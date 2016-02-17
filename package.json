@@ -1,0 +1,28 @@
+{
+  "name": "overvann",
+  "version": "0.0.1",
+  "description": "Nettside om overvannshåndtering",
+  "main": "web_server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/torsteig/Overvann.git"
+  },
+  "keywords": [
+    "overvann",
+    "senter",
+    "portal",
+    "wiki"
+  ],
+  "author": "Peder Langdal, Torstein Granskogen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/torsteig/Overvann/issues"
+  },
+  "homepage": "https://github.com/torsteig/Overvann#readme",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}
