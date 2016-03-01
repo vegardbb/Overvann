@@ -1,0 +1,148 @@
+/* 
+Currently using this palette: 
+http://www.colourlovers.com/palette/443995/i_demand_a_pancake
+*/
+
+
+body {
+	background-color: #e5fcc2;
+	font-family: 'Arvo', serif;
+	color: #547980;
+}
+
+h1 {
+	color: #594f4f;
+}
+
+h3 {
+	color: #45ada8;
+}
+
+a {
+	text-decoration: none;
+	color: #45ADA8;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:visited {
+	color: #45ADA8;
+	text-decoration: none;
+}
+
+#container {
+	width: 950px;
+	margin: 0 auto;
+}
+
+
+header {
+	display: -webkit-flex;
+	-webkit-flex-direction: row;
+	display: flex;
+	flex-direction: row;
+	width: 950px;
+	height: 128px;
+	margin: 20px auto auto auto;
+}
+
+#logo-box {
+	background-color: #000000;
+	width: 128px;
+	height: 128px;
+	margin: auto 0.1em auto 0;
+}
+
+#title-box {
+	width: 400px;
+	height: 128px;
+	margin: auto auto auto 0.2em;
+	position: relative;
+}
+
+#title-box h1 {
+	font-size: 4.2em;
+	margin-top: 0em;
+}
+
+#title-box a {
+	color: #594f4f;
+}
+
+#title-box h3 {
+	font-size: 2em;
+	margin-top: auto;
+	margin-bottom: 0.4em;
+	display: block;
+	position: absolute;
+	bottom: 0;
+}
+
+#navigation-box {
+	overflow: hidden;
+	width: 300px;
+	height: 128px;
+	margin: auto 0 auto auto;
+}
+
+#navigation-box a {
+	margin: 0 20px;
+	color: #45ada8;
+}
+
+#navigation-box a:hover {
+	color: #45ada8;
+}
+
+#navigation-box a:visited {
+	color: #45ada8;
+}
+
+#login-box {
+	width: 400px;
+	margin: auto;
+	color: #547980;
+}
+
+#login-box label {
+	display: inline-block;
+ 	width: 140px;
+	text-align: right;
+}
+
+#login-box a:visited {
+	color: #547980;
+}
+
+#signin-button {
+	width: 100px;
+	margin-left: 40px;
+}
+
+#signup-box {
+	width: 400px;
+	margin: auto;
+	color: #547980;
+}
+
+#signup-box label {
+	display: inline-block;
+ 	width: 140px;
+	text-align: right;
+}
+
+#signup-box a:visited {
+	color: #547980;
+}
+
+#signup-button {
+	width: 100px;
+	margin-left: 40px;
+}
+
+#content {
+	margin-top: 5px;
+	border-top: 5px solid black;
+}

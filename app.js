@@ -9,12 +9,10 @@ var path = require('path');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
-// custom libraries
-// routes
-var route = require('./route');
-// model
-var Model = require('./model');
 
+// custom libraries
+var route = require('./route');
+var Model = require('./model');
 var app = express();
 
 passport.use(new LocalStrategy(function(username, password, done) {
@@ -56,37 +54,36 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(cookieParser());
-app.use(bodyParser());
+app.use(bodyParser.urlencoded({ extended: true }));	// to support JSON-encoded bodies
+app.use(bodyParser.json()); 						// to support URL-encoded bodies
 app.use(session({
-	secret: 'secret strategic xxzzz code'
+	secret: 'overvann er best!',
+	saveUninitialized: false,
+	resave: false
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// GET
+// Static content
+app.use(express.static('static'));
+
+// Routing
 app.get('/', route.index);
-
-// signin
-// GET
 app.get('/signin', route.signIn);
-// POST
 app.post('/signin', route.signInPost);
-
-// signup
-// GET
 app.get('/signup', route.signUp);
-// POST
 app.post('/signup', route.signUpPost);
-
-// logout
-// GET
 app.get('/signout', route.signOut);
-
-/********************************/
-
-/********************************/
+app.get('/om', route.about);
 // 404 not found
 app.use(route.notFound404);
+
+/*
+NYTTIG OM ROUTING
+If you use router.route('/search/:word'), and if your request is
+/places/search/test
+then your req.params.word="test"
+*/
 
 var server = app.listen(app.get('port'), function(err) {
 	if (err) throw err;

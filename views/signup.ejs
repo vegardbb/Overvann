@@ -1,28 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title><%= title %></title>
-    </head>
-    <body>
-        <h2>Register Form</h2>
+<html lang="no">
+<%- include head.ejs %>
+<body>
+<div id="container">
+<%- include header_nouser.ejs %>
+<div id="content">
+    <div id="signup-box">
+        <h2>Registrer bruker</h2>
         <form method="post" action="/signup">
             <% if(typeof(errorMessage) !== 'undefined') {%>
-            <span><%= errorMessage %></span>
+                <span><%= errorMessage %></span>
             <% } %>
             <p>
-                <label for="username">username</label>
-                <input type="text" name="username" id="username"
-                    placeholder="username" required="true"/>
+                <label for="username">Brukernavn</label>
+                <input type="text" name="username" id="username" required="true"/>
             </p>
             <p>
-                <label for="password">password</label>
-                <input type="text" name="password" id="password"
-                    placeholder="password" required="true"/>
+                <label for="password">Passord</label>
+                <input type="text" name="password" id="password" required="true"/>
             </p>
             <p>
-                <input type="submit" name="signup" id="signup" value="register"/>
-                <a href="/signin" title="sign in">sign in</a>
+                <input type="submit" name="signup" id="signup-button" value="Registrer"/> 
             </p>
         </form>
-    </body>
+    </div>
+</div>
+</div>
+</body>
 </html>

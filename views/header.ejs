@@ -1,0 +1,15 @@
+<header>
+    <div id="logo-box"></div>
+    <div id="title-box">
+        <h1><a href="/">Ovase.no</a></h1>
+        <h3>Overvannssenteret</h3>
+    </div>
+    <div id="navigation-box">
+    	<% if ( user === undefined || user === null) { %>
+        	<a href="/signin">Logg inn/Registrer</a>
+        <% } else {%>
+        	<a href="#">Logget inn som <%= user.username %></a>
+        <% } %> 
+        <a href="#">Søk</a>
+    </div>
+</header>
