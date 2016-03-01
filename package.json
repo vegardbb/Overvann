@@ -2,7 +2,7 @@
   "name": "overvann",
   "version": "0.0.1",
   "description": "Nettside om overvannshåndtering",
-  "main": "web_server.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -31,7 +31,7 @@
     "express": "^4.13.4",
     "express-session": "*",
     "knex": "^0.10.0",
-    "mysql": "*",
+    "mysql": "^2.10.2",
     "passport": "*",
     "passport-local": "*"
   }
