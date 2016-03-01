@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+   	<head>
+     	 <title><%= title %></title>
+   	</head>
+   	<body>
+   		<h1>Overvannssenteret</h1>
+      	<p>
+        	<% if ( user === undefined || user === null) { %>
+        		Not logged in. Click <a href="/signin" title="sign in">here</a> to sign in.
+        	<% } else {%>
+        		Logged in as <%= user.username %>
+        	<% } %> 
+        	<a href="/signout" title="sign out">sign out</a>
+      	</p>
+   	</body>
+</html>

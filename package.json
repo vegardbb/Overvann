@@ -23,6 +23,16 @@
   },
   "homepage": "https://github.com/torsteig/Overvann#readme",
   "dependencies": {
-    "express": "^4.13.4"
+    "bcrypt-nodejs": "*",
+    "body-parser": "*",
+    "bookshelf": "^0.9.2",
+    "cookie-parser": "*",
+    "ejs": "*",
+    "express": "^4.13.4",
+    "express-session": "*",
+    "knex": "^0.10.0",
+    "mysql": "*",
+    "passport": "*",
+    "passport-local": "*"
   }
 }
