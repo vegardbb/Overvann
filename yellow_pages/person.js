@@ -22,7 +22,7 @@ var person_page = function(req, res, next) {
     res.render('person', {
         title: 'Ovase.no - Personside',
         user: user,
-        who: fakePerson
+        person: fakePerson
     });
 };
 

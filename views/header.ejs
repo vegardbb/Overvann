@@ -6,9 +6,9 @@
     </div>
     <div id="navigation-box">
     	<% if ( user === undefined || user === null) { %>
-        	<a href="/signin">Logg inn/Registrer</a>
+        <a href="/signin">Logg inn/Registrer</a>
         <% } else {%>
-        	<a href="#">Logget inn som <%= user.username %></a>
+        <a href="#">Logget inn som <%= user.username %></a>
         <% } %> 
         <a href="#">Søk</a>
     </div>

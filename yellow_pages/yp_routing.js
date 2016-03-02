@@ -1,5 +1,6 @@
 var UserSystem = require('./user_system');
 var Person = require('./person')
+var Company = require('./company')
 
 var index = function(req, res, next) {
     var user = req.user;
@@ -44,4 +45,5 @@ module.exports.signUpPost = UserSystem.signUpPost;
 module.exports.signOut = UserSystem.signOut;
 module.exports.about = about;
 module.exports.person = Person.person_page;
+module.exports.company = Company.company_page
 module.exports.notFound404 = notFound404;
