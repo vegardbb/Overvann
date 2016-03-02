@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="no">
+<%- include head.ejs %>
+<body>
+<div id="container">
+<%- include header.ejs %>
+<div id="content">
+    <section class="person-section">
+    	<h2>Fagperson</h2>
+    	<h3><%= who.name %></h3>
+    	<div class="person-box">
+	    	<div class="person-info-box">
+	    		<p><strong>Tittel: </strong><%= who.title %></p>
+	    		<p><strong>Bedrift: </strong><a href="#"><%= who.company %></a></p>
+	    		<p><strong>Telefonnummer: </strong><%= who.phonenumber %></p>
+	    		<p><strong>Addresse: </strong><%= who.address %></p>
+	    		<p><strong>Bransje: </strong><%= who.industry %></p>
+	    		<p><strong>Arbeidssted: </strong><%= who.workarea %></p>
+	    	</div>
+	    	<div class="person-image-box">
+	    		<img src="/images/<%= who.img_name %>" alt="Portrettbilde">
+	    	</div>
+    	</div>
+    </section>
+</div>
+</div>
+</body>
+</html>

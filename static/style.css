@@ -146,3 +146,20 @@ header {
 	margin-top: 5px;
 	border-top: 5px solid black;
 }
+
+.person-section {
+}
+
+.person-box {
+	width: 100%;
+	display: -webkit-flex;
+ 	display: flex;
+}
+
+.person-info-box {
+	width: 80%;
+}
+
+.person-image-box {
+	width: 20%;
+}

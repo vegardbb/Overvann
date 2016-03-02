@@ -75,6 +75,7 @@ app.get('/signup', route.signUp);
 app.post('/signup', route.signUpPost);
 app.get('/signout', route.signOut);
 app.get('/om', route.about);
+app.get('/person/:who', route.person);
 // 404 not found
 app.use(route.notFound404);
 
