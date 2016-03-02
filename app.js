@@ -11,7 +11,7 @@ var LocalStrategy = require('passport-local').Strategy;
 
 
 // custom libraries
-var route = require('./route');
+var YpRouting = require('./yellow_pages/yp_routing')
 var Model = require('./model');
 var app = express();
 
@@ -68,16 +68,16 @@ app.use(passport.session());
 app.use(express.static('static'));
 
 // Routing
-app.get('/', route.index);
-app.get('/signin', route.signIn);
-app.post('/signin', route.signInPost);
-app.get('/signup', route.signUp);
-app.post('/signup', route.signUpPost);
-app.get('/signout', route.signOut);
-app.get('/om', route.about);
-app.get('/person/:who', route.person);
+app.get('/', YpRouting.index);
+app.get('/signin', YpRouting.signIn);
+app.post('/signin', YpRouting.signInPost);
+app.get('/signup', YpRouting.signUp);
+app.post('/signup', YpRouting.signUpPost);
+app.get('/signout', YpRouting.signOut);
+app.get('/om', YpRouting.about);
+app.get('/person/:who', YpRouting.person);
 // 404 not found
-app.use(route.notFound404);
+app.use(YpRouting.notFound404);
 
 /*
 NYTTIG OM ROUTING
