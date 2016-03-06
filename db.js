@@ -1,9 +1,9 @@
 
 var config = {
 	host: 'localhost',  // your host
-	user: 'overvann', // your database user
-	password: 'OvervannDb55', // your database password
-	database: 'dbUsers',
+	user: 'ovase', // your database user
+	password: 'OvaseDBase55', // your database password
+	database: 'ovase',
 	charset: 'UTF8_GENERAL_CI'
 };
 
