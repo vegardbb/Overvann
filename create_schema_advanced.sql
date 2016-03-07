@@ -1,12 +1,12 @@
 
-create database if not exists pedervl_overvann_wiki_db;
+create database if not exists ovase;
 
-use pedervl_overvann_wiki_db;
+use ovase;
 
 drop table if exists yp_persons;
 
 create table if not exists yp_persons(
-   	userId integer primary key auto_increment,
+   	user_id integer primary key auto_increment,
    	username varchar(255) not null unique,
    	password varchar(100) not null,
    	name varchar(255) not null,

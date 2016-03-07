@@ -9,15 +9,47 @@
         <h2>Registrer bruker</h2>
         <form method="post" action="/signup">
             <% if(typeof(errorMessage) !== 'undefined') {%>
-                <span><%= errorMessage %></span>
+                <span class="error-span"><%= errorMessage %></span>
             <% } %>
             <p>
-                <label for="username">Brukernavn</label>
-                <input type="text" name="username" id="username" required="true"/>
+                <label for="username">Brukernavn<abbr class="req" title="Må fylles ut">*</abbr></label>
+                <input type="text" name="username" id="username" required />
             </p>
             <p>
-                <label for="password">Passord</label>
-                <input type="text" name="password" id="password" required="true"/>
+                <label for="password">Passord<abbr class="req" title="Må fylles ut">*</abbr></label>
+                <input type="password" name="password" id="password" required />
+            </p>
+            <p>
+                <label for="password2">Gjenta passord<abbr class="req" title="Må fylles ut">*</abbr></label>
+                <input type="password" name="password2" id="password2" required />
+            </p>
+            <p>
+                <label for="name">Navn<abbr class="req" title="Må fylles ut">*</abbr></label>
+                <input type="text" name="name" id="name" required />
+            </p>
+            <p>
+                <label for="title">Tittel</label>
+                <input type="text" name="title" id="title" />
+            </p>
+            <p>
+                <label for="company">Bedrift</label>
+                <input type="text" name="company" id="company" />
+            </p>
+            <p>
+                <label for="phonenumber">Telefonnummer</label>
+                <input type="text" name="phonenumber" id="phonenumber" />
+            </p>
+            <p>
+                <label for="address">Adresse</label>
+                <input type="text" name="address" id="address" />
+            </p>
+            <p>
+                <label for="industry">Bransje</label>
+                <input type="text" name="industry" id="industry" />
+            </p>
+            <p>
+                <label for="workarea">Arbeidssted</label>
+                <input type="text" name="workarea" id="workarea" />
             </p>
             <p>
                 <input type="submit" name="signup" id="signup-button" value="Registrer"/> 
