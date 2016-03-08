@@ -2,12 +2,18 @@
 <html lang="no">
 <%- include head.ejs %>
 <body>
-<div id="container">
-<%- include header.ejs %>
-<div id="content">
-    <p>Tekst her</p>
-    <p><a href="/om">Litt om oss</a></p>
+<%- include header_large.ejs %>
+<div class="content-container">
+	<div class="inner-container">
+		<div id="content">
+			<div class="card-box">
+			<!-- bilde pluss overskrift pluss tekst med link -->
+			</div>
+		    <p>Tekst her</p>
+		    <p><a href="/om">Litt om oss</a></p>
+		</div>
+	</div>
 </div>
-</div>
+<%- include footer.ejs %>
 </body>
 </html>
