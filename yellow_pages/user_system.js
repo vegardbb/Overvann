@@ -38,7 +38,7 @@ var signInPost = function(req, res, next) {
             if (err) {
                 return res.render('signin', {
                     title: 'Sign In',
-                    user, null,
+                    user: null,
                     errorMessage: err.message
                 });
             } else {
