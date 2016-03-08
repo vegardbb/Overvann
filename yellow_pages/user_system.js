@@ -8,7 +8,8 @@ var Model = require('./../model');
 var signIn = function(req, res, next) {
     if (req.isAuthenticated()) res.redirect('/');
     res.render('signin', {
-        title: 'Sign In'
+        title: 'Sign In',
+        user: null
     });
 };
 
@@ -50,7 +51,8 @@ var signUp = function(req, res, next) {
         res.redirect('/');
     } else {
         res.render('signup', {
-            title: 'Registrer'
+            title: 'Registrer',
+            user: null
         });
     }
 };

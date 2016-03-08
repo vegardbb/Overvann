@@ -41,7 +41,7 @@ a:visited {
 
 
 .header-container {
-	background-image: url("/images/San_Joaquin_River_headwaters_1080.jpg");
+	background-image: url("/images/header/San_Joaquin_River_headwaters_1080.jpg");
 	background-position: 50% 50%;
 	padding-top: 20px;
 }
@@ -90,10 +90,9 @@ header {
 }
 
 #navigation-box {
-	overflow: hidden;
-	width: 300px;
-	height: 128px;
-	margin: auto 0 auto auto;
+	width: 200px;
+	margin: 1em 0 auto auto;
+	text-align: right;
 }
 
 #navigation-box a {
@@ -163,6 +162,18 @@ header {
 	padding-bottom: 5em;
 }
 
+#below-header-small {
+	display: -webkit-flex;
+	-webkit-flex-direction: row;
+	display: flex;
+	flex-direction: row-reverse;
+	width: 950px;
+	margin-top: 2em;
+	margin-bottom: 0;
+	background: rgba(255,255,255,0.85);
+	padding: 1em 0;
+}
+
 .infobox {
 	background: rgba(255,255,255,0.85);
 	width: 65%;
@@ -183,6 +194,12 @@ header {
 	margin: 0 auto;
 }
 
+#normal-search {
+	width: 28%;
+	height: 2em;
+	margin: 0 2em 0 0;
+}
+
 /* --------- CONTENT --------- */
 
 .content-container {
@@ -191,6 +208,35 @@ header {
 
 #content {
 	overflow: auto;
+}
+
+/* --------- INDEX --------- */
+
+.card-box {
+	display: -webkit-flex;
+	-webkit-flex-direction: row;
+	display: flex;
+	flex-direction: row;
+	width: 950px;
+}
+
+.card {
+	width: 300px;
+	margin: 1em auto;
+	border: 1px solid black;
+}
+
+.card h3 {
+	margin-left: 1em;
+	color: #2d2d2d;
+}
+
+.card p {
+	margin-left: 1em;
+}
+
+.card a {
+	color: #12a79d;
 }
 
 .person-section {
