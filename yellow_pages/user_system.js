@@ -22,6 +22,7 @@ var signInPost = function(req, res, next) {
         if (err) {
             return res.render('signin', {
                 title: 'Sign In',
+                user: null,
                 errorMessage: err.message
             });
         }
@@ -29,6 +30,7 @@ var signInPost = function(req, res, next) {
         if (!user) {
             return res.render('signin', {
                 title: 'Sign In',
+                user: null,
                 errorMessage: info.message
             });
         }
@@ -36,6 +38,7 @@ var signInPost = function(req, res, next) {
             if (err) {
                 return res.render('signin', {
                     title: 'Sign In',
+                    user, null,
                     errorMessage: err.message
                 });
             } else {
@@ -69,6 +72,7 @@ var signUpPost = function(req, res, next) {
         if (model) {
             res.render('signup', {
                 title: 'Registrer',
+                user: null,
                 errorMessage: 'Brukernavnet er allerede registrert!'
             });
         } else {
@@ -81,6 +85,7 @@ var signUpPost = function(req, res, next) {
             if (password.localeCompare(repeated_password) !== 0) {
                 res.render('signup', {
                 title: 'Registrer',
+                user: null,
                 errorMessage: 'Passordene var ikke like!'
             });
             }
