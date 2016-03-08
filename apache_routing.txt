@@ -1,0 +1,6 @@
+// Får å forwarde requests til /   til node-appen vår
+// Må puttast i httpd.conf
+
+ProxyPass /wiki !
+ProxyPass / http://localhost:3000/
+ProxyPassReverse / http://localhost:3000/

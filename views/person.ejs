@@ -4,25 +4,29 @@
 <body>
 <div id="container">
 <%- include header.ejs %>
-<div id="content">
-    <section class="person-section">
-        <h2>Fagperson</h2>
-        <h3><%= person.name %></h3>
-        <div class="person-box">
-            <div class="person-info-box">
-                <p><strong>Tittel: </strong><%= person.title %></p>
-                <p><strong>Bedrift: </strong><a href="#"><%= person.company %></a></p>
-                <p><strong>Telefonnummer: </strong><%= person.phonenumber %></p>
-                <p><strong>Addresse: </strong><%= person.address %></p>
-                <p><strong>Bransje: </strong><%= person.industry %></p>
-                <p><strong>Arbeidssted: </strong><%= person.workarea %></p>
-            </div>
-            <div class="person-image-box">
-                <img src="/images/person/<%= person.img_name %>" alt="Portrettbilde">
-            </div>
+<div class="content-container">
+    <div class="inner-container">
+        <div id="content">
+            <section class="person-section">
+                <h2>Fagperson</h2>
+                <h3><%= person.name %></h3>
+                <div class="person-box">
+                    <div class="person-info-box">
+                        <p><strong>Tittel: </strong><%= person.title %></p>
+                        <p><strong>Bedrift: </strong><a href="#"><%= person.company %></a></p>
+                        <p><strong>Telefonnummer: </strong><%= person.phonenumber %></p>
+                        <p><strong>Addresse: </strong><%= person.address %></p>
+                        <p><strong>Bransje: </strong><%= person.industry %></p>
+                        <p><strong>Arbeidssted: </strong><%= person.workarea %></p>
+                    </div>
+                    <div class="person-image-box">
+                        <img src="/images/person/<%= person.img_name %>" alt="Portrettbilde">
+                    </div>
+                </div>
+            </section>
         </div>
-    </section>
+    </div>
 </div>
-</div>
+<%- include footer.ejs %>
 </body>
 </html>

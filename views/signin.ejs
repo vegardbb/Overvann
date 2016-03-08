@@ -3,29 +3,33 @@
 <%- include head.ejs %>
 <body>
 <div id="container">
-<%- include header_nouser.ejs %>
-<div id="content">
-    <div id="login-box">
-        <h2>Logg inn</h2>
-        <form method="post" action="/signin">
-            <% if(typeof(errorMessage) !== 'undefined') {%>
-                <span><%= errorMessage %></span>
-            <% } %>
-            <p>
-                <label for="username">Brukernavn</label>
-                <input type="text" name="username" id="username" required="true"/>
-            </p>
-            <p>
-                <label for="password">Passord</label>
-                <input type="password" name="password" id="password" required="true"/>
-            </p>
-            <p>
-                <input type="submit" name="signin" id="signin-button" value="Logg inn"/> 
-                <a href="/signup" title="register">... eller registrer ny bruker</a>
-            </p>
-        </form>
+<%- include header.ejs %>
+<div class="content-container">
+    <div class="inner-container">
+        <div id="content">
+            <div id="login-box">
+                <h2>Logg inn</h2>
+                <form method="post" action="/signin">
+                    <% if(typeof(errorMessage) !== 'undefined') {%>
+                        <span><%= errorMessage %></span>
+                    <% } %>
+                    <p>
+                        <label for="username">Brukernavn</label>
+                        <input type="text" name="username" id="username" required="true"/>
+                    </p>
+                    <p>
+                        <label for="password">Passord</label>
+                        <input type="password" name="password" id="password" required="true"/>
+                    </p>
+                    <p>
+                        <input type="submit" name="signin" id="signin-button" value="Logg inn"/> 
+                        <a href="/signup" title="register">... eller registrer ny bruker</a>
+                    </p>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
-</div>
+<%- include footer.ejs %>
 </body>
 </html>
