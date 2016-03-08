@@ -223,7 +223,7 @@ header {
 .card {
 	width: 300px;
 	margin: 1em auto;
-	border: 1px solid black;
+	border: 1px solid grey;
 }
 
 .card h3 {
