@@ -2,7 +2,9 @@
 
 OVASE_DIR=~/ovase_web
 WIKI_DIR=/var/www/html/wiki
-BACKUP_DIR=~/deploy_backups
+BACKUP_ROOT=~/deploy_backups
+BACKUP_DIR="${BACKUP_ROOT}/backup_$(date +%Y%m%d_%H%M%S)"
+
 
 # Stop apache and the node-service
 echo "========== Stopping web servers =========="
@@ -14,6 +16,7 @@ shopt -s extglob
 
 # Do backups
 echo "========== Creating backups into '~/deploy_backups' =========="
+mkdir $BACKUP_DIR
 cp -rf $OVASE_DIR $BACKUP_DIR
 cp -rf $WIKI_DIR $BACKUP_DIR
 
