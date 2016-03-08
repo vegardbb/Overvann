@@ -25,10 +25,10 @@ $wgSitename = "Overvannswikien";
 ## For more information on customizing the URLs
 ## (like /w/index.php/Page_title to /wiki/Page_title) please see:
 ## https://www.mediawiki.org/wiki/Manual:Short_URL
-$wgScriptPath = "/wiki";
+$wgScriptPath = "/pedervl/overvann";
 
 ## The protocol and server name to use in fully-qualified URLs
-$wgServer = "http://ec2-52-28-127-183.eu-central-1.compute.amazonaws.com";
+$wgServer = "http://folk.ntnu.no";
 
 
 ## The URL path to static resources (images, scripts, etc.)
@@ -43,8 +43,8 @@ $wgLogo = "$wgResourceBasePath/resources/assets/wiki.png";
 $wgEnableEmail = true;
 $wgEnableUserEmail = true; # UPO
 
-$wgEmergencyContact = "apache@ec2-52-28-127-183.eu-central-1.compute.amazonaws.com";
-$wgPasswordSender = "apache@ec2-52-28-127-183.eu-central-1.compute.amazonaws.com";
+$wgEmergencyContact = "apache@folk.ntnu.no";
+$wgPasswordSender = "apache@folk.ntnu.no";
 
 $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
@@ -52,13 +52,13 @@ $wgEmailAuthentication = true;
 
 ## Database settings
 $wgDBtype = "mysql";
-$wgDBserver = "localhost";
-$wgDBname = "ovase";
-$wgDBuser = "ovase";
-$wgDBpassword = "OvaseDBase55";
+$wgDBserver = "mysql.stud.ntnu.no";
+$wgDBname = "pedervl_overvann_wiki_db";
+$wgDBuser = "pedervl_overvann";
+$wgDBpassword = "OvervannDb55";
 
 # MySQL specific settings
-$wgDBprefix = "wiki_";
+$wgDBprefix = "";
 
 # MySQL table options to use during installation or update
 $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=binary";
@@ -67,14 +67,14 @@ $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=binary";
 $wgDBmysql5 = false;
 
 ## Shared memory settings
-$wgMainCacheType = CACHE_ACCEL;
+$wgMainCacheType = CACHE_NONE;
 $wgMemCachedServers = array();
 
 ## To enable image uploads, make sure the 'images' directory
 ## is writable, then set this to true:
 $wgEnableUploads = true;
-#$wgUseImageMagick = true;
-#$wgImageMagickConvertCommand = "/usr/bin/convert";
+$wgUseImageMagick = true;
+$wgImageMagickConvertCommand = "/usr/bin/convert";
 
 # InstantCommons allows wiki to use images from https://commons.wikimedia.org
 $wgUseInstantCommons = false;
@@ -98,11 +98,11 @@ $wgShellLocale = "en_US.utf8";
 # Site language code, should be one of the list in ./languages/Names.php
 $wgLanguageCode = "nb";
 
-$wgSecretKey = "5e8dbc29d78c6b3151070467a297eb86f0e5f253d233f3cc2993ecc12488b629";
+$wgSecretKey = "0eb35bfad47e55b58f0e30e3f0311175967205624f3c61aebfdbbc4a90eae475";
 
 # Site upgrade key. Must be set to a string (default provided) to turn on the
 # web installer while LocalSettings.php is in place
-$wgUpgradeKey = "46490319dae7cd92";
+$wgUpgradeKey = "38eed394a4d8f201";
 
 ## For attaching licensing metadata to pages, and displaying an
 ## appropriate copyright notice / icon. GNU Free Documentation
@@ -116,6 +116,7 @@ $wgRightsIcon = "$wgResourceBasePath/resources/assets/licenses/cc-by-sa.png";
 $wgDiff3 = "/usr/bin/diff3";
 
 # The following permissions were set based on your choice in the installer
+$wgGroupPermissions['*']['createaccount'] = true;
 $wgGroupPermissions['*']['edit'] = false;
 
 ## Default skin: you can change the default skin. Use the internal symbolic
@@ -124,25 +125,27 @@ $wgDefaultSkin = "vector";
 
 # Enabled skins.
 # The following skins were automatically enabled:
-wfLoadSkin( 'CologneBlue' );
 wfLoadSkin( 'Modern' );
+wfLoadSkin( 'CologneBlue' );
 wfLoadSkin( 'MonoBook' );
 wfLoadSkin( 'Vector' );
 
-
-# Enabled Extensions. Most extensions are enabled by including the base extension file here
-# but check specific extension documentation for more details
-# The following extensions were automatically enabled:
+# Enabled extensions.
 wfLoadExtension( 'Cite' );
-wfLoadExtension( 'CiteThisPage' );
-wfLoadExtension( 'InputBox' );
-wfLoadExtension( 'LocalisationUpdate' );
-wfLoadExtension( 'PdfHandler' );
-wfLoadExtension( 'SpamBlacklist' );
-wfLoadExtension( 'TitleBlacklist' );
-wfLoadExtension( 'WikiEditor' );
-
 
 # End of automatically generated settings.
 # Add more configuration options below.
 
+$wgHooks['EditFormPreloadText'][] = array('prefill');
+
+
+function prefill(&$textbox, &$title) {
+	/*if (strcmp($title , "as") {
+		
+	}*/
+    $title_str = $title->getText();
+	//$url = 'http://folk.ntnu.no/pedervl/overvann/index.php/NewPageTheme';
+    $textbox = "please enter text for $title_str";
+	//header('Location:' .$url);
+	return true;
+}

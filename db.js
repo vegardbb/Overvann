@@ -14,11 +14,4 @@ var knex = require('knex')({
 
 var Bookshelf = require('bookshelf')(knex);
 
-/*
-var DB = Bookshelf.initialize({
-	client: 'mysql', 
-	connection: config
-});
-*/
-
 module.exports.DB = Bookshelf;

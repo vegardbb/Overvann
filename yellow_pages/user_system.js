@@ -50,7 +50,7 @@ var signUp = function(req, res, next) {
         res.redirect('/');
     } else {
         res.render('signup', {
-            title: 'Sign Up'
+            title: 'Registrer'
         });
     }
 };
@@ -66,19 +66,36 @@ var signUpPost = function(req, res, next) {
     return usernamePromise.then(function(model) {
         if (model) {
             res.render('signup', {
-                title: 'signup',
-                errorMessage: 'username already exists'
+                title: 'Registrer',
+                errorMessage: 'Brukernavnet er allerede registrert!'
             });
         } else {
             //****************************************************//
             // MORE VALIDATION GOES HERE(E.G. PASSWORD VALIDATION)
             //****************************************************//
             var password = user.password;
+            var repeated_password = user.password2;
+
+            if (password.localeCompare(repeated_password) !== 0) {
+                res.render('signup', {
+                title: 'Registrer',
+                errorMessage: 'Passordene var ikke like!'
+            });
+            }
+
             var hash = bcrypt.hashSync(password);
 
             var signUpUser = new Model.User({
                 username: user.username,
-                password: hash
+                password: hash,
+                name: user.name,
+                title: user.title ? user.title : null,
+                company: user.company ? user.company : null,
+                phonenumber: user.phonenumber ? user.company : null,
+                address: user.address ? user.address : null,
+                industry: user.industry ? user.industry : null,
+                workarea: user.workarea ? user.workarea : null,
+                img_name: user.img_name ? user.img_name : null
             });
 
             signUpUser.save().then(function(model) {

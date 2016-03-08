@@ -180,3 +180,12 @@ header {
 .company-image-box {
 	width: 30%;
 }
+
+.req {
+	font-size: 150%;
+	color: red;
+}
+
+.error-span {
+	color: red;
+}
