@@ -22,7 +22,7 @@ cp -rf $WIKI_DIR $BACKUP_DIR
 
 # Copy files to ovase_web (the portion of the site which is not the wiki)
 echo "========== Copying ovase files =========="
-cp -rf !(wiki|deploy_code.sh|install_app_service.sh) $OVASE_DIR
+cp -rf !(wiki|configuration|deploy_code.sh|install_app_service.sh) $OVASE_DIR
 
 # Copy files to /var/www/html (the wiki-portion of the site)
 echo "========== Copying wiki files =========="
