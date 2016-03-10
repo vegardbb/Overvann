@@ -1,9 +1,0 @@
-// Får å forwarde requests til /   til node-appen vår
-// Må puttast i httpd.conf
-// Plassering: /etc/httpd/conf/httpd.conf
-
-
-ProxyPass /wiki !
-ProxyPass /phpmyadmin !
-ProxyPass / http://localhost:3000/
-ProxyPassReverse / http://localhost:3000/
