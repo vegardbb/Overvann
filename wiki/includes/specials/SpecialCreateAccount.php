@@ -33,8 +33,12 @@ class SpecialCreateAccount extends SpecialRedirectToSpecial {
 			'CreateAccount',
 			'Userlogin',
 			'signup',
-			array( 'returnto', 'returntoquery', 'uselang' )
+			[ 'returnto', 'returntoquery', 'uselang' ]
 		);
+	}
+
+	public function doesWrites() {
+		return true;
 	}
 
 	// No reason to hide this link on Special:Specialpages

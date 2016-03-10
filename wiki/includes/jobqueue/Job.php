@@ -36,7 +36,7 @@ abstract class Job implements IJobSpecification {
 	public $params;
 
 	/** @var array Additional queue metadata */
-	public $metadata = array();
+	public $metadata = [];
 
 	/** @var Title */
 	protected $title;
@@ -46,6 +46,9 @@ abstract class Job implements IJobSpecification {
 
 	/** @var string Text for error that occurred last */
 	protected $error;
+
+	/** @var callable[] */
+	protected $teardownCallbacks = [];
 
 	/**
 	 * Run the job
@@ -62,14 +65,19 @@ abstract class Job implements IJobSpecification {
 	 * @throws MWException
 	 * @return Job
 	 */
-	public static function factory( $command, Title $title, $params = array() ) {
+	public static function factory( $command, Title $title, $params = [] ) {
 		global $wgJobClasses;
+
 		if ( isset( $wgJobClasses[$command] ) ) {
 			$class = $wgJobClasses[$command];
 
-			return new $class( $title, $params );
+			$job = new $class( $title, $params );
+			$job->command = $command;
+
+			return $job;
 		}
-		throw new MWException( "Invalid job command `{$command}`" );
+
+		throw new InvalidArgumentException( "Invalid job command '{$command}'" );
 	}
 
 	/**
@@ -80,7 +88,7 @@ abstract class Job implements IJobSpecification {
 	public function __construct( $command, $title, $params = false ) {
 		$this->command = $command;
 		$this->title = $title;
-		$this->params = is_array( $params ) ? $params : array(); // sanity
+		$this->params = is_array( $params ) ? $params : []; // sanity
 
 		// expensive jobs may set this to true
 		$this->removeDuplicates = false;
@@ -194,12 +202,12 @@ abstract class Job implements IJobSpecification {
 	 * @since 1.21
 	 */
 	public function getDeduplicationInfo() {
-		$info = array(
+		$info = [
 			'type' => $this->getType(),
 			'namespace' => $this->getTitle()->getNamespace(),
 			'title' => $this->getTitle()->getDBkey(),
 			'params' => $this->getParams()
-		);
+		];
 		if ( is_array( $info['params'] ) ) {
 			// Identical jobs with different "root" jobs should count as duplicates
 			unset( $info['params']['rootJobSignature'] );
@@ -233,11 +241,11 @@ abstract class Job implements IJobSpecification {
 	 * @since 1.21
 	 */
 	public static function newRootJobParams( $key ) {
-		return array(
+		return [
 			'rootJobIsSelf'    => true,
 			'rootJobSignature' => sha1( $key ),
 			'rootJobTimestamp' => wfTimestampNow()
-		);
+		];
 	}
 
 	/**
@@ -246,14 +254,14 @@ abstract class Job implements IJobSpecification {
 	 * @since 1.21
 	 */
 	public function getRootJobParams() {
-		return array(
+		return [
 			'rootJobSignature' => isset( $this->params['rootJobSignature'] )
 				? $this->params['rootJobSignature']
 				: null,
 			'rootJobTimestamp' => isset( $this->params['rootJobTimestamp'] )
 				? $this->params['rootJobTimestamp']
 				: null
-		);
+		];
 	}
 
 	/**
@@ -272,6 +280,25 @@ abstract class Job implements IJobSpecification {
 	 */
 	public function isRootJob() {
 		return $this->hasRootJobParams() && !empty( $this->params['rootJobIsSelf'] );
+	}
+
+	/**
+	 * @param callable $callback
+	 * @since 1.27
+	 */
+	protected function addTeardownCallback( $callback ) {
+		$this->teardownCallbacks[] = $callback;
+	}
+
+	/**
+	 * Do any final cleanup after run(), deferred updates, and all DB commits happen
+	 *
+	 * @since 1.27
+	 */
+	public function teardown() {
+		foreach ( $this->teardownCallbacks as $callback ) {
+			call_user_func( $callback );
+		}
 	}
 
 	/**
@@ -303,7 +330,7 @@ abstract class Job implements IJobSpecification {
 					$paramString .= ' ';
 				}
 				if ( is_array( $value ) ) {
-					$filteredValue = array();
+					$filteredValue = [];
 					foreach ( $value as $k => $v ) {
 						if ( is_scalar( $v ) ) {
 							$filteredValue[$k] = $truncFunc( $v );

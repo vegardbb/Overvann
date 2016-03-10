@@ -18,8 +18,6 @@ div.top,
 div#column-one,
 .mw-editsection,
 .mw-editsection-like,
-.toctoggle,
-#toc.tochidden,
 div#f-poweredbyico,
 div#f-copyrightico,
 li#about,
@@ -119,11 +117,31 @@ pre, .mw-code {
 	border: 1px solid #aaaaaa;
 	background-color: #f9f9f9;
 	padding: 5px;
-	display: inline-block;
 	display: table;
-	/* IE7 and earlier */
-	zoom: 1;
-	*display: inline;
+}
+
+/* Separate columns for tocnumber and toctext */
+.tocnumber,
+.toctext {
+	display: table-cell;
+}
+
+/* Space between the columns for tocnumber and toctext */
+.tocnumber {
+	padding-left: 0;
+	padding-right: 0.5em;
+}
+
+/* @noflip */
+.mw-content-ltr .tocnumber {
+	padding-left: 0;
+	padding-right: 0.5em;
+}
+
+/* @noflip */
+.mw-content-rtl .tocnumber {
+	padding-left: 0.5em;
+	padding-right: 0;
 }
 
 #footer {
@@ -139,30 +157,12 @@ img {
 	vertical-align: middle;
 }
 
-/* math */
-span.texhtml {
-	font-family: serif;
-}
-
 /**
  * Links
  */
-a.stub,
-a.new {
-	color: #ba0000;
-	text-decoration: none;
-}
-
 a {
-	color: black !important;
 	background: none !important;
 	padding: 0 !important;
-}
-
-a:link, a:visited {
-	color: #520;
-	background: transparent;
-	text-decoration: underline;
 }
 
 /* Expand URLs for printing */
@@ -332,7 +332,6 @@ a.sortheader {
 	list-style: none;
 	list-style-type: none;
 	list-style-image: none;
-	vertical-align: middle !ie;
 }
 
 .catlinks li {
@@ -341,8 +340,6 @@ a.sortheader {
 	padding: 0 .4em;
 	border-left: 1px solid #AAA;
 	margin: 0.1em 0;
-	zoom: 1;
-	display: inline !ie;
 }
 
 .catlinks li:first-child {

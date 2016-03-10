@@ -10,7 +10,9 @@
 			"Spacebirdy",
 			"محک",
 			"아라",
-			"Alirezaaa"
+			"Alirezaaa",
+			"Macofe",
+			"Matma Rex"
 		]
 	},
 	"tog-underline": "پیوندون زیر خط دکشی بواشه",
@@ -830,10 +832,8 @@
 	"api-error-badaccess-groups": "شما اجازهٔ باربی‌یشتن پرونده‌ها ره این ویکی دله ندارنی.",
 	"api-error-badtoken": "خطای داخلی: کد امنیتی اشتبائه (Bad token).",
 	"api-error-copyuploaddisabled": "باربی‌یشتن با استفاده از نشونی اینترنتی این کارساز دله غیرفعاله.",
-	"api-error-duplicate": "{{PLURAL:$1|[$2 پروندهٔ دیگه‌یی]|[$2 چن پروندهٔ دیگه]}} وب‌گاه دله با محتوای ات‌تی دیی‌یه.",
-	"api-error-duplicate-archive": "{{PLURAL:$1|[$2 پروندهٔ دیگه‌یی]|[$2 چن پروندهٔ دیگه]}} وب‌گاه دله با محتوای اتجور وجود داشته، ولی حذف {{PLURAL:$1|بیی‌یه|بیی‌نه}}.",
-	"api-error-duplicate-archive-popup-title": "{{PLURAL:$1|پروندهٔ|پرونده‌ئون}} تکراری که اسا حذف بیی‌نه",
-	"api-error-duplicate-popup-title": "{{PLURAL:$1|پرونده|پرونده‌ئون}} تکراری",
+	"api-error-duplicate": "{{PLURAL:$1|پروندهٔ دیگه‌یی|چن پروندهٔ دیگه}} وب‌گاه دله با محتوای ات‌تی دیی‌یه.",
+	"api-error-duplicate-archive": "{{PLURAL:$1|پروندهٔ دیگه‌یی|چن پروندهٔ دیگه}} وب‌گاه دله با محتوای اتجور وجود داشته، ولی حذف {{PLURAL:$1|بیی‌یه|بیی‌نه}}.",
 	"api-error-empty-file": "پرونده‌ای که شما برسنینی خالی بی‌یه.",
 	"api-error-fetchfileerror": "خطای داخلی: زمون بییتن پرونده، اتا چی درست پیش نشی‌یه.",
 	"api-error-file-too-large": "پرونده‌ای که شما برسنینی خله خله گت بی‌یه.",
@@ -860,5 +860,6 @@
 	"api-error-unknown-error": "خطای داخلی: زمونی که شما تلاش کاردنی باربی‌یشتن پرونده ره انجوم هادین، اتا چی اشتباه پیش بورده.",
 	"api-error-unknown-warning": "اخطار نشناسی‌یه: $1",
 	"api-error-uploaddisabled": "باربی‌یشتن این ویکی دله غیرفعاله.",
-	"api-error-verification-error": "ممکن هسته که پرونده رِقِد بورد بائه یا پسوند غلط داره."
+	"api-error-verification-error": "ممکن هسته که پرونده رِقِد بورد بائه یا پسوند غلط داره.",
+	"api-error-blacklisted": "اتا عنوان توصیفی دیگه انتخاب هاکنین."
 }

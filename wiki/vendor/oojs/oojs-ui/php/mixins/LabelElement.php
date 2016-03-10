@@ -22,14 +22,14 @@ class LabelElement extends ElementMixin {
 	 * @param array $config Configuration options
 	 * @param string|HtmlSnippet $config['label'] Label text
 	 */
-	public function __construct( Element $element, array $config = array() ) {
+	public function __construct( Element $element, array $config = [] ) {
 		// Parent constructor
 		// FIXME 'labelElement' is a very stupid way to call '$label'
 		$target = isset( $config['labelElement'] ) ? $config['labelElement'] : new Tag( 'span' );
 		parent::__construct( $element, $target, $config );
 
 		// Initialization
-		$this->target->addClasses( array( 'oo-ui-labelElement-label' ) );
+		$this->target->addClasses( [ 'oo-ui-labelElement-label' ] );
 		$this->setLabel( isset( $config['label'] ) ? $config['label'] : null );
 	}
 
@@ -40,7 +40,7 @@ class LabelElement extends ElementMixin {
 	 * be converted to a single `&nbsp;`.
 	 *
 	 * @param string|HtmlSnippet|null $label Label text
-	 * @chainable
+	 * @return $this
 	 */
 	public function setLabel( $label ) {
 		$this->label = $label;
@@ -54,7 +54,7 @@ class LabelElement extends ElementMixin {
 			}
 		}
 
-		$this->element->toggleClasses( array( 'oo-ui-labelElement' ), !!$this->label );
+		$this->element->toggleClasses( [ 'oo-ui-labelElement' ], !!$this->label );
 
 		return $this;
 	}

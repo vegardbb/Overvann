@@ -1,16 +1,17 @@
 <?php
 
 namespace MediaWiki\Tidy;
+
 use MWHttpRequest;
 use Exception;
 
 class Html5Depurate extends TidyDriverBase {
 	public function __construct( array $config ) {
-		parent::__construct( $config + array(
+		parent::__construct( $config + [
 			'url' => 'http://localhost:4339/document',
 			'timeout' => 10,
 			'connectTimeout' => 0.5,
-		) );
+		] );
 	}
 
 	public function tidy( $text ) {
@@ -18,14 +19,14 @@ class Html5Depurate extends TidyDriverBase {
 			'<body>' . $text . '</body></html>';
 
 		$req = MWHttpRequest::factory( $this->config['url'],
-			array(
+			[
 				'method' => 'POST',
 				'timeout' => $this->config['timeout'],
 				'connectTimeout' => $this->config['connectTimeout'],
-				'postData' => array(
+				'postData' => [
 					'text' => $wrappedtext
-				)
-			) );
+				]
+			] );
 		$status = $req->execute();
 		if ( !$status->isOK() ) {
 			throw new Exception( "Error contacting depurate service: " . $status->getWikiText() );

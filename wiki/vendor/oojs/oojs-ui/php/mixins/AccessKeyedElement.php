@@ -26,7 +26,7 @@ class AccessKeyedElement extends ElementMixin {
 	 * @param array $config Configuration options
 	 * @param string $config['accessKey'] AccessKey. If not provided, no accesskey will be added
 	 */
-	public function __construct( Element $element, array $config = array() ) {
+	public function __construct( Element $element, array $config = [] ) {
 		// Parent constructor
 		$target = isset( $config['accessKeyed'] ) ? $config['accessKeyed'] : $element;
 		parent::__construct( $element, $target, $config );
@@ -41,16 +41,16 @@ class AccessKeyedElement extends ElementMixin {
 	 * Set access key.
 	 *
 	 * @param string $accessKey Tag's access key, use empty string to remove
-	 * @chainable
+	 * @return $this
 	 */
 	public function setAccessKey( $accessKey ) {
 		$accessKey = is_string( $accessKey ) && strlen( $accessKey ) ? $accessKey : null;
 
 		if ( $this->accessKey !== $accessKey ) {
 			if ( $accessKey !== null ) {
-				$this->target->setAttributes( array( 'accesskey' => $accessKey ) );
+				$this->target->setAttributes( [ 'accesskey' => $accessKey ] );
 			} else {
-				$this->target->removeAttributes( array( 'accesskey' ) );
+				$this->target->removeAttributes( [ 'accesskey' ] );
 			}
 			$this->accessKey = $accessKey;
 		}

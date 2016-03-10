@@ -46,17 +46,16 @@
 			return;
 		}
 		this.currentRequest = this.api.get( {
+			formatversion: 2,
 			action: 'query',
 			prop: [ 'info' ],
 			titles: titles
 		} ).done( function ( response ) {
-			var index, curr, title;
-			for ( index in response.query.pages ) {
-				curr = response.query.pages[ index ];
-				title = new ForeignTitle( curr.title ).getPrefixedText();
-				this.existenceCache[ title ] = curr.missing === undefined;
+			$.each( response.query.pages, function ( index, page ) {
+				var title = new ForeignTitle( page.title ).getPrefixedText();
+				this.existenceCache[ title ] = !page.missing;
 				queue[ title ].resolve( this.existenceCache[ title ] );
-			}
+			} );
 		}.bind( this ) );
 	};
 
@@ -175,13 +174,17 @@
 			title = new ForeignTitle( this.title.getPrefixedText() ), // HACK
 			prefix = this.apiUrl.replace( '/w/api.php', '' ); // HACK
 
+		this.missing = missing;
+
 		if ( !missing ) {
 			this.$link
 				.attr( 'href', prefix + title.getUrl() )
+				.attr( 'title', title.getPrefixedText() )
 				.removeClass( 'new' );
 		} else {
 			this.$link
 				.attr( 'href', prefix + title.getUrl( { action: 'edit', redlink: 1 } ) )
+				.attr( 'title', mw.msg( 'red-link-title', title.getPrefixedText() ) )
 				.addClass( 'new' );
 		}
 	};

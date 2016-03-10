@@ -33,7 +33,7 @@ require_once __DIR__ . '/Maintenance.php';
 class RebuildRecentchanges extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = "Rebuild recent changes";
+		$this->addDescription( 'Rebuild recent changes' );
 	}
 
 	public function execute() {
@@ -41,16 +41,16 @@ class RebuildRecentchanges extends Maintenance {
 		$this->rebuildRecentChangesTablePass2();
 		$this->rebuildRecentChangesTablePass3();
 		$this->rebuildRecentChangesTablePass4();
+		$this->rebuildRecentChangesTablePass5();
 		$this->purgeFeeds();
 		$this->output( "Done.\n" );
 	}
 
 	/**
-	 * Rebuild pass 1
-	 * DOCUMENT ME!
+	 * Rebuild pass 1: Insert `recentchanges` entries for page revisions.
 	 */
 	private function rebuildRecentChangesTablePass1() {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
 
 		$dbw->delete( 'recentchanges', '*' );
 
@@ -67,8 +67,8 @@ class RebuildRecentchanges extends Maintenance {
 		}
 
 		$cutoff = time() - $wgRCMaxAge;
-		$dbw->insertSelect( 'recentchanges', array( 'page', 'revision' ),
-			array(
+		$dbw->insertSelect( 'recentchanges', [ 'page', 'revision' ],
+			[
 				'rc_timestamp' => 'rev_timestamp',
 				'rc_user' => 'rev_user',
 				'rc_user_text' => 'rev_user_text',
@@ -88,23 +88,23 @@ class RebuildRecentchanges extends Maintenance {
 						$dbw->addQuotes( RecentChange::SRC_EDIT )
 				),
 				'rc_deleted' => 'rev_deleted'
-			),
-			array(
+			],
+			[
 				'rev_timestamp > ' . $dbw->addQuotes( $dbw->timestamp( $cutoff ) ),
 				'rev_page=page_id'
-			),
+			],
 			__METHOD__,
-			array(), // INSERT options
-			array( 'ORDER BY' => 'rev_timestamp DESC', 'LIMIT' => 5000 ) // SELECT options
+			[], // INSERT options
+			[ 'ORDER BY' => 'rev_timestamp DESC', 'LIMIT' => 5000 ] // SELECT options
 		);
 	}
 
 	/**
-	 * Rebuild pass 2
-	 * DOCUMENT ME!
+	 * Rebuild pass 2: Enhance entries for page revisions with references to the previous revision
+	 * (rc_last_oldid, rc_new etc.) and size differences (rc_old_len, rc_new_len).
 	 */
 	private function rebuildRecentChangesTablePass2() {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
 		list( $recentchanges, $revision ) = $dbw->tableNamesN( 'recentchanges', 'revision' );
 
 		$this->output( "Updating links and size differences...\n" );
@@ -143,20 +143,20 @@ class RebuildRecentchanges extends Maintenance {
 				$this->output( "Uhhh, something wrong? No curid\n" );
 			} else {
 				# Grab the entry's text size
-				$size = $dbw->selectField( 'revision', 'rev_len', array( 'rev_id' => $obj->rc_this_oldid ) );
+				$size = $dbw->selectField( 'revision', 'rev_len', [ 'rev_id' => $obj->rc_this_oldid ] );
 
 				$dbw->update( 'recentchanges',
-					array(
+					[
 						'rc_last_oldid' => $lastOldId,
 						'rc_new' => $new,
 						'rc_type' => $new,
 						'rc_source' => $new === 1 ? RecentChange::SRC_NEW : RecentChange::SRC_EDIT,
 						'rc_old_len' => $lastSize,
 						'rc_new_len' => $size,
-					), array(
+					], [
 						'rc_cur_id' => $lastCurId,
 						'rc_this_oldid' => $obj->rc_this_oldid,
-					),
+					],
 					__METHOD__
 				);
 
@@ -167,11 +167,10 @@ class RebuildRecentchanges extends Maintenance {
 	}
 
 	/**
-	 * Rebuild pass 3
-	 * DOCUMENT ME!
+	 * Rebuild pass 3: Insert `recentchanges` entries for action logs.
 	 */
 	private function rebuildRecentChangesTablePass3() {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
 
 		$this->output( "Loading from user, page, and logging tables...\n" );
 
@@ -183,11 +182,11 @@ class RebuildRecentchanges extends Maintenance {
 		list( $logging, $page ) = $dbw->tableNamesN( 'logging', 'page' );
 		$dbw->insertSelect(
 			'recentchanges',
-			array(
+			[
 				'user',
 				"$logging LEFT JOIN $page ON (log_namespace=page_namespace AND log_title=page_title)"
-			),
-			array(
+			],
+			[
 				'rc_timestamp' => 'log_timestamp',
 				'rc_user' => 'log_user',
 				'rc_user_text' => 'user_name',
@@ -208,36 +207,35 @@ class RebuildRecentchanges extends Maintenance {
 				'rc_logid' => 'log_id',
 				'rc_params' => 'log_params',
 				'rc_deleted' => 'log_deleted'
-			),
-			array(
+			],
+			[
 				'log_timestamp > ' . $dbw->addQuotes( $dbw->timestamp( $cutoff ) ),
 				'log_user=user_id',
 				'log_type' => $basicRCLogs,
-			),
+			],
 			__METHOD__,
-			array(), // INSERT options
-			array( 'ORDER BY' => 'log_timestamp DESC', 'LIMIT' => 5000 ) // SELECT options
+			[], // INSERT options
+			[ 'ORDER BY' => 'log_timestamp DESC', 'LIMIT' => 5000 ] // SELECT options
 		);
 	}
 
 	/**
-	 * Rebuild pass 4
-	 * DOCUMENT ME!
+	 * Rebuild pass 4: Mark bot and autopatrolled entries.
 	 */
 	private function rebuildRecentChangesTablePass4() {
 		global $wgUseRCPatrol;
 
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
 
 		list( $recentchanges, $usergroups, $user ) =
 			$dbw->tableNamesN( 'recentchanges', 'user_groups', 'user' );
 
 		$botgroups = User::getGroupsWithPermission( 'bot' );
-		$autopatrolgroups = $wgUseRCPatrol ? User::getGroupsWithPermission( 'autopatrol' ) : array();
+		$autopatrolgroups = $wgUseRCPatrol ? User::getGroupsWithPermission( 'autopatrol' ) : [];
 		# Flag our recent bot edits
 		if ( !empty( $botgroups ) ) {
 			$botwhere = $dbw->makeList( $botgroups );
-			$botusers = array();
+			$botusers = [];
 
 			$this->output( "Flagging bot account edits...\n" );
 
@@ -261,7 +259,7 @@ class RebuildRecentchanges extends Maintenance {
 		# Flag our recent autopatrolled edits
 		if ( !$wgMiserMode && !empty( $autopatrolgroups ) ) {
 			$patrolwhere = $dbw->makeList( $autopatrolgroups );
-			$patrolusers = array();
+			$patrolusers = [];
 
 			$this->output( "Flagging auto-patrolled edits...\n" );
 
@@ -281,6 +279,46 @@ class RebuildRecentchanges extends Maintenance {
 					"WHERE rc_user_text IN($patrolwhere)";
 				$dbw->query( $sql2 );
 			}
+		}
+	}
+
+	/**
+	 * Rebuild pass 5: Delete duplicate entries where we generate both a page revision and a log entry
+	 * for a single action (upload only, at the moment, but potentially also move, protect, ...).
+	 */
+	private function rebuildRecentChangesTablePass5() {
+		$dbw = wfGetDB( DB_MASTER );
+
+		$this->output( "Removing duplicate revision and logging entries...\n" );
+
+		$res = $dbw->select(
+			[ 'logging', 'log_search' ],
+			[ 'ls_value', 'ls_log_id' ],
+			[
+				'ls_log_id = log_id',
+				'ls_field' => 'associated_rev_id',
+				'log_type' => 'upload',
+			],
+			__METHOD__
+		);
+		foreach ( $res as $obj ) {
+			$rev_id = $obj->ls_value;
+			$log_id = $obj->ls_log_id;
+
+			// Mark the logging row as having an associated rev id
+			$dbw->update(
+				'recentchanges',
+				/*SET*/ [ 'rc_this_oldid' => $rev_id ],
+				/*WHERE*/ [ 'rc_logid' => $log_id ],
+				__METHOD__
+			);
+
+			// Delete the revision row
+			$dbw->delete(
+				'recentchanges',
+				/*WHERE*/ [ 'rc_this_oldid' => $rev_id, 'rc_logid' => 0 ],
+				__METHOD__
+			);
 		}
 	}
 

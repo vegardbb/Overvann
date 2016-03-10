@@ -4,7 +4,7 @@
  * even the most ancient of browsers, so be very careful when editing.
  */
 /*jshint unused: false, evil: true */
-/*globals mw, RLQ: true, $VARS, $CODE, performance */
+/*globals mw, RLQ: true, NORLQ: true, $VARS, $CODE, performance */
 
 var mediaWikiLoadStart = ( new Date() ).getTime(),
 
@@ -31,8 +31,8 @@ function isCompatible( ua ) {
 
 	// Browsers with outdated or limited JavaScript engines get the no-JS experience
 	return !(
-		// Internet Explorer < 8
-		( ua.indexOf( 'MSIE' ) !== -1 && parseFloat( ua.split( 'MSIE' )[ 1 ] ) < 8 ) ||
+		// Internet Explorer < 9
+		( ua.indexOf( 'MSIE' ) !== -1 && parseFloat( ua.split( 'MSIE' )[ 1 ] ) < 9 ) ||
 		// Firefox < 3
 		( ua.indexOf( 'Firefox/' ) !== -1 && parseFloat( ua.split( 'Firefox/' )[ 1 ] ) < 3 ) ||
 		// Opera < 12
@@ -67,11 +67,29 @@ function isCompatible( ua ) {
 
 // Conditional script injection
 ( function () {
+	var NORLQ, script;
 	if ( !isCompatible() ) {
 		// Undo class swapping in case of an unsupported browser.
 		// See OutputPage::getHeadScripts().
 		document.documentElement.className = document.documentElement.className
 			.replace( /(^|\s)client-js(\s|$)/, '$1client-nojs$2' );
+
+		NORLQ = window.NORLQ || [];
+		while ( NORLQ.length ) {
+			NORLQ.shift()();
+		}
+		window.NORLQ = {
+			push: function ( fn ) {
+				fn();
+			}
+		};
+
+		// Clear and disable the other queue
+		window.RLQ = {
+			// No-op
+			push: function () {}
+		};
+
 		return;
 	}
 
@@ -87,7 +105,7 @@ function isCompatible( ua ) {
 
 		// Must be after mw.config.set because these callbacks may use mw.loader which
 		// needs to have values 'skin', 'debug' etc. from mw.config.
-		window.RLQ = window.RLQ || [];
+		var RLQ = window.RLQ || [];
 		while ( RLQ.length ) {
 			RLQ.shift()();
 		}
@@ -96,9 +114,15 @@ function isCompatible( ua ) {
 				fn();
 			}
 		};
+
+		// Clear and disable the other queue
+		window.NORLQ = {
+			// No-op
+			push: function () {}
+		};
 	}
 
-	var script = document.createElement( 'script' );
+	script = document.createElement( 'script' );
 	script.src = $VARS.baseModulesUri;
 	script.onload = script.onreadystatechange = function () {
 		if ( !script.readyState || /loaded|complete/.test( script.readyState ) ) {

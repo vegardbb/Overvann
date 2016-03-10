@@ -64,11 +64,10 @@ class BenchUtf8TitleCheck extends Benchmarker {
 		$this->canRun = function_exists( 'mb_check_encoding' );
 
 		if ( $this->canRun ) {
-			$this->mDescription = "Benchmark for using a regexp vs. mb_check_encoding " .
-				"to check for UTF-8 encoding.";
-			mb_internal_encoding( 'UTF-8' );
+			$this->addDescription( "Benchmark for using a regexp vs. mb_check_encoding " .
+				"to check for UTF-8 encoding." );
 		} else {
-			$this->mDescription = "CANNOT RUN benchmark using mb_check_encoding: function not available.";
+			$this->addDescription( 'CANNOT RUN benchmark using mb_check_encoding: function not available.' );
 		}
 	}
 
@@ -76,24 +75,24 @@ class BenchUtf8TitleCheck extends Benchmarker {
 		if ( !$this->canRun ) {
 			return;
 		}
-		$benchmarks = array();
+		$benchmarks = [];
 		foreach ( $this->data as $val ) {
-			$benchmarks[] = array(
-				'function' => array( $this, 'use_regexp' ),
-				'args' => array( rawurldecode( $val ) )
-			);
-			$benchmarks[] = array(
-				'function' => array( $this, 'use_regexp_non_capturing' ),
-				'args' => array( rawurldecode( $val ) )
-			);
-			$benchmarks[] = array(
-				'function' => array( $this, 'use_regexp_once_only' ),
-				'args' => array( rawurldecode( $val ) )
-			);
-			$benchmarks[] = array(
-				'function' => array( $this, 'use_mb_check_encoding' ),
-				'args' => array( rawurldecode( $val ) )
-			);
+			$benchmarks[] = [
+				'function' => [ $this, 'use_regexp' ],
+				'args' => [ rawurldecode( $val ) ]
+			];
+			$benchmarks[] = [
+				'function' => [ $this, 'use_regexp_non_capturing' ],
+				'args' => [ rawurldecode( $val ) ]
+			];
+			$benchmarks[] = [
+				'function' => [ $this, 'use_regexp_once_only' ],
+				'args' => [ rawurldecode( $val ) ]
+			];
+			$benchmarks[] = [
+				'function' => [ $this, 'use_mb_check_encoding' ],
+				'args' => [ rawurldecode( $val ) ]
+			];
 		}
 		$this->bench( $benchmarks );
 		print $this->getFormattedResults();

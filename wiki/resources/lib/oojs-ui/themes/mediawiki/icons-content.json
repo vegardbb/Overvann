@@ -1,9 +1,10 @@
 {
-	"prefix": "oo-ui-icon",
+	"selectorWithoutVariant": ".oo-ui-icon-{name}",
+	"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-icon-{name}",
 	"intro": "@import '../../../../src/styles/common';",
 	"variants": {
 		"invert": {
-			"color": "#FFFFFF",
+			"color": "#ffffff",
 			"global": true
 		}
 	},
@@ -19,6 +20,10 @@
 		"articleSearch": { "file": {
 			"ltr": "images/icons/articleSearch-ltr.svg",
 			"rtl": "images/icons/articleSearch-rtl.svg"
+		} },
+		"articleRedirect": { "file": {
+			"ltr": "images/icons/articleRedirect-ltr.svg",
+			"rtl": "images/icons/articleRedirect-rtl.svg"
 		} },
 		"book": { "file": {
 			"ltr": "images/icons/book-ltr.svg",

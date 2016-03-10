@@ -60,7 +60,6 @@ class LineFormatter extends MonologLineFormatter {
 		$this->includeStacktraces( $includeStacktraces );
 	}
 
-
 	/**
 	 * {@inheritdoc}
 	 */
@@ -94,7 +93,6 @@ class LineFormatter extends MonologLineFormatter {
 		return $output;
 	}
 
-
 	/**
 	 * Convert an Exception to a string.
 	 *
@@ -105,7 +103,6 @@ class LineFormatter extends MonologLineFormatter {
 		return $this->normalizeExceptionArray( $this->exceptionAsArray( $e ) );
 	}
 
-
 	/**
 	 * Convert an exception to an array of structured data.
 	 *
@@ -113,14 +110,14 @@ class LineFormatter extends MonologLineFormatter {
 	 * @return array
 	 */
 	protected function exceptionAsArray( Exception $e ) {
-		$out = array(
+		$out = [
 			'class' => get_class( $e ),
 			'message' => $e->getMessage(),
 			'code' => $e->getCode(),
 			'file' => $e->getFile(),
 			'line' => $e->getLine(),
 			'trace' => MWExceptionHandler::redactTrace( $e->getTrace() ),
-		);
+		];
 
 		$prev = $e->getPrevious();
 		if ( $prev ) {
@@ -130,7 +127,6 @@ class LineFormatter extends MonologLineFormatter {
 		return $out;
 	}
 
-
 	/**
 	 * Convert an array of Exception data to a string.
 	 *
@@ -138,13 +134,13 @@ class LineFormatter extends MonologLineFormatter {
 	 * @return string
 	 */
 	protected function normalizeExceptionArray( array $e ) {
-		$defaults = array(
+		$defaults = [
 			'class' => 'Unknown',
 			'file' => 'unknown',
 			'line' => null,
 			'message' => 'unknown',
-			'trace' => array(),
-		);
+			'trace' => [],
+		];
 		$e = array_merge( $defaults, $e );
 
 		$str = "\n[Exception {$e['class']}] (" .

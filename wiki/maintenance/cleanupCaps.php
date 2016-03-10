@@ -42,7 +42,7 @@ class CapsCleanup extends TableCleanup {
 
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = "Script to cleanup capitalization";
+		$this->addDescription( 'Script to cleanup capitalization' );
 		$this->addOption( 'namespace', 'Namespace number to run caps cleanup on', false, true );
 	}
 
@@ -53,16 +53,16 @@ class CapsCleanup extends TableCleanup {
 			$this->error( "\$wgCapitalLinks is on -- no need for caps links cleanup.", true );
 		}
 
-		$this->user = User::newFromName( 'Conversion script' );
+		$this->user = User::newSystemUser( 'Conversion script', [ 'steal' => true ] );
 
 		$this->namespace = intval( $this->getOption( 'namespace', 0 ) );
 		$this->dryrun = $this->hasOption( 'dry-run' );
 
-		$this->runTable( array(
+		$this->runTable( [
 			'table' => 'page',
-			'conds' => array( 'page_namespace' => $this->namespace ),
+			'conds' => [ 'page_namespace' => $this->namespace ],
 			'index' => 'page_id',
-			'callback' => 'processRow' ) );
+			'callback' => 'processRow' ] );
 	}
 
 	protected function processRow( $row ) {

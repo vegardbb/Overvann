@@ -12,10 +12,10 @@ class CSSMinTest extends MediaWikiTestCase {
 
 		$server = 'http://doc.example.org';
 
-		$this->setMwGlobals( array(
+		$this->setMwGlobals( [
 			'wgServer' => $server,
 			'wgCanonicalServer' => $server,
-		) );
+		] );
 	}
 
 	/**
@@ -33,43 +33,43 @@ class CSSMinTest extends MediaWikiTestCase {
 	}
 
 	public static function provideMinifyCases() {
-		return array(
+		return [
 			// Whitespace
-			array( "\r\t\f \v\n\r", "" ),
-			array( "foo, bar {\n\tprop: value;\n}", "foo,bar{prop:value}" ),
+			[ "\r\t\f \v\n\r", "" ],
+			[ "foo, bar {\n\tprop: value;\n}", "foo,bar{prop:value}" ],
 
 			// Loose comments
-			array( "/* foo */", "" ),
-			array( "/*******\n foo\n *******/", "" ),
-			array( "/*!\n foo\n */", "" ),
+			[ "/* foo */", "" ],
+			[ "/*******\n foo\n *******/", "" ],
+			[ "/*!\n foo\n */", "" ],
 
 			// Inline comments in various different places
-			array( "/* comment */foo, bar {\n\tprop: value;\n}", "foo,bar{prop:value}" ),
-			array( "foo/* comment */, bar {\n\tprop: value;\n}", "foo,bar{prop:value}" ),
-			array( "foo,/* comment */ bar {\n\tprop: value;\n}", "foo,bar{prop:value}" ),
-			array( "foo, bar/* comment */ {\n\tprop: value;\n}", "foo,bar{prop:value}" ),
-			array( "foo, bar {\n\t/* comment */prop: value;\n}", "foo,bar{prop:value}" ),
-			array( "foo, bar {\n\tprop: /* comment */value;\n}", "foo,bar{prop:value}" ),
-			array( "foo, bar {\n\tprop: value /* comment */;\n}", "foo,bar{prop:value }" ),
-			array( "foo, bar {\n\tprop: value; /* comment */\n}", "foo,bar{prop:value; }" ),
+			[ "/* comment */foo, bar {\n\tprop: value;\n}", "foo,bar{prop:value}" ],
+			[ "foo/* comment */, bar {\n\tprop: value;\n}", "foo,bar{prop:value}" ],
+			[ "foo,/* comment */ bar {\n\tprop: value;\n}", "foo,bar{prop:value}" ],
+			[ "foo, bar/* comment */ {\n\tprop: value;\n}", "foo,bar{prop:value}" ],
+			[ "foo, bar {\n\t/* comment */prop: value;\n}", "foo,bar{prop:value}" ],
+			[ "foo, bar {\n\tprop: /* comment */value;\n}", "foo,bar{prop:value}" ],
+			[ "foo, bar {\n\tprop: value /* comment */;\n}", "foo,bar{prop:value }" ],
+			[ "foo, bar {\n\tprop: value; /* comment */\n}", "foo,bar{prop:value; }" ],
 
 			// Keep track of things that aren't as minified as much as they
 			// could be (bug 35493)
-			array( 'foo { prop: value ;}', 'foo{prop:value }' ),
-			array( 'foo { prop : value; }', 'foo{prop :value}' ),
-			array( 'foo { prop: value ; }', 'foo{prop:value }' ),
-			array( 'foo { font-family: "foo" , "bar"; }', 'foo{font-family:"foo" ,"bar"}' ),
-			array( "foo { src:\n\turl('foo') ,\n\turl('bar') ; }", "foo{src:url('foo') ,url('bar') }" ),
+			[ 'foo { prop: value ;}', 'foo{prop:value }' ],
+			[ 'foo { prop : value; }', 'foo{prop :value}' ],
+			[ 'foo { prop: value ; }', 'foo{prop:value }' ],
+			[ 'foo { font-family: "foo" , "bar"; }', 'foo{font-family:"foo" ,"bar"}' ],
+			[ "foo { src:\n\turl('foo') ,\n\turl('bar') ; }", "foo{src:url('foo') ,url('bar') }" ],
 
 			// Interesting cases with string values
 			// - Double quotes, single quotes
-			array( 'foo { content: ""; }', 'foo{content:""}' ),
-			array( "foo { content: ''; }", "foo{content:''}" ),
-			array( 'foo { content: "\'"; }', 'foo{content:"\'"}' ),
-			array( "foo { content: '\"'; }", "foo{content:'\"'}" ),
+			[ 'foo { content: ""; }', 'foo{content:""}' ],
+			[ "foo { content: ''; }", "foo{content:''}" ],
+			[ 'foo { content: "\'"; }', 'foo{content:"\'"}' ],
+			[ "foo { content: '\"'; }", "foo{content:'\"'}" ],
 			// - Whitespace in string values
-			array( 'foo { content: " "; }', 'foo{content:" "}' ),
-		);
+			[ 'foo { content: " "; }', 'foo{content:" "}' ],
+		];
 	}
 
 	/**
@@ -93,33 +93,33 @@ class CSSMinTest extends MediaWikiTestCase {
 	public static function provideRemapCases() {
 		// Parameter signature:
 		// CSSMin::remap( $code, $local, $remote, $embedData = true )
-		return array(
-			array(
+		return [
+			[
 				'Simple case',
-				array( 'foo { prop: url(bar.png); }', false, 'http://example.org', false ),
+				[ 'foo { prop: url(bar.png); }', false, 'http://example.org', false ],
 				'foo { prop: url(http://example.org/bar.png); }',
-			),
-			array(
+			],
+			[
 				'Without trailing slash',
-				array( 'foo { prop: url(../bar.png); }', false, 'http://example.org/quux', false ),
+				[ 'foo { prop: url(../bar.png); }', false, 'http://example.org/quux', false ],
 				'foo { prop: url(http://example.org/bar.png); }',
-			),
-			array(
+			],
+			[
 				'With trailing slash on remote (bug 27052)',
-				array( 'foo { prop: url(../bar.png); }', false, 'http://example.org/quux/', false ),
+				[ 'foo { prop: url(../bar.png); }', false, 'http://example.org/quux/', false ],
 				'foo { prop: url(http://example.org/bar.png); }',
-			),
-			array(
+			],
+			[
 				'Guard against stripping double slashes from query',
-				array( 'foo { prop: url(bar.png?corge=//grault); }', false, 'http://example.org/quux/', false ),
+				[ 'foo { prop: url(bar.png?corge=//grault); }', false, 'http://example.org/quux/', false ],
 				'foo { prop: url(http://example.org/quux/bar.png?corge=//grault); }',
-			),
-			array(
+			],
+			[
 				'Expand absolute paths',
-				array( 'foo { prop: url(/w/skin/images/bar.png); }', false, 'http://example.org/quux', false ),
+				[ 'foo { prop: url(/w/skin/images/bar.png); }', false, 'http://example.org/quux', false ],
 				'foo { prop: url(http://doc.example.org/w/skin/images/bar.png); }',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -137,17 +137,17 @@ class CSSMinTest extends MediaWikiTestCase {
 	}
 
 	public static function provideIsRemoteUrl() {
-		return array(
-			array( true, 'http://localhost/w/red.gif?123' ),
-			array( true, 'https://example.org/x.png' ),
-			array( true, '//example.org/x.y.z/image.png' ),
-			array( true, '//localhost/styles.css?query=yes' ),
-			array( true, 'data:image/gif;base64,R0lGODlhAQABAIAAAP8AADAAACwAAAAAAQABAAACAkQBADs=' ),
-			array( false, 'x.gif' ),
-			array( false, '/x.gif' ),
-			array( false, './x.gif' ),
-			array( false, '../x.gif' ),
-		);
+		return [
+			[ true, 'http://localhost/w/red.gif?123' ],
+			[ true, 'https://example.org/x.png' ],
+			[ true, '//example.org/x.y.z/image.png' ],
+			[ true, '//localhost/styles.css?query=yes' ],
+			[ true, 'data:image/gif;base64,R0lGODlhAQABAIAAAP8AADAAACwAAAAAAQABAAACAkQBADs=' ],
+			[ false, 'x.gif' ],
+			[ false, '/x.gif' ],
+			[ false, './x.gif' ],
+			[ false, '../x.gif' ],
+		];
 	}
 
 	/**
@@ -155,16 +155,16 @@ class CSSMinTest extends MediaWikiTestCase {
 	 * @cover CSSMin::isRemoteUrl
 	 */
 	public function testIsRemoteUrl( $expect, $url ) {
-		$this->assertEquals( CSSMin::isRemoteUrl( $url ), $expect );
+		$this->assertEquals( CSSMinTestable::isRemoteUrl( $url ), $expect );
 	}
 
 	public static function provideIsLocalUrls() {
-		return array(
-			array( false, 'x.gif' ),
-			array( true, '/x.gif' ),
-			array( false, './x.gif' ),
-			array( false, '../x.gif' ),
-		);
+		return [
+			[ false, 'x.gif' ],
+			[ true, '/x.gif' ],
+			[ false, './x.gif' ],
+			[ false, '../x.gif' ],
+		];
 	}
 
 	/**
@@ -172,7 +172,7 @@ class CSSMinTest extends MediaWikiTestCase {
 	 * @cover CSSMin::isLocalUrl
 	 */
 	public function testIsLocalUrl( $expect, $url ) {
-		$this->assertEquals( CSSMin::isLocalUrl( $url ), $expect );
+		$this->assertEquals( CSSMinTestable::isLocalUrl( $url ), $expect );
 	}
 
 	public static function provideRemapRemappingCases() {
@@ -188,6 +188,7 @@ class CSSMinTest extends MediaWikiTestCase {
 			. '%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%228%22%20height%3D'
 			. '%228%22%3E%0A%3Ccircle%20cx%3D%224%22%20cy%3D%224%22%20r%3D%222%22%2F%3E%0A%3C%2Fsvg%3E%0A';
 
+		// @codingStandardsIgnoreStart Generic.Files.LineLength
 		return array(
 			array(
 				'Regular file',
@@ -374,6 +375,7 @@ class CSSMinTest extends MediaWikiTestCase {
 				'.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #d3d3d3/*{borderColorDefault}*/; background: #e6e6e6/*{bgColorDefault}*/ url(http://localhost/w/images/ui-bg_glass_75_e6e6e6_1x400.png)/*{bgImgUrlDefault}*/ 50%/*{bgDefaultXPos}*/ 50%/*{bgDefaultYPos}*/ repeat-x/*{bgDefaultRepeat}*/; font-weight: normal/*{fwDefault}*/; color: #555555/*{fcDefault}*/; }',
 			),
 		);
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**
@@ -391,28 +393,28 @@ class CSSMinTest extends MediaWikiTestCase {
 	}
 
 	public static function provideBuildUrlValueCases() {
-		return array(
-			array(
+		return [
+			[
 				'Full URL',
 				'scheme://user@domain:port/~user/fi%20le.png?query=yes&really=y+s',
 				'url(scheme://user@domain:port/~user/fi%20le.png?query=yes&really=y+s)',
-			),
-			array(
+			],
+			[
 				'data: URI',
 				'data:image/png;base64,R0lGODlh/+==',
 				'url(data:image/png;base64,R0lGODlh/+==)',
-			),
-			array(
+			],
+			[
 				'URL with quotes',
 				"https://en.wikipedia.org/wiki/Wendy's",
 				"url(\"https://en.wikipedia.org/wiki/Wendy's\")",
-			),
-			array(
+			],
+			[
 				'URL with parentheses',
 				'https://en.wikipedia.org/wiki/Boston_(band)',
 				'url("https://en.wikipedia.org/wiki/Boston_(band)")',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -427,17 +429,27 @@ class CSSMinTest extends MediaWikiTestCase {
 	}
 
 	public static function provideStringCases() {
-		return array(
+		return [
 			// String values should be respected
 			// - More than one space in a string value
-			array( 'foo { content: "  "; }', 'foo{content:"  "}' ),
+			[ 'foo { content: "  "; }', 'foo{content:"  "}' ],
 			// - Using a tab in a string value (turns into a space)
-			array( "foo { content: '\t'; }", "foo{content:'\t'}" ),
+			[ "foo { content: '\t'; }", "foo{content:'\t'}" ],
 			// - Using css-like syntax in string values
-			array(
+			[
 				'foo::after { content: "{;}"; position: absolute; }',
 				'foo::after{content:"{;}";position:absolute}'
-			),
-		);
+			],
+		];
+	}
+}
+
+class CSSMinTestable extends CSSMin {
+	// Make some protected methods public
+	public static function isRemoteUrl( $maybeUrl ) {
+		return parent::isRemoteUrl( $maybeUrl );
+	}
+	public static function isLocalUrl( $maybeUrl ) {
+		return parent::isLocalUrl( $maybeUrl );
 	}
 }

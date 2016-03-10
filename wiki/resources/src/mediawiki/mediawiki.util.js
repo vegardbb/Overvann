@@ -59,6 +59,18 @@
 		},
 
 		/**
+		 * Encode the string like Sanitizer::escapeId in PHP
+		 *
+		 * @param {string} str String to be encoded.
+		 */
+		escapeId: function ( str ) {
+			str = String( str );
+			return util.rawurlencode( str.replace( / /g, '_' ) )
+				.replace( /%3A/g, ':' )
+				.replace( /%/g, '.' );
+		},
+
+		/**
 		 * Encode page titles for use in a URL
 		 *
 		 * We want / and : to be included as literal characters in our title URLs
@@ -95,13 +107,31 @@
 		 * @return {string} Url of the page with name of `str`
 		 */
 		getUrl: function ( str, params ) {
-			var url = mw.config.get( 'wgArticlePath' ).replace(
-				'$1',
-				util.wikiUrlencode( typeof str === 'string' ? str : mw.config.get( 'wgPageName' ) )
-			);
+			var titleFragmentStart,
+				url,
+				fragment = '',
+				pageName = typeof str === 'string' ? str : mw.config.get( 'wgPageName' );
 
+			// Find any fragment should one exist
+			if ( typeof str === 'string' ) {
+				titleFragmentStart = pageName.indexOf( '#' );
+				if ( titleFragmentStart !== -1 ) {
+					fragment = pageName.slice( titleFragmentStart + 1 );
+					// Exclude the fragment from the page name
+					pageName = pageName.slice( 0, titleFragmentStart );
+				}
+			}
+
+			url = mw.config.get( 'wgArticlePath' ).replace( '$1', util.wikiUrlencode( pageName ) );
+
+			// Add query string if necessary
 			if ( params && !$.isEmptyObject( params ) ) {
 				url += ( url.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( params );
+			}
+
+			// Append the encoded fragment
+			if ( fragment.length > 0 ) {
+				url += '#' + util.escapeId( fragment );
 			}
 
 			return url;
@@ -122,8 +152,7 @@
 			} else if ( str === 'load' ) {
 				return mw.config.get( 'wgLoadScript' );
 			} else {
-				return mw.config.get( 'wgScriptPath' ) + '/' + str +
-					mw.config.get( 'wgScriptExtension' );
+				return mw.config.get( 'wgScriptPath' ) + '/' + str + '.php';
 			}
 		},
 
@@ -206,9 +235,19 @@
 		 * (e.g. `'#foobar'`) for that item.
 		 *
 		 *     mw.util.addPortletLink(
-		 *         'p-tb', 'http://mediawiki.org/',
-		 *         'MediaWiki.org', 't-mworg', 'Go to MediaWiki.org ', 'm', '#t-print'
+		 *         'p-tb', 'https://www.mediawiki.org/',
+		 *         'mediawiki.org', 't-mworg', 'Go to mediawiki.org', 'm', '#t-print'
 		 *     );
+		 *
+		 *     var node = mw.util.addPortletLink(
+		 *         'p-tb',
+		 *         new mw.Title( 'Special:Example' ).getUrl(),
+		 *         'Example'
+		 *     );
+		 *     $( node ).on( 'click', function ( e ) {
+		 *         console.log( 'Example' );
+		 *         e.preventDefault();
+		 *     } );
 		 *
 		 * @param {string} portlet ID of the target portlet ( 'p-cactions' or 'p-personal' etc.)
 		 * @param {string} href Link URL

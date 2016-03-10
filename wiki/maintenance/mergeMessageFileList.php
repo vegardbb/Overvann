@@ -51,8 +51,9 @@ class MergeMessageFileList extends Maintenance {
 		);
 		$this->addOption( 'extensions-dir', 'Path where extensions can be found.', false, true );
 		$this->addOption( 'output', 'Send output to this file (omit for stdout)', false, true );
-		$this->mDescription = 'Merge $wgExtensionMessagesFiles and $wgMessagesDirs from ' .
-			' various extensions to produce a single file listing all message files and dirs.';
+		$this->addDescription( 'Merge $wgExtensionMessagesFiles and $wgMessagesDirs from ' .
+			' various extensions to produce a single file listing all message files and dirs.'
+		);
 	}
 
 	public function execute() {
@@ -69,7 +70,7 @@ class MergeMessageFileList extends Maintenance {
 				"\$wgExtensionEntryPointListFiles is not set", 1 );
 		}
 
-		$mmfl = array( 'setupFiles' => array() );
+		$mmfl = [ 'setupFiles' => [] ];
 
 		# Add setup files contained in file passed to --list-file
 		if ( $this->hasOption( 'list-file' ) ) {
@@ -85,11 +86,11 @@ class MergeMessageFileList extends Maintenance {
 				if ( $extname == '.' || $extname == '..' || !is_dir( "$extdir/$extname" ) ) {
 					continue;
 				}
-				$possibilities = array(
+				$possibilities = [
 					"$extdir/$extname/extension.json",
 					"$extdir/$extname/skin.json",
 					"$extdir/$extname/$extname.php"
-				);
+				];
 				$found = false;
 				foreach ( $possibilities as $extfile ) {
 					if ( file_exists( $extfile ) ) {
@@ -132,7 +133,7 @@ class MergeMessageFileList extends Maintenance {
 	private function readFile( $fileName ) {
 		global $IP;
 
-		$files = array();
+		$files = [];
 		$fileLines = file( $fileName );
 		if ( $fileLines === false ) {
 			$this->hasError = true;
@@ -162,7 +163,7 @@ class MergeMessageFileList extends Maintenance {
 
 require_once RUN_MAINTENANCE_IF_MAIN;
 
-$queue = array();
+$queue = [];
 foreach ( $mmfl['setupFiles'] as $fileName ) {
 	if ( strval( $fileName ) === '' ) {
 		continue;
@@ -181,7 +182,7 @@ foreach ( $mmfl['setupFiles'] as $fileName ) {
 if ( $queue ) {
 	$registry = new ExtensionRegistry();
 	$data = $registry->readFromQueue( $queue );
-	foreach ( array( 'wgExtensionMessagesFiles', 'wgMessagesDirs' ) as $var ) {
+	foreach ( [ 'wgExtensionMessagesFiles', 'wgMessagesDirs' ] as $var ) {
 		if ( isset( $data['globals'][$var] ) ) {
 			$GLOBALS[$var] = array_merge( $data['globals'][$var], $GLOBALS[$var] );
 		}
@@ -196,11 +197,11 @@ $s =
 	'$wgExtensionMessagesFiles = ' . var_export( $wgExtensionMessagesFiles, true ) . ";\n\n" .
 	'$wgMessagesDirs = ' . var_export( $wgMessagesDirs, true ) . ";\n\n";
 
-$dirs = array(
+$dirs = [
 	$IP,
 	dirname( __DIR__ ),
 	realpath( $IP )
-);
+];
 
 foreach ( $dirs as $dir ) {
 	$s = preg_replace( "/'" . preg_quote( $dir, '/' ) . "([^']*)'/", '"$IP\1"', $s );

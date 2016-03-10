@@ -33,7 +33,7 @@ use Liuggio\StatsdClient\Factory\StatsdDataFactory;
  * @since 1.25
  */
 class BufferingStatsdDataFactory extends StatsdDataFactory {
-	protected $buffer = array();
+	protected $buffer = [];
 
 	public function __construct( $prefix ) {
 		parent::__construct();
@@ -54,10 +54,12 @@ class BufferingStatsdDataFactory extends StatsdDataFactory {
 		$key = preg_replace( '/[:.]+/', '.', $key );
 		$key = preg_replace( '/[^a-z0-9.]+/i', '_', $key );
 		$key = trim( $key, '_.' );
-		return str_replace( array( '._', '_.' ), '.', $key );
+		return str_replace( [ '._', '_.' ], '.', $key );
 	}
 
-	public function produceStatsdData( $key, $value = 1, $metric = StatsdDataInterface::STATSD_METRIC_COUNT ) {
+	public function produceStatsdData(
+		$key, $value = 1, $metric = StatsdDataInterface::STATSD_METRIC_COUNT
+	) {
 		$entity = $this->produceStatsdDataEntity();
 		if ( $key !== null ) {
 			$key = self::normalizeMetricKey( "{$this->prefix}.{$key}" );

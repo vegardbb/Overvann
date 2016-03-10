@@ -62,8 +62,14 @@ class TableDiffFormatter extends DiffFormatter {
 	protected function blockHeader( $xbeg, $xlen, $ybeg, $ylen ) {
 		// '<!--LINE \d+ -->' get replaced by a localised line number
 		// in DifferenceEngine::localiseLineNumbers
-		$r = '<tr><td colspan="2" class="diff-lineno" id="mw-diff-left-l' . $xbeg . '" ><!--LINE ' . $xbeg . "--></td>\n" .
-			'<td colspan="2" class="diff-lineno"><!--LINE ' . $ybeg . "--></td></tr>\n";
+		$r = '<tr><td colspan="2" class="diff-lineno" id="mw-diff-left-l' .
+			$xbeg .
+			'" ><!--LINE ' .
+			$xbeg .
+			"--></td>\n" .
+			'<td colspan="2" class="diff-lineno"><!--LINE ' .
+			$ybeg .
+			"--></td></tr>\n";
 
 		return $r;
 	}
@@ -74,7 +80,7 @@ class TableDiffFormatter extends DiffFormatter {
 	 * @param string $header
 	 */
 	protected function startBlock( $header ) {
-		echo $header;
+		$this->writeOutput( $header );
 	}
 
 	protected function endBlock() {
@@ -151,9 +157,9 @@ class TableDiffFormatter extends DiffFormatter {
 	 */
 	protected function added( $lines ) {
 		foreach ( $lines as $line ) {
-			echo '<tr>' . $this->emptyLine() .
+			$this->writeOutput( '<tr>' . $this->emptyLine() .
 				$this->addedLine( '<ins class="diffchange">' .
-					htmlspecialchars( $line ) . '</ins>' ) . "</tr>\n";
+					htmlspecialchars( $line ) . '</ins>' ) . "</tr>\n" );
 		}
 	}
 
@@ -164,9 +170,9 @@ class TableDiffFormatter extends DiffFormatter {
 	 */
 	protected function deleted( $lines ) {
 		foreach ( $lines as $line ) {
-			echo '<tr>' . $this->deletedLine( '<del class="diffchange">' .
+			$this->writeOutput( '<tr>' . $this->deletedLine( '<del class="diffchange">' .
 					htmlspecialchars( $line ) . '</del>' ) .
-				$this->emptyLine() . "</tr>\n";
+				$this->emptyLine() . "</tr>\n" );
 		}
 	}
 
@@ -177,9 +183,9 @@ class TableDiffFormatter extends DiffFormatter {
 	 */
 	protected function context( $lines ) {
 		foreach ( $lines as $line ) {
-			echo '<tr>' .
+			$this->writeOutput( '<tr>' .
 				$this->contextLine( htmlspecialchars( $line ) ) .
-				$this->contextLine( htmlspecialchars( $line ) ) . "</tr>\n";
+				$this->contextLine( htmlspecialchars( $line ) ) . "</tr>\n" );
 		}
 	}
 
@@ -198,14 +204,16 @@ class TableDiffFormatter extends DiffFormatter {
 		# Notice that WordLevelDiff returns HTML-escaped output.
 		# Hence, we will be calling addedLine/deletedLine without HTML-escaping.
 
-		while ( $line = array_shift( $del ) ) {
+		$line = array_shift( $del );
+		while ( $line ) {
 			$aline = array_shift( $add );
-			echo '<tr>' . $this->deletedLine( $line ) .
-				$this->addedLine( $aline ) . "</tr>\n";
+			$this->writeOutput( '<tr>' . $this->deletedLine( $line ) .
+				$this->addedLine( $aline ) . "</tr>\n" );
+			$line = array_shift( $del );
 		}
 		foreach ( $add as $line ) { # If any leftovers
-			echo '<tr>' . $this->emptyLine() .
-				$this->addedLine( $line ) . "</tr>\n";
+			$this->writeOutput( '<tr>' . $this->emptyLine() .
+				$this->addedLine( $line ) . "</tr>\n" );
 		}
 	}
 
