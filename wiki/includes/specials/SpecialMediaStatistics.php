@@ -27,6 +27,14 @@
  */
 class MediaStatisticsPage extends QueryPage {
 	protected $totalCount = 0, $totalBytes = 0;
+	/**
+	* @var integer $totalPerType Combined file size of all files in a section
+	*/
+	protected $totalPerType = 0;
+	/**
+	* @var integer $totalSize Combined file size of all files
+	*/
+	protected $totalSize = 0;
 
 	function __construct( $name = 'MediaStatistics' ) {
 		parent::__construct( $name );
@@ -55,7 +63,7 @@ class MediaStatisticsPage extends QueryPage {
 	 */
 	public function getQueryInfo() {
 		$dbr = wfGetDB( DB_SLAVE );
-		$fakeTitle = $dbr->buildConcat( array(
+		$fakeTitle = $dbr->buildConcat( [
 			'img_media_type',
 			$dbr->addQuotes( ';' ),
 			'img_major_mime',
@@ -65,26 +73,26 @@ class MediaStatisticsPage extends QueryPage {
 			'COUNT(*)',
 			$dbr->addQuotes( ';' ),
 			'SUM( img_size )'
-		) );
-		return array(
-			'tables' => array( 'image' ),
-			'fields' => array(
+		] );
+		return [
+			'tables' => [ 'image' ],
+			'fields' => [
 				'title' => $fakeTitle,
 				'namespace' => NS_MEDIA, /* needs to be something */
 				'value' => '1'
-			),
-			'conds' => array(
+			],
+			'conds' => [
 				// WMF has a random null row in the db
 				'img_media_type IS NOT NULL'
-			),
-			'options' => array(
-				'GROUP BY' => array(
+			],
+			'options' => [
+				'GROUP BY' => [
 					'img_media_type',
 					'img_major_mime',
 					'img_minor_mime',
-				)
-			)
-		);
+				]
+			]
+		];
 	}
 
 	/**
@@ -95,7 +103,7 @@ class MediaStatisticsPage extends QueryPage {
 	 * @return Array Fields to sort by
 	 */
 	function getOrderFields() {
-		return array( 'img_media_type', 'count(*)', 'img_major_mime', 'img_minor_mime' );
+		return [ 'img_media_type', 'count(*)', 'img_major_mime', 'img_minor_mime' ];
 	}
 
 	/**
@@ -123,6 +131,7 @@ class MediaStatisticsPage extends QueryPage {
 					$this->outputTableEnd();
 				}
 				$this->outputMediaType( $mediaType );
+				$this->totalPerType = 0;
 				$this->outputTableStart( $mediaType );
 				$prevMediaType = $mediaType;
 			}
@@ -130,6 +139,14 @@ class MediaStatisticsPage extends QueryPage {
 		}
 		if ( $prevMediaType !== null ) {
 			$this->outputTableEnd();
+			// add total size of all files
+			$this->outputMediaType( 'total' );
+			$this->getOutput()->addWikiText(
+				$this->msg( 'mediastatistics-allbytes' )
+					->numParams( $this->totalSize )
+					->sizeParams( $this->totalSize )
+					->text()
+			);
 		}
 	}
 
@@ -138,6 +155,14 @@ class MediaStatisticsPage extends QueryPage {
 	 */
 	protected function outputTableEnd() {
 		$this->getOutput()->addHtml( Html::closeElement( 'table' ) );
+		$this->getOutput()->addWikiText(
+				$this->msg( 'mediastatistics-bytespertype' )
+					->numParams( $this->totalPerType )
+					->sizeParams( $this->totalPerType )
+					->numParams( $this->makePercentPretty( $this->totalPerType / $this->totalBytes ) )
+					->text()
+		);
+		$this->totalSize += $this->totalPerType;
 	}
 
 	/**
@@ -151,18 +176,18 @@ class MediaStatisticsPage extends QueryPage {
 		$mimeSearch = SpecialPage::getTitleFor( 'MIMEsearch', $mime );
 		$row = Html::rawElement(
 			'td',
-			array(),
+			[],
 			Linker::link( $mimeSearch, htmlspecialchars( $mime ) )
 		);
 		$row .= Html::element(
 			'td',
-			array(),
+			[],
 			$this->getExtensionList( $mime )
 		);
 		$row .= Html::rawElement(
 			'td',
 			// Make sure js sorts it in numeric order
-			array( 'data-sort-value' => $count ),
+			[ 'data-sort-value' => $count ],
 			$this->msg( 'mediastatistics-nfiles' )
 				->numParams( $count )
 				/** @todo Check to be sure this really should have number formatting */
@@ -172,7 +197,7 @@ class MediaStatisticsPage extends QueryPage {
 		$row .= Html::rawElement(
 			'td',
 			// Make sure js sorts it in numeric order
-			array( 'data-sort-value' =>  $bytes ),
+			[ 'data-sort-value' =>  $bytes ],
 			$this->msg( 'mediastatistics-nbytes' )
 				->numParams( $bytes )
 				->sizeParams( $bytes )
@@ -180,8 +205,8 @@ class MediaStatisticsPage extends QueryPage {
 				->numParams( $this->makePercentPretty( $bytes / $this->totalBytes ) )
 				->parse()
 		);
-
-		$this->getOutput()->addHTML( Html::rawElement( 'tr', array(), $row ) );
+		$this->totalPerType += $bytes;
+		$this->getOutput()->addHTML( Html::rawElement( 'tr', [], $row ) );
 	}
 
 	/**
@@ -231,12 +256,12 @@ class MediaStatisticsPage extends QueryPage {
 		$this->getOutput()->addHTML(
 			Html::openElement(
 				'table',
-				array( 'class' => array(
+				[ 'class' => [
 					'mw-mediastats-table',
 					'mw-mediastats-table-' . strtolower( $mediaType ),
 					'sortable',
 					'wikitable'
-				) )
+				] ]
 			)
 		);
 		$this->getOutput()->addHTML( $this->getTableHeaderRow() );
@@ -248,19 +273,19 @@ class MediaStatisticsPage extends QueryPage {
 	 * @return String the header row of the able
 	 */
 	protected function getTableHeaderRow() {
-		$headers = array( 'mimetype', 'extensions', 'count', 'totalbytes' );
+		$headers = [ 'mimetype', 'extensions', 'count', 'totalbytes' ];
 		$ths = '';
 		foreach ( $headers as $header ) {
 			$ths .= Html::rawElement(
 				'th',
-				array(),
+				[],
 				// for grep:
 				// mediastatistics-table-mimetype, mediastatistics-table-extensions
 				// tatistics-table-count, mediastatistics-table-totalbytes
 				$this->msg( 'mediastatistics-table-' . $header )->parse()
 			);
 		}
-		return Html::rawElement( 'tr', array(), $ths );
+		return Html::rawElement( 'tr', [], $ths );
 	}
 
 	/**
@@ -272,10 +297,10 @@ class MediaStatisticsPage extends QueryPage {
 		$this->getOutput()->addHTML(
 			Html::element(
 				'h2',
-				array( 'class' => array(
+				[ 'class' => [
 					'mw-mediastats-mediatype',
 					'mw-mediastats-mediatype-' . strtolower( $mediaType )
-				) ),
+				] ],
 				// for grep
 				// mediastatistics-header-unknown, mediastatistics-header-bitmap,
 				// mediastatistics-header-drawing, mediastatistics-header-audio,

@@ -78,7 +78,7 @@ class SpecialCategories extends SpecialPage {
 		$cap->doQuery();
 
 		$this->getOutput()->addHTML(
-			Html::openElement( 'div', array( 'class' => 'mw-spcontent' ) ) .
+			Html::openElement( 'div', [ 'class' => 'mw-spcontent' ] ) .
 				$this->msg( 'categoriespagetext', $cap->getNumRows() )->parseAsBlock() .
 				$cap->getStartForm( $from ) .
 				$cap->getNavigationBar() .
@@ -125,16 +125,16 @@ class CategoryPager extends AlphabeticPager {
 	}
 
 	function getQueryInfo() {
-		return array(
-			'tables' => array( 'category' ),
-			'fields' => array( 'cat_title', 'cat_pages' ),
-			'conds' => array( 'cat_pages > 0' ),
-			'options' => array( 'USE INDEX' => 'cat_title' ),
-		);
+		return [
+			'tables' => [ 'category' ],
+			'fields' => [ 'cat_title', 'cat_pages' ],
+			'conds' => [ 'cat_pages > 0' ],
+			'options' => [ 'USE INDEX' => 'cat_title' ],
+		];
 	}
 
 	function getIndexField() {
-#		return array( 'abc' => 'cat_title', 'count' => 'cat_pages' );
+# 		return array( 'abc' => 'cat_title', 'count' => 'cat_pages' );
 		return 'cat_title';
 	}
 
@@ -145,13 +145,13 @@ class CategoryPager extends AlphabeticPager {
 		return $this->mDefaultQuery;
 	}
 
-#	protected function getOrderTypeMessages() {
-#		return array( 'abc' => 'special-categories-sort-abc',
-#			'count' => 'special-categories-sort-count' );
-#	}
+# 	protected function getOrderTypeMessages() {
+# 		return array( 'abc' => 'special-categories-sort-abc',
+# 			'count' => 'special-categories-sort-count' );
+# 	}
 
 	protected function getDefaultDirections() {
-#		return array( 'abc' => false, 'count' => true );
+# 		return array( 'abc' => false, 'count' => true );
 		return false;
 	}
 
@@ -182,17 +182,17 @@ class CategoryPager extends AlphabeticPager {
 	public function getStartForm( $from ) {
 		return Xml::tags(
 			'form',
-			array( 'method' => 'get', 'action' => wfScript() ),
+			[ 'method' => 'get', 'action' => wfScript() ],
 			Html::hidden( 'title', $this->getTitle()->getPrefixedText() ) .
 				Xml::fieldset(
 					$this->msg( 'categories' )->text(),
 					Xml::inputLabel(
 						$this->msg( 'categoriesfrom' )->text(),
-						'from', 'from', 20, $from, array( 'class' => 'mw-ui-input-inline' ) ) .
+						'from', 'from', 20, $from, [ 'class' => 'mw-ui-input-inline' ] ) .
 						' ' .
 						Html::submitButton(
-							$this->msg( 'allpagessubmit' )->text(),
-							array(), array( 'mw-ui-progressive' )
+							$this->msg( 'categories-submit' )->text(),
+							[], [ 'mw-ui-progressive' ]
 						)
 				)
 		);

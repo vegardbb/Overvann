@@ -44,7 +44,7 @@ class RefreshImageMetadata extends Maintenance {
 	function __construct() {
 		parent::__construct();
 
-		$this->mDescription = 'Script to update image metadata records';
+		$this->addDescription( 'Script to update image metadata records' );
 		$this->setBatchSize( 200 );
 
 		$this->addOption(
@@ -95,7 +95,7 @@ class RefreshImageMetadata extends Maintenance {
 		$leftAlone = 0;
 		$error = 0;
 
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
 		if ( $this->mBatchSize <= 0 ) {
 			$this->error( "Batch size is too low...", 12 );
 		}
@@ -104,15 +104,15 @@ class RefreshImageMetadata extends Maintenance {
 		$conds = $this->getConditions( $dbw );
 
 		// For the WHERE img_name > 'foo' condition that comes after doing a batch
-		$conds2 = array();
+		$conds2 = [];
 		if ( $start !== false ) {
 			$conds2[] = 'img_name >= ' . $dbw->addQuotes( $start );
 		}
 
-		$options = array(
+		$options = [
 			'LIMIT' => $this->mBatchSize,
 			'ORDER BY' => 'img_name ASC',
-		);
+		];
 
 		do {
 			$res = $dbw->select(
@@ -172,7 +172,7 @@ class RefreshImageMetadata extends Maintenance {
 					}
 				}
 			}
-			$conds2 = array( 'img_name > ' . $dbw->addQuotes( $row->img_name ) );
+			$conds2 = [ 'img_name > ' . $dbw->addQuotes( $row->img_name ) ];
 			wfWaitForSlaves();
 		} while ( $res->numRows() === $this->mBatchSize );
 
@@ -193,7 +193,7 @@ class RefreshImageMetadata extends Maintenance {
 	 * @return array
 	 */
 	function getConditions( $dbw ) {
-		$conds = array();
+		$conds = [];
 
 		$end = $this->getOption( 'end', false );
 		$mime = $this->getOption( 'mime', false );

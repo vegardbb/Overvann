@@ -153,6 +153,16 @@ abstract class ContextSource implements IContextSource {
 	}
 
 	/**
+	 * Get the Timing object
+	 *
+	 * @since 1.27
+	 * @return Timing
+	 */
+	public function getTiming() {
+		return $this->getContext()->getTiming();
+	}
+
+	/**
 	 * Get the Stats object
 	 *
 	 * @since 1.25
@@ -161,7 +171,6 @@ abstract class ContextSource implements IContextSource {
 	public function getStats() {
 		return $this->getContext()->getStats();
 	}
-
 
 	/**
 	 * Get a Message object with context set
@@ -174,7 +183,7 @@ abstract class ContextSource implements IContextSource {
 	public function msg( /* $args */ ) {
 		$args = func_get_args();
 
-		return call_user_func_array( array( $this->getContext(), 'msg' ), $args );
+		return call_user_func_array( [ $this->getContext(), 'msg' ], $args );
 	}
 
 	/**

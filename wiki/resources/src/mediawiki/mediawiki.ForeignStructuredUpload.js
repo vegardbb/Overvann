@@ -41,6 +41,13 @@
 	};
 
 	/**
+	 * Empty the list of categories for the upload.
+	 */
+	ForeignStructuredUpload.prototype.clearCategories = function () {
+		this.categories = [];
+	};
+
+	/**
 	 * Add a description to the upload.
 	 *
 	 * @param {string} language The language code for the description's language. Must have a template on the target wiki to work properly.
@@ -51,6 +58,13 @@
 			language: language,
 			text: description
 		} );
+	};
+
+	/**
+	 * Empty the list of descriptions for the upload.
+	 */
+	ForeignStructuredUpload.prototype.clearDescriptions = function () {
+		this.descriptions = [];
 	};
 
 	/**
@@ -70,6 +84,7 @@
 	 */
 	ForeignStructuredUpload.prototype.getText = function () {
 		return (
+			'== {{int:filedesc}} ==\n' +
 			'{{' +
 			this.getTemplateName() +
 			'\n|description=' +
@@ -81,6 +96,7 @@
 			'\n|author=' +
 			this.getUser() +
 			'\n}}\n\n' +
+			'== {{int:license-header}} ==\n' +
 			this.getLicense() +
 			'\n\n' +
 			this.getCategories()
@@ -124,7 +140,7 @@
 
 		for ( i = 0; i < this.descriptions.length; i++ ) {
 			desc = this.descriptions[ i ];
-			templateCalls.push( '{{' + desc.language + '|' + desc.text + '}}' );
+			templateCalls.push( '{{' + desc.language + '|1=' + desc.text + '}}' );
 		}
 
 		return templateCalls.join( '\n' );
@@ -139,6 +155,10 @@
 	 */
 	ForeignStructuredUpload.prototype.getCategories = function () {
 		var i, cat, categoryLinks = [];
+
+		if ( this.categories.length === 0 ) {
+			return '{{subst:unc}}';
+		}
 
 		for ( i = 0; i < this.categories.length; i++ ) {
 			cat = this.categories[ i ];
@@ -177,7 +197,18 @@
 	 * @return {string}
 	 */
 	ForeignStructuredUpload.prototype.getUser = function () {
-		return mw.config.get( 'wgUserName' );
+		var username, namespace;
+		// Do not localise, we don't know the language of target wiki
+		namespace = 'User';
+		username = mw.config.get( 'wgUserName' );
+		if ( !username ) {
+			// The user is not logged in locally. However, they might be logged in on the foreign wiki.
+			// We should record their username there. (If they're not logged in there either, this will
+			// record the IP address.) It's also possible that the user opened this dialog, got an error
+			// about not being logged in, logged in in another browser tab, then continued uploading.
+			username = '{{subst:REVISIONUSER}}';
+		}
+		return '[[' + namespace + ':' + username + '|' + username + ']]';
 	};
 
 	mw.ForeignStructuredUpload = ForeignStructuredUpload;

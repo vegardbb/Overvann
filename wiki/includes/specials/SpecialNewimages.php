@@ -62,7 +62,7 @@ class SpecialNewFiles extends IncludableSpecialPage {
 		if ( !$message->isDisabled() ) {
 			$this->getOutput()->addWikiText(
 				Html::rawElement( 'p',
-					array( 'lang' => $wgContLang->getHtmlCode(), 'dir' => $wgContLang->getDir() ),
+					[ 'lang' => $wgContLang->getHtmlCode(), 'dir' => $wgContLang->getDir() ],
 					"\n" . $message->plain() . "\n"
 				),
 				/* $lineStart */ false,
@@ -81,9 +81,20 @@ class NewFilesPager extends ReverseChronologicalPager {
 	 */
 	protected $gallery;
 
+	/**
+	 * @var bool
+	 */
+	protected $showBots;
+
+	/**
+	 * @var bool
+	 */
+	protected $hidePatrolled;
+
 	function __construct( IContextSource $context, $par = null ) {
 		$this->like = $context->getRequest()->getText( 'like' );
-		$this->showbots = $context->getRequest()->getBool( 'showbots', 0 );
+		$this->showBots = $context->getRequest()->getBool( 'showbots', 0 );
+		$this->hidePatrolled = $context->getRequest()->getBool( 'hidepatrolled', 0 );
 		if ( is_numeric( $par ) ) {
 			$this->setLimit( $par );
 		}
@@ -92,28 +103,50 @@ class NewFilesPager extends ReverseChronologicalPager {
 	}
 
 	function getQueryInfo() {
-		$conds = $jconds = array();
-		$tables = array( 'image' );
+		$conds = $jconds = [];
+		$tables = [ 'image' ];
+		$fields = [ 'img_name', 'img_user', 'img_timestamp' ];
+		$options = [];
 
-		if ( !$this->showbots ) {
+		if ( !$this->showBots ) {
 			$groupsWithBotPermission = User::getGroupsWithPermission( 'bot' );
 
 			if ( count( $groupsWithBotPermission ) ) {
 				$tables[] = 'user_groups';
 				$conds[] = 'ug_group IS NULL';
-				$jconds['user_groups'] = array(
+				$jconds['user_groups'] = [
 					'LEFT JOIN',
-					array(
+					[
 						'ug_group' => $groupsWithBotPermission,
 						'ug_user = img_user'
-					)
-				);
+					]
+				];
 			}
+		}
+
+		if ( $this->hidePatrolled ) {
+			$tables[] = 'recentchanges';
+			$conds['rc_type'] = RC_LOG;
+			$conds['rc_log_type'] = 'upload';
+			$conds['rc_patrolled'] = 0;
+			$conds['rc_namespace'] = NS_FILE;
+			$jconds['recentchanges'] = [
+				'INNER JOIN',
+				[
+					'rc_title = img_name',
+					'rc_user = img_user',
+					'rc_timestamp = img_timestamp'
+				]
+			];
+			// We're ordering by img_timestamp, so we have to make sure MariaDB queries `image` first.
+			// It sometimes decides to query `recentchanges` first and filesort the result set later
+			// to get the right ordering. T124205 / https://mariadb.atlassian.net/browse/MDEV-8880
+			$options[] = 'STRAIGHT_JOIN';
 		}
 
 		if ( !$this->getConfig()->get( 'MiserMode' ) && $this->like !== null ) {
 			$dbr = wfGetDB( DB_SLAVE );
-			$likeObj = Title::newFromURL( $this->like );
+			$likeObj = Title::newFromText( $this->like );
 			if ( $likeObj instanceof Title ) {
 				$like = $dbr->buildLike(
 					$dbr->anyString(),
@@ -124,12 +157,13 @@ class NewFilesPager extends ReverseChronologicalPager {
 			}
 		}
 
-		$query = array(
+		$query = [
 			'tables' => $tables,
-			'fields' => '*',
+			'fields' => $fields,
 			'join_conds' => $jconds,
-			'conds' => $conds
-		);
+			'conds' => $conds,
+			'options' => $options,
+		];
 
 		return $query;
 	}
@@ -174,31 +208,40 @@ class NewFilesPager extends ReverseChronologicalPager {
 	}
 
 	function getForm() {
-		$fields = array(
-			'like' => array(
+		$fields = [
+			'like' => [
 				'type' => 'text',
 				'label-message' => 'newimages-label',
 				'name' => 'like',
-			),
-			'showbots' => array(
+			],
+			'showbots' => [
 				'type' => 'check',
 				'label-message' => 'newimages-showbots',
 				'name' => 'showbots',
-			),
-			'limit' => array(
+			],
+			'hidepatrolled' => [
+				'type' => 'check',
+				'label-message' => 'newimages-hidepatrolled',
+				'name' => 'hidepatrolled',
+			],
+			'limit' => [
 				'type' => 'hidden',
 				'default' => $this->mLimit,
 				'name' => 'limit',
-			),
-			'offset' => array(
+			],
+			'offset' => [
 				'type' => 'hidden',
 				'default' => $this->getRequest()->getText( 'offset' ),
 				'name' => 'offset',
-			),
-		);
+			],
+		];
 
 		if ( $this->getConfig()->get( 'MiserMode' ) ) {
 			unset( $fields['like'] );
+		}
+
+		if ( !$this->getUser()->useFilePatrol() ) {
+			unset( $fields['hidepatrolled'] );
 		}
 
 		$context = new DerivativeContext( $this->getContext() );

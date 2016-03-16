@@ -3,16 +3,16 @@
 /**
  * @group large
  */
-class BcryptPasswordTestCase extends PasswordTestCase {
+class BcryptPasswordTest extends PasswordTestCase {
 	protected function getTypeConfigs() {
-		return array( 'bcrypt' => array(
+		return [ 'bcrypt' => [
 			'class' => 'BcryptPassword',
 			'cost' => 9,
-		) );
+		] ];
 	}
 
 	public static function providePasswordTests() {
-		/** @codingStandardsIgnoreStart Generic.Files.LineLength.TooLong */
+		// @codingStandardsIgnoreStart Generic.Files.LineLength
 		return array(
 			// Tests from glibc bcrypt implementation
 			array( true, ':bcrypt:5$CCCCCCCCCCCCCCCCCCCCC.$E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW', "U*U" ),
@@ -35,6 +35,6 @@ class BcryptPasswordTestCase extends PasswordTestCase {
 			array( false, ':bcrypt:5$CCCCCCCCCCCCCCCCCCCCC.$E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW', "UXU" ),
 			array( false, ':bcrypt:5$CCCCCCCCCCCCCCCCCCCCC.$E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW', "" ),
 		);
-		/** @codingStandardsIgnoreEnd */
+		// @codingStandardsIgnoreEnd
 	}
 }

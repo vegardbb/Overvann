@@ -11,7 +11,7 @@ class ApiFormatPhpTest extends ApiFormatTestBase {
 	private static function addFormatVersion( $format, $arr ) {
 		foreach ( $arr as &$p ) {
 			if ( !isset( $p[2] ) ) {
-				$p[2] = array( 'formatversion' => $format );
+				$p[2] = [ 'formatversion' => $format ];
 			} else {
 				$p[2]['formatversion'] = $format;
 			}
@@ -20,6 +20,7 @@ class ApiFormatPhpTest extends ApiFormatTestBase {
 	}
 
 	public static function provideGeneralEncoding() {
+		// @codingStandardsIgnoreStart Generic.Files.LineLength
 		return array_merge(
 			self::addFormatVersion( 1, array(
 				// Basic types
@@ -96,15 +97,16 @@ class ApiFormatPhpTest extends ApiFormatTestBase {
 					'a:1:{s:3:"foo";s:3:"foo";}' ),
 			) )
 		);
+		// @codingStandardsIgnoreEnd
 	}
 
 	public function testCrossDomainMangling() {
-		$config = new HashConfig( array( 'MangleFlashPolicy' => false ) );
+		$config = new HashConfig( [ 'MangleFlashPolicy' => false ] );
 		$context = new RequestContext;
-		$context->setConfig( new MultiConfig( array(
+		$context->setConfig( new MultiConfig( [
 			$config,
 			$context->getConfig(),
-		) ) );
+		] ) );
 		$main = new ApiMain( $context );
 		$main->getResult()->addValue( null, null, '< Cross-Domain-Policy >' );
 
@@ -134,7 +136,8 @@ class ApiFormatPhpTest extends ApiFormatTestBase {
 		} catch ( UsageException $ex ) {
 			ob_end_clean();
 			$this->assertSame(
-				'This response cannot be represented using format=php. See https://bugzilla.wikimedia.org/show_bug.cgi?id=66776',
+				'This response cannot be represented using format=php. ' .
+					'See https://phabricator.wikimedia.org/T68776',
 				$ex->getMessage(),
 				'Expected exception'
 			);

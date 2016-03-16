@@ -5,8 +5,8 @@ http://www.colourlovers.com/palette/443995/i_demand_a_pancake
 
 
 body {
-	background-color: #e5fcc2;
-	font-family: 'Arvo', serif;
+	background-color: #9b8679;
+	font-family: 'PT Sans', sans-serif;
 	color: #547980;
 }
 
@@ -32,59 +32,67 @@ a:visited {
 	text-decoration: none;
 }
 
-#container {
+.inner-container {
 	width: 950px;
 	margin: 0 auto;
 }
 
+/* --------- HEADER --------- */
+
+
+.header-container {
+	background-image: url("/images/header/San_Joaquin_River_headwaters_1080.jpg");
+	background-position: 50% 50%;
+	padding-top: 20px;
+}
+
 
 header {
+	background-color: white;
 	display: -webkit-flex;
 	-webkit-flex-direction: row;
 	display: flex;
 	flex-direction: row;
 	width: 950px;
-	height: 128px;
-	margin: 20px auto auto auto;
+	height: 150px;
+	margin: auto;
 }
 
 #logo-box {
-	background-color: #000000;
-	width: 128px;
-	height: 128px;
-	margin: auto 0.1em auto 0;
+	margin: auto 0.1em auto 0.8em;
 }
 
 #title-box {
 	width: 400px;
-	height: 128px;
-	margin: auto auto auto 0.2em;
-	position: relative;
+	margin: auto auto auto 1em;
 }
 
 #title-box h1 {
-	font-size: 4.2em;
-	margin-top: 0em;
+	font-size: 2.2em;
+	font-weight: 400;
+	margin-bottom: 0.2em;
 }
 
 #title-box a {
-	color: #594f4f;
+	color: #24aae1;
 }
 
 #title-box h3 {
-	font-size: 2em;
-	margin-top: auto;
-	margin-bottom: 0.4em;
-	display: block;
-	position: absolute;
-	bottom: 0;
+	color: #12a79d;
+	font-size: 3em;
+	letter-spacing: 0.4em;
+	margin-top: 0.2em;
+}
+
+#title-box strong {
+	font-weight: bold;
+	/*color: #1f9dd1; */
 }
 
 #navigation-box {
-	overflow: hidden;
-	width: 300px;
-	height: 128px;
-	margin: auto 0 auto auto;
+	width: 200px;
+	margin: 1em 0 auto auto;
+	text-align: right;
 }
 
 #navigation-box a {
@@ -142,9 +150,93 @@ header {
 	margin-left: 40px;
 }
 
+/* --------- LOWER PART OF HEADER --------- */
+
+#below-header {
+	display: -webkit-flex;
+	-webkit-flex-direction: row;
+	display: flex;
+	flex-direction: row;
+	width: 950px;
+	margin-top: 2em;
+	padding-bottom: 5em;
+}
+
+#below-header-small {
+	display: -webkit-flex;
+	-webkit-flex-direction: row;
+	display: flex;
+	flex-direction: row-reverse;
+	width: 950px;
+	margin-top: 2em;
+	margin-bottom: 0;
+	background: rgba(255,255,255,0.85);
+	padding: 1em 0;
+}
+
+.infobox {
+	background: rgba(255,255,255,0.85);
+	width: 65%;
+	margin: 0 auto;
+	padding: 0 1em;
+	color: black;
+	font-weight: bold;
+
+}
+
+.search {
+	background: white;
+}
+
+#index-search {
+	width: 28%;
+	height: 2em;
+	margin: 0 auto;
+}
+
+#normal-search {
+	width: 28%;
+	height: 2em;
+	margin: 0 2em 0 0;
+}
+
+/* --------- CONTENT --------- */
+
+.content-container {
+	background-color: white;
+}
+
 #content {
-	margin-top: 5px;
-	border-top: 5px solid black;
+	overflow: auto;
+}
+
+/* --------- INDEX --------- */
+
+.card-box {
+	display: -webkit-flex;
+	-webkit-flex-direction: row;
+	display: flex;
+	flex-direction: row;
+	width: 950px;
+}
+
+.card {
+	width: 300px;
+	margin: 1em auto;
+	border: 1px solid grey;
+}
+
+.card h3 {
+	margin-left: 1em;
+	color: #2d2d2d;
+}
+
+.card p {
+	margin-left: 1em;
+}
+
+.card a {
+	color: #12a79d;
 }
 
 .person-section {
@@ -179,4 +271,28 @@ header {
 
 .company-image-box {
 	width: 30%;
+}
+
+.req {
+	font-size: 150%;
+	color: red;
+}
+
+.error-span {
+	color: red;
+}
+
+/* --------- FOOTER --------- */
+
+footer {
+	color: white;
+	text-align: right;
+}
+
+footer a {
+	color: white;
+}
+
+footer a:visited {
+	color: white;
 }

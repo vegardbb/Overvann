@@ -1,4 +1,11 @@
 <?php
+	if ( version_compare( PHP_VERSION, '5.5.9', '<=' ) ) {
+		echo '<p>Sorry, the PHP demo requires PHP 5.5.9+, which is not yet available on this server. ' .
+			'Please see <a href="https://phabricator.wikimedia.org/T127504">T127504</a> ' .
+			'for more details.</p>';
+		exit;
+	}
+
 	$autoload = __DIR__ . '/vendor/autoload.php';
 	if ( !file_exists( $autoload ) ) {
 		echo '<h1>Did you forget to run <code>composer install</code>?</h1>';
@@ -10,25 +17,16 @@
 	$themeClass = 'OOUI\\' . ( $theme === 'apex' ? 'Apex' : 'MediaWiki' ) . 'Theme';
 	OOUI\Theme::setSingleton( new $themeClass() );
 
-	$graphicSuffixMap = array(
-		'mixed' => '',
-		'vector' => '.vector',
-		'raster' => '.raster',
-	);
-	$graphic = ( isset( $_GET['graphic'] ) && isset( $graphicSuffixMap[ $_GET['graphic'] ] ) )
-		? $_GET['graphic'] : 'mixed';
-	$graphicSuffix = $graphicSuffixMap[ $graphic ];
-
 	$direction = ( isset( $_GET['direction'] ) && $_GET['direction'] === 'rtl' ) ? 'rtl' : 'ltr';
 	$directionSuffix = $direction === 'rtl' ? '.rtl' : '';
 	OOUI\Element::setDefaultDir( $direction );
 
-	$query = array(
+	$query = [
 		'theme' => $theme,
-		'graphic' => $graphic,
 		'direction' => $direction,
-	);
-	$styleFileName = "oojs-ui-$theme$graphicSuffix$directionSuffix.css";
+	];
+	$styleFileName = "oojs-ui-core-$theme$directionSuffix.css";
+	$styleFileNameImages = "oojs-ui-images-$theme$directionSuffix.css";
 ?>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -36,416 +34,405 @@
 	<meta charset="UTF-8">
 	<title>OOjs UI Widget Demo</title>
 	<link rel="stylesheet" href="dist/<?php echo $styleFileName; ?>">
+	<link rel="stylesheet" href="dist/<?php echo $styleFileNameImages; ?>">
 	<link rel="stylesheet" href="styles/demo<?php echo $directionSuffix; ?>.css">
 </head>
 <body class="oo-ui-<?php echo $direction; ?>">
 	<div class="oo-ui-demo">
 		<div class="oo-ui-demo-menu">
 			<?php
-				echo new OOUI\ButtonGroupWidget( array(
+				echo new OOUI\ButtonGroupWidget( [
 					'infusable' => true,
-					'items' => array(
-						new OOUI\ButtonWidget( array(
+					'items' => [
+						new OOUI\ButtonWidget( [
 							'label' => 'MediaWiki',
-							'href' => '?' . http_build_query( array_merge( $query, array( 'theme' => 'mediawiki' ) ) ),
-						) ),
-						new OOUI\ButtonWidget( array(
+							'href' => '?' . http_build_query( array_merge( $query, [ 'theme' => 'mediawiki' ] ) ),
+						] ),
+						new OOUI\ButtonWidget( [
 							'label' => 'Apex',
-							'href' => '?' . http_build_query( array_merge( $query, array( 'theme' => 'apex' ) ) ),
-						) ),
-					)
-				) );
-				echo new OOUI\ButtonGroupWidget( array(
+							'href' => '?' . http_build_query( array_merge( $query, [ 'theme' => 'apex' ] ) ),
+						] ),
+					]
+				] );
+				echo new OOUI\ButtonGroupWidget( [
 					'infusable' => true,
-					'items' => array(
-						new OOUI\ButtonWidget( array(
-							'label' => 'Mixed',
-							'href' => '?' . http_build_query( array_merge( $query, array( 'graphic' => 'mixed' ) ) ),
-						) ),
-						new OOUI\ButtonWidget( array(
-							'label' => 'Vector',
-							'href' => '?' . http_build_query( array_merge( $query, array( 'graphic' => 'vector' ) ) ),
-						) ),
-						new OOUI\ButtonWidget( array(
-							'label' => 'Raster',
-							'href' => '?' . http_build_query( array_merge( $query, array( 'graphic' => 'raster' ) ) ),
-						) ),
-					)
-				) );
-				echo new OOUI\ButtonGroupWidget( array(
-					'infusable' => true,
-					'items' => array(
-						new OOUI\ButtonWidget( array(
+					'items' => [
+						new OOUI\ButtonWidget( [
 							'label' => 'LTR',
-							'href' => '?' . http_build_query( array_merge( $query, array( 'direction' => 'ltr' ) ) ),
-						) ),
-						new OOUI\ButtonWidget( array(
+							'href' => '?' . http_build_query( array_merge( $query, [ 'direction' => 'ltr' ] ) ),
+						] ),
+						new OOUI\ButtonWidget( [
 							'label' => 'RTL',
-							'href' => '?' . http_build_query( array_merge( $query, array( 'direction' => 'rtl' ) ) ),
-						) ),
-					)
-				) );
-				echo new OOUI\ButtonGroupWidget( array(
+							'href' => '?' . http_build_query( array_merge( $query, [ 'direction' => 'rtl' ] ) ),
+						] ),
+					]
+				] );
+				echo new OOUI\ButtonGroupWidget( [
 					'infusable' => true,
 					'id' => 'oo-ui-demo-menu-infuse',
-					'items' => array(
-						new OOUI\ButtonWidget( array(
+					'items' => [
+						new OOUI\ButtonWidget( [
 							'label' => 'JS',
-							'href' => ".#widgets-$theme-$graphic-$direction",
-						) ),
-						new OOUI\ButtonWidget( array(
+							'href' => ".#widgets-$theme-$direction",
+						] ),
+						new OOUI\ButtonWidget( [
 							'label' => 'PHP',
 							'href' => '?' . http_build_query( $query ),
-						) ),
-					)
-				) );
+						] ),
+					]
+				] );
 			?>
 		</div>
 		<?php
-				$demoContainer = new OOUI\PanelLayout( array(
+				$demoContainer = new OOUI\PanelLayout( [
 					'expanded' => false,
 					'padded' => true,
 					'framed' => true,
-				) );
-				$demoContainer->addClasses( array( 'oo-ui-demo-container' ) );
+				] );
+				$demoContainer->addClasses( [ 'oo-ui-demo-container' ] );
 
-				$styles = array(
-					array(),
-					array(
-						'flags' => array( 'progressive' ),
-					),
-					array(
-						'flags' => array( 'constructive' ),
-					),
-					array(
-						'flags' => array( 'destructive' ),
-					),
-					array(
-						'flags' => array( 'primary', 'progressive' ),
-					),
-					array(
-						'flags' => array( 'primary', 'constructive' ),
-					),
-					array(
-						'flags' => array( 'primary', 'destructive' ),
-					),
-				);
-				$states = array(
-					array(
+				$styles = [
+					[],
+					[
+						'flags' => [ 'progressive' ],
+					],
+					[
+						'flags' => [ 'constructive' ],
+					],
+					[
+						'flags' => [ 'destructive' ],
+					],
+					[
+						'flags' => [ 'primary', 'progressive' ],
+					],
+					[
+						'flags' => [ 'primary', 'constructive' ],
+					],
+					[
+						'flags' => [ 'primary', 'destructive' ],
+					],
+				];
+				$states = [
+					[
 						'label' => 'Button',
-					),
-					array(
+					],
+					[
 						'label' => 'Button',
 						'icon' => 'tag',
-					),
-					array(
+					],
+					[
 						'label' => 'Button',
 						'icon' => 'tag',
 						'indicator' => 'down',
-					),
-					array(
+					],
+					[
 						'icon' => 'tag',
 						'title' => "Title text",
-					),
-					array(
+					],
+					[
 						'indicator' => 'down',
-					),
-					array(
+					],
+					[
 						'icon' => 'tag',
 						'indicator' => 'down',
-					),
-					array(
+					],
+					[
 						'label' => 'Button',
 						'disabled' => true,
-					),
-					array(
+					],
+					[
 						'icon' => 'tag',
 						'title' => "Title text",
 						'disabled' => true,
-					),
-					array(
+					],
+					[
 						'indicator' => 'down',
 						'disabled' => true,
-					),
-				);
+					],
+				];
 				$buttonStyleShowcaseWidget = new OOUI\Widget();
+				$table = new OOUI\Tag( 'table' );
 				foreach ( $styles as $style ) {
+					$tableRow = new OOUI\Tag( 'tr' );
 					foreach ( $states as $state ) {
-						$buttonStyleShowcaseWidget->appendContent(
-							new OOUI\ButtonWidget( array_merge( $style, $state, array( 'infusable' => true ) ) )
+						$tableCell = new OOUI\Tag( 'td' );
+						$tableCell->appendContent(
+							new OOUI\ButtonWidget( array_merge( $style, $state, [ 'infusable' => true ] ) )
 						);
+						$tableRow->appendContent( $tableCell );
 					}
-					$buttonStyleShowcaseWidget->appendContent( new OOUI\HtmlSnippet( '<br />' ) );
+					$table->appendContent( $tableRow );
 				}
+				$buttonStyleShowcaseWidget->appendContent( $table );
 
-				$demoContainer->appendContent( new OOUI\FieldsetLayout( array(
+				$demoContainer->appendContent( new OOUI\FieldsetLayout( [
 					'infusable' => true,
 					'label' => 'Simple buttons',
-					'items' => array(
+					'items' => [
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array( 'label' => 'Normal' ) ),
-							array(
+							new OOUI\ButtonWidget( [ 'label' => 'Normal' ] ),
+							[
 								'label' => "ButtonWidget (normal)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Progressive',
-								'flags' => array( 'progressive' )
-							) ),
-							array(
+								'flags' => [ 'progressive' ]
+							] ),
+							[
 								'label' => "ButtonWidget (progressive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Constructive',
-								'flags' => array( 'constructive' )
-							) ),
-							array(
-								'label' => "ButtonWidget (constructive)\xE2\x80\x8E",
+								'flags' => [ 'constructive' ]
+							] ),
+							[
+								'label' => "ButtonWidget (constructive, deprecated)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Destructive',
-								'flags' => array( 'destructive' )
-							) ),
-							array(
+								'flags' => [ 'destructive' ]
+							] ),
+							[
 								'label' => "ButtonWidget (destructive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Primary progressive',
-								'flags' => array( 'primary', 'progressive' )
-							) ),
-							array(
+								'flags' => [ 'primary', 'progressive' ]
+							] ),
+							[
 								'label' => "ButtonWidget (primary, progressive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Primary constructive',
-								'flags' => array( 'primary', 'constructive' )
-							) ),
-							array(
-								'label' => "ButtonWidget (primary, constructive)\xE2\x80\x8E",
+								'flags' => [ 'primary', 'constructive' ]
+							] ),
+							[
+								'label' => "ButtonWidget (primary, constructive, deprecated)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Primary destructive',
-								'flags' => array( 'primary', 'destructive' )
-							) ),
-							array(
+								'flags' => [ 'primary', 'destructive' ]
+							] ),
+							[
 								'label' => "ButtonWidget (primary, destructive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Disabled',
 								'disabled' => true
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
-								'label' => 'Constructive',
-								'flags' => array( 'constructive' ),
+							new OOUI\ButtonWidget( [
+								'label' => 'Progressive',
+								'flags' => [ 'progressive' ],
 								'disabled' => true
-							) ),
-							array(
-								'label' => "ButtonWidget (constructive, disabled)\xE2\x80\x8E",
+							] ),
+							[
+								'label' => "ButtonWidget (progressive, disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
-								'label' => 'Constructive',
+							new OOUI\ButtonWidget( [
+								'label' => 'Progressive',
 								'icon' => 'tag',
-								'flags' => array( 'constructive' ),
+								'flags' => [ 'progressive' ],
 								'disabled' => true
-							) ),
-							array(
-								'label' => "ButtonWidget (constructive, icon, disabled)\xE2\x80\x8E",
+							] ),
+							[
+								'label' => "ButtonWidget (progressive, icon, disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Icon',
 								'icon' => 'tag'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (icon)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Icon',
 								'icon' => 'tag',
-								'flags' => array( 'progressive' )
-							) ),
-							array(
+								'flags' => [ 'progressive' ]
+							] ),
+							[
 								'label' => "ButtonWidget (icon, progressive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Indicator',
 								'indicator' => 'down'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (indicator)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Indicator',
 								'indicator' => 'down',
-								'flags' => array( 'constructive' )
-							) ),
-							array(
-								'label' => "ButtonWidget (indicator, constructive)\xE2\x80\x8E",
+								'flags' => [ 'progressive' ]
+							] ),
+							[
+								'label' => "ButtonWidget (indicator, progressive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'framed' => false,
 								'icon' => 'help',
 								'title' => 'Icon only'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (icon only)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'framed' => false,
 								'icon' => 'tag',
 								'label' => 'Labeled'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (frameless)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'framed' => false,
-								'flags' => array( 'progressive' ),
+								'flags' => [ 'progressive' ],
 								'icon' => 'check',
 								'label' => 'Progressive'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (frameless, progressive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'framed' => false,
-								'flags' => array( 'destructive' ),
+								'flags' => [ 'destructive' ],
 								'icon' => 'remove',
 								'label' => 'Destructive'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (frameless, destructive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'framed' => false,
-								'flags' => array( 'constructive' ),
+								'flags' => [ 'constructive' ],
 								'icon' => 'add',
 								'label' => 'Constructive'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (frameless, constructive)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'framed' => false,
 								'icon' => 'tag',
 								'label' => 'Disabled',
 								'disabled' => true
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (frameless, disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'framed' => false,
-								'flags' => array( 'constructive' ),
+								'flags' => [ 'constructive' ],
 								'icon' => 'tag',
 								'label' => 'Constructive',
 								'disabled' => true
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (frameless, constructive, disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'AccessKeyed',
 								'accessKey' => 'k',
-							) ),
-							array(
+							] ),
+							[
 								'label' => "ButtonWidget (with accesskey k)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						)
-					)
-				) ) );
-				$demoContainer->appendContent( new OOUI\FieldsetLayout( array(
+					]
+				] ) );
+				$demoContainer->appendContent( new OOUI\FieldsetLayout( [
 					'infusable' => true,
 					'label' => 'Button sets',
-					'items' => array(
+					'items' => [
 						new OOUI\FieldLayout(
-							new OOUI\ButtonGroupWidget( array(
-								'items' => array(
-									new OOUI\ButtonWidget( array(
+							new OOUI\ButtonGroupWidget( [
+								'items' => [
+									new OOUI\ButtonWidget( [
 										'icon' => 'tag',
 										'label' => 'One'
-									) ),
-									new OOUI\ButtonWidget( array(
+									] ),
+									new OOUI\ButtonWidget( [
 										'label' => 'Two'
-									) ),
-									new OOUI\ButtonWidget( array(
+									] ),
+									new OOUI\ButtonWidget( [
 										'indicator' => 'required',
 										'label' => 'Three'
-									) )
-								)
-							) ),
-							array(
+									] )
+								]
+							] ),
+							[
 								'label' => 'ButtonGroupWidget',
 								'align' => 'top'
-							)
+							]
 						)
-					)
-				) ) );
+					]
+				] ) );
 				# Note that $buttonStyleShowcaseWidget is not infusable,
 				# because the contents would not be preserved -- we assume
 				# that widgets will manage their own contents by default,
@@ -454,554 +441,653 @@
 				# (recursively) made infusable.  We protect the FieldLayout
 				# by wrapping it with a new <div> Tag, so that it won't get
 				# rebuilt during infusion.
-				$wrappedFieldLayout = new OOUI\Tag( 'div' );
-				$wrappedFieldLayout->appendContent(
+				$wrappedFieldLayout = ( new OOUI\Tag( 'div' ) )
+					->appendContent(
 						new OOUI\FieldLayout(
 							$buttonStyleShowcaseWidget,
-							array(
+							[
 								'align' => 'top'
-							)
+							]
 						)
-				);
-				$demoContainer->appendContent( new OOUI\FieldsetLayout( array(
+					);
+				$demoContainer->appendContent( new OOUI\FieldsetLayout( [
 					'infusable' => true,
 					'label' => 'Button style showcase',
-					'items' => array( $wrappedFieldLayout ),
-				) ) );
-				$demoContainer->appendContent( new OOUI\FieldsetLayout( array(
+					'items' => [ $wrappedFieldLayout ],
+				] ) );
+				$demoContainer->appendContent( new OOUI\FieldsetLayout( [
 					'infusable' => true,
 					'label' => 'Form widgets',
-					'items' => array(
+					'items' => [
 						new OOUI\FieldLayout(
-							new OOUI\CheckboxInputWidget( array(
+							new OOUI\CheckboxInputWidget( [
 								'selected' => true
-							) ),
-							array(
+							] ),
+							[
 								'align' => 'inline',
 								'label' => 'CheckboxInputWidget'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\CheckboxInputWidget( array(
+							new OOUI\CheckboxInputWidget( [
 								'selected' => true,
 								'disabled' => true
-							) ),
-							array(
+							] ),
+							[
 								'align' => 'inline',
 								'label' => "CheckboxInputWidget (disabled)\xE2\x80\x8E"
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\RadioInputWidget( array(
+							new OOUI\RadioInputWidget( [
 								'name' => 'oojs-ui-radio-demo'
-							) ),
-							array(
+							] ),
+							[
 								'align' => 'inline',
 								'label' => 'Connected RadioInputWidget #1'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\RadioInputWidget( array(
+							new OOUI\RadioInputWidget( [
 								'name' => 'oojs-ui-radio-demo',
 								'selected' => true
-							) ),
-							array(
+							] ),
+							[
 								'align' => 'inline',
 								'label' => 'Connected RadioInputWidget #2'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\RadioInputWidget( array(
+							new OOUI\RadioInputWidget( [
 								'selected' => true,
 								'disabled' => true
-							) ),
-							array(
+							] ),
+							[
 								'align' => 'inline',
 								'label' => "RadioInputWidget (disabled)\xE2\x80\x8E"
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\RadioSelectInputWidget( array(
+							new OOUI\RadioSelectInputWidget( [
 								'value' => 'dog',
-								'options' => array(
-									array(
+								'options' => [
+									[
 										'data' => 'cat',
 										'label' => 'Cat'
-									),
-									array(
+									],
+									[
 										'data' => 'dog',
 										'label' => 'Dog'
-									),
-									array(
+									],
+									[
 										'data' => 'goldfish',
 										'label' => 'Goldfish'
-									),
-								)
-							) ),
-							array(
+									],
+								]
+							] ),
+							[
 								'align' => 'top',
 								'label' => 'RadioSelectInputWidget',
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array( 'value' => 'Text input' ) ),
-							array(
+							new OOUI\TextInputWidget( [ 'value' => 'Text input' ] ),
+							[
 								'label' => "TextInputWidget\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array( 'icon' => 'search' ) ),
-							array(
+							new OOUI\TextInputWidget( [ 'icon' => 'search' ] ),
+							[
 								'label' => "TextInputWidget (icon)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'required' => true
-							) ),
-							array(
+							] ),
+							[
 								'label' => "TextInputWidget (required)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array( 'placeholder' => 'Placeholder' ) ),
-							array(
+							new OOUI\TextInputWidget( [ 'placeholder' => 'Placeholder' ] ),
+							[
 								'label' => "TextInputWidget (placeholder)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array( 'type' => 'search' ) ),
-							array(
+							new OOUI\TextInputWidget( [ 'type' => 'search' ] ),
+							[
 								'label' => "TextInputWidget (type=search)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'value' => 'Readonly',
 								'readOnly' => true
-							) ),
-							array(
+							] ),
+							[
 								'label' => "TextInputWidget (readonly)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'value' => 'Disabled',
 								'disabled' => true
-							) ),
-							array(
+							] ),
+							[
 								'label' => "TextInputWidget (disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'value' => 'Accesskey A',
 								'accessKey' => 'a'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "TextInputWidget (with Accesskey)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'value' => 'Title attribute',
 								'title' => 'Title attribute with more information about me.'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "TextInputWidget (with title)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'multiline' => true,
 								'value' => "Multiline\nMultiline"
-							) ),
-							array(
+							] ),
+							[
 								'label' => "TextInputWidget (multiline)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'multiline' => true,
 								'rows' => 15,
 								'value' => "Multiline\nMultiline"
-							) ),
-							array(
+							] ),
+							[
 								'label' => "TextInputWidget (multiline, rows=15)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\DropdownInputWidget( array(
-								'options' => array(
-									array(
+							new OOUI\TextInputWidget( [
+								'multiline' => true,
+								'value' => "Multiline\nMultiline",
+								'icon' => 'tag',
+								'indicator' => 'required'
+							] ),
+							[
+								'label' => "TextInputWidget (multiline, icon, indicator)\xE2\x80\x8E",
+								'align' => 'top'
+							]
+						),
+						new OOUI\FieldLayout(
+							new OOUI\DropdownInputWidget( [
+								'options' => [
+									[
 										'data' => 'a',
 										'label' => 'First'
-									),
-									array(
+									],
+									[
 										'data' => 'b',
 										'label' => 'Second'
-									),
-									array(
+									],
+									[
 										'data' => 'c',
 										'label' => 'Third'
-									)
-								),
+									]
+								],
 								'value' => 'b',
 								'title' => 'Select an item'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'DropdownInputWidget',
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonInputWidget( array(
+							new OOUI\DropdownInputWidget( [
+								'options' => [
+									[ 'data' => 'sq', 'label' => 'Albanian' ],
+									[ 'data' => 'frp', 'label' => 'Arpitan' ],
+									[ 'data' => 'ba', 'label' => 'Bashkir' ],
+									[ 'data' => 'pt-br', 'label' => 'Brazilian Portuguese' ],
+									[ 'data' => 'tzm', 'label' => 'Central Atlas Tamazight' ],
+									[ 'data' => 'zh', 'label' => 'Chinese' ],
+									[ 'data' => 'co', 'label' => 'Corsican' ],
+									[ 'data' => 'del', 'label' => 'Delaware' ],
+									[ 'data' => 'eml', 'label' => 'Emiliano-Romagnolo' ],
+									[ 'data' => 'en', 'label' => 'English' ],
+									[ 'data' => 'fi', 'label' => 'Finnish' ],
+									[ 'data' => 'aln', 'label' => 'Gheg Albanian' ],
+									[ 'data' => 'he', 'label' => 'Hebrew' ],
+									[ 'data' => 'ilo', 'label' => 'Iloko' ],
+									[ 'data' => 'kbd', 'label' => 'Kabardian' ],
+									[ 'data' => 'csb', 'label' => 'Kashubian' ],
+									[ 'data' => 'avk', 'label' => 'Kotava' ],
+									[ 'data' => 'lez', 'label' => 'Lezghian' ],
+									[ 'data' => 'nds-nl', 'label' => 'Low Saxon' ],
+									[ 'data' => 'ml', 'label' => 'Malayalam' ],
+									[ 'data' => 'dum', 'label' => 'Middle Dutch' ],
+									[ 'data' => 'ary', 'label' => 'Moroccan Arabic' ],
+									[ 'data' => 'pih', 'label' => 'Norfuk / Pitkern' ],
+									[ 'data' => 'ny', 'label' => 'Nyanja' ],
+									[ 'data' => 'ang', 'label' => 'Old English' ],
+									[ 'data' => 'non', 'label' => 'Old Norse' ],
+									[ 'data' => 'pau', 'label' => 'Palauan' ],
+									[ 'data' => 'pdt', 'label' => 'Plautdietsch' ],
+									[ 'data' => 'ru', 'label' => 'Russian' ],
+									[ 'data' => 'stq', 'label' => 'Saterland Frisian' ],
+									[ 'data' => 'ii', 'label' => 'Sichuan Yi' ],
+									[ 'data' => 'bcc', 'label' => 'Southern Balochi' ],
+									[ 'data' => 'shi', 'label' => 'Tachelhit' ],
+									[ 'data' => 'th', 'label' => 'Thai' ],
+									[ 'data' => 'tr', 'label' => 'Turkish' ],
+									[ 'data' => 'fiu-vro', 'label' => 'Võro' ],
+									[ 'data' => 'vls', 'label' => 'West Flemish' ],
+									[ 'data' => 'zea', 'label' => 'Zeelandic' ],
+								],
+								'value' => 'en',
+							] ),
+							[
+								'label' => "DropdownInputWidget (long)\xE2\x80\x8E",
+								'align' => 'top'
+							]
+						),
+						new OOUI\FieldLayout(
+							new OOUI\ComboBoxInputWidget( [
+								'options' => [
+									[ 'data' => 'asd', 'label' => 'Label for asd' ],
+									[ 'data' => 'fgh', 'label' => 'Label for fgh' ],
+									[ 'data' => 'jkl', 'label' => 'Label for jkl' ],
+									[ 'data' => 'zxc', 'label' => 'Label for zxc' ],
+									[ 'data' => 'vbn', 'label' => 'Label for vbn' ],
+								]
+							] ),
+							[
+								'label' => 'ComboBoxInputWidget',
+								'align' => 'top'
+							]
+						),
+						new OOUI\FieldLayout(
+							new OOUI\ComboBoxInputWidget( [
+								'disabled' => true,
+								'options' => [
+									[ 'data' => 'asd', 'label' => 'Label for asd' ],
+									[ 'data' => 'fgh', 'label' => 'Label for fgh' ],
+									[ 'data' => 'jkl', 'label' => 'Label for jkl' ],
+									[ 'data' => 'zxc', 'label' => 'Label for zxc' ],
+									[ 'data' => 'vbn', 'label' => 'Label for vbn' ],
+								]
+							] ),
+							[
+								'label' => "ComboBoxInputWidget (disabled)\xE2\x80\x8E",
+								'align' => 'top'
+							]
+						),
+						new OOUI\FieldLayout(
+							new OOUI\ComboBoxInputWidget(),
+							[
+								'label' => "ComboBoxInputWidget (empty)\xE2\x80\x8E",
+								'align' => 'top'
+							]
+						),
+						new OOUI\FieldLayout(
+							new OOUI\ButtonInputWidget( [
 								'label' => 'Submit the form',
 								'type' => 'submit'
-							) ),
-							array(
+							] ),
+							[
 								'align' => 'top',
 								'label' => "ButtonInputWidget\xE2\x80\x8E"
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonInputWidget( array(
+							new OOUI\ButtonInputWidget( [
 								'label' => 'Submit the form',
 								'type' => 'submit',
 								'useInputTag' => true
-							) ),
-							array(
+							] ),
+							[
 								'align' => 'top',
 								'label' => "ButtonInputWidget (using <input/>)\xE2\x80\x8E"
-							)
+							]
 						)
-					)
-				) ) );
+					]
+				] ) );
 				// We can't make the outer FieldsetLayout infusable, because the Widget in its FieldLayout
 				// is added with 'content', which is not preserved after infusion. But we need the Widget
 				// to wrap the HorizontalLayout. Need to think about this at some point.
-				$demoContainer->appendContent( new OOUI\FieldsetLayout( array(
+				$demoContainer->appendContent( new OOUI\FieldsetLayout( [
 					'infusable' => false,
 					'label' => 'HorizontalLayout',
-					'items' => array(
+					'items' => [
 						new OOUI\FieldLayout(
-							new OOUI\Widget( array(
-								'content' => new OOUI\HorizontalLayout( array(
+							new OOUI\Widget( [
+								'content' => new OOUI\HorizontalLayout( [
 									'infusable' => true,
-									'items' => array(
-										new OOUI\ButtonWidget( array( 'label' => 'Button' ) ),
-										new OOUI\ButtonGroupWidget( array( 'items' => array(
-											new OOUI\ButtonWidget( array( 'label' => 'A' ) ),
-											new OOUI\ButtonWidget( array( 'label' => 'B' ) )
-										) ) ),
-										new OOUI\ButtonInputWidget( array( 'label' => 'ButtonInput' ) ),
-										new OOUI\TextInputWidget( array( 'value' => 'TextInput' ) ),
-										new OOUI\DropdownInputWidget( array( 'options' => array(
-											array(
+									'items' => [
+										new OOUI\ButtonWidget( [ 'label' => 'Button' ] ),
+										new OOUI\ButtonGroupWidget( [ 'items' => [
+											new OOUI\ButtonWidget( [ 'label' => 'A' ] ),
+											new OOUI\ButtonWidget( [ 'label' => 'B' ] )
+										] ] ),
+										new OOUI\ButtonInputWidget( [ 'label' => 'ButtonInput' ] ),
+										new OOUI\TextInputWidget( [ 'value' => 'TextInput' ] ),
+										new OOUI\DropdownInputWidget( [ 'options' => [
+											[
 												'label' => 'DropdownInput',
 												'data' => null
-											)
-										) ) ),
-										new OOUI\CheckboxInputWidget( array( 'selected' => true ) ),
-										new OOUI\RadioInputWidget( array( 'selected' => true ) ),
-										new OOUI\LabelWidget( array( 'label' => 'Label' ) )
-									),
-								) ),
-							) ),
-							array(
+											]
+										] ] ),
+										new OOUI\CheckboxInputWidget( [ 'selected' => true ] ),
+										new OOUI\RadioInputWidget( [ 'selected' => true ] ),
+										new OOUI\LabelWidget( [ 'label' => 'Label' ] )
+									],
+								] ),
+							] ),
+							[
 								'label' => 'Multiple widgets shown as a single line, ' .
 									'as used in compact forms or in parts of a bigger widget.',
 								'align' => 'top'
-							)
+							]
 						),
-					),
-				) ) );
-				$demoContainer->appendContent( new OOUI\FieldsetLayout( array(
+					],
+				] ) );
+				$demoContainer->appendContent( new OOUI\FieldsetLayout( [
 					'infusable' => true,
 					'label' => 'Other widgets',
-					'items' => array(
+					'items' => [
 						new OOUI\FieldLayout(
-							new OOUI\IconWidget( array(
-								'icon' => 'picture',
-								'title' => 'Picture icon'
-							) ),
-							array(
+							new OOUI\IconWidget( [
+								'icon' => 'search',
+								'title' => 'Search icon'
+							] ),
+							[
 								'label' => "IconWidget (normal)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\IconWidget( array(
+							new OOUI\IconWidget( [
 								'icon' => 'remove',
 								'flags' => 'destructive',
 								'title' => 'Remove icon'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "IconWidget (flagged)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\IconWidget( array(
-								'icon' => 'picture',
-								'title' => 'Picture icon',
+							new OOUI\IconWidget( [
+								'icon' => 'search',
+								'title' => 'Search icon',
 								'disabled' => true
-							) ),
-							array(
+							] ),
+							[
 								'label' => "IconWidget (disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\IndicatorWidget( array(
+							new OOUI\IndicatorWidget( [
 								'indicator' => 'required',
 								'title' => 'Required indicator'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "IndicatorWidget (normal)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\IndicatorWidget( array(
+							new OOUI\IndicatorWidget( [
 								'indicator' => 'required',
 								'title' => 'Required indicator',
 								'disabled' => true
-							) ),
-							array(
+							] ),
+							[
 								'label' => "IndicatorWidget (disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\LabelWidget( array(
+							new OOUI\LabelWidget( [
 								'label' => 'Label'
-							) ),
-							array(
+							] ),
+							[
 								'label' => "LabelWidget (normal)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\LabelWidget( array(
+							new OOUI\LabelWidget( [
 								'label' => 'Label',
 								'disabled' => true,
-							) ),
-							array(
+							] ),
+							[
 								'label' => "LabelWidget (disabled)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\LabelWidget( array(
+							new OOUI\LabelWidget( [
 								'label' => new OOUI\HtmlSnippet( '<b>Fancy</b> <i>text</i> <u>formatting</u>!' ),
-							) ),
-							array(
+							] ),
+							[
 								'label' => "LabelWidget (with html)\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						)
-					)
-				) ) );
-				$demoContainer->appendContent( new OOUI\FieldsetLayout( array(
+					]
+				] ) );
+				$demoContainer->appendContent( new OOUI\FieldsetLayout( [
 					'infusable' => true,
 					'label' => 'Field layouts',
 					'help' => 'I am an additional, helpful information. Lorem ipsum dolor sit amet, cibo pri ' .
 						"in, duo ex inimicus perpetua complectitur, mel periculis similique at.\xE2\x80\x8E",
-					'items' => array(
+					'items' => [
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'FieldLayout with help',
 								'help' => 'I am an additional, helpful information. Lorem ipsum dolor sit amet, cibo pri ' .
 									"in, duo ex inimicus perpetua complectitur, mel periculis similique at.\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'FieldLayout with HTML help',
 								'help' => new OOUI\HtmlSnippet( '<b>Bold text</b> is helpful!' ),
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'FieldLayout with title',
 								'title' => 'Field title text',
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\ActionFieldLayout(
 							new OOUI\TextInputWidget(),
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'ActionFieldLayout aligned left',
 								'align' => 'left'
-							)
+							]
 						),
 						new OOUI\ActionFieldLayout(
 							new OOUI\TextInputWidget(),
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'ActionFieldLayout aligned inline',
 								'align' => 'inline'
-							)
+							]
 						),
 						new OOUI\ActionFieldLayout(
 							new OOUI\TextInputWidget(),
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'ActionFieldLayout aligned right',
 								'align' => 'right'
-							)
+							]
 						),
 						new OOUI\ActionFieldLayout(
 							new OOUI\TextInputWidget(),
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'ActionFieldLayout aligned top',
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\ActionFieldLayout(
 							new OOUI\TextInputWidget(),
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'ActionFieldLayout aligned top with help',
 								'help' => 'I am an additional, helpful information. Lorem ipsum dolor sit amet, cibo pri ' .
 									"in, duo ex inimicus perpetua complectitur, mel periculis similique at.\xE2\x80\x8E",
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\ActionFieldLayout(
 							new OOUI\TextInputWidget(),
-							new OOUI\ButtonWidget( array(
+							new OOUI\ButtonWidget( [
 								'label' => 'Button'
-							) ),
-							array(
+							] ),
+							[
 								'label' =>
 									new OOUI\HtmlSnippet( '<i>ActionFieldLayout aligned top with rich text label</i>' ),
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'value' => ''
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'FieldLayout with notice',
-								'notices' => array( 'Please input a number.' ),
+								'notices' => [ 'Please input a number.' ],
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'value' => 'Foo'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'FieldLayout with error message',
-								'errors' => array( 'The value must be a number.' ),
+								'errors' => [ 'The value must be a number.' ],
 								'align' => 'top'
-							)
+							]
 						),
 						new OOUI\FieldLayout(
-							new OOUI\TextInputWidget( array(
+							new OOUI\TextInputWidget( [
 								'value' => 'Foo'
-							) ),
-							array(
+							] ),
+							[
 								'label' => 'FieldLayout with notice and error message',
-								'notices' => array( 'Please input a number.' ),
-								'errors' => array( 'The value must be a number.' ),
+								'notices' => [ 'Please input a number.' ],
+								'errors' => [ 'The value must be a number.' ],
 								'align' => 'top'
-							)
+							]
 						),
-					)
-				) ) );
+					]
+				] ) );
 
-				$demoContainer->appendContent( new OOUI\FormLayout( array(
+				$demoContainer->appendContent( new OOUI\FormLayout( [
 					'infusable' => true,
 					'method' => 'GET',
 					'action' => 'widgets.php',
-					'items' => array(
-						new OOUI\FieldsetLayout( array(
+					'items' => [
+						new OOUI\FieldsetLayout( [
 							'label' => 'Form layout',
-							'items' => array(
+							'items' => [
 								new OOUI\FieldLayout(
-									new OOUI\TextInputWidget( array(
+									new OOUI\TextInputWidget( [
 										'name' => 'username',
-									) ),
-									array(
+									] ),
+									[
 										'label' => 'User name',
 										'align' => 'top',
-									)
+									]
 								),
 								new OOUI\FieldLayout(
-									new OOUI\TextInputWidget( array(
+									new OOUI\TextInputWidget( [
 										'name' => 'password',
 										'type' => 'password',
-									) ),
-									array(
+									] ),
+									[
 										'label' => 'Password',
 										'align' => 'top',
-									)
+									]
 								),
 								new OOUI\FieldLayout(
-									new OOUI\CheckboxInputWidget( array(
+									new OOUI\CheckboxInputWidget( [
 										'name' => 'rememberme',
 										'selected' => true,
-									) ),
-									array(
+									] ),
+									[
 										'label' => 'Remember me',
 										'align' => 'inline',
-									)
+									]
 								),
 								new OOUI\FieldLayout(
-									new OOUI\ButtonInputWidget( array(
+									new OOUI\ButtonInputWidget( [
 										'name' => 'login',
 										'label' => 'Log in',
 										'type' => 'submit',
-										'flags' => array( 'primary', 'progressive' ),
+										'flags' => [ 'primary', 'progressive' ],
 										'icon' => 'check',
-									) ),
-									array(
+									] ),
+									[
 										'label' => null,
 										'align' => 'top',
-									)
+									]
 								),
-							)
-						) )
-					)
-				) ) );
+							]
+						] )
+					]
+				] ) );
 
 				echo $demoContainer;
 
@@ -1012,7 +1098,7 @@
 	<script src="node_modules/jquery/dist/jquery.js"></script>
 	<script src="node_modules/es5-shim/es5-shim.js"></script>
 	<script src="node_modules/oojs/dist/oojs.jquery.js"></script>
-	<script src="dist/oojs-ui.js"></script>
+	<script src="dist/oojs-ui-core.js"></script>
 	<script src="dist/oojs-ui-<?php echo $theme; ?>.js"></script>
 	<script src="infusion.js"></script>
 </body>

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author Adam Shorland
+ * @author Addshore
  */
 class StatusTest extends MediaWikiLangTestCase {
 
@@ -22,13 +22,13 @@ class StatusTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideValues() {
-		return array(
-			array(),
-			array( 'foo' ),
-			array( array( 'foo' => 'bar' ) ),
-			array( new Exception() ),
-			array( 1234 ),
-		);
+		return [
+			[],
+			[ 'foo' ],
+			[ [ 'foo' => 'bar' ] ],
+			[ new Exception() ],
+			[ 1234 ],
+		];
 	}
 
 	/**
@@ -64,7 +64,16 @@ class StatusTest extends MediaWikiLangTestCase {
 		$this->assertTrue( $status->ok );
 		$status = Status::newFatal( 'foo', 1, 2 );
 		$this->assertFalse( $status->ok );
-		$this->assertArrayEquals( array( array( 'type' => 'error', 'message' => 'foo', 'params' => array( 1, 2 ) ) ), $status->errors );
+		$this->assertArrayEquals(
+			[
+				[
+					'type' => 'error',
+					'message' => 'foo',
+					'params' => [ 1, 2 ]
+				]
+			],
+			$status->errors
+		);
 	}
 
 	/**
@@ -79,12 +88,12 @@ class StatusTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideSetResult() {
-		return array(
-			array( true ),
-			array( false ),
-			array( true, 'value' ),
-			array( false, 'value' ),
-		);
+		return [
+			[ true ],
+			[ false ],
+			[ true, 'value' ],
+			[ false, 'value' ],
+		];
 	}
 
 	/**
@@ -98,10 +107,10 @@ class StatusTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideIsOk() {
-		return array(
-			array( true ),
-			array( false ),
-		);
+		return [
+			[ true ],
+			[ false ],
+		];
 	}
 
 	/**
@@ -127,12 +136,12 @@ class StatusTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideIsGood() {
-		return array(
-			array( true, array(), true ),
-			array( true, array( 'foo' ), false ),
-			array( false, array(), false ),
-			array( false, array( 'foo' ), false ),
-		);
+		return [
+			[ true, [], true ],
+			[ true, [ 'foo' ], false ],
+			[ false, [], false ],
+			[ false, [ 'foo' ], false ],
+		];
 	}
 
 	/**
@@ -152,7 +161,7 @@ class StatusTest extends MediaWikiLangTestCase {
 
 		$this->assertEquals( count( $messages ), count( $warnings ) );
 		foreach ( $messages as $key => $message ) {
-			$expectedArray = array_merge( array( $message->getKey() ), $message->getParams() );
+			$expectedArray = array_merge( [ $message->getKey() ], $message->getParams() );
 			$this->assertEquals( $warnings[$key], $expectedArray );
 		}
 	}
@@ -174,7 +183,7 @@ class StatusTest extends MediaWikiLangTestCase {
 
 		$this->assertEquals( count( $messages ), count( $errors ) );
 		foreach ( $messages as $key => $message ) {
-			$expectedArray = array_merge( array( $message->getKey() ), $message->getParams() );
+			$expectedArray = array_merge( [ $message->getKey() ], $message->getParams() );
 			$this->assertEquals( $errors[$key], $expectedArray );
 		}
 	}
@@ -196,13 +205,13 @@ class StatusTest extends MediaWikiLangTestCase {
 
 		$this->assertEquals( count( $messages ), count( $errors ) );
 		foreach ( $messages as $key => $message ) {
-			$expectedArray = array_merge( array( $message->getKey() ), $message->getParams() );
+			$expectedArray = array_merge( [ $message->getKey() ], $message->getParams() );
 			$this->assertEquals( $errors[$key], $expectedArray );
 		}
 		$this->assertFalse( $status->isOK() );
 	}
 
-	protected function getMockMessage( $key = 'key', $params = array() ) {
+	protected function getMockMessage( $key = 'key', $params = [] ) {
 		$message = $this->getMockBuilder( 'Message' )
 			->disableOriginalConstructor()
 			->getMock();
@@ -220,7 +229,7 @@ class StatusTest extends MediaWikiLangTestCase {
 	 * @return Message[]
 	 */
 	protected function getMockMessages( $messageDetails ) {
-		$messages = array();
+		$messages = [];
 		foreach ( $messageDetails as $key => $paramsArray ) {
 			$messages[] = $this->getMockMessage( $key, $paramsArray );
 		}
@@ -228,10 +237,10 @@ class StatusTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideMockMessageDetails() {
-		return array(
-			array( array( 'key1' => array( 'foo' => 'bar' ) ) ),
-			array( array( 'key1' => array( 'foo' => 'bar' ), 'key2' => array( 'foo2' => 'bar2' ) ) ),
-		);
+		return [
+			[ [ 'key1' => [ 'foo' => 'bar' ] ] ],
+			[ [ 'key1' => [ 'foo' => 'bar' ], 'key2' => [ 'foo2' => 'bar2' ] ] ],
+		];
 	}
 
 	/**
@@ -303,10 +312,10 @@ class StatusTest extends MediaWikiLangTestCase {
 			return '-' . $value . '-';
 		};
 
-		return array(
-			array( false, array( 'foo' => 'bar' ), array( 'foo' => 'bar' ) ),
-			array( $cleanCallback, array( 'foo' => 'bar' ), array( 'foo' => '-bar-' ) ),
-		);
+		return [
+			[ false, [ 'foo' => 'bar' ], [ 'foo' => 'bar' ] ],
+			[ $cleanCallback, [ 'foo' => 'bar' ], [ 'foo' => '-bar-' ] ],
+		];
 	}
 
 	/**
@@ -338,55 +347,55 @@ class StatusTest extends MediaWikiLangTestCase {
 	 *    1 => expected string (with no context)
 	 */
 	public static function provideGetWikiTextAndHtml() {
-		$testCases = array();
+		$testCases = [];
 
-		$testCases['GoodStatus'] = array(
+		$testCases['GoodStatus'] = [
 			new Status(),
 			"Internal error: Status::getWikiText called for a good result, this is incorrect\n",
 			"<p>Internal error: Status::getWikiText called for a good result, this is incorrect\n</p>",
-		);
+		];
 
 		$status = new Status();
 		$status->ok = false;
-		$testCases['GoodButNoError'] = array(
+		$testCases['GoodButNoError'] = [
 			$status,
 			"Internal error: Status::getWikiText: Invalid result object: no error text but not OK\n",
 			"<p>Internal error: Status::getWikiText: Invalid result object: no error text but not OK\n</p>",
-		);
+		];
 
 		$status = new Status();
 		$status->warning( 'fooBar!' );
-		$testCases['1StringWarning'] = array(
+		$testCases['1StringWarning'] = [
 			$status,
 			"<fooBar!>",
 			"<p>&lt;fooBar!&gt;\n</p>",
-		);
+		];
 
 		$status = new Status();
 		$status->warning( 'fooBar!' );
 		$status->warning( 'fooBar2!' );
-		$testCases['2StringWarnings'] = array(
+		$testCases['2StringWarnings'] = [
 			$status,
 			"* <fooBar!>\n* <fooBar2!>\n",
 			"<ul><li> &lt;fooBar!&gt;</li>\n<li> &lt;fooBar2!&gt;</li></ul>\n",
-		);
+		];
 
 		$status = new Status();
-		$status->warning( new Message( 'fooBar!', array( 'foo', 'bar' ) ) );
-		$testCases['1MessageWarning'] = array(
+		$status->warning( new Message( 'fooBar!', [ 'foo', 'bar' ] ) );
+		$testCases['1MessageWarning'] = [
 			$status,
 			"<fooBar!>",
 			"<p>&lt;fooBar!&gt;\n</p>",
-		);
+		];
 
 		$status = new Status();
-		$status->warning( new Message( 'fooBar!', array( 'foo', 'bar' ) ) );
+		$status->warning( new Message( 'fooBar!', [ 'foo', 'bar' ] ) );
 		$status->warning( new Message( 'fooBar2!' ) );
-		$testCases['2MessageWarnings'] = array(
+		$testCases['2MessageWarnings'] = [
 			$status,
 			"* <fooBar!>\n* <fooBar2!>\n",
 			"<ul><li> &lt;fooBar!&gt;</li>\n<li> &lt;fooBar2!&gt;</li></ul>\n",
-		);
+		];
 
 		return $testCases;
 	}
@@ -394,13 +403,29 @@ class StatusTest extends MediaWikiLangTestCase {
 	/**
 	 * @dataProvider provideGetMessage
 	 * @covers Status::getMessage
-	 * @todo test long and short context messages generated through this method
 	 */
-	public function testGetMessage( Status $status, $expectedParams = array(), $expectedKey ) {
+	public function testGetMessage(
+		Status $status, $expectedParams = [], $expectedKey, $expectedWrapper
+	) {
 		$message = $status->getMessage();
 		$this->assertInstanceOf( 'Message', $message );
 		$this->assertEquals( $expectedParams, $message->getParams(), 'Message::getParams' );
 		$this->assertEquals( $expectedKey, $message->getKey(), 'Message::getKey' );
+
+		$message = $status->getMessage( 'wrapper-short', 'wrapper-long' );
+		$this->assertInstanceOf( 'Message', $message );
+		$this->assertEquals( $expectedWrapper, $message->getKey(), 'Message::getKey with wrappers' );
+		$this->assertCount( 1, $message->getParams(), 'Message::getParams with wrappers' );
+
+		$message = $status->getMessage( 'wrapper' );
+		$this->assertInstanceOf( 'Message', $message );
+		$this->assertEquals( 'wrapper', $message->getKey(), 'Message::getKey with wrappers' );
+		$this->assertCount( 1, $message->getParams(), 'Message::getParams with wrappers' );
+
+		$message = $status->getMessage( false, 'wrapper' );
+		$this->assertInstanceOf( 'Message', $message );
+		$this->assertEquals( 'wrapper', $message->getKey(), 'Message::getKey with wrappers' );
+		$this->assertCount( 1, $message->getParams(), 'Message::getParams with wrappers' );
 	}
 
 	/**
@@ -410,60 +435,66 @@ class StatusTest extends MediaWikiLangTestCase {
 	 *    2 => expected Message key
 	 */
 	public static function provideGetMessage() {
-		$testCases = array();
+		$testCases = [];
 
-		$testCases['GoodStatus'] = array(
+		$testCases['GoodStatus'] = [
 			new Status(),
-			array( "Status::getMessage called for a good result, this is incorrect\n" ),
-			'internalerror_info'
-		);
+			[ "Status::getMessage called for a good result, this is incorrect\n" ],
+			'internalerror_info',
+			'wrapper-short'
+		];
 
 		$status = new Status();
 		$status->ok = false;
-		$testCases['GoodButNoError'] = array(
+		$testCases['GoodButNoError'] = [
 			$status,
-			array( "Status::getMessage: Invalid result object: no error text but not OK\n" ),
-			'internalerror_info'
-		);
+			[ "Status::getMessage: Invalid result object: no error text but not OK\n" ],
+			'internalerror_info',
+			'wrapper-short'
+		];
 
 		$status = new Status();
 		$status->warning( 'fooBar!' );
-		$testCases['1StringWarning'] = array(
+		$testCases['1StringWarning'] = [
 			$status,
-			array(),
-			'fooBar!'
-		);
+			[],
+			'fooBar!',
+			'wrapper-short'
+		];
 
 		// FIXME: Assertion tries to compare a StubUserLang with a Language object, because
 		// "data providers are executed before both the call to the setUpBeforeClass static method
 		// and the first call to the setUp method. Because of that you can't access any variables
 		// you create there from within a data provider."
 		// http://phpunit.de/manual/3.7/en/writing-tests-for-phpunit.html
-//		$status = new Status();
-//		$status->warning( 'fooBar!' );
-//		$status->warning( 'fooBar2!' );
-//		$testCases[ '2StringWarnings' ] = array(
-//			$status,
-//			array( new Message( 'fooBar!' ), new Message( 'fooBar2!' ) ),
-//			"* \$1\n* \$2"
-//		);
+// 		$status = new Status();
+// 		$status->warning( 'fooBar!' );
+// 		$status->warning( 'fooBar2!' );
+// 		$testCases[ '2StringWarnings' ] = array(
+// 			$status,
+// 			array( new Message( 'fooBar!' ), new Message( 'fooBar2!' ) ),
+// 			"* \$1\n* \$2",
+// 			'wrapper-long'
+// 		);
 
 		$status = new Status();
-		$status->warning( new Message( 'fooBar!', array( 'foo', 'bar' ) ) );
-		$testCases['1MessageWarning'] = array(
+		$status->warning( new Message( 'fooBar!', [ 'foo', 'bar' ] ) );
+		$testCases['1MessageWarning'] = [
 			$status,
-			array( 'foo', 'bar' ),
-			'fooBar!'
-		);
+			[ 'foo', 'bar' ],
+			'fooBar!',
+			'wrapper-short'
+		];
 
 		$status = new Status();
-		$status->warning( new Message( 'fooBar!', array( 'foo', 'bar' ) ) );
+		$status->warning( new Message( 'fooBar!', [ 'foo', 'bar' ] ) );
 		$status->warning( new Message( 'fooBar2!' ) );
-		$testCases['2MessageWarnings'] = array(
+		$testCases['2MessageWarnings'] = [
 			$status,
-			array( new Message( 'fooBar!', array( 'foo', 'bar' ) ), new Message( 'fooBar2!' ) ),
-			"* \$1\n* \$2"
-		);
+			[ new Message( 'fooBar!', [ 'foo', 'bar' ] ), new Message( 'fooBar2!' ) ],
+			"* \$1\n* \$2",
+			'wrapper-long'
+		];
 
 		return $testCases;
 	}
@@ -473,9 +504,9 @@ class StatusTest extends MediaWikiLangTestCase {
 	 */
 	public function testReplaceMessage() {
 		$status = new Status();
-		$message = new Message( 'key1', array( 'foo1', 'bar1' ) );
+		$message = new Message( 'key1', [ 'foo1', 'bar1' ] );
 		$status->error( $message );
-		$newMessage = new Message( 'key2', array( 'foo2', 'bar2' ) );
+		$newMessage = new Message( 'key2', [ 'foo2', 'bar2' ] );
 
 		$status->replaceMessage( $message, $newMessage );
 
@@ -490,10 +521,10 @@ class StatusTest extends MediaWikiLangTestCase {
 		$method->setAccessible( true );
 		$status = new Status();
 		$key = 'foo';
-		$params = array( 'bar' );
+		$params = [ 'bar' ];
 
 		/** @var Message $message */
-		$message = $method->invoke( $status, array_merge( array( $key ), $params ) );
+		$message = $method->invoke( $status, array_merge( [ $key ], $params ) );
 		$this->assertInstanceOf( 'Message', $message );
 		$this->assertEquals( $key, $message->getKey() );
 		$this->assertEquals( $params, $message->getParams() );
@@ -507,15 +538,15 @@ class StatusTest extends MediaWikiLangTestCase {
 		$method->setAccessible( true );
 		$status = new Status();
 		$key = 'foo';
-		$params = array( 'bar' );
+		$params = [ 'bar' ];
 
 		/** @var Message[] $messageArray */
 		$messageArray = $method->invoke(
 			$status,
-			array(
-				array_merge( array( $key ), $params ),
-				array_merge( array( $key ), $params )
-			)
+			[
+				array_merge( [ $key ], $params ),
+				array_merge( [ $key ], $params )
+			]
 		);
 
 		$this->assertInternalType( 'array', $messageArray );
@@ -577,10 +608,10 @@ class StatusTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideNonObjectMessages() {
-		return array(
-			array( array( 'ImaString', array( 'param1' => 'value1' ) ) ),
-			array( array( 'ImaString' ) ),
-		);
+		return [
+			[ [ 'ImaString', [ 'param1' => 'value1' ] ] ],
+			[ [ 'ImaString' ] ],
+		];
 	}
 
 }

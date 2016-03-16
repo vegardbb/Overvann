@@ -31,6 +31,10 @@ class SpecialUserlogout extends UnlistedSpecialPage {
 		parent::__construct( 'Userlogout' );
 	}
 
+	public function doesWrites() {
+		return true;
+	}
+
 	function execute( $par ) {
 		/**
 		 * Some satellite ISPs use broken precaching schemes that log people out straight after
@@ -44,6 +48,18 @@ class SpecialUserlogout extends UnlistedSpecialPage {
 		$this->setHeaders();
 		$this->outputHeader();
 
+		// Make sure it's possible to log out
+		$session = MediaWiki\Session\SessionManager::getGlobalSession();
+		if ( !$session->canSetUser() ) {
+			throw new ErrorPageError(
+				'cannotlogoutnow-title',
+				'cannotlogoutnow-text',
+				[
+					$session->getProvider()->describe( RequestContext::getMain()->getLanguage() )
+				]
+			);
+		}
+
 		$user = $this->getUser();
 		$oldName = $user->getName();
 		$user->logout();
@@ -56,7 +72,7 @@ class SpecialUserlogout extends UnlistedSpecialPage {
 
 		// Hook.
 		$injected_html = '';
-		Hooks::run( 'UserLogoutComplete', array( &$user, &$injected_html, $oldName ) );
+		Hooks::run( 'UserLogoutComplete', [ &$user, &$injected_html, $oldName ] );
 		$out->addHTML( $injected_html );
 
 		$out->returnToMain();

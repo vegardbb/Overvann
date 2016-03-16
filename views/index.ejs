@@ -2,12 +2,30 @@
 <html lang="no">
 <%- include head.ejs %>
 <body>
-<div id="container">
-<%- include header.ejs %>
-<div id="content">
-    <p>Tekst her</p>
-    <p><a href="/om">Litt om oss</a></p>
+<%- include header_large.ejs %>
+<div class="content-container">
+	<div class="inner-container">
+		<div id="content">
+			<div class="card-box">
+				<section class="card">
+					<img src="/images/index/Paradigmeskifte-diagram_card_size.png" alt="Noen moderne overvannstiltak">
+					<h3>Fagwiki</h3>
+					<p><a href="/wiki/">Lær mer om ulike typer tiltak og framgangsmåter for å håndtere ekstemnedbør</a></p>
+				</section>
+				<section class="card">
+					<img src="/images/index/Paradigmeskifte-diagram_card_size.png" alt="Noen moderne overvannstiltak">
+					<h3>Fagwiki</h3>
+					<p><a href="/wiki/">Lær mer om ulike typer tiltak og framgangsmåter for å håndtere ekstemnedbør</a></p>
+				</section>
+				<section class="card">
+					<img src="/images/index/Paradigmeskifte-diagram_card_size.png" alt="Noen moderne overvannstiltak">
+					<h3>Fagwiki</h3>
+					<p><a href="/wiki/">Lær mer om ulike typer tiltak og framgangsmåter for å håndtere ekstemnedbør</a></p>
+				</section>
+			</div>
+		</div>
+	</div>
 </div>
-</div>
+<%- include footer.ejs %>
 </body>
 </html>
