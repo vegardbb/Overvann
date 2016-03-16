@@ -104,7 +104,7 @@ var signUpPost = function(req, res, next) {
                 workarea: user.workarea ? user.workarea : null,
                 img_name: user.img_name ? user.img_name : null
             });
-
+              
             signUpUser.save().then(function(model) {
                 // sign in the newly registered user
                 signInPost(req, res, next);
