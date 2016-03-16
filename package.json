@@ -30,6 +30,7 @@
     "ejs": "*",
     "express": "^4.13.4",
     "express-session": "*",
+    "jquery": "^2.2.1",
     "knex": "^0.10.0",
     "mysql": "^2.10.2",
     "passport": "*",
