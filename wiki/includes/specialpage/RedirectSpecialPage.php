@@ -28,10 +28,10 @@
  */
 abstract class RedirectSpecialPage extends UnlistedSpecialPage {
 	// Query parameters that can be passed through redirects
-	protected $mAllowedRedirectParams = [];
+	protected $mAllowedRedirectParams = array();
 
 	// Query parameters added by redirects
-	protected $mAddedRedirectParams = [];
+	protected $mAddedRedirectParams = array();
 
 	/**
 	 * @param string|null $subpage
@@ -73,11 +73,11 @@ abstract class RedirectSpecialPage extends UnlistedSpecialPage {
 	 * @return array|bool
 	 */
 	public function getRedirectQuery() {
-		$params = [];
+		$params = array();
 		$request = $this->getRequest();
 
 		foreach ( array_merge( $this->mAllowedRedirectParams,
-				[ 'uselang', 'useskin', 'debug' ] // parameters which can be passed to all pages
+				array( 'uselang', 'useskin', 'debug' ) // parameters which can be passed to all pages
 			) as $arg ) {
 			if ( $request->getVal( $arg, null ) !== null ) {
 				$params[$arg] = $request->getVal( $arg );
@@ -120,7 +120,7 @@ abstract class SpecialRedirectToSpecial extends RedirectSpecialPage {
 
 	function __construct(
 		$name, $redirName, $redirSubpage = false,
-		$allowedRedirectParams = [], $addedRedirectParams = []
+		$allowedRedirectParams = array(), $addedRedirectParams = array()
 	) {
 		parent::__construct( $name );
 		$this->redirName = $redirName;
@@ -208,7 +208,7 @@ abstract class SpecialRedirectToSpecial extends RedirectSpecialPage {
 abstract class RedirectSpecialArticle extends RedirectSpecialPage {
 	function __construct( $name ) {
 		parent::__construct( $name );
-		$redirectParams = [
+		$redirectParams = array(
 			'action',
 			'redirect', 'rdfrom',
 			# Options for preloaded edits
@@ -222,9 +222,9 @@ abstract class RedirectSpecialArticle extends RedirectSpecialPage {
 			'redlink',
 			# Options for action=raw; missing ctype can break JS or CSS in some browsers
 			'ctype', 'maxage', 'smaxage',
-		];
+		);
 
-		Hooks::run( "RedirectSpecialArticleRedirectParams", [ &$redirectParams ] );
+		Hooks::run( "RedirectSpecialArticleRedirectParams", array( &$redirectParams ) );
 		$this->mAllowedRedirectParams = $redirectParams;
 	}
 }

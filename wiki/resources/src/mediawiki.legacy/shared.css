@@ -116,9 +116,33 @@ abbr[title],
 	unicode-bidi: isolate;
 }
 
+/**
+ * Links to redirects appear italicized on [[Special:AllPages]], [[Special:PrefixIndex]],
+ * [[Special:Watchlist/edit]] and in category listings.
+ */
+.allpagesredirect,
+.redirect-in-category,
+.watchlistredir {
+	font-style: italic;
+}
+
 /* Comment portions of RC entries */
 span.comment {
 	font-style: italic;
+}
+
+/* Math */
+.texvc {
+	direction: ltr;
+	unicode-bidi: embed;
+}
+
+img.tex {
+	vertical-align: middle;
+}
+
+span.texhtml {
+	font-family: serif;
 }
 
 /**
@@ -189,10 +213,6 @@ td.mw-submit {
 input#wpSummary {
 	width: 80%;
 	margin-bottom: 1em;
-}
-
-.mw-input-with-label {
-	white-space: nowrap;
 }
 
 /**
@@ -274,11 +294,15 @@ input#wpSummary {
 }
 
 /**
- * Convenience links to edit delete and protect reasons
+ * Convenience links to edit block, delete and protect reasons
+ * and upload licenses
  */
+p.mw-ipb-conveniencelinks,
 p.mw-protect-editreasons,
 p.mw-filedelete-editreasons,
-p.mw-delete-editreasons {
+p.mw-delete-editreasons,
+p.mw-revdel-editreasons,
+p.mw-upload-editlicenses {
 	font-size: 90%;
 	text-align: right;
 }
@@ -295,6 +319,10 @@ p.mw-delete-editreasons {
 	margin-right: 0.2em;
 }
 
+#pagehistory span.minor {
+	font-weight: bold;
+}
+
 #pagehistory li {
 	border: 1px solid white;
 }
@@ -304,7 +332,7 @@ p.mw-delete-editreasons {
 	border: 1px dashed #aaa;
 }
 
-.mw-history-revisionactions {
+.mw-history-revisionactions, #mw-fileduplicatesearch-icon {
 	float: right;
 }
 
@@ -872,6 +900,8 @@ table.floatleft {
 }
 
 .mw-editsection,
+.toctoggle,
+.tochidden,
 #jump-to-nav {
 	-moz-user-select: none;
 	-webkit-user-select: none;

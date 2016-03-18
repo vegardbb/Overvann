@@ -34,10 +34,10 @@ class ApiImageRotate extends ApiBase {
 	private static function addValues( array &$result, $values, $flag = null, $name = null ) {
 		foreach ( $values as $val ) {
 			if ( $val instanceof Title ) {
-				$v = [];
+				$v = array();
 				ApiQueryBase::addTitleInfo( $v, $val );
 			} elseif ( $name !== null ) {
-				$v = [ $name => $val ];
+				$v = array( $name => $val );
 			} else {
 				$v = $val;
 			}
@@ -54,13 +54,13 @@ class ApiImageRotate extends ApiBase {
 		$params = $this->extractRequestParams();
 		$rotation = $params['rotation'];
 
-		$continuationManager = new ApiContinuationManager( $this, [], [] );
+		$continuationManager = new ApiContinuationManager( $this, array(), array() );
 		$this->setContinuationManager( $continuationManager );
 
 		$pageSet = $this->getPageSet();
 		$pageSet->execute();
 
-		$result = [];
+		$result = array();
 
 		self::addValues( $result, $pageSet->getInvalidTitlesAndReasons(), 'invalid' );
 		self::addValues( $result, $pageSet->getSpecialTitles(), 'special', 'title' );
@@ -69,14 +69,14 @@ class ApiImageRotate extends ApiBase {
 		self::addValues( $result, $pageSet->getInterwikiTitlesAsResult() );
 
 		foreach ( $pageSet->getTitles() as $title ) {
-			$r = [];
+			$r = array();
 			$r['id'] = $title->getArticleID();
 			ApiQueryBase::addTitleInfo( $r, $title );
 			if ( !$title->exists() ) {
 				$r['missing'] = true;
 			}
 
-			$file = wfFindFile( $title, [ 'latest' => true ] );
+			$file = wfFindFile( $title, array( 'latest' => true ) );
 			if ( !$file ) {
 				$r['result'] = 'Failure';
 				$r['errormessage'] = 'File does not exist';
@@ -110,11 +110,11 @@ class ApiImageRotate extends ApiBase {
 			$ext = strtolower( pathinfo( "$srcPath", PATHINFO_EXTENSION ) );
 			$tmpFile = TempFSFile::factory( 'rotate_', $ext );
 			$dstPath = $tmpFile->getPath();
-			$err = $handler->rotate( $file, [
-				'srcPath' => $srcPath,
-				'dstPath' => $dstPath,
-				'rotation' => $rotation
-			] );
+			$err = $handler->rotate( $file, array(
+				"srcPath" => $srcPath,
+				"dstPath" => $dstPath,
+				"rotation" => $rotation
+			) );
 			if ( !$err ) {
 				$comment = wfMessage(
 					'rotate-comment'
@@ -184,15 +184,15 @@ class ApiImageRotate extends ApiBase {
 	}
 
 	public function getAllowedParams( $flags = 0 ) {
-		$result = [
-			'rotation' => [
-				ApiBase::PARAM_TYPE => [ '90', '180', '270' ],
+		$result = array(
+			'rotation' => array(
+				ApiBase::PARAM_TYPE => array( '90', '180', '270' ),
 				ApiBase::PARAM_REQUIRED => true
-			],
-			'continue' => [
+			),
+			'continue' => array(
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			],
-		];
+			),
+		);
 		if ( $flags ) {
 			$result += $this->getPageSet()->getFinalParams( $flags );
 		}
@@ -205,12 +205,12 @@ class ApiImageRotate extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=imagerotate&titles=File:Example.jpg&rotation=90&token=123ABC'
 				=> 'apihelp-imagerotate-example-simple',
 			'action=imagerotate&generator=categorymembers&gcmtitle=Category:Flip&gcmtype=file&' .
 				'rotation=180&token=123ABC'
 				=> 'apihelp-imagerotate-example-generator',
-		];
+		);
 	}
 }

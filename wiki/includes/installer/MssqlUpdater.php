@@ -36,39 +36,35 @@ class MssqlUpdater extends DatabaseUpdater {
 	protected $db;
 
 	protected function getCoreUpdateList() {
-		return [
+		return array(
 			// 1.23
-			[ 'addField', 'mwuser', 'user_password_expires', 'patch-user_password_expires.sql' ],
+			array( 'addField', 'mwuser', 'user_password_expires', 'patch-user_password_expires.sql' ),
 
 			// 1.24
-			[ 'addField', 'page', 'page_lang', 'patch-page-page_lang.sql' ],
+			array( 'addField', 'page', 'page_lang', 'patch-page-page_lang.sql' ),
 
 			// 1.25
-			[ 'dropTable', 'hitcounter' ],
-			[ 'dropField', 'site_stats', 'ss_total_views', 'patch-drop-ss_total_views.sql' ],
-			[ 'dropField', 'page', 'page_counter', 'patch-drop-page_counter.sql' ],
+			array( 'dropTable', 'hitcounter' ),
+			array( 'dropField', 'site_stats', 'ss_total_views', 'patch-drop-ss_total_views.sql' ),
+			array( 'dropField', 'page', 'page_counter', 'patch-drop-page_counter.sql' ),
 			// Constraint updates
-			[ 'updateConstraints', 'category_types', 'categorylinks', 'cl_type' ],
-			[ 'updateConstraints', 'major_mime', 'filearchive', 'fa_major_mime' ],
-			[ 'updateConstraints', 'media_type', 'filearchive', 'fa_media_type' ],
-			[ 'updateConstraints', 'major_mime', 'oldimage', 'oi_major_mime' ],
-			[ 'updateConstraints', 'media_type', 'oldimage', 'oi_media_type' ],
-			[ 'updateConstraints', 'major_mime', 'image', 'img_major_mime' ],
-			[ 'updateConstraints', 'media_type', 'image', 'img_media_type' ],
-			[ 'updateConstraints', 'media_type', 'uploadstash', 'us_media_type' ],
+			array( 'updateConstraints', 'category_types', 'categorylinks', 'cl_type' ),
+			array( 'updateConstraints', 'major_mime', 'filearchive', 'fa_major_mime' ),
+			array( 'updateConstraints', 'media_type', 'filearchive', 'fa_media_type' ),
+			array( 'updateConstraints', 'major_mime', 'oldimage', 'oi_major_mime' ),
+			array( 'updateConstraints', 'media_type', 'oldimage', 'oi_media_type' ),
+			array( 'updateConstraints', 'major_mime', 'image', 'img_major_mime' ),
+			array( 'updateConstraints', 'media_type', 'image', 'img_media_type' ),
+			array( 'updateConstraints', 'media_type', 'uploadstash', 'us_media_type' ),
 			// END: Constraint updates
 
-			[ 'modifyField', 'image', 'img_major_mime',
-				'patch-img_major_mime-chemical.sql' ],
-			[ 'modifyField', 'oldimage', 'oi_major_mime',
-				'patch-oi_major_mime-chemical.sql' ],
-			[ 'modifyField', 'filearchive', 'fa_major_mime',
-				'patch-fa_major_mime-chemical.sql' ],
-
-			// 1.27
-			[ 'dropTable', 'msg_resource_links' ],
-			[ 'dropTable', 'msg_resource' ],
-		];
+			array( 'modifyField', 'image', 'img_major_mime',
+				'patch-img_major_mime-chemical.sql' ),
+			array( 'modifyField', 'oldimage', 'oi_major_mime',
+				'patch-oi_major_mime-chemical.sql' ),
+			array( 'modifyField', 'filearchive', 'fa_major_mime',
+				'patch-fa_major_mime-chemical.sql' ),
+		);
 	}
 
 	/**
@@ -104,7 +100,7 @@ class MssqlUpdater extends DatabaseUpdater {
 		# After all checks passed, start the update
 		$this->insertUpdateRow( $updateKey );
 		$path = 'named_constraints.sql';
-		$constraintMap = [
+		$constraintMap = array(
 			'category_types' =>
 				"($field in('page', 'subcat', 'file'))",
 			'major_mime'     =>
@@ -113,18 +109,18 @@ class MssqlUpdater extends DatabaseUpdater {
 			'media_type'     =>
 				"($field in('UNKNOWN', 'BITMAP', 'DRAWING', 'AUDIO', 'VIDEO', 'MULTIMEDIA'," .
 				"'OFFICE', 'TEXT', 'EXECUTABLE', 'ARCHIVE'))"
-		];
+		);
 		$constraint = $constraintMap[$constraintType];
 
 		# and hack-in those variables that should be replaced
 		# in our template file right now
-		$this->db->setSchemaVars( [
+		$this->db->setSchemaVars( array(
 			'tableName'       => $table,
 			'fieldName'       => $field,
 			'checkConstraint' => $constraint,
 			'wgDBname'        => $wgDBname,
 			'wgDBmwschema'    => $wgDBmwschema,
-		] );
+		) );
 
 		# Full path from file name
 		$path = $this->db->patchPath( $path );

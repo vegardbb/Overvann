@@ -32,8 +32,7 @@
 					"mw.util",
 					"mw.plugin.*",
 					"mw.cookie",
-					"mw.experiments",
-					"mw.viewport"
+					"mw.experiments"
 				]
 			},
 			{
@@ -107,22 +106,8 @@
 		"name": "Upstream",
 		"groups": [
 			{
-				"name": "OOjs",
-				"classes": [
-					"OO",
-					"OO.EmitterList",
-					"OO.EventEmitter",
-					"OO.Factory",
-					"OO.Registry",
-					"OO.SortedEmitterList"
-				]
-			},
-			{
-				"name": "OOUI",
-				"classes": [
-					"OO.ui",
-					"OO.ui.*"
-				]
+				"name": "OOJS",
+				"classes": ["OO", "OO.*"]
 			},
 			{
 				"name": "jQuery",

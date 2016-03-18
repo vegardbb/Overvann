@@ -33,7 +33,7 @@ require_once __DIR__ . '/Maintenance.php';
 class PopulateRevisionLength extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Populates the rev_len and ar_len fields' );
+		$this->mDescription = "Populates the rev_len and ar_len fields";
 		$this->setBatchSize( 200 );
 	}
 
@@ -92,22 +92,22 @@ class PopulateRevisionLength extends LoggedUpdateMaintenance {
 			$res = $db->select(
 				$table,
 				$fields,
-				[
+				array(
 					"$idCol >= $blockStart",
 					"$idCol <= $blockEnd",
 					"{$prefix}_len IS NULL"
-				],
+				),
 				__METHOD__
 			);
 
-			$this->beginTransaction( $db, __METHOD__ );
+			$db->begin( __METHOD__ );
 			# Go through and update rev_len from these rows.
 			foreach ( $res as $row ) {
 				if ( $this->upgradeRow( $row, $table, $idCol, $prefix ) ) {
 					$count++;
 				}
 			}
-			$this->commitTransaction( $db, __METHOD__ );
+			$db->commit( __METHOD__ );
 
 			$blockStart += $this->mBatchSize;
 			$blockEnd += $this->mBatchSize;
@@ -142,8 +142,8 @@ class PopulateRevisionLength extends LoggedUpdateMaintenance {
 
 		# Update the row...
 		$db->update( $table,
-			[ "{$prefix}_len" => $content->getSize() ],
-			[ $idCol => $row->$idCol ],
+			array( "{$prefix}_len" => $content->getSize() ),
+			array( $idCol => $row->$idCol ),
 			__METHOD__
 		);
 

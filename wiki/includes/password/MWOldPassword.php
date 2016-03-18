@@ -28,7 +28,7 @@
  */
 class MWOldPassword extends ParameterizedPassword {
 	protected function getDefaultParams() {
-		return [];
+		return array();
 	}
 
 	protected function getDelimiter() {
@@ -41,7 +41,7 @@ class MWOldPassword extends ParameterizedPassword {
 		if ( $wgPasswordSalt && count( $this->args ) === 1 ) {
 			$this->hash = md5( $this->args[0] . '-' . md5( $plaintext ) );
 		} else {
-			$this->args = [];
+			$this->args = array();
 			$this->hash = md5( $plaintext );
 		}
 	}

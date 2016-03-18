@@ -16,16 +16,17 @@ class ExtraParserTest extends MediaWikiTestCase {
 		parent::setUp();
 
 		$contLang = Language::factory( 'en' );
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgShowDBErrorBacktrace' => true,
 			'wgLanguageCode' => 'en',
 			'wgContLang' => $contLang,
 			'wgLang' => Language::factory( 'en' ),
+			'wgMemc' => new EmptyBagOStuff,
 			'wgCleanSignatures' => true,
-		] );
+		) );
 
 		$this->options = ParserOptions::newFromUserAndLang( new User, $contLang );
-		$this->options->setTemplateCallback( [ __CLASS__, 'statelessFetchTemplate' ] );
+		$this->options->setTemplateCallback( array( __CLASS__, 'statelessFetchTemplate' ) );
 		$this->parser = new Parser;
 
 		MagicWord::clearCache();
@@ -119,11 +120,11 @@ class ExtraParserTest extends MediaWikiTestCase {
 	}
 
 	public static function provideStringsForCleanSigInSig() {
-		return [
-			[ "{{Foo}} ~~~~", "{{Foo}} " ],
-			[ "~~~", "" ],
-			[ "~~~~~", "" ],
-		];
+		return array(
+			array( "{{Foo}} ~~~~", "{{Foo}} " ),
+			array( "~~~", "" ),
+			array( "~~~~~", "" ),
+		);
 	}
 
 	/**
@@ -182,12 +183,12 @@ class ExtraParserTest extends MediaWikiTestCase {
 	 */
 	static function statelessFetchTemplate( $title, $parser = false ) {
 		$text = "Content of ''" . $title->getFullText() . "''";
-		$deps = [];
+		$deps = array();
 
-		return [
+		return array(
 			'text' => $text,
 			'finalTitle' => $title,
-			'deps' => $deps ];
+			'deps' => $deps );
 	}
 
 	/**
@@ -198,7 +199,7 @@ class ExtraParserTest extends MediaWikiTestCase {
 		$title = Title::newFromText( __FUNCTION__ );
 		$catName = wfMessage( 'broken-file-category' )->inContentLanguage()->text();
 		$cat = Title::makeTitleSafe( NS_CATEGORY, $catName );
-		$expected = [ $cat->getDBkey() ];
+		$expected = array( $cat->getDBkey() );
 		$parserOutput = $this->parser->parse( "[[file:nonexistent]]", $title, $this->options );
 		$result = $parserOutput->getCategoryLinks();
 		$this->assertEquals( $expected, $result );

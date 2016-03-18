@@ -13,7 +13,7 @@
  * @author Urhixidur
  */
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_SPECIAL          => 'Spesial',
 	NS_TALK             => 'Discute',
 	NS_USER             => 'Usor',
@@ -27,10 +27,10 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Aida_Discute',
 	NS_CATEGORY         => 'Categoria',
 	NS_CATEGORY_TALK    => 'Categoria_Discute',
-];
+);
 
-$specialPageAliases = [
-	'Newimages'                 => [ 'FixesNova' ],
-	'Newpages'                  => [ 'PajesNova' ],
-];
+$specialPageAliases = array(
+	'Newimages'                 => array( 'FixesNova' ),
+	'Newpages'                  => array( 'PajesNova' ),
+);
 

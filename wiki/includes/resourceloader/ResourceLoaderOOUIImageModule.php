@@ -30,13 +30,13 @@ class ResourceLoaderOOUIImageModule extends ResourceLoaderImageModule {
 		}
 
 		// Core default themes
-		$themes = [ 'default' => 'mediawiki' ];
+		$themes = array( 'default' => 'mediawiki' );
 		$themes += ExtensionRegistry::getInstance()->getAttribute( 'SkinOOUIThemes' );
 
 		$name = $this->definition['name'];
 		$rootPath = $this->definition['rootPath'];
 
-		$definition = [];
+		$definition = array();
 		foreach ( $themes as $skin => $theme ) {
 			// TODO Allow extensions to specify this path somehow
 			$dataPath = $this->localBasePath . '/' . $rootPath . '/' . $theme . '/' . $name . '.json';
@@ -55,7 +55,7 @@ class ResourceLoaderOOUIImageModule extends ResourceLoaderImageModule {
 					}
 				} );
 			} else {
-				$data = [];
+				$data = array();
 			}
 
 			foreach ( $data as $key => $value ) {

@@ -35,12 +35,7 @@ class PublishStashedFileJob extends Job {
 	}
 
 	public function run() {
-		/** @noinspection PhpUnusedLocalVariableInspection */
 		$scope = RequestContext::importScopedSession( $this->params['session'] );
-		$this->addTeardownCallback( function () use ( &$scope ) {
-			ScopedCallback::consume( $scope ); // T126450
-		} );
-
 		$context = RequestContext::getMain();
 		$user = $context->getUser();
 		try {
@@ -53,7 +48,7 @@ class PublishStashedFileJob extends Job {
 			UploadBase::setSessionStatus(
 				$user,
 				$this->params['filekey'],
-				[ 'result' => 'Poll', 'stage' => 'publish', 'status' => Status::newGood() ]
+				array( 'result' => 'Poll', 'stage' => 'publish', 'status' => Status::newGood() )
 			);
 
 			$upload = new UploadFromStash( $user );
@@ -67,11 +62,11 @@ class PublishStashedFileJob extends Job {
 			$verification = $upload->verifyUpload();
 			if ( $verification['status'] !== UploadBase::OK ) {
 				$status = Status::newFatal( 'verification-error' );
-				$status->value = [ 'verification' => $verification ];
+				$status->value = array( 'verification' => $verification );
 				UploadBase::setSessionStatus(
 					$user,
 					$this->params['filekey'],
-					[ 'result' => 'Failure', 'stage' => 'publish', 'status' => $status ]
+					array( 'result' => 'Failure', 'stage' => 'publish', 'status' => $status )
 				);
 				$this->setLastError( "Could not verify upload." );
 
@@ -83,14 +78,13 @@ class PublishStashedFileJob extends Job {
 				$this->params['comment'],
 				$this->params['text'],
 				$this->params['watch'],
-				$user,
-				isset( $this->params['tags'] ) ? $this->params['tags'] : []
+				$user
 			);
 			if ( !$status->isGood() ) {
 				UploadBase::setSessionStatus(
 					$user,
 					$this->params['filekey'],
-					[ 'result' => 'Failure', 'stage' => 'publish', 'status' => $status ]
+					array( 'result' => 'Failure', 'stage' => 'publish', 'status' => $status )
 				);
 				$this->setLastError( $status->getWikiText() );
 
@@ -108,25 +102,25 @@ class PublishStashedFileJob extends Job {
 			UploadBase::setSessionStatus(
 				$user,
 				$this->params['filekey'],
-				[
+				array(
 					'result' => 'Success',
 					'stage' => 'publish',
 					'filename' => $upload->getLocalFile()->getName(),
 					'imageinfo' => $imageInfo,
 					'status' => Status::newGood()
-				]
+				)
 			);
 		} catch ( Exception $e ) {
 			UploadBase::setSessionStatus(
 				$user,
 				$this->params['filekey'],
-				[
+				array(
 					'result' => 'Failure',
 					'stage' => 'publish',
 					'status' => Status::newFatal( 'api-error-publishfailed' )
-				]
+				)
 			);
-			$this->setLastError( get_class( $e ) . ": " . $e->getMessage() );
+			$this->setLastError( get_class( $e ) . ": " . $e->getText() );
 			// To prevent potential database referential integrity issues.
 			// See bug 32551.
 			MWExceptionHandler::rollbackMasterChangesAndLog( $e );
@@ -140,7 +134,7 @@ class PublishStashedFileJob extends Job {
 	public function getDeduplicationInfo() {
 		$info = parent::getDeduplicationInfo();
 		if ( is_array( $info['params'] ) ) {
-			$info['params'] = [ 'filekey' => $info['params']['filekey'] ];
+			$info['params'] = array( 'filekey' => $info['params']['filekey'] );
 		}
 
 		return $info;

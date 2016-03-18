@@ -99,7 +99,7 @@
 				word: 'Wikipedia',
 				grammarForm: 'תחילית',
 				expected: '־Wikipedia',
-				description: 'Add a hyphen (maqaf) before non-Hebrew letters'
+				description: 'GAdd a hyphen (maqaf) before non-Hebrew letters'
 			},
 			{
 				word: '1995',
@@ -307,84 +307,6 @@
 				grammarForm: 'prepositional',
 				expected: 'данных',
 				description: 'Grammar test for prepositional case, данные -> данных'
-			},
-			{
-				word: 'русский',
-				grammarForm: 'languagegen',
-				expected: 'русского',
-				description: 'Grammar test for languagegen case, русский -> русского'
-			},
-			{
-				word: 'немецкий',
-				grammarForm: 'languagegen',
-				expected: 'немецкого',
-				description: 'Grammar test for languagegen case, немецкий -> немецкого'
-			},
-			{
-				word: 'иврит',
-				grammarForm: 'languagegen',
-				expected: 'иврита',
-				description: 'Grammar test for languagegen case, иврит -> иврита'
-			},
-			{
-				word: 'эсперанто',
-				grammarForm: 'languagegen',
-				expected: 'эсперанто',
-				description: 'Grammar test for languagegen case, эсперанто -> эсперанто'
-			},
-			{
-				word: 'русский',
-				grammarForm: 'languageprep',
-				expected: 'русском',
-				description: 'Grammar test for languageprep case, русский -> русском'
-			},
-			{
-				word: 'немецкий',
-				grammarForm: 'languageprep',
-				expected: 'немецком',
-				description: 'Grammar test for languageprep case, немецкий -> немецком'
-			},
-			{
-				word: 'идиш',
-				grammarForm: 'languageprep',
-				expected: 'идише',
-				description: 'Grammar test for languageprep case, идиш -> идише'
-			},
-			{
-				word: 'эсперанто',
-				grammarForm: 'languageprep',
-				expected: 'эсперанто',
-				description: 'Grammar test for languageprep case, эсперанто -> эсперанто'
-			},
-			{
-				word: 'русский',
-				grammarForm: 'languageadverb',
-				expected: 'по-русски',
-				description: 'Grammar test for languageadverb case, русский -> по-русски'
-			},
-			{
-				word: 'немецкий',
-				grammarForm: 'languageadverb',
-				expected: 'по-немецки',
-				description: 'Grammar test for languageadverb case, немецкий -> по-немецки'
-			},
-			{
-				word: 'иврит',
-				grammarForm: 'languageadverb',
-				expected: 'на иврите',
-				description: 'Grammar test for languageadverb case, иврит -> на иврите'
-			},
-			{
-				word: 'эсперанто',
-				grammarForm: 'languageadverb',
-				expected: 'на эсперанто',
-				description: 'Grammar test for languageadverb case, эсперанто -> на эсперанто'
-			},
-			{
-				word: 'гуарани',
-				grammarForm: 'languageadverb',
-				expected: 'на языке гуарани',
-				description: 'Grammar test for languageadverb case, гуарани -> на языке гуарани'
 			}
 		],
 
@@ -432,27 +354,39 @@
 
 		uk: [
 			{
+				word: 'тесть',
+				grammarForm: 'genitive',
+				expected: 'тестя',
+				description: 'Grammar test for genitive case'
+			},
+			{
 				word: 'Вікіпедія',
 				grammarForm: 'genitive',
 				expected: 'Вікіпедії',
 				description: 'Grammar test for genitive case'
 			},
 			{
-				word: 'Віківиди',
+				word: 'установка',
 				grammarForm: 'genitive',
-				expected: 'Віківидів',
+				expected: 'установки',
 				description: 'Grammar test for genitive case'
 			},
 			{
-				word: 'Вікіцитати',
+				word: 'похоти',
 				grammarForm: 'genitive',
-				expected: 'Вікіцитат',
+				expected: 'похотей',
 				description: 'Grammar test for genitive case'
 			},
 			{
-				word: 'Вікіпідручник',
+				word: 'доводы',
 				grammarForm: 'genitive',
-				expected: 'Вікіпідручника',
+				expected: 'доводов',
+				description: 'Grammar test for genitive case'
+			},
+			{
+				word: 'песчаник',
+				grammarForm: 'genitive',
+				expected: 'песчаника',
 				description: 'Grammar test for genitive case'
 			},
 			{

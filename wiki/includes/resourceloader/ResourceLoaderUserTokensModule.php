@@ -1,6 +1,6 @@
 <?php
 /**
- * ResourceLoader module for user tokens.
+ * Resource loader module for user tokens.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ class ResourceLoaderUserTokensModule extends ResourceLoaderModule {
 
 	protected $origin = self::ORIGIN_CORE_INDIVIDUAL;
 
-	protected $targets = [ 'desktop', 'mobile' ];
+	protected $targets = array( 'desktop', 'mobile' );
 
 	/* Methods */
 
@@ -43,29 +43,22 @@ class ResourceLoaderUserTokensModule extends ResourceLoaderModule {
 	protected function contextUserTokens( ResourceLoaderContext $context ) {
 		$user = $context->getUserObj();
 
-		return [
+		return array(
 			'editToken' => $user->getEditToken(),
 			'patrolToken' => $user->getEditToken( 'patrol' ),
 			'watchToken' => $user->getEditToken( 'watch' ),
-			'csrfToken' => $user->getEditToken(),
-		];
+		);
 	}
 
 	/**
-	 * Generate the JavaScript content of this module.
-	 *
-	 * Add '@nomin' annotation to prevent the module's contents from getting
-	 * cached (T84960).
-	 *
 	 * @param ResourceLoaderContext $context
 	 * @return string
 	 */
 	public function getScript( ResourceLoaderContext $context ) {
-		return Xml::encodeJsCall(
-			'mw.user.tokens.set',
-			[ $this->contextUserTokens( $context ) ],
+		return Xml::encodeJsCall( 'mw.user.tokens.set',
+			array( $this->contextUserTokens( $context ) ),
 			ResourceLoader::inDebugMode()
-		) . ResourceLoader::FILTER_NOMIN;
+		);
 	}
 
 	/**

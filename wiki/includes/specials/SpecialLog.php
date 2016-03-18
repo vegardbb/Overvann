@@ -76,19 +76,19 @@ class SpecialLog extends SpecialPage {
 		}
 
 		# Handle type-specific inputs
-		$qc = [];
+		$qc = array();
 		if ( $opts->getValue( 'type' ) == 'suppress' ) {
 			$offender = User::newFromName( $opts->getValue( 'offender' ), false );
 			if ( $offender && $offender->getId() > 0 ) {
-				$qc = [ 'ls_field' => 'target_author_id', 'ls_value' => $offender->getId() ];
+				$qc = array( 'ls_field' => 'target_author_id', 'ls_value' => $offender->getId() );
 			} elseif ( $offender && IP::isIPAddress( $offender->getName() ) ) {
-				$qc = [ 'ls_field' => 'target_author_ip', 'ls_value' => $offender->getName() ];
+				$qc = array( 'ls_field' => 'target_author_ip', 'ls_value' => $offender->getName() );
 			}
 		} else {
 			// Allow extensions to add relations to their search types
 			Hooks::run(
 				'SpecialLogAddLogSearchRelations',
-				[ $opts->getValue( 'type' ), $this->getRequest(), &$qc ]
+				array( $opts->getValue( 'type' ), $this->getRequest(), &$qc )
 			);
 		}
 
@@ -122,13 +122,13 @@ class SpecialLog extends SpecialPage {
 		if ( $types !== null ) {
 			return $types;
 		}
-		$types = [
+		$types = array(
 			'block',
 			'newusers',
 			'rights',
-		];
+		);
 
-		Hooks::run( 'GetLogTypesOnUser', [ &$types ] );
+		Hooks::run( 'GetLogTypesOnUser', array( &$types ) );
 		return $types;
 	}
 
@@ -147,7 +147,7 @@ class SpecialLog extends SpecialPage {
 	private function parseParams( FormOptions $opts, $par ) {
 		# Get parameters
 		$parms = explode( '/', ( $par = ( $par !== null ) ? $par : '' ) );
-		$symsForAll = [ '*', 'all' ];
+		$symsForAll = array( '*', 'all' );
 		if ( $parms[0] != '' &&
 			( in_array( $par, $this->getConfig()->get( 'LogTypes' ) ) || in_array( $par, $symsForAll ) )
 		) {
@@ -228,7 +228,7 @@ class SpecialLog extends SpecialPage {
 		# Show button to hide log entries and/or edit change tags
 		$s = Html::openElement(
 			'form',
-			[ 'action' => wfScript(), 'id' => 'mw-log-deleterevision-submit' ]
+			array( 'action' => wfScript(), 'id' => 'mw-log-deleterevision-submit' )
 		) . "\n";
 		$s .= Html::hidden( 'action', 'historysubmit' ) . "\n";
 		$s .= Html::hidden( 'type', 'logging' ) . "\n";
@@ -237,30 +237,27 @@ class SpecialLog extends SpecialPage {
 		if ( $canRevDelete ) {
 			$buttons .= Html::element(
 				'button',
-				[
+				array(
 					'type' => 'submit',
 					'name' => 'revisiondelete',
 					'value' => '1',
 					'class' => "deleterevision-log-submit mw-log-deleterevision-button"
-				],
+				),
 				$this->msg( 'showhideselectedlogentries' )->text()
 			) . "\n";
 		}
 		if ( $showTagEditUI ) {
 			$buttons .= Html::element(
 				'button',
-				[
+				array(
 					'type' => 'submit',
 					'name' => 'editchangetags',
 					'value' => '1',
 					'class' => "editchangetags-log-submit mw-log-editchangetags-button"
-				],
+				),
 				$this->msg( 'log-edit-tags' )->text()
 			) . "\n";
 		}
-
-		$buttons .= ( new ListToggle( $this->getOutput() ) )->getHTML();
-
 		$s .= $buttons . $formcontents . $buttons;
 		$s .= Html::closeElement( 'form' );
 

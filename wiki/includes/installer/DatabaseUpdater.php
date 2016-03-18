@@ -38,20 +38,20 @@ abstract class DatabaseUpdater {
 	 *
 	 * @var array
 	 */
-	protected $updates = [];
+	protected $updates = array();
 
 	/**
 	 * Array of updates that were skipped
 	 *
 	 * @var array
 	 */
-	protected $updatesSkipped = [];
+	protected $updatesSkipped = array();
 
 	/**
 	 * List of extension-provided database updates
 	 * @var array
 	 */
-	protected $extensionUpdates = [];
+	protected $extensionUpdates = array();
 
 	/**
 	 * Handle to the database subclass
@@ -66,7 +66,7 @@ abstract class DatabaseUpdater {
 	 * Scripts to run after database update
 	 * Should be a subclass of LoggedUpdateMaintenance
 	 */
-	protected $postDatabaseUpdateMaintenance = [
+	protected $postDatabaseUpdateMaintenance = array(
 		'DeleteDefaultMessages',
 		'PopulateRevisionLength',
 		'PopulateRevisionSha1',
@@ -75,7 +75,7 @@ abstract class DatabaseUpdater {
 		'PopulateFilearchiveSha1',
 		'PopulateBacklinkNamespace',
 		'FixDefaultJsonContentPages'
-	];
+	);
 
 	/**
 	 * File handle for SQL output.
@@ -116,7 +116,7 @@ abstract class DatabaseUpdater {
 		$this->maintenance->setDB( $db );
 		$this->initOldGlobals();
 		$this->loadExtensions();
-		Hooks::run( 'LoadExtensionSchemaUpdates', [ $this ] );
+		Hooks::run( 'LoadExtensionSchemaUpdates', array( $this ) );
 	}
 
 	/**
@@ -129,12 +129,12 @@ abstract class DatabaseUpdater {
 
 		# For extensions only, should be populated via hooks
 		# $wgDBtype should be checked to specifiy the proper file
-		$wgExtNewTables = []; // table, dir
-		$wgExtNewFields = []; // table, column, dir
-		$wgExtPGNewFields = []; // table, column, column attributes; for PostgreSQL
-		$wgExtPGAlteredFields = []; // table, column, new type, conversion method; for PostgreSQL
-		$wgExtNewIndexes = []; // table, index, dir
-		$wgExtModifiedFields = []; // table, index, dir
+		$wgExtNewTables = array(); // table, dir
+		$wgExtNewFields = array(); // table, column, dir
+		$wgExtPGNewFields = array(); // table, column, column attributes; for PostgreSQL
+		$wgExtPGAlteredFields = array(); // table, column, new type, conversion method; for PostgreSQL
+		$wgExtNewIndexes = array(); // table, index, dir
+		$wgExtModifiedFields = array(); // table, index, dir
 	}
 
 	/**
@@ -154,7 +154,7 @@ abstract class DatabaseUpdater {
 
 		// This will automatically add "AutoloadClasses" to $wgAutoloadClasses
 		$data = $registry->readFromQueue( $queue );
-		$hooks = [ 'wgHooks' => [ 'LoadExtensionSchemaUpdates' => [] ] ];
+		$hooks = array( 'wgHooks' => array( 'LoadExtensionSchemaUpdates' => array() ) );
 		if ( isset( $data['globals']['wgHooks']['LoadExtensionSchemaUpdates'] ) ) {
 			$hooks = $data['globals']['wgHooks']['LoadExtensionSchemaUpdates'];
 		}
@@ -240,7 +240,7 @@ abstract class DatabaseUpdater {
 	 * @param string $sqlPath Full path to the schema file
 	 */
 	public function addExtensionTable( $tableName, $sqlPath ) {
-		$this->extensionUpdates[] = [ 'addTable', $tableName, $sqlPath, true ];
+		$this->extensionUpdates[] = array( 'addTable', $tableName, $sqlPath, true );
 	}
 
 	/**
@@ -251,7 +251,7 @@ abstract class DatabaseUpdater {
 	 * @param string $sqlPath
 	 */
 	public function addExtensionIndex( $tableName, $indexName, $sqlPath ) {
-		$this->extensionUpdates[] = [ 'addIndex', $tableName, $indexName, $sqlPath, true ];
+		$this->extensionUpdates[] = array( 'addIndex', $tableName, $indexName, $sqlPath, true );
 	}
 
 	/**
@@ -263,7 +263,7 @@ abstract class DatabaseUpdater {
 	 * @param string $sqlPath
 	 */
 	public function addExtensionField( $tableName, $columnName, $sqlPath ) {
-		$this->extensionUpdates[] = [ 'addField', $tableName, $columnName, $sqlPath, true ];
+		$this->extensionUpdates[] = array( 'addField', $tableName, $columnName, $sqlPath, true );
 	}
 
 	/**
@@ -275,7 +275,7 @@ abstract class DatabaseUpdater {
 	 * @param string $sqlPath
 	 */
 	public function dropExtensionField( $tableName, $columnName, $sqlPath ) {
-		$this->extensionUpdates[] = [ 'dropField', $tableName, $columnName, $sqlPath, true ];
+		$this->extensionUpdates[] = array( 'dropField', $tableName, $columnName, $sqlPath, true );
 	}
 
 	/**
@@ -288,7 +288,7 @@ abstract class DatabaseUpdater {
 	 * @param string $sqlPath The path to the SQL change path
 	 */
 	public function dropExtensionIndex( $tableName, $indexName, $sqlPath ) {
-		$this->extensionUpdates[] = [ 'dropIndex', $tableName, $indexName, $sqlPath, true ];
+		$this->extensionUpdates[] = array( 'dropIndex', $tableName, $indexName, $sqlPath, true );
 	}
 
 	/**
@@ -299,7 +299,7 @@ abstract class DatabaseUpdater {
 	 * @param string $sqlPath
 	 */
 	public function dropExtensionTable( $tableName, $sqlPath ) {
-		$this->extensionUpdates[] = [ 'dropTable', $tableName, $sqlPath, true ];
+		$this->extensionUpdates[] = array( 'dropTable', $tableName, $sqlPath, true );
 	}
 
 	/**
@@ -317,7 +317,7 @@ abstract class DatabaseUpdater {
 	public function renameExtensionIndex( $tableName, $oldIndexName, $newIndexName,
 		$sqlPath, $skipBothIndexExistWarning = false
 	) {
-		$this->extensionUpdates[] = [
+		$this->extensionUpdates[] = array(
 			'renameIndex',
 			$tableName,
 			$oldIndexName,
@@ -325,7 +325,7 @@ abstract class DatabaseUpdater {
 			$skipBothIndexExistWarning,
 			$sqlPath,
 			true
-		];
+		);
 	}
 
 	/**
@@ -336,7 +336,7 @@ abstract class DatabaseUpdater {
 	 * @param string $sqlPath The path to the SQL change path
 	 */
 	public function modifyExtensionField( $tableName, $fieldName, $sqlPath ) {
-		$this->extensionUpdates[] = [ 'modifyField', $tableName, $fieldName, $sqlPath, true ];
+		$this->extensionUpdates[] = array( 'modifyField', $tableName, $fieldName, $sqlPath, true );
 	}
 
 	/**
@@ -387,9 +387,9 @@ abstract class DatabaseUpdater {
 	 * Writes the schema updates desired to a file for the DB Admin to run.
 	 * @param array $schemaUpdate
 	 */
-	private function writeSchemaUpdateFile( $schemaUpdate = [] ) {
+	private function writeSchemaUpdateFile( $schemaUpdate = array() ) {
 		$updates = $this->updatesSkipped;
-		$this->updatesSkipped = [];
+		$this->updatesSkipped = array();
 
 		foreach ( $updates as $funcList ) {
 			$func = $funcList[0];
@@ -406,7 +406,7 @@ abstract class DatabaseUpdater {
 	 *
 	 * @param array $what What updates to perform
 	 */
-	public function doUpdates( $what = [ 'core', 'extensions', 'stats' ] ) {
+	public function doUpdates( $what = array( 'core', 'extensions', 'stats' ) ) {
 		global $wgVersion;
 
 		$this->db->begin( __METHOD__ );
@@ -442,13 +442,13 @@ abstract class DatabaseUpdater {
 	 * @param bool $passSelf Whether to pass this object we calling external functions
 	 */
 	private function runUpdates( array $updates, $passSelf ) {
-		$updatesDone = [];
-		$updatesSkipped = [];
+		$updatesDone = array();
+		$updatesSkipped = array();
 		foreach ( $updates as $params ) {
 			$origParams = $params;
 			$func = array_shift( $params );
 			if ( !is_array( $func ) && method_exists( $this, $func ) ) {
-				$func = [ $this, $func ];
+				$func = array( $this, $func );
 			} elseif ( $passSelf ) {
 				array_unshift( $params, $this );
 			}
@@ -456,9 +456,8 @@ abstract class DatabaseUpdater {
 			flush();
 			if ( $ret !== false ) {
 				$updatesDone[] = $origParams;
-				wfGetLBFactory()->waitForReplication();
 			} else {
-				$updatesSkipped[] = [ $func, $params, $origParams ];
+				$updatesSkipped[] = array( $func, $params, $origParams );
 			}
 		}
 		$this->updatesSkipped = array_merge( $this->updatesSkipped, $updatesSkipped );
@@ -469,7 +468,7 @@ abstract class DatabaseUpdater {
 	 * @param string $version
 	 * @param array $updates
 	 */
-	protected function setAppliedUpdates( $version, $updates = [] ) {
+	protected function setAppliedUpdates( $version, $updates = array() ) {
 		$this->db->clearFlag( DBO_DDLMODE );
 		if ( !$this->canUseNewUpdatelog() ) {
 			return;
@@ -477,7 +476,7 @@ abstract class DatabaseUpdater {
 		$key = "updatelist-$version-" . time() . self::$updateCounter;
 		self::$updateCounter++;
 		$this->db->insert( 'updatelog',
-			[ 'ul_key' => $key, 'ul_value' => serialize( $updates ) ],
+			array( 'ul_key' => $key, 'ul_value' => serialize( $updates ) ),
 			__METHOD__ );
 		$this->db->setFlag( DBO_DDLMODE );
 	}
@@ -494,7 +493,7 @@ abstract class DatabaseUpdater {
 			'updatelog',
 			# Bug 65813
 			'1 AS X',
-			[ 'ul_key' => $key ],
+			array( 'ul_key' => $key ),
 			__METHOD__
 		);
 
@@ -510,7 +509,7 @@ abstract class DatabaseUpdater {
 	 */
 	public function insertUpdateRow( $key, $val = null ) {
 		$this->db->clearFlag( DBO_DDLMODE );
-		$values = [ 'ul_key' => $key ];
+		$values = array( 'ul_key' => $key );
 		if ( $val && $this->canUseNewUpdatelog() ) {
 			$values['ul_value'] = $val;
 		}
@@ -568,33 +567,33 @@ abstract class DatabaseUpdater {
 		global $wgExtNewFields, $wgExtNewTables, $wgExtModifiedFields,
 			$wgExtNewIndexes;
 
-		$updates = [];
+		$updates = array();
 
 		foreach ( $wgExtNewTables as $tableRecord ) {
-			$updates[] = [
+			$updates[] = array(
 				'addTable', $tableRecord[0], $tableRecord[1], true
-			];
+			);
 		}
 
 		foreach ( $wgExtNewFields as $fieldRecord ) {
-			$updates[] = [
+			$updates[] = array(
 				'addField', $fieldRecord[0], $fieldRecord[1],
 				$fieldRecord[2], true
-			];
+			);
 		}
 
 		foreach ( $wgExtNewIndexes as $fieldRecord ) {
-			$updates[] = [
+			$updates[] = array(
 				'addIndex', $fieldRecord[0], $fieldRecord[1],
 				$fieldRecord[2], true
-			];
+			);
 		}
 
 		foreach ( $wgExtModifiedFields as $fieldRecord ) {
-			$updates[] = [
+			$updates[] = array(
 				'modifyField', $fieldRecord[0], $fieldRecord[1],
 				$fieldRecord[2], true
-			];
+			);
 		}
 
 		return $updates;
@@ -617,7 +616,7 @@ abstract class DatabaseUpdater {
 	 */
 	public function copyFile( $filename ) {
 		$this->db->sourceFile( $filename, false, false, false,
-			[ $this, 'appendLine' ]
+			array( $this, 'appendLine' )
 		);
 	}
 
@@ -918,13 +917,13 @@ abstract class DatabaseUpdater {
 	public function setFileAccess() {
 		$repo = RepoGroup::singleton()->getLocalRepo();
 		$zonePath = $repo->getZonePath( 'temp' );
-		if ( $repo->getBackend()->directoryExists( [ 'dir' => $zonePath ] ) ) {
+		if ( $repo->getBackend()->directoryExists( array( 'dir' => $zonePath ) ) ) {
 			// If the directory was never made, then it will have the right ACLs when it is made
-			$status = $repo->getBackend()->secure( [
+			$status = $repo->getBackend()->secure( array(
 				'dir' => $zonePath,
 				'noAccess' => true,
 				'noListing' => true
-			] );
+			) );
 			if ( $status->isOK() ) {
 				$this->output( "Set the local repo temp zone container to be private.\n" );
 			} else {
@@ -956,7 +955,7 @@ abstract class DatabaseUpdater {
 	 */
 	protected function checkStats() {
 		$this->output( "...site_stats is populated..." );
-		$row = $this->db->selectRow( 'site_stats', '*', [ 'ss_row_id' => 1 ], __METHOD__ );
+		$row = $this->db->selectRow( 'site_stats', '*', array( 'ss_row_id' => 1 ), __METHOD__ );
 		if ( $row === false ) {
 			$this->output( "data is missing! rebuilding...\n" );
 		} elseif ( isset( $row->site_stats ) && $row->ss_total_pages == -1 ) {
@@ -979,11 +978,11 @@ abstract class DatabaseUpdater {
 		if ( $activeUsers == -1 ) {
 			$activeUsers = $this->db->selectField( 'recentchanges',
 				'COUNT( DISTINCT rc_user_text )',
-				[ 'rc_user != 0', 'rc_bot' => 0, "rc_log_type != 'newusers'" ], __METHOD__
+				array( 'rc_user != 0', 'rc_bot' => 0, "rc_log_type != 'newusers'" ), __METHOD__
 			);
 			$this->db->update( 'site_stats',
-				[ 'ss_active_users' => intval( $activeUsers ) ],
-				[ 'ss_row_id' => 1 ], __METHOD__, [ 'LIMIT' => 1 ]
+				array( 'ss_active_users' => intval( $activeUsers ) ),
+				array( 'ss_row_id' => 1 ), __METHOD__, array( 'LIMIT' => 1 )
 			);
 		}
 		$this->output( "...ss_active_users user count set...\n" );

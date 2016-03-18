@@ -144,7 +144,7 @@ class DbTestPreviewer extends TestRecorder {
 			$this->prevRun = $this->db->selectField( 'testrun', 'MAX(tr_id)' );
 		}
 
-		$this->results = [];
+		$this->results = array();
 	}
 
 	function record( $test, $result ) {
@@ -156,7 +156,7 @@ class DbTestPreviewer extends TestRecorder {
 		if ( $this->prevRun ) {
 			// f = fail, p = pass, n = nonexistent
 			// codes show before then after
-			$table = [
+			$table = array(
 				'fp' => 'previously failing test(s) now PASSING! :)',
 				'pn' => 'previously PASSING test(s) removed o_O',
 				'np' => 'new PASSING test(s) :)',
@@ -165,12 +165,12 @@ class DbTestPreviewer extends TestRecorder {
 				'fn' => 'previously FAILING test(s) removed O_o',
 				'nf' => 'new FAILING test(s) :(',
 				'ff' => 'still FAILING test(s) :(',
-			];
+			);
 
-			$prevResults = [];
+			$prevResults = array();
 
-			$res = $this->db->select( 'testitem', [ 'ti_name', 'ti_success' ],
-				[ 'ti_run' => $this->prevRun ], __METHOD__ );
+			$res = $this->db->select( 'testitem', array( 'ti_name', 'ti_success' ),
+				array( 'ti_run' => $this->prevRun ), __METHOD__ );
 
 			foreach ( $res as $row ) {
 				if ( !$this->parent->regex
@@ -183,7 +183,7 @@ class DbTestPreviewer extends TestRecorder {
 			$combined = array_keys( $this->results + $prevResults );
 
 			# Determine breakdown by change type
-			$breakdown = [];
+			$breakdown = array();
 			foreach ( $combined as $test ) {
 				if ( !isset( $prevResults[$test] ) ) {
 					$before = 'n';
@@ -240,11 +240,11 @@ class DbTestPreviewer extends TestRecorder {
 		if ( $after == 'n' ) {
 			$changedRun = $this->db->selectField( 'testitem',
 				'MIN(ti_run)',
-				[ 'ti_name' => $testname ],
+				array( 'ti_name' => $testname ),
 				__METHOD__ );
 			$appear = $this->db->selectRow( 'testrun',
-				[ 'tr_date', 'tr_mw_version' ],
-				[ 'tr_id' => $changedRun ],
+				array( 'tr_date', 'tr_mw_version' ),
+				array( 'tr_id' => $changedRun ),
 				__METHOD__ );
 
 			return "First recorded appearance: "
@@ -254,9 +254,9 @@ class DbTestPreviewer extends TestRecorder {
 
 		// Otherwise, this test has previous recorded results.
 		// See when this test last had a different result to what we're seeing now.
-		$conds = [
+		$conds = array(
 			'ti_name' => $testname,
-			'ti_success' => ( $after == 'f' ? "1" : "0" ) ];
+			'ti_success' => ( $after == 'f' ? "1" : "0" ) );
 
 		if ( $this->curRun ) {
 			$conds[] = "ti_run != " . $this->db->addQuotes( $this->curRun );
@@ -277,14 +277,14 @@ class DbTestPreviewer extends TestRecorder {
 		// (i.e. it used to work, but now doesn't; or used to fail, but is now fixed.)
 		// In this situation, give as much info as we can as to when it changed status.
 		$pre = $this->db->selectRow( 'testrun',
-			[ 'tr_date', 'tr_mw_version' ],
-			[ 'tr_id' => $changedRun ],
+			array( 'tr_date', 'tr_mw_version' ),
+			array( 'tr_id' => $changedRun ),
 			__METHOD__ );
 		$post = $this->db->selectRow( 'testrun',
-			[ 'tr_date', 'tr_mw_version' ],
-			[ "tr_id > " . $this->db->addQuotes( $changedRun ) ],
+			array( 'tr_date', 'tr_mw_version' ),
+			array( "tr_id > " . $this->db->addQuotes( $changedRun ) ),
 			__METHOD__,
-			[ "LIMIT" => 1, "ORDER BY" => 'tr_id' ]
+			array( "LIMIT" => 1, "ORDER BY" => 'tr_id' )
 		);
 
 		if ( $post ) {
@@ -329,13 +329,13 @@ class DbTestRecorder extends DbTestPreviewer {
 		parent::start();
 
 		$this->db->insert( 'testrun',
-			[
+			array(
 				'tr_date' => $this->db->timestamp(),
 				'tr_mw_version' => $this->version,
 				'tr_php_version' => PHP_VERSION,
 				'tr_db_version' => $this->db->getServerVersion(),
 				'tr_uname' => php_uname()
-			],
+			),
 			__METHOD__ );
 		if ( $this->db->getType() === 'postgres' ) {
 			$this->curRun = $this->db->currentSequenceValue( 'testrun_id_seq' );
@@ -354,11 +354,11 @@ class DbTestRecorder extends DbTestPreviewer {
 		parent::record( $test, $result );
 
 		$this->db->insert( 'testitem',
-			[
+			array(
 				'ti_run' => $this->curRun,
 				'ti_name' => $test,
 				'ti_success' => $result ? 1 : 0,
-			],
+			),
 			__METHOD__ );
 	}
 }
@@ -375,7 +375,7 @@ class TestFileIterator implements Iterator {
 	private $test;
 	private $section = null;
 	/** String|null: current test section being analyzed */
-	private $sectionData = [];
+	private $sectionData = array();
 	private $lineNum;
 	private $eof;
 	# Create a fake parser tests which never run anything unless
@@ -434,10 +434,10 @@ class TestFileIterator implements Iterator {
 	function setupCurrentTest() {
 		// "input" and "result" are old section names allowed
 		// for backwards-compatibility.
-		$input = $this->checkSection( [ 'wikitext', 'input' ], false );
-		$result = $this->checkSection( [ 'html/php', 'html/*', 'html', 'result' ], false );
+		$input = $this->checkSection( array( 'wikitext', 'input' ), false );
+		$result = $this->checkSection( array( 'html/php', 'html/*', 'html', 'result' ), false );
 		// some tests have "with tidy" and "without tidy" variants
-		$tidy = $this->checkSection( [ 'html/php+tidy', 'html+tidy' ], false );
+		$tidy = $this->checkSection( array( 'html/php+tidy', 'html+tidy' ), false );
 		if ( $tidy != false ) {
 			if ( $this->nextSubTest == 0 ) {
 				if ( $result != false ) {
@@ -458,11 +458,8 @@ class TestFileIterator implements Iterator {
 			$this->sectionData['config'] = '';
 		}
 
-		$isDisabled = preg_match( '/\\bdisabled\\b/i', $this->sectionData['options'] ) &&
-			!$this->parserTest->runDisabled;
-		$isParsoidOnly = preg_match( '/\\bparsoid\\b/i', $this->sectionData['options'] ) &&
-			$result == 'html' &&
-			!$this->parserTest->runParsoid;
+		$isDisabled = preg_match( '/\\bdisabled\\b/i', $this->sectionData['options'] ) && !$this->parserTest->runDisabled;
+		$isParsoidOnly = preg_match( '/\\bparsoid\\b/i', $this->sectionData['options'] ) && $result == 'html' && !$this->parserTest->runParsoid;
 		$isFiltered = !preg_match( "/" . $this->parserTest->regex . "/i", $this->sectionData['test'] );
 		if ( $input == false || $result == false || $isDisabled || $isParsoidOnly || $isFiltered ) {
 			# disabled test
@@ -477,13 +474,13 @@ class TestFileIterator implements Iterator {
 			throw new MWException( "Problem running requested parser hook from the test file" );
 		}
 
-		$this->test = [
+		$this->test = array(
 			'test' => ParserTest::chomp( $this->sectionData['test'] ),
 			'input' => ParserTest::chomp( $this->sectionData[$input] ),
 			'result' => ParserTest::chomp( $this->sectionData[$result] ),
 			'options' => ParserTest::chomp( $this->sectionData['options'] ),
 			'config' => ParserTest::chomp( $this->sectionData['config'] ),
-		];
+		);
 		if ( $tidy != false ) {
 			$this->test['options'] .= " tidy";
 		}
@@ -504,7 +501,7 @@ class TestFileIterator implements Iterator {
 
 		while ( false !== ( $line = fgets( $this->fh ) ) ) {
 			$this->lineNum++;
-			$matches = [];
+			$matches = array();
 
 			if ( preg_match( '/^!!\s*(\S+)/', $line, $matches ) ) {
 				$this->section = strtolower( $matches[1] );
@@ -605,7 +602,7 @@ class TestFileIterator implements Iterator {
 	 * Clear section name and its data
 	 */
 	private function clearSection() {
-		$this->sectionData = [];
+		$this->sectionData = array();
 		$this->section = null;
 
 	}
@@ -628,7 +625,7 @@ class TestFileIterator implements Iterator {
 			throw new MWException( __METHOD__ . " can not verify a null section!\n" );
 		}
 		if ( !is_array( $tokens ) ) {
-			$tokens = [ $tokens ];
+			$tokens = array( $tokens );
 		}
 		if ( count( $tokens ) == 0 ) {
 			throw new MWException( __METHOD__ . " can not verify zero sections!\n" );
@@ -661,7 +658,8 @@ class TestFileIterator implements Iterator {
 			) );
 		}
 
-		return array_values( $tokens )[0];
+		$tokens = array_values( $tokens );
+		return $tokens[0];
 	}
 }
 
@@ -684,9 +682,9 @@ class DelayedParserTest {
 	 * Call to this will erase any hooks function that were pending.
 	 */
 	public function reset() {
-		$this->hooks = [];
-		$this->fnHooks = [];
-		$this->transparentHooks = [];
+		$this->hooks = array();
+		$this->fnHooks = array();
+		$this->transparentHooks = array();
 	}
 
 	/**
@@ -812,7 +810,7 @@ class TidySupport {
 			class_exists( 'tidy' ) && !wfIsHHVM();
 
 		$this->externalTidy = is_executable( $wgTidyBin ) ||
-			Installer::locateExecutableInDefaultPaths( [ $wgTidyBin ] )
+			Installer::locateExecutableInDefaultPaths( array( $wgTidyBin ) )
 			!== false;
 	}
 

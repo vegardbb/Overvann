@@ -12,6 +12,9 @@
 //
 // Styleguide 2.
 
+@transitionDuration: .1s;
+@transitionFunction: ease-in-out;
+
 // Neutral button styling
 //
 // These are the main actions on the page/workflow. The page should have only one of progressive, constructive and desctructive buttons, the rest being quiet.
@@ -31,26 +34,27 @@
 	font-size: 1em;
 	// Container layout
 	display: inline-block;
-	min-width: 4em;
-	max-width: 28.75em; // equivalent to 460px, @see T95367
 	padding: .5em 1em;
 	margin: 0;
-	border-radius: @borderRadius;
-	.box-sizing( border-box );
+	.box-sizing(border-box);
 
 	// Disable weird iOS styling
 	-webkit-appearance: none;
 
-	// IE 6 & 7 hack
-	// https://stackoverflow.com/a/5838575/365238
+	// IE6/IE7 hack
+	// http://stackoverflow.com/a/5838575/365238
 	*display: inline;
 	zoom: 1;
+
+	// Container styling
+	.button-colors(#FFF, #CCC, #777);
+	border-radius: @borderRadius;
+	min-width: 4em;
 
 	// Ensure that buttons and inputs are nicely aligned when they have differing heights
 	vertical-align: middle;
 
 	// Content styling
-	.button-colors( #fff, @colorGray12, @colorGray7 );
 	text-align: center;
 	font-weight: bold;
 
@@ -61,6 +65,8 @@
 		text-shadow: none;
 		cursor: default;
 	}
+
+	.transition(background @transitionDuration @transitionFunction, color @transitionDuration @transitionFunction, box-shadow @transitionDuration @transitionFunction;);
 
 	// Styling for specific button types
 	// -----------------------------------------
@@ -111,8 +117,6 @@
 	&.mw-ui-block {
 		display: block;
 		width: 100%;
-		margin-left: auto;
-		margin-right: auto;
 	}
 
 	// Progressive buttons
@@ -131,14 +135,14 @@
 	// Styleguide 2.1.1.
 	&.mw-ui-progressive,
 	&.mw-ui-primary {
-		.button-colors( @colorProgressive, @colorProgressiveHighlight, @colorProgressiveActive );
+		.button-colors(@colorProgressive, @colorProgressiveHighlight, @colorProgressiveActive);
 
 		&.mw-ui-quiet {
-			.button-colors-quiet( @colorProgressive, @colorProgressiveHighlight, @colorProgressiveActive );
+			.button-colors-quiet(@colorProgressive, @colorProgressiveHighlight, @colorProgressiveActive);
 		}
 	}
 
-	// Constructive buttons (deprecated, consolidated with `progressive` – see T110555)
+	// Constructive buttons
 	//
 	// Use constructive buttons for actions which result in a final action in the process that results
 	// in a change of state.
@@ -154,10 +158,10 @@
 	//
 	// Styleguide 2.1.2.
 	&.mw-ui-constructive {
-		.button-colors( @colorProgressive, @colorProgressiveHighlight, @colorProgressiveActive );
+		.button-colors(@colorConstructive, @colorConstructiveHighlight, @colorConstructiveActive);
 
 		&.mw-ui-quiet {
-			.button-colors-quiet( @colorProgressive, @colorProgressiveHighlight, @colorProgressiveActive );
+			.button-colors-quiet(@colorConstructive, @colorConstructiveHighlight, @colorConstructiveActive);
 		}
 	}
 
@@ -176,10 +180,10 @@
 	//
 	// Styleguide 2.1.3.
 	&.mw-ui-destructive {
-		.button-colors( @colorDestructive, @colorDestructiveHighlight, @colorDestructiveActive );
+		.button-colors(@colorDestructive, @colorDestructiveHighlight, @colorDestructiveActive);
 
 		&.mw-ui-quiet {
-			.button-colors-quiet( @colorDestructive, @colorDestructiveHighlight, @colorDestructiveActive );
+			.button-colors-quiet(@colorDestructive, @colorDestructiveHighlight, @colorDestructiveActive);
 		}
 	}
 
@@ -214,9 +218,9 @@
 	// Styleguide 2.1.4.
 	&.mw-ui-quiet {
 		background: transparent;
-		border: 0;
+		border: none;
 		text-shadow: none;
-		.button-colors-quiet( @colorButtonText, @colorButtonTextHighlight, @colorButtonTextActive );
+		.button-colors-quiet(@colorButtonText, @colorButtonTextHighlight, @colorButtonTextActive);
 
 		&:hover,
 		&:focus {
@@ -239,12 +243,6 @@ a.mw-ui-button {
 	&:focus {
 		text-decoration: none;
 	}
-
-	// a-tags behave different to inputs if the line-height attribute is inherited
-	// from another element (e.g. mw-body-content). They appear bigger as input
-	// tags. See Bug T116427. To fix that, apply the correct line-height (used
-	// for inputs) to a-tags, too.
-	line-height: normal;
 }
 
 // Button groups
@@ -253,35 +251,29 @@ a.mw-ui-button {
 //
 // Markup:
 // <div class="mw-ui-button-group">
-//   <div class="mw-ui-button is-on">A</div>
+//   <div class="mw-ui-button">A</div>
 //   <div class="mw-ui-button">B</div>
 //   <div class="mw-ui-button">C</div>
 //   <div class="mw-ui-button">D</div>
 // </div><div style="clear:both"></div>
 //
 // Styleguide 2.2.
-.mw-ui-button-group {
-	& > * {
-		min-width: 48px;
-		border-radius: 0;
-		float: left;
+.mw-ui-button-group > * {
+	min-width: 48px;
+	border-radius: 0;
+	float: left;
 
-		&:first-child {
-			border-top-left-radius: @borderRadius;
-			border-bottom-left-radius: @borderRadius;
-		}
-
-		&:not( :first-child ) {
-			border-left: 0;
-		}
-
-		&:last-child {
-			border-top-right-radius: @borderRadius;
-			border-bottom-right-radius: @borderRadius;
-		}
+	&:first-child {
+		border-top-left-radius: @borderRadius;
+		border-bottom-left-radius: @borderRadius;
 	}
 
-	& .is-on .button {
-		cursor: default;
+	&:not(:first-child) {
+		border-left: none;
+	}
+
+	&:last-child{
+		border-top-right-radius: @borderRadius;
+		border-bottom-right-radius: @borderRadius;
 	}
 }

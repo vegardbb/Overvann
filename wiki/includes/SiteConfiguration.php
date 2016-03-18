@@ -119,24 +119,24 @@ class SiteConfiguration {
 	/**
 	 * Array of suffixes, for self::siteFromDB()
 	 */
-	public $suffixes = [];
+	public $suffixes = array();
 
 	/**
 	 * Array of wikis, should be the same as $wgLocalDatabases
 	 */
-	public $wikis = [];
+	public $wikis = array();
 
 	/**
 	 * The whole array of settings
 	 */
-	public $settings = [];
+	public $settings = array();
 
 	/**
 	 * Array of domains that are local and can be handled by the same server
 	 *
 	 * @deprecated since 1.25; use $wgLocalVirtualHosts instead.
 	 */
-	public $localVHosts = [];
+	public $localVHosts = array();
 
 	/**
 	 * Optional callback to load full configuration data.
@@ -167,7 +167,7 @@ class SiteConfiguration {
 	 * Configuration cache for getConfig()
 	 * @var array
 	 */
-	protected $cfgCache = [];
+	protected $cfgCache = array();
 
 	/**
 	 * Retrieves a configuration setting for a given wiki.
@@ -178,8 +178,8 @@ class SiteConfiguration {
 	 * @param array $wikiTags The tags assigned to the wiki.
 	 * @return mixed The value of the setting requested.
 	 */
-	public function get( $settingName, $wiki, $suffix = null, $params = [],
-		$wikiTags = []
+	public function get( $settingName, $wiki, $suffix = null, $params = array(),
+		$wikiTags = array()
 	) {
 		$params = $this->mergeParams( $wiki, $suffix, $params, $wikiTags );
 		return $this->getSetting( $settingName, $wiki, $params );
@@ -217,7 +217,7 @@ class SiteConfiguration {
 						break 2;
 					} elseif ( array_key_exists( "+$tag", $thisSetting ) && is_array( $thisSetting["+$tag"] ) ) {
 						if ( $retval === null ) {
-							$retval = [];
+							$retval = array();
 						}
 						$retval = self::arrayMerge( $retval, $thisSetting["+$tag"] );
 					}
@@ -236,7 +236,7 @@ class SiteConfiguration {
 						&& is_array( $thisSetting["+$suffix"] )
 					) {
 						if ( $retval === null ) {
-							$retval = [];
+							$retval = array();
 						}
 						$retval = self::arrayMerge( $retval, $thisSetting["+$suffix"] );
 					}
@@ -292,9 +292,9 @@ class SiteConfiguration {
 	 * @param array $wikiTags The tags assigned to the wiki.
 	 * @return array Array of settings requested.
 	 */
-	public function getAll( $wiki, $suffix = null, $params = [], $wikiTags = [] ) {
+	public function getAll( $wiki, $suffix = null, $params = array(), $wikiTags = array() ) {
 		$params = $this->mergeParams( $wiki, $suffix, $params, $wikiTags );
-		$localSettings = [];
+		$localSettings = array();
 		foreach ( $this->settings as $varname => $stuff ) {
 			$append = false;
 			$var = $varname;
@@ -322,8 +322,8 @@ class SiteConfiguration {
 	 * @param array $wikiTags The tags assigned to the wiki.
 	 * @return bool The value of the setting requested.
 	 */
-	public function getBool( $setting, $wiki, $suffix = null, $wikiTags = [] ) {
-		return (bool)$this->get( $setting, $wiki, $suffix, [], $wikiTags );
+	public function getBool( $setting, $wiki, $suffix = null, $wikiTags = array() ) {
+		return (bool)$this->get( $setting, $wiki, $suffix, array(), $wikiTags );
 	}
 
 	/**
@@ -345,7 +345,7 @@ class SiteConfiguration {
 	 * @param array $wikiTags The tags assigned to the wiki.
 	 */
 	public function extractVar( $setting, $wiki, $suffix, &$var,
-		$params = [], $wikiTags = []
+		$params = array(), $wikiTags = array()
 	) {
 		$value = $this->get( $setting, $wiki, $suffix, $params, $wikiTags );
 		if ( !is_null( $value ) ) {
@@ -362,7 +362,7 @@ class SiteConfiguration {
 	 * @param array $wikiTags The tags assigned to the wiki.
 	 */
 	public function extractGlobal( $setting, $wiki, $suffix = null,
-		$params = [], $wikiTags = []
+		$params = array(), $wikiTags = array()
 	) {
 		$params = $this->mergeParams( $wiki, $suffix, $params, $wikiTags );
 		$this->extractGlobalSetting( $setting, $wiki, $params );
@@ -396,8 +396,8 @@ class SiteConfiguration {
 	 * @param array $params List of parameters. $.'key' is replaced by $value in all returned data.
 	 * @param array $wikiTags The tags assigned to the wiki.
 	 */
-	public function extractAllGlobals( $wiki, $suffix = null, $params = [],
-		$wikiTags = []
+	public function extractAllGlobals( $wiki, $suffix = null, $params = array(),
+		$wikiTags = array()
 	) {
 		$params = $this->mergeParams( $wiki, $suffix, $params, $wikiTags );
 		foreach ( $this->settings as $varName => $setting ) {
@@ -414,18 +414,18 @@ class SiteConfiguration {
 	 * @return array
 	 */
 	protected function getWikiParams( $wiki ) {
-		static $default = [
+		static $default = array(
 			'suffix' => null,
 			'lang' => null,
-			'tags' => [],
-			'params' => [],
-		];
+			'tags' => array(),
+			'params' => array(),
+		);
 
 		if ( !is_callable( $this->siteParamsCallback ) ) {
 			return $default;
 		}
 
-		$ret = call_user_func_array( $this->siteParamsCallback, [ $this, $wiki ] );
+		$ret = call_user_func_array( $this->siteParamsCallback, array( $this, $wiki ) );
 		# Validate the returned value
 		if ( !is_array( $ret ) ) {
 			return $default;
@@ -484,7 +484,7 @@ class SiteConfiguration {
 		// Allow override
 		$def = $this->getWikiParams( $db );
 		if ( !is_null( $def['suffix'] ) && !is_null( $def['lang'] ) ) {
-			return [ $def['suffix'], $def['lang'] ];
+			return array( $def['suffix'], $def['lang'] );
 		}
 
 		$site = null;
@@ -501,7 +501,7 @@ class SiteConfiguration {
 			}
 		}
 		$lang = str_replace( '_', '-', $lang );
-		return [ $site, $lang ];
+		return array( $site, $lang );
 	}
 
 	/**
@@ -521,7 +521,7 @@ class SiteConfiguration {
 		$multi = is_array( $settings );
 		$settings = (array)$settings;
 		if ( $wiki === wfWikiID() ) { // $wiki is this wiki
-			$res = [];
+			$res = array();
 			foreach ( $settings as $name ) {
 				if ( !preg_match( '/^wg[A-Z]/', $name ) ) {
 					throw new MWException( "Variable '$name' does start with 'wg'." );
@@ -539,19 +539,19 @@ class SiteConfiguration {
 			} elseif ( !in_array( $wiki, $this->wikis ) ) {
 				throw new MWException( "No such wiki '$wiki'." );
 			} else {
-				$this->cfgCache[$wiki] = [];
+				$this->cfgCache[$wiki] = array();
 			}
 			$retVal = 1;
 			$cmd = wfShellWikiCmd(
 				"$IP/maintenance/getConfiguration.php",
-				[
+				array(
 					'--wiki', $wiki,
 					'--settings', implode( ' ', $settings ),
 					'--format', 'PHP'
-				]
+				)
 			);
 			// ulimit5.sh breaks this call
-			$data = trim( wfShellExec( $cmd, $retVal, [], [ 'memory' => 0 ] ) );
+			$data = trim( wfShellExec( $cmd, $retVal, array(), array( 'memory' => 0 ) ) );
 			if ( $retVal != 0 || !strlen( $data ) ) {
 				throw new MWException( "Failed to run getConfiguration.php." );
 			}

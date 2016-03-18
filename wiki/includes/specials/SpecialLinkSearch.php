@@ -68,9 +68,10 @@ class LinkSearchPage extends QueryPage {
 	 * This allows for dependency injection even though we don't control object creation.
 	 */
 	private function initServices() {
-		global $wgContLang;
+		global $wgLanguageCode;
 		if ( !$this->linkRenderer ) {
-			$titleFormatter = new MediaWikiTitleCodec( $wgContLang, GenderCache::singleton() );
+			$lang = Language::factory( $wgLanguageCode );
+			$titleFormatter = new MediaWikiTitleCodec( $lang, GenderCache::singleton() );
 			$this->linkRenderer = new MediaWikiPageLinkRenderer( $titleFormatter );
 		}
 	}
@@ -92,7 +93,7 @@ class LinkSearchPage extends QueryPage {
 		$target = $request->getVal( 'target', $par );
 		$namespace = $request->getIntOrNull( 'namespace' );
 
-		$protocols_list = [];
+		$protocols_list = array();
 		foreach ( $this->getConfig()->get( 'UrlProtocols' ) as $prot ) {
 			if ( $prot !== '//' ) {
 				$protocols_list[] = $prot;
@@ -120,8 +121,8 @@ class LinkSearchPage extends QueryPage {
 			'<nowiki>' . $this->getLanguage()->commaList( $protocols_list ) . '</nowiki>',
 			count( $protocols_list )
 		);
-		$fields = [
-			'target' => [
+		$fields = array(
+			'target' => array(
 				'type' => 'text',
 				'name' => 'target',
 				'id' => 'target',
@@ -129,11 +130,11 @@ class LinkSearchPage extends QueryPage {
 				'label-message' => 'linksearch-pat',
 				'default' => $target,
 				'dir' => 'ltr',
-			]
-		];
+			)
+		);
 		if ( !$this->getConfig()->get( 'MiserMode' ) ) {
-			$fields += [
-				'namespace' => [
+			$fields += array(
+				'namespace' => array(
 					'type' => 'namespaceselect',
 					'name' => 'namespace',
 					'label-message' => 'linksearch-ns',
@@ -141,12 +142,12 @@ class LinkSearchPage extends QueryPage {
 					'id' => 'namespace',
 					'all' => '',
 					'cssclass' => 'namespaceselector',
-				],
-			];
+				),
+			);
 		}
-		$hiddenFields = [
+		$hiddenFields = array(
 			'title' => $this->getPageTitle()->getPrefixedDBkey(),
-		];
+		);
 		$htmlForm = HTMLForm::factory( 'ooui', $fields, $this->getContext() );
 		$htmlForm->addHiddenFields( $hiddenFields );
 		$htmlForm->setSubmitTextMsg( 'linksearch-ok' );
@@ -157,10 +158,10 @@ class LinkSearchPage extends QueryPage {
 		$this->addHelpLink( 'Help:Linksearch' );
 
 		if ( $target != '' ) {
-			$this->setParams( [
+			$this->setParams( array(
 				'query' => $target2,
 				'namespace' => $namespace,
-				'protocol' => $protocol ] );
+				'protocol' => $protocol ) );
 			parent::execute( $par );
 			if ( $this->mungedQuery === false ) {
 				$out->addWikiMsg( 'linksearch-error' );
@@ -190,7 +191,7 @@ class LinkSearchPage extends QueryPage {
 
 		if ( $query === '*' && $prot !== '' ) {
 			// Allow queries like 'ftp://*' to find all ftp links
-			$rv = [ $prot, $dbr->anyString() ];
+			$rv = array( $prot, $dbr->anyString() );
 		} else {
 			$rv = LinkFilter::makeLikeArray( $query, $prot );
 		}
@@ -199,16 +200,16 @@ class LinkSearchPage extends QueryPage {
 			// LinkFilter doesn't handle wildcard in IP, so we'll have to munge here.
 			$pattern = '/^(:?[0-9]{1,3}\.)+\*\s*$|^(:?[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]*\*\s*$/';
 			if ( preg_match( $pattern, $query ) ) {
-				$rv = [ $prot . rtrim( $query, " \t*" ), $dbr->anyString() ];
+				$rv = array( $prot . rtrim( $query, " \t*" ), $dbr->anyString() );
 				$field = 'el_to';
 			}
 		}
 
-		return [ $rv, $field ];
+		return array( $rv, $field );
 	}
 
 	function linkParameters() {
-		$params = [];
+		$params = array();
 		$params['target'] = $this->mProt . $this->mQuery;
 		if ( $this->mNs !== null && !$this->getConfig()->get( 'MiserMode' ) ) {
 			$params['namespace'] = $this->mNs;
@@ -224,25 +225,25 @@ class LinkSearchPage extends QueryPage {
 		list( $this->mungedQuery, $clause ) = self::mungeQuery( $this->mQuery, $this->mProt );
 		if ( $this->mungedQuery === false ) {
 			// Invalid query; return no results
-			return [ 'tables' => 'page', 'fields' => 'page_id', 'conds' => '0=1' ];
+			return array( 'tables' => 'page', 'fields' => 'page_id', 'conds' => '0=1' );
 		}
 
 		$stripped = LinkFilter::keepOneWildcard( $this->mungedQuery );
 		$like = $dbr->buildLike( $stripped );
-		$retval = [
-			'tables' => [ 'page', 'externallinks' ],
-			'fields' => [
+		$retval = array(
+			'tables' => array( 'page', 'externallinks' ),
+			'fields' => array(
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
 				'value' => 'el_index',
 				'url' => 'el_to'
-			],
-			'conds' => [
+			),
+			'conds' => array(
 				'page_id = el_from',
 				"$clause $like"
-			],
-			'options' => [ 'USE INDEX' => $clause ]
-		];
+			),
+			'options' => array( 'USE INDEX' => $clause )
+		);
 
 		if ( $this->mNs !== null && !$this->getConfig()->get( 'MiserMode' ) ) {
 			$retval['conds']['page_namespace'] = $this->mNs;
@@ -293,7 +294,7 @@ class LinkSearchPage extends QueryPage {
 	 * @return array
 	 */
 	function getOrderFields() {
-		return [];
+		return array();
 	}
 
 	protected function getGroupName() {

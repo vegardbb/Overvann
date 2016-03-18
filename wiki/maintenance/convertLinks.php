@@ -36,9 +36,9 @@ class ConvertLinks extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription(
-			'Convert from the old links schema (string->ID) to the new schema (ID->ID). '
-				. 'The wiki should be put into read-only mode while this script executes' );
+		$this->mDescription =
+			"Convert from the old links schema (string->ID) to the new schema (ID->ID)."
+				. "The wiki should be put into read-only mode while this script executes";
 
 		$this->addArg( 'logperformance', "Log performance to perfLogFilename.", false );
 		$this->addArg(
@@ -66,7 +66,7 @@ class ConvertLinks extends Maintenance {
 	}
 
 	public function execute() {
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 
 		$type = $dbw->getType();
 		if ( $type != 'mysql' ) {
@@ -148,7 +148,7 @@ class ConvertLinks extends Maintenance {
 
 			$dbw->bufferResults( false );
 			$res = $dbw->query( "SELECT cur_namespace,cur_title,cur_id FROM $cur" );
-			$ids = [];
+			$ids = array();
 
 			foreach ( $res as $row ) {
 				$title = $row->cur_title;
@@ -193,9 +193,9 @@ class ConvertLinks extends Maintenance {
 				$sqlRead = $dbw->limitResult( $sqlRead, $linksConvInsertInterval, $rowOffset );
 				$res = $dbw->query( $sqlRead );
 				if ( $noKeys ) {
-					$sqlWrite = [ "INSERT INTO $links_temp (l_from,l_to) VALUES " ];
+					$sqlWrite = array( "INSERT INTO $links_temp (l_from,l_to) VALUES " );
 				} else {
-					$sqlWrite = [ "INSERT IGNORE INTO $links_temp (l_from,l_to) VALUES " ];
+					$sqlWrite = array( "INSERT IGNORE INTO $links_temp (l_from,l_to) VALUES " );
 				}
 
 				$tuplesAdded = 0; # no tuples added to INSERT yet
@@ -215,7 +215,7 @@ class ConvertLinks extends Maintenance {
 				}
 				$dbw->freeResult( $res );
 				# $this->output( "rowOffset: $rowOffset\ttuplesAdded: "
-				# 	. "$tuplesAdded\tnumBadLinks: $numBadLinks\n" );
+				#	. "$tuplesAdded\tnumBadLinks: $numBadLinks\n" );
 				if ( $tuplesAdded != 0 ) {
 					if ( $reportLinksConvProgress ) {
 						$this->output( "Inserting $tuplesAdded tuples into $links_temp..." );
@@ -267,7 +267,7 @@ class ConvertLinks extends Maintenance {
 	}
 
 	private function createTempTable() {
-		$dbConn = $this->getDB( DB_MASTER );
+		$dbConn = wfGetDB( DB_MASTER );
 
 		if ( !( $dbConn->isOpen() ) ) {
 			$this->output( "Opening connection to database failed.\n" );

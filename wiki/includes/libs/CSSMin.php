@@ -45,7 +45,7 @@ class CSSMin {
 	/* Protected Static Members */
 
 	/** @var array List of common image files extensions and MIME-types */
-	protected static $mimeTypes = [
+	protected static $mimeTypes = array(
 		'gif' => 'image/gif',
 		'jpe' => 'image/jpeg',
 		'jpeg' => 'image/jpeg',
@@ -55,21 +55,49 @@ class CSSMin {
 		'tiff' => 'image/tiff',
 		'xbm' => 'image/x-xbitmap',
 		'svg' => 'image/svg+xml',
-	];
+	);
 
 	/* Static Methods */
 
 	/**
-	 * Get a list of local files referenced in a stylesheet (includes non-existent files).
+	 * Gets a list of local file paths which are referenced in a CSS style sheet.
+	 *
+	 * If you wish non-existent files to be listed too, use getAllLocalFileReferences().
+	 *
+	 * For backwards-compatibility, if the second parameter is not given or null,
+	 * this function will return an empty array instead of erroring out.
 	 *
 	 * @param string $source CSS stylesheet source to process
 	 * @param string $path File path where the source was read from
 	 * @return array List of local file references
 	 */
-	public static function getLocalFileReferences( $source, $path ) {
+	public static function getLocalFileReferences( $source, $path = null ) {
+		if ( $path === null ) {
+			return array();
+		}
+
+		$files = self::getAllLocalFileReferences( $source, $path );
+
+		// Skip non-existent files
+		$files = array_filter( $files, function ( $file ) {
+			return file_exists( $file );
+		} );
+
+		return $files;
+	}
+
+	/**
+	 * Gets a list of local file paths which are referenced in a CSS style sheet, including
+	 * non-existent files.
+	 *
+	 * @param string $source CSS stylesheet source to process
+	 * @param string $path File path where the source was read from
+	 * @return array List of local file references
+	 */
+	public static function getAllLocalFileReferences( $source, $path ) {
 		$stripped = preg_replace( '/' . self::COMMENT_REGEX . '/s', '', $source );
 		$path = rtrim( $path, '/' ) . '/';
-		$files = [];
+		$files = array();
 
 		$rFlags = PREG_OFFSET_CAPTURE | PREG_SET_ORDER;
 		if ( preg_match_all( '/' . self::URL_REGEX . '/', $stripped, $matches, $rFlags ) ) {
@@ -153,25 +181,6 @@ class CSSMin {
 	}
 
 	/**
-	 * Serialize a string (escape and quote) for use as a CSS string value.
-	 * http://www.w3.org/TR/2013/WD-cssom-20131205/#serialize-a-string
-	 *
-	 * @param string $value
-	 * @return string
-	 * @throws Exception
-	 */
-	public static function serializeStringValue( $value ) {
-		if ( strstr( $value, "\0" ) ) {
-			throw new Exception( "Invalid character in CSS string" );
-		}
-		$value = strtr( $value, [ '\\' => '\\\\', '"' => '\\"' ] );
-		$value = preg_replace_callback( '/[\x01-\x1f\x7f-\x9f]/', function ( $match ) {
-			return '\\' . base_convert( ord( $match[0] ), 10, 16 ) . ' ';
-		}, $value );
-		return '"' . $value . '"';
-	}
-
-	/**
 	 * @param $file string
 	 * @return bool|string
 	 */
@@ -211,7 +220,7 @@ class CSSMin {
 		if ( preg_match( '!^[\w\d:@/~.%+;,?&=-]+$!', $url ) ) {
 			return "url($url)";
 		} else {
-			return 'url("' . strtr( $url, [ '\\' => '\\\\', '"' => '\\"' ] ) . '")';
+			return 'url("' . strtr( $url, array( '\\' => '\\\\', '"' => '\\"' ) ) . '")';
 		}
 	}
 
@@ -249,7 +258,7 @@ class CSSMin {
 		// Replace all comments by a placeholder so they will not interfere with the remapping.
 		// Warning: This will also catch on anything looking like the start of a comment between
 		// quotation marks (e.g. "foo /* bar").
-		$comments = [];
+		$comments = array();
 
 		$pattern = '/(?!' . CSSMin::EMBED_REGEX . ')(' . CSSMin::COMMENT_REGEX . ')/s';
 
@@ -276,17 +285,7 @@ class CSSMin {
 				// Check for global @embed comment and remove it. Allow other comments to be present
 				// before @embed (they have been replaced with placeholders at this point).
 				$embedAll = false;
-				$rule = preg_replace(
-					'/^((?:\s+|' .
-						CSSMin::PLACEHOLDER .
-						'(\d+)x)*)' .
-						CSSMin::EMBED_REGEX .
-						'\s*/',
-					'$1',
-					$rule,
-					1,
-					$embedAll
-				);
+				$rule = preg_replace( '/^((?:\s+|' . CSSMin::PLACEHOLDER . '(\d+)x)*)' . CSSMin::EMBED_REGEX . '\s*/', '$1', $rule, 1, $embedAll );
 
 				// Build two versions of current rule: with remapped URLs
 				// and with embedded data: URIs (where possible).
@@ -304,7 +303,7 @@ class CSSMin {
 
 				if ( $embedData ) {
 					// Remember the occurring MIME types to avoid fallbacks when embedding some files.
-					$mimeTypes = [];
+					$mimeTypes = array();
 
 					$ruleWithEmbedded = preg_replace_callback(
 						$pattern,
@@ -321,7 +320,7 @@ class CSSMin {
 							$url = $match['file'] . $match['query'];
 							$file = $local . $match['file'];
 							if (
-								!self::isRemoteUrl( $url ) && !self::isLocalUrl( $url )
+								!CSSMin::isRemoteUrl( $url ) && !CSSMin::isLocalUrl( $url )
 								&& file_exists( $file )
 							) {
 								$mimeTypes[ CSSMin::getMimeType( $file ) ] = true;
@@ -333,7 +332,7 @@ class CSSMin {
 					);
 
 					// Are all referenced images SVGs?
-					$needsEmbedFallback = $mimeTypes !== [ 'image/svg+xml' => true ];
+					$needsEmbedFallback = $mimeTypes !== array( 'image/svg+xml' => true );
 				}
 
 				if ( !$embedData || $ruleWithEmbedded === $ruleWithRemapped ) {
@@ -363,10 +362,11 @@ class CSSMin {
 	/**
 	 * Is this CSS rule referencing a remote URL?
 	 *
+	 * @private Until we require PHP 5.5 and we can access self:: from closures.
 	 * @param string $maybeUrl
 	 * @return bool
 	 */
-	protected static function isRemoteUrl( $maybeUrl ) {
+	public static function isRemoteUrl( $maybeUrl ) {
 		if ( substr( $maybeUrl, 0, 2 ) === '//' || parse_url( $maybeUrl, PHP_URL_SCHEME ) ) {
 			return true;
 		}
@@ -376,10 +376,11 @@ class CSSMin {
 	/**
 	 * Is this CSS rule referencing a local URL?
 	 *
+	 * @private Until we require PHP 5.5 and we can access self:: from closures.
 	 * @param string $maybeUrl
 	 * @return bool
 	 */
-	protected static function isLocalUrl( $maybeUrl ) {
+	public static function isLocalUrl( $maybeUrl ) {
 		if ( $maybeUrl !== '' && $maybeUrl[0] === '/' && !self::isRemoteUrl( $maybeUrl ) ) {
 			return true;
 		}
@@ -421,18 +422,14 @@ class CSSMin {
 			// Path to the actual file on the filesystem
 			$localFile = "{$local}/{$file}";
 			if ( file_exists( $localFile ) ) {
+				// Add version parameter as the first five hex digits
+				// of the MD5 hash of the file's contents.
+				$url .= '?' . substr( md5_file( $localFile ), 0, 5 );
 				if ( $embed ) {
 					$data = self::encodeImageAsDataURI( $localFile );
 					if ( $data !== false ) {
 						return $data;
 					}
-				}
-				if ( method_exists( 'OutputPage', 'transformFilePath' ) ) {
-					$url = OutputPage::transformFilePath( $remote, $local, $file );
-				} else {
-					// Add version parameter as the first five hex digits
-					// of the MD5 hash of the file's contents.
-					$url .= '?' . substr( md5_file( $localFile ), 0, 5 );
 				}
 			}
 			// If any of these conditions failed (file missing, we don't want to embed it
@@ -453,9 +450,9 @@ class CSSMin {
 	public static function minify( $css ) {
 		return trim(
 			str_replace(
-				[ '; ', ': ', ' {', '{ ', ', ', '} ', ';}' ],
-				[ ';', ':', '{', '{', ',', '}', '}' ],
-				preg_replace( [ '/\s+/', '/\/\*.*?\*\//s' ], [ ' ', '' ], $css )
+				array( '; ', ': ', ' {', '{ ', ', ', '} ', ';}' ),
+				array( ';', ':', '{', '{', ',', '}', '}' ),
+				preg_replace( array( '/\s+/', '/\/\*.*?\*\//s' ), array( ' ', '' ), $css )
 			)
 		);
 	}

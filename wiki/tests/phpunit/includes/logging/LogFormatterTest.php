@@ -35,13 +35,13 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 
 		global $wgLang;
 
-		$this->setMwGlobals( [
-			'wgLogTypes' => [ 'phpunit' ],
-			'wgLogActionsHandlers' => [ 'phpunit/test' => 'LogFormatter',
-				'phpunit/param' => 'LogFormatter' ],
+		$this->setMwGlobals( array(
+			'wgLogTypes' => array( 'phpunit' ),
+			'wgLogActionsHandlers' => array( 'phpunit/test' => 'LogFormatter',
+				'phpunit/param' => 'LogFormatter' ),
 			'wgUser' => User::newFromName( 'Testuser' ),
-			'wgExtensionMessagesFiles' => [ 'LogTests' => __DIR__ . '/LogTests.i18n.php' ],
-		] );
+			'wgExtensionMessagesFiles' => array( 'LogTests' => __DIR__ . '/LogTests.i18n.php' ),
+		) );
 
 		Language::getLocalisationCache()->recache( $wgLang->getCode() );
 
@@ -79,7 +79,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::newFromEntry
 	 */
 	public function testNormalLogParams() {
-		$entry = $this->newLogEntry( 'test', [] );
+		$entry = $this->newLogEntry( 'test', array() );
 		$formatter = LogFormatter::newFromEntry( $entry );
 		$formatter->setContext( $this->context );
 
@@ -101,7 +101,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 			$this->user->getEditCount()
 		);
 
-		$titleLink = Linker::link( $this->title, null, [], [] );
+		$titleLink = Linker::link( $this->title, null, array(), array() );
 
 		// $paramsWithoutTools and $paramsWithTools should be only different
 		// in index 0
@@ -121,8 +121,8 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getActionText
 	 */
 	public function testLogParamsTypeRaw() {
-		$params = [ '4:raw:raw' => Linker::link( $this->title, null, [], [] ) ];
-		$expected = Linker::link( $this->title, null, [], [] );
+		$params = array( '4:raw:raw' => Linker::link( $this->title, null, array(), array() ) );
+		$expected = Linker::link( $this->title, null, array(), array() );
 
 		$entry = $this->newLogEntry( 'param', $params );
 		$formatter = LogFormatter::newFromEntry( $entry );
@@ -138,7 +138,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getActionText
 	 */
 	public function testLogParamsTypeMsg() {
-		$params = [ '4:msg:msg' => 'log-description-phpunit' ];
+		$params = array( '4:msg:msg' => 'log-description-phpunit' );
 		$expected = wfMessage( 'log-description-phpunit' )->text();
 
 		$entry = $this->newLogEntry( 'param', $params );
@@ -155,7 +155,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getActionText
 	 */
 	public function testLogParamsTypeMsgContent() {
-		$params = [ '4:msg-content:msgContent' => 'log-description-phpunit' ];
+		$params = array( '4:msg-content:msgContent' => 'log-description-phpunit' );
 		$expected = wfMessage( 'log-description-phpunit' )->inContentLanguage()->text();
 
 		$entry = $this->newLogEntry( 'param', $params );
@@ -174,7 +174,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	public function testLogParamsTypeNumber() {
 		global $wgLang;
 
-		$params = [ '4:number:number' => 123456789 ];
+		$params = array( '4:number:number' => 123456789 );
 		$expected = $wgLang->formatNum( 123456789 );
 
 		$entry = $this->newLogEntry( 'param', $params );
@@ -191,7 +191,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getActionText
 	 */
 	public function testLogParamsTypeUserLink() {
-		$params = [ '4:user-link:userLink' => $this->user->getName() ];
+		$params = array( '4:user-link:userLink' => $this->user->getName() );
 		$expected = Linker::userLink(
 			$this->user->getId(),
 			$this->user->getName()
@@ -211,8 +211,8 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getActionText
 	 */
 	public function testLogParamsTypeTitleLink() {
-		$params = [ '4:title-link:titleLink' => $this->title->getText() ];
-		$expected = Linker::link( $this->title, null, [], [] );
+		$params = array( '4:title-link:titleLink' => $this->title->getText() );
+		$expected = Linker::link( $this->title, null, array(), array() );
 
 		$entry = $this->newLogEntry( 'param', $params );
 		$formatter = LogFormatter::newFromEntry( $entry );
@@ -228,7 +228,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getActionText
 	 */
 	public function testLogParamsTypePlain() {
-		$params = [ '4:plain:plain' => 'Some plain text' ];
+		$params = array( '4:plain:plain' => 'Some plain text' );
 		$expected = 'Some plain text';
 
 		$entry = $this->newLogEntry( 'param', $params );
@@ -245,7 +245,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getComment
 	 */
 	public function testLogComment() {
-		$entry = $this->newLogEntry( 'test', [] );
+		$entry = $this->newLogEntry( 'test', array() );
 		$formatter = LogFormatter::newFromEntry( $entry );
 		$formatter->setContext( $this->context );
 
@@ -260,7 +260,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::formatParameterValueForApi
 	 */
 	public function testApiParamFormatting( $key, $value, $expected ) {
-		$entry = $this->newLogEntry( 'param', [ $key => $value ] );
+		$entry = $this->newLogEntry( 'param', array( $key => $value ) );
 		$formatter = LogFormatter::newFromEntry( $entry );
 		$formatter->setContext( $this->context );
 
@@ -271,79 +271,41 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideApiParamFormatting() {
-		return [
-			[ 0, 'value', [ 'value' ] ],
-			[ 'named', 'value', [ 'named' => 'value' ] ],
-			[ '::key', 'value', [ 'key' => 'value' ] ],
-			[ '4::key', 'value', [ 'key' => 'value' ] ],
-			[ '4:raw:key', 'value', [ 'key' => 'value' ] ],
-			[ '4:plain:key', 'value', [ 'key' => 'value' ] ],
-			[ '4:bool:key', '1', [ 'key' => true ] ],
-			[ '4:bool:key', '0', [ 'key' => false ] ],
-			[ '4:number:key', '123', [ 'key' => 123 ] ],
-			[ '4:number:key', '123.5', [ 'key' => 123.5 ] ],
-			[ '4:array:key', [], [ 'key' => [ ApiResult::META_TYPE => 'array' ] ] ],
-			[ '4:assoc:key', [], [ 'key' => [ ApiResult::META_TYPE => 'assoc' ] ] ],
-			[ '4:kvp:key', [], [ 'key' => [ ApiResult::META_TYPE => 'kvp' ] ] ],
-			[ '4:timestamp:key', '20150102030405', [ 'key' => '2015-01-02T03:04:05Z' ] ],
-			[ '4:msg:key', 'parentheses', [
+		return array(
+			array( 0, 'value', array( 'value' ) ),
+			array( 'named', 'value', array( 'named' => 'value' ) ),
+			array( '::key', 'value', array( 'key' => 'value' ) ),
+			array( '4::key', 'value', array( 'key' => 'value' ) ),
+			array( '4:raw:key', 'value', array( 'key' => 'value' ) ),
+			array( '4:plain:key', 'value', array( 'key' => 'value' ) ),
+			array( '4:bool:key', '1', array( 'key' => true ) ),
+			array( '4:bool:key', '0', array( 'key' => false ) ),
+			array( '4:number:key', '123', array( 'key' => 123 ) ),
+			array( '4:number:key', '123.5', array( 'key' => 123.5 ) ),
+			array( '4:array:key', array(), array( 'key' => array( ApiResult::META_TYPE => 'array' ) ) ),
+			array( '4:assoc:key', array(), array( 'key' => array( ApiResult::META_TYPE => 'assoc' ) ) ),
+			array( '4:kvp:key', array(), array( 'key' => array( ApiResult::META_TYPE => 'kvp' ) ) ),
+			array( '4:timestamp:key', '20150102030405', array( 'key' => '2015-01-02T03:04:05Z' ) ),
+			array( '4:msg:key', 'parentheses', array(
 				'key_key' => 'parentheses',
 				'key_text' => wfMessage( 'parentheses' )->text(),
-			] ],
-			[ '4:msg-content:key', 'parentheses', [
+			) ),
+			array( '4:msg-content:key', 'parentheses', array(
 				'key_key' => 'parentheses',
 				'key_text' => wfMessage( 'parentheses' )->inContentLanguage()->text(),
-			] ],
-			[ '4:title:key', 'project:foo', [
+			) ),
+			array( '4:title:key', 'project:foo', array(
 				'key_ns' => NS_PROJECT,
 				'key_title' => Title::newFromText( 'project:foo' )->getFullText(),
-			] ],
-			[ '4:title-link:key', 'project:foo', [
+			) ),
+			array( '4:title-link:key', 'project:foo', array(
 				'key_ns' => NS_PROJECT,
 				'key_title' => Title::newFromText( 'project:foo' )->getFullText(),
-			] ],
-			[ '4:user:key', 'foo', [ 'key' => 'Foo' ] ],
-			[ '4:user-link:key', 'foo', [ 'key' => 'Foo' ] ],
-		];
+			) ),
+			array( '4:user:key', 'foo', array( 'key' => 'Foo' ) ),
+			array( '4:user-link:key', 'foo', array( 'key' => 'Foo' ) ),
+		);
 	}
-
-	/**
-	 * The testIrcMsgForAction* tests are supposed to cover the hacky
-	 * LogFormatter::getIRCActionText / bug 34508
-	 *
-	 * Third parties bots listen to those messages. They are clever enough
-	 * to fetch the i18n messages from the wiki and then analyze the IRC feed
-	 * to reverse engineer the $1, $2 messages.
-	 * One thing bots can not detect is when MediaWiki change the meaning of
-	 * a message like what happened when we deployed 1.19. $1 became the user
-	 * performing the action which broke basically all bots around.
-	 *
-	 * Should cover the following log actions (which are most commonly used by bots):
-	 * - block/block
-	 * - block/unblock
-	 * - block/reblock
-	 * - delete/delete
-	 * - delete/restore
-	 * - newusers/create
-	 * - newusers/create2
-	 * - newusers/autocreate
-	 * - move/move
-	 * - move/move_redir
-	 * - protect/protect
-	 * - protect/modifyprotect
-	 * - protect/unprotect
-	 * - protect/move_prot
-	 * - upload/upload
-	 * - merge/merge
-	 * - import/upload
-	 * - import/interwiki
-	 *
-	 * As well as the following Auto Edit Summaries:
-	 * - blank
-	 * - replace
-	 * - rollback
-	 * - undo
-	 */
 
 	/**
 	 * @covers LogFormatter::getIRCActionComment
@@ -357,10 +319,10 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 			$this->context->msg( 'blocklogentry', 'SomeTitle', 'duration', '(flags)' )->plain()
 			. $sep . $this->user_comment,
 			'block', 'block',
-			[
+			array(
 				'5::duration' => 'duration',
 				'6::flags' => 'flags',
-			],
+			),
 			$this->user_comment
 		);
 		# block/block - legacy
@@ -368,10 +330,10 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 			$this->context->msg( 'blocklogentry', 'SomeTitle', 'duration', '(flags)' )->plain()
 			. $sep . $this->user_comment,
 			'block', 'block',
-			[
+			array(
 				'duration',
 				'flags',
-			],
+			),
 			$this->user_comment,
 			'',
 			true
@@ -380,7 +342,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$this->context->msg( 'unblocklogentry', 'SomeTitle' )->plain() . $sep . $this->user_comment,
 			'block', 'unblock',
-			[],
+			array(),
 			$this->user_comment
 		);
 		# block/reblock
@@ -388,10 +350,10 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 			$this->context->msg( 'reblock-logentry', 'SomeTitle', 'duration', '(flags)' )->plain()
 			. $sep . $this->user_comment,
 			'block', 'reblock',
-			[
+			array(
 				'5::duration' => 'duration',
 				'6::flags' => 'flags',
-			],
+			),
 			$this->user_comment
 		);
 	}
@@ -407,7 +369,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$this->context->msg( 'deletedarticle', 'SomeTitle' )->plain() . $sep . $this->user_comment,
 			'delete', 'delete',
-			[],
+			array(),
 			$this->user_comment
 		);
 
@@ -415,7 +377,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$this->context->msg( 'undeletedarticle', 'SomeTitle' )->plain() . $sep . $this->user_comment,
 			'delete', 'restore',
-			[],
+			array(),
 			$this->user_comment
 		);
 	}
@@ -428,22 +390,22 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			'New user account',
 			'newusers', 'newusers',
-			[]
+			array()
 		);
 		$this->assertIRCComment(
 			'New user account',
 			'newusers', 'create',
-			[]
+			array()
 		);
 		$this->assertIRCComment(
 			'created new account SomeTitle',
 			'newusers', 'create2',
-			[]
+			array()
 		);
 		$this->assertIRCComment(
 			'Account created automatically',
 			'newusers', 'autocreate',
-			[]
+			array()
 		);
 	}
 
@@ -452,10 +414,10 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getIRCActionText
 	 */
 	public function testIrcMsgForLogTypeMove() {
-		$move_params = [
+		$move_params = array(
 			'4::target' => $this->target->getPrefixedText(),
 			'5::noredir' => 0,
-		];
+		);
 		$sep = $this->context->msg( 'colon-separator' )->text();
 
 		# move/move
@@ -486,11 +448,11 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$this->context->msg( 'patrol-log-line', 'revision 777', '[[SomeTitle]]', '' )->plain(),
 			'patrol', 'patrol',
-			[
+			array(
 				'4::curid' => '777',
 				'5::previd' => '666',
 				'6::auto' => 0,
-			]
+			)
 		);
 	}
 
@@ -499,14 +461,14 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 	 * @covers LogFormatter::getIRCActionText
 	 */
 	public function testIrcMsgForLogTypeProtect() {
-		$protectParams = [
-			'4::description' => '[edit=sysop] (indefinite) ‎[move=sysop] (indefinite)'
-		];
+		$protectParams = array(
+			'[edit=sysop] (indefinite) ‎[move=sysop] (indefinite)'
+		);
 		$sep = $this->context->msg( 'colon-separator' )->text();
 
 		# protect/protect
 		$this->assertIRCComment(
-			$this->context->msg( 'protectedarticle', 'SomeTitle ' . $protectParams['4::description'] )
+			$this->context->msg( 'protectedarticle', 'SomeTitle ' . $protectParams[0] )
 				->plain() . $sep . $this->user_comment,
 			'protect', 'protect',
 			$protectParams,
@@ -517,16 +479,14 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$this->context->msg( 'unprotectedarticle', 'SomeTitle' )->plain() . $sep . $this->user_comment,
 			'protect', 'unprotect',
-			[],
+			array(),
 			$this->user_comment
 		);
 
 		# protect/modify
 		$this->assertIRCComment(
-			$this->context->msg(
-				'modifiedarticleprotection',
-				'SomeTitle ' . $protectParams['4::description']
-			)->plain() . $sep . $this->user_comment,
+			$this->context->msg( 'modifiedarticleprotection', 'SomeTitle ' . $protectParams[0] )
+				->plain() . $sep . $this->user_comment,
 			'protect', 'modify',
 			$protectParams,
 			$this->user_comment
@@ -537,9 +497,9 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 			$this->context->msg( 'movedarticleprotection', 'SomeTitle', 'OldTitle' )
 				->plain() . $sep . $this->user_comment,
 			'protect', 'move_prot',
-			[
+			array(
 				'4::oldtitle' => 'OldTitle'
-			],
+			),
 			$this->user_comment
 		);
 	}
@@ -555,7 +515,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$this->context->msg( 'uploadedimage', 'SomeTitle' )->plain() . $sep . $this->user_comment,
 			'upload', 'upload',
-			[],
+			array(),
 			$this->user_comment
 		);
 
@@ -563,7 +523,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$this->context->msg( 'overwroteimage', 'SomeTitle' )->plain() . $sep . $this->user_comment,
 			'upload', 'overwrite',
-			[],
+			array(),
 			$this->user_comment
 		);
 	}
@@ -580,10 +540,10 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 			$this->context->msg( 'pagemerge-logentry', 'SomeTitle', 'Dest', 'timestamp' )->plain()
 			. $sep . $this->user_comment,
 			'merge', 'merge',
-			[
+			array(
 				'4::dest' => 'Dest',
 				'5::mergepoint' => 'timestamp',
-			],
+			),
 			$this->user_comment
 		);
 	}
@@ -602,7 +562,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$msg,
 			'import', 'upload',
-			[],
+			array(),
 			$this->user_comment
 		);
 
@@ -613,7 +573,7 @@ class LogFormatterTest extends MediaWikiLangTestCase {
 		$this->assertIRCComment(
 			$msg,
 			'import', 'interwiki',
-			[],
+			array(),
 			$this->user_comment
 		);
 	}

@@ -58,24 +58,15 @@ class ApiUnblock extends ApiBase {
 					$msg['info'],
 					$msg['code'],
 					0,
-					[ 'blockinfo' => ApiQueryUserInfo::getBlockInfo( $user->getBlock() ) ]
+					array( 'blockinfo' => ApiQueryUserInfo::getBlockInfo( $user->getBlock() ) )
 				);
 			}
 		}
 
-		// Check if user can add tags
-		if ( !is_null( $params['tags'] ) ) {
-			$ableToTag = ChangeTags::canAddTagsAccompanyingChange( $params['tags'], $user );
-			if ( !$ableToTag->isOK() ) {
-				$this->dieStatus( $ableToTag );
-			}
-		}
-
-		$data = [
+		$data = array(
 			'Target' => is_null( $params['id'] ) ? $params['user'] : "#{$params['id']}",
-			'Reason' => $params['reason'],
-			'Tags' => $params['tags']
-		];
+			'Reason' => $params['reason']
+		);
 		$block = Block::newFromTarget( $data['Target'] );
 		$retval = SpecialUnblock::processUnblock( $data, $this->getContext() );
 		if ( $retval !== true ) {
@@ -99,17 +90,13 @@ class ApiUnblock extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
-			'id' => [
+		return array(
+			'id' => array(
 				ApiBase::PARAM_TYPE => 'integer',
-			],
+			),
 			'user' => null,
 			'reason' => '',
-			'tags' => [
-				ApiBase::PARAM_TYPE => 'tags',
-				ApiBase::PARAM_ISMULTI => true,
-			],
-		];
+		);
 	}
 
 	public function needsToken() {
@@ -117,12 +104,12 @@ class ApiUnblock extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=unblock&id=105'
 				=> 'apihelp-unblock-example-id',
 			'action=unblock&user=Bob&reason=Sorry%20Bob'
 				=> 'apihelp-unblock-example-user',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

@@ -32,10 +32,10 @@
  * @author Mij <mij@bitchx.it>
  */
 
-$optionsWithArgs = [
+$optionsWithArgs = array(
 	'extensions', 'comment', 'comment-file', 'comment-ext', 'summary', 'user',
 	'license', 'sleep', 'limit', 'from', 'source-wiki-url', 'timestamp',
-];
+);
 require_once __DIR__ . '/commandLine.inc';
 require_once __DIR__ . '/importImages.inc';
 $processed = $added = $ignored = $skipped = $overwritten = $failed = 0;
@@ -70,9 +70,9 @@ $files = findFiles( $dir, $extensions, isset( $options['search-recursively'] ) )
 # Initialise the user for this operation
 $user = isset( $options['user'] )
 	? User::newFromName( $options['user'] )
-	: User::newSystemUser( 'Maintenance script', [ 'steal' => true ] );
+	: User::newFromName( 'Maintenance script' );
 if ( !$user instanceof User ) {
-	$user = User::newSystemUser( 'Maintenance script', [ 'steal' => true ] );
+	$user = User::newFromName( 'Maintenance script' );
 }
 $wgUser = $user;
 
@@ -136,7 +136,7 @@ $count = count( $files );
 if ( $count > 0 ) {
 
 	foreach ( $files as $file ) {
-		$base = UtfNormal\Validator::cleanUp( wfBaseName( $file ) );
+		$base = wfBaseName( $file );
 
 		# Validate a title
 		$title = Title::makeTitleSafe( NS_FILE, $base );
@@ -241,12 +241,12 @@ if ( $count > 0 ) {
 		} else {
 			$props = FSFile::getPropsFromPath( $file );
 			$flags = 0;
-			$publishOptions = [];
+			$publishOptions = array();
 			$handler = MediaHandler::getHandler( $props['mime'] );
 			if ( $handler ) {
 				$publishOptions['headers'] = $handler->getStreamHeaders( $props['metadata'] );
 			} else {
-				$publishOptions['headers'] = [];
+				$publishOptions['headers'] = array();
 			}
 			$archive = $image->publish( $file, $flags, $publishOptions );
 			if ( !$archive->isGood() ) {
@@ -299,13 +299,13 @@ if ( $count > 0 ) {
 				echo "\nSetting image restrictions ... ";
 
 				$cascade = false;
-				$restrictions = [];
+				$restrictions = array();
 				foreach ( $title->getRestrictionTypes() as $type ) {
 					$restrictions[$type] = $protectLevel;
 				}
 
 				$page = WikiPage::factory( $title );
-				$status = $page->doUpdateRestrictions( $restrictions, [], $cascade, '', $user );
+				$status = $page->doUpdateRestrictions( $restrictions, array(), $cascade, '', $user );
 				echo ( $status->isOK() ? 'done' : 'failed' ) . "\n";
 			}
 		} else {
@@ -328,7 +328,7 @@ if ( $count > 0 ) {
 	# Print out some statistics
 	echo "\n";
 	foreach (
-		[
+		array(
 			'count' => 'Found',
 			'limit' => 'Limit',
 			'ignored' => 'Ignored',
@@ -336,7 +336,7 @@ if ( $count > 0 ) {
 			'skipped' => 'Skipped',
 			'overwritten' => 'Overwritten',
 			'failed' => 'Failed'
-		] as $var => $desc
+		) as $var => $desc
 	) {
 		if ( $$var > 0 ) {
 			echo "{$desc}: {$$var}\n";

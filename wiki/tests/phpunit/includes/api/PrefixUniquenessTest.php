@@ -13,7 +13,7 @@ class PrefixUniquenessTest extends MediaWikiTestCase {
 		$moduleManager = $query->getModuleManager();
 
 		$modules = $moduleManager->getNames();
-		$prefixes = [];
+		$prefixes = array();
 
 		foreach ( $modules as $name ) {
 			$module = $moduleManager->getModule( $name );

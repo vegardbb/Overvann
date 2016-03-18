@@ -31,11 +31,11 @@ require_once __DIR__ . '/Maintenance.php';
  * @ingroup Maintenance
  */
 class CreateAndPromote extends Maintenance {
-	private static $permitRoles = [ 'sysop', 'bureaucrat', 'bot' ];
+	private static $permitRoles = array( 'sysop', 'bureaucrat', 'bot' );
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Create a new user account and/or grant it additional rights' );
+		$this->mDescription = "Create a new user account and/or grant it additional rights";
 		$this->addOption(
 			'force',
 			'If acccount exists already, just grant it rights or change password.'
@@ -59,7 +59,7 @@ class CreateAndPromote extends Maintenance {
 		$username = $this->getArg( 0 );
 		$password = $this->getArg( 1 );
 		$force = $this->hasOption( 'force' );
-		$inGroups = [];
+		$inGroups = array();
 
 		$user = User::newFromName( $username );
 		if ( !is_object( $user ) ) {
@@ -77,7 +77,7 @@ class CreateAndPromote extends Maintenance {
 			$inGroups = $user->getGroups();
 		}
 
-		$groups = array_filter( self::$permitRoles, [ $this, 'hasOption' ] );
+		$groups = array_filter( self::$permitRoles, array( $this, 'hasOption' ) );
 		if ( $this->hasOption( 'custom-groups' ) ) {
 			$customGroupsText = $this->getOption( 'custom-groups' );
 			if ( $customGroupsText !== '' ) {
@@ -106,12 +106,6 @@ class CreateAndPromote extends Maintenance {
 			}
 		}
 
-		if ( !$exists ) {
-			# Insert the account into the database
-			$user->addToDatabase();
-			$user->saveSettings();
-		}
-
 		if ( $password ) {
 			# Try to set the password
 			try {
@@ -125,8 +119,14 @@ class CreateAndPromote extends Maintenance {
 			}
 		}
 
+		if ( !$exists ) {
+			# Insert the account into the database
+			$user->addToDatabase();
+			$user->saveSettings();
+		}
+
 		# Promote user
-		array_map( [ $user, 'addGroup' ], $promotions );
+		array_map( array( $user, 'addGroup' ), $promotions );
 
 		if ( !$exists ) {
 			# Increment site_stats.ss_users

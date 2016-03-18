@@ -3,8 +3,7 @@
 		"authors": [
 			"Kaganer",
 			"Liangent",
-			"아라",
-			"Macofe"
+			"아라"
 		]
 	},
 	"tog-underline": "Zerpajvandho xat kaşida şavand:",
@@ -285,7 +284,7 @@
 	"cascadeprotected": "In sahifa az viroiş muhofizat şudaast, baroi in ki  dar {{PLURAL:$1|sahifai|sahifahoi}} muhofizatşudai zerin, ki guzainai \"obşorī\" dar {{PLURAL:$1|on|onho}} intixob şudaast, faro giriftaast: $2",
 	"namespaceprotected": "Şumo içozati viroişi sahifahoi fazoinomi '''$1'''-ro nadored.",
 	"ns-specialprotected": "Sahifahoi viƶa ƣajri qobili viroiş hastand.",
-	"titleprotected": "Eçodi sahifae bo in unvon az tarafi [[User:$1|$1]] çilavgirī şudaast.\nDaleli zikrşuda az in qaror ast <em>$2</em>.",
+	"titleprotected": "Eçodi sahifae bo in unvon az tarafi [[User:$1|$1]] çilavgirī şudaast.\nDaleli zikrşuda az in qaror ast ''$2''.",
 	"virus-badscanner": "Tanzimoti bad: puişgari virusi noşinoxta: ''$1''",
 	"virus-scanfailed": "puiş nomuvaffaq (ramzi $1)",
 	"virus-unknownscanner": "antivirusi noşinos:",
@@ -504,7 +503,7 @@
 	"mergehistory-go": "Namoişi viroişhoi qobili idƣom",
 	"mergehistory-submit": "Idƣom nusxaho",
 	"mergehistory-empty": "Heç jak nusxaho qobili idƣom nestand.",
-	"mergehistory-done": "$3 {{PLURAL:$3|nusxa|nusxaho}} az $1 bo muvaffaqijat ba [[:$2]] idƣom şud.",
+	"mergehistory-success": "$3 {{PLURAL:$3|nusxa|nusxaho}} az [[:$1]] bo muvaffaqijat ba [[:$2]] idƣom şud.",
 	"mergehistory-fail": "Idƣomi ta'rix mumkin nest, lutfan parametrhoi sahifa va vaqtro bozbinī kuned.",
 	"mergehistory-no-source": "Sahifai manba' $1 vuçud nadorad.",
 	"mergehistory-no-destination": "Sahifai maqsad $1 vuçud nadorad.",
@@ -750,6 +749,7 @@
 	"upload-maxfilesize": "Buzurgtarin andozai parvanda: $1",
 	"filewasdeleted": "Parvandae bo hamin nom peştar borguzorī va pas az on pok şudaast. Peş az borguzorī ba $1 nigared.",
 	"filename-bad-prefix": "Nomi parvandae, ki şumo borguzori kardanied bo '''\"$1\"''' oƣoz meşavad, ki jak peşvandi maxsusi akshoi sabtşuda tavassuti aksbardorakhoi raqamī ast. Lutfan nomi behtari tavsifotī baroi parvanda intixob kuned.",
+	"upload-success-subj": "Firistodan bomuvaffaqijat",
 	"upload-proto-error": "Qarordodi nodurust",
 	"upload-proto-error-text": "Borguzori az durdast bo nişonahoe, ki bo <code>http://</code> jo <code>ftp://</code> oƣoz meşavand, nijoz dorad.",
 	"upload-file-error": "Xatoi doxilī",
@@ -795,7 +795,7 @@
 	"filerevert-legend": "Vogardoniji parvanda",
 	"filerevert-intro": "Şumo dar holi vogardoniji '''[[Media:$1|$1]]''' ba [$4 nusxai az $3, $2] hasted.",
 	"filerevert-comment": "Tavzeh:",
-	"filerevert-defaultcomment": "Vogardonī ba nusxai $2, $1 ($3)",
+	"filerevert-defaultcomment": "Vogardonī ba nusxai $2, $1",
 	"filerevert-submit": "birav",
 	"filerevert-success": "'''[[Media:$1|$1]]''' vogardonida şud ba [nusxai $4 az ta'rixi $3, $2].",
 	"filerevert-badversion": "Nusxai kūhnatare az in parvanda vuçud nadoşt.",
@@ -931,6 +931,7 @@
 	"mailnologin": "Nişonae az firistanda vuçud nadorad",
 	"mailnologintext": "Baroi firistodani poctai elektronī baroi korbaroni digar bojad [[Special:UserLogin|ba sistem vorid şaved]] va nişonai poctai elektroniji mū'tabar dar [[Special:Preferences|tarçihoti]] xud doşta boşed.",
 	"emailuser": "Firistodani email ba in korbar",
+	"emailpage": "Poctai elektronī ba korbar",
 	"defemailsubject": "Vikipedia e-mail",
 	"noemailtitle": "Nişonai poctai elektronī mavçud nest",
 	"emailfrom": "Az:",
@@ -993,7 +994,7 @@
 	"rollbacklink": "vogardoni",
 	"rollbackfailed": "Vogardoni naşud",
 	"cantrollback": "Nametavon viroişro vogardond; oxirin hissaguzor tanho muallifi in maqola ast.",
-	"editcomment": "Xulosai viroiş in bud: <em>$1</em>.",
+	"editcomment": "Xulosai viroiş in bud: \"''$1''\".",
 	"revertpage": "Viroişi [[Special:Contributions/$2|$2]] ([[User talk:$2|Bahs]]) vogardonida şud ba oxirin taƣjire, ki [[User:$1|$1]] ançom doda bud",
 	"rollback-success": "Viroişhoi $1 vogardonī şud; sahifa ba viroişi $2 bargardonida şud.",
 	"sessionfailure": "Ba nazar merasad, muşkilie dar mavridi nişasti korbariji şumo vuçud dorad; amali darxostşuda ba unvoni iqdomi peşgirona dar barobari rabuda şudani ittilooti nişasti korbarī, laƣv şud. Lutfan tugmai \"bozgaşt\"-ro dar mururgari xud paxş kuned va sahifae, ki az on inço rasidaed muçaddadan faroxonī kuned, sipas muçaddadan boz sa'j kuned.",
@@ -1178,6 +1179,7 @@
 	"move-page-legend": "Kūconidani sahifa",
 	"movepagetext": "Bo istifodai az formai zerin nomi sahifa taƣjir xohad şud, va tamomi ta'rixaş ba nomi çadid kūconida xohad şud.\nUnvoni peşina tabdil ba jak sahifai masir ba unvoni çadid xohad şud.\nPajvandho ba unvoni peşinai sahifa taƣjir naxohand kard; hatman taƣjiri masirhoi [[Special:DoubleRedirects|dutoī]] jo [[Special:BrokenRedirects|şikastaro]] barrasi kuned.\nŞumo mas'ul itminon hasted ki in pajvandho hanūz ba hamon çoe ki qaror ast biravand.\n\nTavaççūh kuned, ki agar sahifae dar unvoni çadid vuçud doşta boşad sahifa kūconida '''naxohad şud''', magar in ki sahifa xolī jo taƣjiri masir boşad va ta'rixi viroişi nadoşta boşad.\nIn ja'ne iştiboh agar iştiboh karded metavoned sahifaro ba hamon çoe ki az on kūconida şuda bud bargardoned, va in ki nametavoned rūi sahifahoi mavçudbuda binavised.\n\n'''HUŞDOR!'''\nKūconidani sahifaho ba nomi çadid mumkin ast taƣjiri asosī va ƣajrimuntazire baroi sahifahoi maşhur boşad;\nlutfan mutmain şaved ki peş az kūconidani sahifa, oqibati in korro dark mekuned.",
 	"movepagetalktext": "Sahifai bahsi marbuta, agar vuçud doşta boşad, ba tavri xudkorī hamroh bo maqolai aslī kūconida xohad şud '''magar inki:'''\n\n*jak sahifai bahsi ƣajrixolī tahti in nomi çadid vuçud doşta boşad, jo\n*ça'bai zerro tik nazada boşed.\n\nDar on holatho, sahifaro bojad ba tavri dastī kūconid va jo du sahifaro bo viroiş jak kuned.",
+	"movearticle": "Kūconidani sahifa:",
 	"movenologintext": "Baroi kūconidani sahifa şumo bojad korbari sabtşuda va [[Special:UserLogin|ba sistem vurudşuda]] boşed.",
 	"movenotallowedfile": "Şumo içozati intiqoli parvandahoro nadored.",
 	"cant-move-user-page": "Şumo içozat nadored sahifahoi korbariji sarşoxaro intiqol dihed.",
@@ -1203,6 +1205,7 @@
 	"movesubpage": "{{PLURAL:$1|Zersahifa|Zersahifaho}}",
 	"movereason": "Sabab:",
 	"revertmove": "vogardonī",
+	"delete_and_move": "Hazf va kūconidan",
 	"delete_and_move_text": "==Nijoz ba hazf==\n\nMaqolai maqsad \"[[:$1]]\" vuçud dorad. Ojo mexohed onro hazf kuned to intiqol mumkin şavad?",
 	"delete_and_move_confirm": "Bale, sahifa hazf şavad",
 	"delete_and_move_reason": "Hazf şud baroi mumkin şudani kūconidan",
@@ -1727,6 +1730,5 @@
 	"expand_templates_ok": "Ta'jid",
 	"expand_templates_remove_comments": "Hazfi tavzehot",
 	"expand_templates_generate_xml": "Namoişi daraxti taçzehi XML",
-	"expand_templates_preview": "Peşnamoiş",
-	"randomrootpage": "Sahifai reşaviji tasodufī"
+	"expand_templates_preview": "Peşnamoiş"
 }

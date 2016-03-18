@@ -11,34 +11,34 @@ abstract class PoolCounterAbstractMock extends PoolCounter {
 
 class PoolCounterTest extends MediaWikiTestCase {
 	public function testConstruct() {
-		$poolCounterConfig = [
+		$poolCounterConfig = array(
 			'class' => 'PoolCounterMock',
 			'timeout' => 10,
 			'workers' => 10,
 			'maxqueue' => 100,
-		];
+		);
 
 		$poolCounter = $this->getMockBuilder( 'PoolCounterAbstractMock' )
-			->setConstructorArgs( [ $poolCounterConfig, 'testCounter', 'someKey' ] )
+			->setConstructorArgs( array( $poolCounterConfig, 'testCounter', 'someKey' ) )
 			// don't mock anything - the proper syntax would be setMethods(null), but due
 			// to a PHPUnit bug that does not work with getMockForAbstractClass()
-			->setMethods( [ 'idontexist' ] )
+			->setMethods( array( 'idontexist' ) )
 			->getMockForAbstractClass();
 		$this->assertInstanceOf( 'PoolCounter', $poolCounter );
 	}
 
 	public function testConstructWithSlots() {
-		$poolCounterConfig = [
+		$poolCounterConfig = array(
 			'class' => 'PoolCounterMock',
 			'timeout' => 10,
 			'workers' => 10,
 			'slots' => 2,
 			'maxqueue' => 100,
-		];
+		);
 
 		$poolCounter = $this->getMockBuilder( 'PoolCounterAbstractMock' )
-			->setConstructorArgs( [ $poolCounterConfig, 'testCounter', 'key' ] )
-			->setMethods( [ 'idontexist' ] ) // don't mock anything
+			->setConstructorArgs( array( $poolCounterConfig, 'testCounter', 'key' ) )
+			->setMethods( array( 'idontexist' ) ) // don't mock anything
 			->getMockForAbstractClass();
 		$this->assertInstanceOf( 'PoolCounter', $poolCounter );
 	}
@@ -47,14 +47,14 @@ class PoolCounterTest extends MediaWikiTestCase {
 		$poolCounter = $this->getMockBuilder( 'PoolCounterAbstractMock' )
 			// don't mock anything - the proper syntax would be setMethods(null), but due
 			// to a PHPUnit bug that does not work with getMockForAbstractClass()
-			->setMethods( [ 'idontexist' ] )
+			->setMethods( array( 'idontexist' ) )
 			->disableOriginalConstructor()
 			->getMockForAbstractClass();
 
 		$hashKeyIntoSlots = new ReflectionMethod( $poolCounter, 'hashKeyIntoSlots' );
 		$hashKeyIntoSlots->setAccessible( true );
 
-		$keysWithTwoSlots = $keysWithFiveSlots = [];
+		$keysWithTwoSlots = $keysWithFiveSlots = array();
 		foreach ( range( 1, 100 ) as $i ) {
 			$keysWithTwoSlots[] = $hashKeyIntoSlots->invoke( $poolCounter, 'key ' . $i, 2 );
 			$keysWithFiveSlots[] = $hashKeyIntoSlots->invoke( $poolCounter, 'key ' . $i, 5 );

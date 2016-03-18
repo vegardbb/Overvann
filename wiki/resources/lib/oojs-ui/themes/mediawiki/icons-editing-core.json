@@ -1,23 +1,22 @@
 {
-	"selectorWithoutVariant": ".oo-ui-icon-{name}",
-	"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-icon-{name}",
+	"prefix": "oo-ui-icon",
 	"intro": "@import '../../../../src/styles/common';",
 	"variants": {
 		"invert": {
-			"color": "#ffffff",
+			"color": "#FFFFFF",
 			"global": true
 		},
 		"progressive": {
-			"color": "#347bff"
+			"color": "#347BFF"
 		},
 		"constructive": {
-			"color": "#347bff"
+			"color": "#00AF89"
 		},
 		"destructive": {
-			"color": "#d11d13"
+			"color": "#D11D13"
 		},
 		"warning": {
-			"color": "#ff5d00"
+			"color": "#FF5D00"
 		}
 	},
 	"images": {
@@ -41,14 +40,6 @@
 			"ltr": "images/icons/external-link-ltr.svg",
 			"rtl":  "images/icons/external-link-rtl.svg"
 		} },
-		"linkSecure": { "file": "images/icons/secure-link.svg" },
-		"redo": { "file": {
-			"ltr": "images/icons/arched-arrow-ltr.svg",
-			"rtl": "images/icons/arched-arrow-rtl.svg"
-		} },
-		"undo": { "file": {
-			"ltr": "images/icons/arched-arrow-rtl.svg",
-			"rtl": "images/icons/arched-arrow-ltr.svg"
-		} }
+		"linkSecure": { "file": "images/icons/secure-link.svg" }
 	}
 }

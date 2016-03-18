@@ -31,7 +31,7 @@ require_once __DIR__ . '/Maintenance.php';
 class PopulateImageSha1 extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Populate the img_sha1 field' );
+		$this->mDescription = "Populate the img_sha1 field";
 		$this->addOption( 'force', "Recalculate sha1 for rows that already have a value" );
 		$this->addOption( 'multiversiononly', "Calculate only for files with several versions" );
 		$this->addOption( 'method', "Use 'pipe' to pipe to mysql command line,\n" .
@@ -67,12 +67,12 @@ class PopulateImageSha1 extends LoggedUpdateMaintenance {
 		$isRegen = ( $force || $file != '' ); // forced recalculation?
 
 		$t = -microtime( true );
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 		if ( $file != '' ) {
 			$res = $dbw->select(
 				'image',
-				[ 'img_name' ],
-				[ 'img_name' => $file ],
+				array( 'img_name' ),
+				array( 'img_name' => $file ),
 				__METHOD__
 			);
 			if ( !$res ) {
@@ -83,20 +83,20 @@ class PopulateImageSha1 extends LoggedUpdateMaintenance {
 			$this->output( "Populating img_sha1 field for specified files\n" );
 		} else {
 			if ( $this->hasOption( 'multiversiononly' ) ) {
-				$conds = [];
+				$conds = array();
 				$this->output( "Populating and recalculating img_sha1 field for versioned files\n" );
 			} elseif ( $force ) {
-				$conds = [];
+				$conds = array();
 				$this->output( "Populating and recalculating img_sha1 field\n" );
 			} else {
-				$conds = [ 'img_sha1' => '' ];
+				$conds = array( 'img_sha1' => '' );
 				$this->output( "Populating img_sha1 field\n" );
 			}
 			if ( $this->hasOption( 'multiversiononly' ) ) {
 				$res = $dbw->select( 'oldimage',
-					[ 'img_name' => 'DISTINCT(oi_name)' ], $conds, __METHOD__ );
+					array( 'img_name' => 'DISTINCT(oi_name)' ), $conds, __METHOD__ );
 			} else {
-				$res = $dbw->select( 'image', [ 'img_name' ], $conds, __METHOD__ );
+				$res = $dbw->select( 'image', array( 'img_name' ), $conds, __METHOD__ );
 			}
 		}
 

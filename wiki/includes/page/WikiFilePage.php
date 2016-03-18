@@ -29,10 +29,10 @@ class WikiFilePage extends WikiPage {
 	/**
 	 * @var File
 	 */
-	protected $mFile = false;
-	protected $mRepo = null;
-	protected $mFileLoaded = false;
-	protected $mDupes = null;
+	protected $mFile = false; 				// !< File object
+	protected $mRepo = null;			    // !<
+	protected $mFileLoaded = false;		    // !<
+	protected $mDupes = null;				// !<
 
 	public function __construct( $title ) {
 		parent::__construct( $title );
@@ -137,7 +137,7 @@ class WikiFilePage extends WikiPage {
 		}
 		$hash = $this->mFile->getSha1();
 		if ( !( $hash ) ) {
-			$this->mDupes = [];
+			$this->mDupes = array();
 			return $this->mDupes;
 		}
 		$dupes = RepoGroup::singleton()->findBySha1( $hash );
@@ -169,15 +169,16 @@ class WikiFilePage extends WikiPage {
 		$this->loadFile();
 		if ( $this->mFile->exists() ) {
 			wfDebug( 'ImagePage::doPurge purging ' . $this->mFile->getName() . "\n" );
-			DeferredUpdates::addUpdate( new HTMLCacheUpdate( $this->mTitle, 'imagelinks' ) );
+			$update = new HTMLCacheUpdate( $this->mTitle, 'imagelinks' );
+			$update->doUpdate();
 			$this->mFile->upgradeRow();
-			$this->mFile->purgeCache( [ 'forThumbRefresh' => true ] );
+			$this->mFile->purgeCache( array( 'forThumbRefresh' => true ) );
 		} else {
 			wfDebug( 'ImagePage::doPurge no image for '
 				. $this->mFile->getName() . "; limiting purge to cache only\n" );
 			// even if the file supposedly doesn't exist, force any cached information
 			// to be updated (in case the cached information is wrong)
-			$this->mFile->purgeCache( [ 'forThumbRefresh' => true ] );
+			$this->mFile->purgeCache( array( 'forThumbRefresh' => true ) );
 		}
 		if ( $this->mRepo ) {
 			// Purge redirect cache
@@ -202,7 +203,7 @@ class WikiFilePage extends WikiPage {
 
 		if ( !$file instanceof LocalFile ) {
 			wfDebug( __CLASS__ . '::' . __METHOD__ . " is not supported for this file\n" );
-			return TitleArray::newFromResult( new FakeResultWrapper( [] ) );
+			return TitleArray::newFromResult( new FakeResultWrapper( array() ) );
 		}
 
 		/** @var LocalRepo $repo */
@@ -210,18 +211,18 @@ class WikiFilePage extends WikiPage {
 		$dbr = $repo->getSlaveDB();
 
 		$res = $dbr->select(
-			[ 'page', 'categorylinks' ],
-			[
+			array( 'page', 'categorylinks' ),
+			array(
 				'page_title' => 'cl_to',
 				'page_namespace' => NS_CATEGORY,
-			],
-			[
+			),
+			array(
 				'page_namespace' => $title->getNamespace(),
 				'page_title' => $title->getDBkey(),
-			],
+			),
 			__METHOD__,
-			[],
-			[ 'categorylinks' => [ 'INNER JOIN', 'page_id = cl_from' ] ]
+			array(),
+			array( 'categorylinks' => array( 'INNER JOIN', 'page_id = cl_from' ) )
 		);
 
 		return TitleArray::newFromResult( $res );

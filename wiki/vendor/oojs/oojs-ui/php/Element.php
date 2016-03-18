@@ -39,19 +39,19 @@ class Element extends Tag {
 	protected $data = null;
 
 	/**
-	 * Strings of the CSS classes explicitly configured for this element (as opposed to #$classes,
-	 * which contains all classes for this element).
+	 * CSS classes explicitly configured for this element (as opposed to #$classes, which contains all
+	 * classes for this element).
 	 *
-	 * @var array
+	 * @var string[]
 	 */
-	protected $ownClasses = [];
+	protected $ownClasses = array();
 
 	/**
-	 * ElementMixins.
+	 * Mixins.
 	 *
-	 * @var array List mixed in objects.
+	 * @var ElementMixin[] List mixed in objects.
 	 */
-	protected $mixins = [];
+	protected $mixins = array();
 
 	/* Methods */
 
@@ -65,7 +65,7 @@ class Element extends Tag {
 	 *   HtmlSnippet instance to prevent that.
 	 * @param mixed $config['data'] Element data
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Parent constructor
 		parent::__construct( $this->getTagName() );
 
@@ -81,7 +81,7 @@ class Element extends Tag {
 			$this->addClasses( $this->ownClasses );
 		}
 		if ( isset( $config['id'] ) ) {
-			$this->setAttributes( [ 'id' => $config['id'] ] );
+			$this->setAttributes( array( 'id' => $config['id'] ) );
 		}
 		if ( isset( $config['text'] ) ) {
 			// JS compatibility
@@ -107,7 +107,7 @@ class Element extends Tag {
 		// Search mixins for methods
 		foreach ( $this->mixins as $mixin ) {
 			if ( method_exists( $mixin, $method ) ) {
-				return call_user_func_array( [ $mixin, $method ], $arguments );
+				return call_user_func_array( array( $mixin, $method ), $arguments );
 			}
 		}
 		// Fail normally
@@ -181,7 +181,7 @@ class Element extends Tag {
 	 * Set element data.
 	 *
 	 * @param mixed $data Element data
-	 * @return $this
+	 * @chainable
 	 */
 	public function setData( $data ) {
 		$this->data = $data;
@@ -245,7 +245,7 @@ class Element extends Tag {
 		if ( $this->data !== null ) {
 			$config['data'] = $this->data;
 		}
-		if ( $this->ownClasses !== [] ) {
+		if ( $this->ownClasses !== array() ) {
 			$config['classes'] = $this->ownClasses;
 		}
 		return $config;
@@ -261,16 +261,16 @@ class Element extends Tag {
 	 */
 	private function getSerializedConfig() {
 		// Ensure that '_' comes first in the output.
-		$config = [ '_' => true ];
+		$config = array( '_' => true );
 		$config = $this->getConfig( $config );
 		// Post-process config array to turn Tag references into ID references
 		// and HtmlSnippet references into a { html: 'string' } JSON form.
 		$replaceElements = function( &$item ) {
 			if ( $item instanceof Tag ) {
 				$item->ensureInfusableId();
-				$item = [ 'tag' => $item->getAttribute( 'id' ) ];
+				$item = array( 'tag' => $item->getAttribute( 'id' ) );
 			} elseif ( $item instanceof HtmlSnippet ) {
-				$item = [ 'html' => (string) $item ];
+				$item = array( 'html' => (string) $item );
 			}
 		};
 		array_walk_recursive( $config, $replaceElements );
@@ -329,41 +329,5 @@ class Element extends Tag {
 	 */
 	public static function setDefaultDir( $dir ) {
 		self::$defaultDir = $dir === 'rtl' ? 'rtl' : 'ltr';
-	}
-
-	/**
-	 * A helper method to massage an array of HTML attributes into a format that is more likely to
-	 * work with an OOjs UI PHP element, camel-casing attribute names and setting values of boolean
-	 * ones to true. Intended as a convenience to be used when refactoring legacy systems using HTML
-	 * to use OOjs UI.
-	 *
-	 * @param array $attrs HTML attributes, e.g. `[ 'disabled' => '', 'accesskey' => 'k' ]`
-	 * @return array OOjs UI PHP element config, e.g. `[ 'disabled' => true, 'accessKey' => 'k' ]`
-	 */
-	public static function configFromHtmlAttributes( array $attrs ) {
-		$booleanAttrs = [
-			'disabled' => true,
-			'required' => true,
-			'autofocus' => true,
-			'multiple' => true,
-			'readonly' => true,
-		];
-		$attributeToConfig = [
-			'maxlength' => 'maxLength',
-			'readonly' => 'readOnly',
-			'tabindex' => 'tabIndex',
-			'accesskey' => 'accessKey',
-		];
-		$config = [];
-		foreach ( $attrs as $key => $value ) {
-			if ( isset( $booleanAttrs[$key] ) && $value !== false && $value !== null ) {
-				$value = true;
-			}
-			if ( isset( $attributeToConfig[$key] ) ) {
-				$key = $attributeToConfig[$key];
-			}
-			$config[$key] = $value;
-		}
-		return $config;
 	}
 }

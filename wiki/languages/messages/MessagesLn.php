@@ -14,10 +14,10 @@
 $fallback = 'fr';
 
 // Remove French aliases
-$namespaceGenderAliases = [];
+$namespaceGenderAliases = array();
 
 $linkPrefixExtension = true;
 
 # Same as the French (bug 8485)
-$separatorTransformTable = [ ',' => "\xc2\xa0", '.' => ',' ];
+$separatorTransformTable = array( ',' => "\xc2\xa0", '.' => ',' );
 

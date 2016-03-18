@@ -39,12 +39,12 @@ abstract class ReverseChronologicalPager extends IndexPager {
 			return $this->mNavigationBar;
 		}
 
-		$linkTexts = [
+		$linkTexts = array(
 			'prev' => $this->msg( 'pager-newer-n' )->numParams( $this->mLimit )->escaped(),
 			'next' => $this->msg( 'pager-older-n' )->numParams( $this->mLimit )->escaped(),
 			'first' => $this->msg( 'histlast' )->escaped(),
 			'last' => $this->msg( 'histfirst' )->escaped()
-		];
+		);
 
 		$pagingLinks = $this->getPagingLinks( $linkTexts );
 		$limitLinks = $this->getLimitLinks();

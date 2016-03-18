@@ -310,7 +310,7 @@ class SpecialPage {
 	public function prefixSearchSubpages( $search, $limit, $offset ) {
 		$subpages = $this->getSubpagesForPrefixSearch();
 		if ( !$subpages ) {
-			return [];
+			return array();
 		}
 
 		return self::prefixSearchArray( $search, $limit, $subpages, $offset );
@@ -325,30 +325,7 @@ class SpecialPage {
 	 * @return string[] subpages to search from
 	 */
 	protected function getSubpagesForPrefixSearch() {
-		return [];
-	}
-
-	/**
-	 * Perform a regular substring search for prefixSearchSubpages
-	 * @param string $search Prefix to search for
-	 * @param int $limit Maximum number of results to return (usually 10)
-	 * @param int $offset Number of results to skip (usually 0)
-	 * @return string[] Matching subpages
-	 */
-	protected function prefixSearchString( $search, $limit, $offset ) {
-		$title = Title::newFromText( $search );
-		if ( !$title || !$title->canExist() ) {
-			// No prefix suggestion in special and media namespace
-			return [];
-		}
-
-		$search = SearchEngine::create();
-		$search->setLimitOffset( $limit, $offset );
-		$search->setNamespaces( [] );
-		$result = $search->defaultPrefixSearch( $search );
-		return array_map( function( Title $t ) {
-			return $t->getPrefixedText();
-		}, $result );
+		return array();
 	}
 
 	/**
@@ -377,11 +354,11 @@ class SpecialPage {
 		$out->setRobotPolicy( $this->getRobotPolicy() );
 		$out->setPageTitle( $this->getDescription() );
 		if ( $this->getConfig()->get( 'UseMediaWikiUIEverywhere' ) ) {
-			$out->addModuleStyles( [
+			$out->addModuleStyles( array(
 				'mediawiki.ui.input',
 				'mediawiki.ui.radio',
 				'mediawiki.ui.checkbox',
-			] );
+			) );
 		}
 	}
 
@@ -401,7 +378,7 @@ class SpecialPage {
 		 * @param SpecialPage $this
 		 * @param string|null $subPage
 		 */
-		Hooks::run( 'SpecialPageBeforeExecute', [ $this, $subPage ] );
+		Hooks::run( 'SpecialPageBeforeExecute', array( $this, $subPage ) );
 
 		$this->beforeExecute( $subPage );
 		$this->execute( $subPage );
@@ -415,7 +392,7 @@ class SpecialPage {
 		 * @param SpecialPage $this
 		 * @param string|null $subPage
 		 */
-		Hooks::run( 'SpecialPageAfterExecute', [ $this, $subPage ] );
+		Hooks::run( 'SpecialPageAfterExecute', array( $this, $subPage ) );
 	}
 
 	/**
@@ -626,7 +603,7 @@ class SpecialPage {
 	 */
 	public function msg( /* $args */ ) {
 		$message = call_user_func_array(
-			[ $this->getContext(), 'msg' ],
+			array( $this->getContext(), 'msg' ),
 			func_get_args()
 		);
 		// RequestContext passes context to wfMessage, and the language is set from
@@ -649,7 +626,7 @@ class SpecialPage {
 		$feedTemplate = wfScript( 'api' );
 
 		foreach ( $this->getConfig()->get( 'FeedClasses' ) as $format => $class ) {
-			$theseParams = $params + [ 'feedformat' => $format ];
+			$theseParams = $params + array( 'feedformat' => $format );
 			$url = wfAppendQuery( $feedTemplate, $theseParams );
 			$this->getOutput()->addFeedLink( $format, $url );
 		}
@@ -696,16 +673,6 @@ class SpecialPage {
 		}
 
 		return $group;
-	}
-
-	/**
-	 * Indicates whether this special page may perform database writes
-	 *
-	 * @return bool
-	 * @since 1.27
-	 */
-	public function doesWrites() {
-		return false;
 	}
 
 	/**

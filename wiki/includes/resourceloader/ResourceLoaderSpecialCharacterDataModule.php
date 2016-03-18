@@ -1,6 +1,6 @@
 <?php
 /**
- * ResourceLoader module for populating special characters data for some
+ * Resource loader module for populating special characters data for some
  * editing extensions to use.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,12 +22,12 @@
  */
 
 /**
- * ResourceLoader module for populating special characters data for some
+ * Resource loader module for populating special characters data for some
  * editing extensions to use.
  */
 class ResourceLoaderSpecialCharacterDataModule extends ResourceLoaderModule {
 	private $path = "resources/src/mediawiki.language/specialcharacters.json";
-	protected $targets = [ 'desktop', 'mobile' ];
+	protected $targets = array( 'desktop', 'mobile' );
 
 	/**
 	 * Get all the dynamic data.
@@ -46,9 +46,9 @@ class ResourceLoaderSpecialCharacterDataModule extends ResourceLoaderModule {
 	public function getScript( ResourceLoaderContext $context ) {
 		return Xml::encodeJsCall(
 			'mw.language.setSpecialCharacters',
-			[
+			array(
 				$this->getData()
-			],
+			),
 			ResourceLoader::inDebugMode()
 		);
 	}
@@ -65,14 +65,14 @@ class ResourceLoaderSpecialCharacterDataModule extends ResourceLoaderModule {
 	 * @return array
 	 */
 	public function getDependencies( ResourceLoaderContext $context = null ) {
-		return [ 'mediawiki.language' ];
+		return array( 'mediawiki.language' );
 	}
 
 	/**
 	 * @return array
 	 */
 	public function getMessages() {
-		return [
+		return array(
 			'special-characters-group-latin',
 			'special-characters-group-latinextended',
 			'special-characters-group-ipa',
@@ -95,6 +95,6 @@ class ResourceLoaderSpecialCharacterDataModule extends ResourceLoaderModule {
 			'special-characters-title-endash',
 			'special-characters-title-emdash',
 			'special-characters-title-minus'
-		];
+		);
 	}
 }

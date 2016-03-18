@@ -45,7 +45,7 @@ require_once __DIR__ . '/Maintenance.php';
 class MoveBatch extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Moves a batch of pages' );
+		$this->mDescription = "Moves a batch of pages";
 		$this->addOption( 'u', "User to perform move", false, true );
 		$this->addOption( 'r', "Reason to move page", false, true );
 		$this->addOption( 'i', "Interval to sleep between moves" );
@@ -61,7 +61,7 @@ class MoveBatch extends Maintenance {
 		chdir( $oldCwd );
 
 		# Options processing
-		$user = $this->getOption( 'u', false );
+		$user = $this->getOption( 'u', 'Move page script' );
 		$reason = $this->getOption( 'r', '' );
 		$interval = $this->getOption( 'i', 0 );
 		$noredirects = $this->getOption( 'noredirects', false );
@@ -75,17 +75,13 @@ class MoveBatch extends Maintenance {
 		if ( !$file ) {
 			$this->error( "Unable to read file, exiting", true );
 		}
-		if ( $user === false ) {
-			$wgUser = User::newSystemUser( 'Move page script', [ 'steal' => true ] );
-		} else {
-			$wgUser = User::newFromName( $user );
-		}
+		$wgUser = User::newFromName( $user );
 		if ( !$wgUser ) {
 			$this->error( "Invalid username", true );
 		}
 
 		# Setup complete, now start
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 		// @codingStandardsIgnoreStart Ignore avoid function calls in a FOR loop test part warning
 		for ( $linenum = 1; !feof( $file ); $linenum++ ) {
 			// @codingStandardsIgnoreEnd
@@ -106,13 +102,13 @@ class MoveBatch extends Maintenance {
 			}
 
 			$this->output( $source->getPrefixedText() . ' --> ' . $dest->getPrefixedText() );
-			$this->beginTransaction( $dbw, __METHOD__ );
+			$dbw->begin( __METHOD__ );
 			$mp = new MovePage( $source, $dest );
 			$status = $mp->move( $wgUser, $reason, !$noredirects );
 			if ( !$status->isOK() ) {
 				$this->output( "\nFAILED: " . $status->getWikiText() );
 			}
-			$this->commitTransaction( $dbw, __METHOD__ );
+			$dbw->commit( __METHOD__ );
 			$this->output( "\n" );
 
 			if ( $interval ) {

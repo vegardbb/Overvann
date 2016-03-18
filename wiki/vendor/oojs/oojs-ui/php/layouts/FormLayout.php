@@ -18,17 +18,17 @@ class FormLayout extends Layout {
 	 * @param string $config['enctype'] HTML form `enctype` attribute
 	 * @param FieldsetLayout[] $config['items'] Items to add
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Parent constructor
 		parent::__construct( $config );
 
 		// Mixins
-		$this->mixin( new GroupElement( $this, array_merge( $config, [ 'group' => $this ] ) ) );
+		$this->mixin( new GroupElement( $this, array_merge( $config, array( 'group' => $this ) ) ) );
 
 		// Initialization
-		$attributeWhitelist = [ 'method', 'action', 'enctype' ];
+		$attributeWhitelist = array( 'method', 'action', 'enctype' );
 		$this
-			->addClasses( [ 'oo-ui-formLayout' ] )
+			->addClasses( array( 'oo-ui-formLayout' ) )
 			->setAttributes( array_intersect_key( $config, array_flip( $attributeWhitelist ) ) );
 		if ( isset( $config['items'] ) ) {
 			$this->addItems( $config['items'] );
@@ -36,7 +36,7 @@ class FormLayout extends Layout {
 	}
 
 	public function getConfig( &$config ) {
-		foreach ( [ 'method', 'action', 'enctype' ] as $attr ) {
+		foreach ( array( 'method', 'action', 'enctype' ) as $attr ) {
 			$value = $this->getAttribute( $attr );
 			if ( $value !== null ) {
 				$config[$attr] = $value;

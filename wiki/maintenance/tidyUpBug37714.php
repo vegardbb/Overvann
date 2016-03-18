@@ -7,24 +7,25 @@ require_once __DIR__ . '/Maintenance.php';
 class TidyUpBug37714 extends Maintenance {
 	public function execute() {
 		// Search for all log entries which are about changing the visability of other log entries.
-		$result = $this->getDB( DB_SLAVE )->select(
+		$result = wfGetDB( DB_SLAVE )->select(
 			'logging',
-			[ 'log_id', 'log_params' ],
-			[
-				'log_type' => [ 'suppress', 'delete' ],
+			array( 'log_id', 'log_params' ),
+			array(
+				'log_type' => array( 'suppress', 'delete' ),
 				'log_action' => 'event',
 				'log_namespace' => NS_SPECIAL,
 				'log_title' => SpecialPage::getTitleFor( 'Log' )->getText()
-			],
+			),
 			__METHOD__
 		);
 
 		foreach ( $result as $row ) {
-			$ids = explode( ',', explode( "\n", $row->log_params )[0] );
-			$result = $this->getDB( DB_SLAVE )->select( // Work out what log entries were changed here.
+			$paramLines = explode( "\n", $row->log_params );
+			$ids = explode( ',', $paramLines[0] ); // Array dereferencing is PHP >= 5.4 :(
+			$result = wfGetDB( DB_SLAVE )->select( // Work out what log entries were changed here.
 				'logging',
 				'log_type',
-				[ 'log_id' => $ids ],
+				array( 'log_id' => $ids ),
 				__METHOD__,
 				'DISTINCT'
 			);
@@ -32,10 +33,10 @@ class TidyUpBug37714 extends Maintenance {
 				// If there's only one type, the target title can be set to include it.
 				$logTitle = SpecialPage::getTitleFor( 'Log', $result->current()->log_type )->getText();
 				$this->output( 'Set log_title to "' . $logTitle . '" for log entry ' . $row->log_id . ".\n" );
-				$this->getDB( DB_MASTER )->update(
+				wfGetDB( DB_MASTER )->update(
 					'logging',
-					[ 'log_title' => $logTitle ],
-					[ 'log_id' => $row->log_id ],
+					array( 'log_title' => $logTitle ),
+					array( 'log_id' => $row->log_id ),
 					__METHOD__
 				);
 				wfWaitForSlaves();

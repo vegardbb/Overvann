@@ -32,18 +32,18 @@ require_once __DIR__ . '/../Maintenance.php';
 class OrphanStats extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription(
-			"Show some statistics on the blob_orphans table, created with trackBlobs.php" );
+		$this->mDescription =
+			"Show some statistics on the blob_orphans table, created with trackBlobs.php";
 	}
 
-	protected function &getDB( $cluster, $groups = [], $wiki = false ) {
+	protected function &getDB( $cluster, $groups = array(), $wiki = false ) {
 		$lb = wfGetLBFactory()->getExternalLB( $cluster );
 
 		return $lb->getConnection( DB_SLAVE );
 	}
 
 	public function execute() {
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_SLAVE );
 		if ( !$dbr->tableExists( 'blob_orphans' ) ) {
 			$this->error( "blob_orphans doesn't seem to exist, need to run trackBlobs.php first", true );
 		}
@@ -51,7 +51,7 @@ class OrphanStats extends Maintenance {
 
 		$num = 0;
 		$totalSize = 0;
-		$hashes = [];
+		$hashes = array();
 		$maxSize = 0;
 
 		foreach ( $res as $boRow ) {
@@ -59,7 +59,7 @@ class OrphanStats extends Maintenance {
 			$blobRow = $extDB->selectRow(
 				'blobs',
 				'*',
-				[ 'blob_id' => $boRow->bo_blob_id ],
+				array( 'blob_id' => $boRow->bo_blob_id ),
 				__METHOD__
 			);
 

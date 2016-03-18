@@ -32,11 +32,11 @@ class BadTitleError extends ErrorPageError {
 	 *     a MalformedTitleException to figure out things from
 	 * @param array $params Parameter to wfMessage()
 	 */
-	public function __construct( $msg = 'badtitletext', $params = [] ) {
+	public function __construct( $msg = 'badtitletext', $params = array() ) {
 		if ( $msg instanceof MalformedTitleException ) {
 			$errorMessage = $msg->getErrorMessage();
 			if ( !$errorMessage ) {
-				parent::__construct( 'badtitle', 'badtitletext', [] );
+				parent::__construct( 'badtitle', 'badtitletext', array() );
 			} else {
 				$errorMessageParams = $msg->getErrorMessageParameters();
 				parent::__construct( 'badtitle', $errorMessage, $errorMessageParams );

@@ -15,10 +15,10 @@ class ExifRotationTest extends MediaWikiMediaTestCase {
 
 		$this->handler = new BitmapHandler();
 
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgShowEXIF' => true,
 			'wgEnableAutoRotation' => true,
-		] );
+		) );
 	}
 
 	/**
@@ -67,14 +67,14 @@ class ExifRotationTest extends MediaWikiMediaTestCase {
 		}
 		foreach ( $thumbs as $size => $out ) {
 			if ( preg_match( '/^(\d+)px$/', $size, $matches ) ) {
-				$params = [
+				$params = array(
 					'width' => $matches[1],
-				];
+				);
 			} elseif ( preg_match( '/^(\d+)x(\d+)px$/', $size, $matches ) ) {
-				$params = [
+				$params = array(
 					'width' => $matches[1],
 					'height' => $matches[2]
-				];
+				);
 			} else {
 				throw new MWException( 'bogus test data format ' . $size );
 			}
@@ -106,36 +106,36 @@ class ExifRotationTest extends MediaWikiMediaTestCase {
 	}
 
 	public static function provideFiles() {
-		return [
-			[
+		return array(
+			array(
 				'landscape-plain.jpg',
 				'image/jpeg',
-				[
+				array(
 					'width' => 1024,
 					'height' => 768,
-				],
-				[
-					'800x600px' => [ 800, 600 ],
-					'9999x800px' => [ 1067, 800 ],
-					'800px' => [ 800, 600 ],
-					'600px' => [ 600, 450 ],
-				]
-			],
-			[
+				),
+				array(
+					'800x600px' => array( 800, 600 ),
+					'9999x800px' => array( 1067, 800 ),
+					'800px' => array( 800, 600 ),
+					'600px' => array( 600, 450 ),
+				)
+			),
+			array(
 				'portrait-rotated.jpg',
 				'image/jpeg',
-				[
+				array(
 					'width' => 768, // as rotated
 					'height' => 1024, // as rotated
-				],
-				[
-					'800x600px' => [ 450, 600 ],
-					'9999x800px' => [ 600, 800 ],
-					'800px' => [ 800, 1067 ],
-					'600px' => [ 600, 800 ],
-				]
-			]
-		];
+				),
+				array(
+					'800x600px' => array( 450, 600 ),
+					'9999x800px' => array( 600, 800 ),
+					'800px' => array( 800, 1067 ),
+					'600px' => array( 600, 800 ),
+				)
+			)
+		);
 	}
 
 	/**
@@ -172,14 +172,14 @@ class ExifRotationTest extends MediaWikiMediaTestCase {
 
 		foreach ( $thumbs as $size => $out ) {
 			if ( preg_match( '/^(\d+)px$/', $size, $matches ) ) {
-				$params = [
+				$params = array(
 					'width' => $matches[1],
-				];
+				);
 			} elseif ( preg_match( '/^(\d+)x(\d+)px$/', $size, $matches ) ) {
-				$params = [
+				$params = array(
 					'width' => $matches[1],
 					'height' => $matches[2]
-				];
+				);
 			} else {
 				throw new MWException( 'bogus test data format ' . $size );
 			}
@@ -211,36 +211,36 @@ class ExifRotationTest extends MediaWikiMediaTestCase {
 	}
 
 	public static function provideFilesNoAutoRotate() {
-		return [
-			[
+		return array(
+			array(
 				'landscape-plain.jpg',
 				'image/jpeg',
-				[
+				array(
 					'width' => 1024,
 					'height' => 768,
-				],
-				[
-					'800x600px' => [ 800, 600 ],
-					'9999x800px' => [ 1067, 800 ],
-					'800px' => [ 800, 600 ],
-					'600px' => [ 600, 450 ],
-				]
-			],
-			[
+				),
+				array(
+					'800x600px' => array( 800, 600 ),
+					'9999x800px' => array( 1067, 800 ),
+					'800px' => array( 800, 600 ),
+					'600px' => array( 600, 450 ),
+				)
+			),
+			array(
 				'portrait-rotated.jpg',
 				'image/jpeg',
-				[
+				array(
 					'width' => 1024, // since not rotated
 					'height' => 768, // since not rotated
-				],
-				[
-					'800x600px' => [ 800, 600 ],
-					'9999x800px' => [ 1067, 800 ],
-					'800px' => [ 800, 600 ],
-					'600px' => [ 600, 450 ],
-				]
-			]
-		];
+				),
+				array(
+					'800x600px' => array( 800, 600 ),
+					'9999x800px' => array( 1067, 800 ),
+					'800px' => array( 800, 600 ),
+					'600px' => array( 600, 450 ),
+				)
+			)
+		);
 	}
 
 	const TEST_WIDTH = 100;
@@ -250,31 +250,31 @@ class ExifRotationTest extends MediaWikiMediaTestCase {
 	 * @dataProvider provideBitmapExtractPreRotationDimensions
 	 */
 	public function testBitmapExtractPreRotationDimensions( $rotation, $expected ) {
-		$result = $this->handler->extractPreRotationDimensions( [
+		$result = $this->handler->extractPreRotationDimensions( array(
 			'physicalWidth' => self::TEST_WIDTH,
 			'physicalHeight' => self::TEST_HEIGHT,
-		], $rotation );
+		), $rotation );
 		$this->assertEquals( $expected, $result );
 	}
 
 	public static function provideBitmapExtractPreRotationDimensions() {
-		return [
-			[
+		return array(
+			array(
 				0,
-				[ self::TEST_WIDTH, self::TEST_HEIGHT ]
-			],
-			[
+				array( self::TEST_WIDTH, self::TEST_HEIGHT )
+			),
+			array(
 				90,
-				[ self::TEST_HEIGHT, self::TEST_WIDTH ]
-			],
-			[
+				array( self::TEST_HEIGHT, self::TEST_WIDTH )
+			),
+			array(
 				180,
-				[ self::TEST_WIDTH, self::TEST_HEIGHT ]
-			],
-			[
+				array( self::TEST_WIDTH, self::TEST_HEIGHT )
+			),
+			array(
 				270,
-				[ self::TEST_HEIGHT, self::TEST_WIDTH ]
-			],
-		];
+				array( self::TEST_HEIGHT, self::TEST_WIDTH )
+			),
+		);
 	}
 }

@@ -41,12 +41,12 @@ class RevDelArchivedFileList extends RevDelFileList {
 		return $db->select(
 			'filearchive',
 			ArchivedFile::selectFields(),
-			[
+			array(
 				'fa_name' => $this->title->getDBkey(),
 				'fa_id' => $ids
-			],
+			),
 			__METHOD__,
-			[ 'ORDER BY' => 'fa_id DESC' ]
+			array( 'ORDER BY' => 'fa_id DESC' )
 		);
 	}
 

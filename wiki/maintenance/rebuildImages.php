@@ -48,17 +48,17 @@ class ImageBuilder extends Maintenance {
 		parent::__construct();
 
 		global $wgUpdateCompatibleMetadata;
-		// make sure to update old, but compatible img_metadata fields.
+		//make sure to update old, but compatible img_metadata fields.
 		$wgUpdateCompatibleMetadata = true;
 
-		$this->addDescription( 'Script to update image metadata records' );
+		$this->mDescription = 'Script to update image metadata records';
 
 		$this->addOption( 'missing', 'Check for files without associated database record' );
 		$this->addOption( 'dry-run', 'Only report, don\'t update the database' );
 	}
 
 	public function execute() {
-		$this->dbw = $this->getDB( DB_MASTER );
+		$this->dbw = wfGetDB( DB_MASTER );
 		$this->dryrun = $this->hasOption( 'dry-run' );
 		if ( $this->dryrun ) {
 			$GLOBALS['wgReadOnly'] = 'Dry run mode, image upgrades are suppressed';
@@ -127,7 +127,7 @@ class ImageBuilder extends Maintenance {
 		$this->init( $count, $table );
 		$this->output( "Processing $table...\n" );
 
-		$result = $this->getDB( DB_SLAVE )->select( $table, '*', [], __METHOD__ );
+		$result = wfGetDB( DB_SLAVE )->select( $table, '*', array(), __METHOD__ );
 
 		foreach ( $result as $row ) {
 			$update = call_user_func( $callback, $row, null );
@@ -141,7 +141,7 @@ class ImageBuilder extends Maintenance {
 	}
 
 	function buildImage() {
-		$callback = [ $this, 'imageCallback' ];
+		$callback = array( $this, 'imageCallback' );
 		$this->buildTable( 'image', 'img_name', $callback );
 	}
 
@@ -154,7 +154,7 @@ class ImageBuilder extends Maintenance {
 	}
 
 	function buildOldImage() {
-		$this->buildTable( 'oldimage', 'oi_archive_name', [ $this, 'oldimageCallback' ] );
+		$this->buildTable( 'oldimage', 'oi_archive_name', array( $this, 'oldimageCallback' ) );
 	}
 
 	function oldimageCallback( $row, $copy ) {
@@ -171,14 +171,14 @@ class ImageBuilder extends Maintenance {
 	}
 
 	function crawlMissing() {
-		$this->getRepo()->enumFiles( [ $this, 'checkMissingImage' ] );
+		$this->getRepo()->enumFiles( array( $this, 'checkMissingImage' ) );
 	}
 
 	function checkMissingImage( $fullpath ) {
 		$filename = wfBaseName( $fullpath );
 		$row = $this->dbw->selectRow( 'image',
-			[ 'img_name' ],
-			[ 'img_name' => $filename ],
+			array( 'img_name' ),
+			array( 'img_name' => $filename ),
 			__METHOD__ );
 
 		if ( !$row ) { // file not registered

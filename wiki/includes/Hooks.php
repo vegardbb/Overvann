@@ -25,6 +25,12 @@
  */
 
 /**
+ * @since 1.18
+ */
+class MWHookException extends MWException {
+}
+
+/**
  * Hooks class.
  *
  * Used to supersede $wgHooks, because globals are EVIL.
@@ -36,7 +42,7 @@ class Hooks {
 	 * Array of events mapped to an array of callbacks to be run
 	 * when that event is triggered.
 	 */
-	protected static $handlers = [];
+	protected static $handlers = array();
 
 	/**
 	 * Attach an event handler to a given hook.
@@ -48,7 +54,7 @@ class Hooks {
 	 */
 	public static function register( $name, $callback ) {
 		if ( !isset( self::$handlers[$name] ) ) {
-			self::$handlers[$name] = [];
+			self::$handlers[$name] = array();
 		}
 
 		self::$handlers[$name][] = $callback;
@@ -98,7 +104,7 @@ class Hooks {
 		global $wgHooks;
 
 		if ( !self::isRegistered( $name ) ) {
-			return [];
+			return array();
 		} elseif ( !isset( self::$handlers[$name] ) ) {
 			return $wgHooks[$name];
 		} elseif ( !isset( $wgHooks[$name] ) ) {
@@ -128,11 +134,11 @@ class Hooks {
 	 *   processing to continue. Not returning a value (or explicitly
 	 *   returning null) is equivalent to returning true.
 	 */
-	public static function run( $event, array $args = [], $deprecatedVersion = null ) {
+	public static function run( $event, array $args = array(), $deprecatedVersion = null ) {
 		foreach ( self::getHandlers( $event ) as $hook ) {
 			// Turn non-array values into an array. (Can't use casting because of objects.)
 			if ( !is_array( $hook ) ) {
-				$hook = [ $hook ];
+				$hook = array( $hook );
 			}
 
 			if ( !array_filter( $hook ) ) {
@@ -163,7 +169,7 @@ class Hooks {
 				}
 
 				$func = get_class( $object ) . '::' . $method;
-				$callback = [ $object, $method ];
+				$callback = array( $object, $method );
 			} elseif ( is_string( $hook[0] ) ) {
 				$func = $callback = array_shift( $hook );
 			} else {

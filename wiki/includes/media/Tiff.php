@@ -40,7 +40,7 @@ class TiffHandler extends ExifBitmapHandler {
 	 * @param File $file
 	 * @return bool
 	 */
-	public function canRender( $file ) {
+	function canRender( $file ) {
 		global $wgTiffThumbnailType;
 
 		return (bool)$wgTiffThumbnailType
@@ -54,7 +54,7 @@ class TiffHandler extends ExifBitmapHandler {
 	 * @param File $file
 	 * @return bool
 	 */
-	public function mustRender( $file ) {
+	function mustRender( $file ) {
 		return true;
 	}
 

@@ -31,7 +31,7 @@ require_once __DIR__ . '/Maintenance.php';
 class RefreshLinks extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Refresh link tables' );
+		$this->mDescription = "Refresh link tables";
 		$this->addOption( 'dfn-only', 'Delete links from nonexistent articles only' );
 		$this->addOption( 'new-only', 'Only affect articles with just a single edit' );
 		$this->addOption( 'redirects-only', 'Only fix redirects, not all links' );
@@ -73,34 +73,39 @@ class RefreshLinks extends Maintenance {
 	private function doRefreshLinks( $start, $newOnly = false,
 		$end = null, $redirectsOnly = false, $oldRedirectsOnly = false
 	) {
+		global $wgParser;
+
 		$reportingInterval = 100;
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_SLAVE );
 
 		if ( $start === null ) {
 			$start = 1;
 		}
 
 		// Give extensions a chance to optimize settings
-		Hooks::run( 'MaintenanceRefreshLinksInit', [ $this ] );
+		Hooks::run( 'MaintenanceRefreshLinksInit', array( $this ) );
+
+		# Don't generate extension images (e.g. Timeline)
+		$wgParser->clearTagHooks();
 
 		$what = $redirectsOnly ? "redirects" : "links";
 
 		if ( $oldRedirectsOnly ) {
 			# This entire code path is cut-and-pasted from below.  Hurrah.
 
-			$conds = [
+			$conds = array(
 				"page_is_redirect=1",
 				"rd_from IS NULL",
 				self::intervalCond( $dbr, 'page_id', $start, $end ),
-			];
+			);
 
 			$res = $dbr->select(
-				[ 'page', 'redirect' ],
+				array( 'page', 'redirect' ),
 				'page_id',
 				$conds,
 				__METHOD__,
-				[],
-				[ 'redirect' => [ "LEFT JOIN", "page_id=rd_from" ] ]
+				array(),
+				array( 'redirect' => array( "LEFT JOIN", "page_id=rd_from" ) )
 			);
 			$num = $res->numRows();
 			$this->output( "Refreshing $num old redirects from $start...\n" );
@@ -117,11 +122,11 @@ class RefreshLinks extends Maintenance {
 		} elseif ( $newOnly ) {
 			$this->output( "Refreshing $what from " );
 			$res = $dbr->select( 'page',
-				[ 'page_id' ],
-				[
+				array( 'page_id' ),
+				array(
 					'page_is_new' => 1,
 					self::intervalCond( $dbr, 'page_id', $start, $end ),
-				],
+				),
 				__METHOD__
 			);
 			$num = $res->numRows();
@@ -187,12 +192,12 @@ class RefreshLinks extends Maintenance {
 	 */
 	private function fixRedirect( $id ) {
 		$page = WikiPage::newFromID( $id );
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 
 		if ( $page === null ) {
 			// This page doesn't exist (any more)
 			// Delete any redirect table entry for it
-			$dbw->delete( 'redirect', [ 'rd_from' => $id ],
+			$dbw->delete( 'redirect', array( 'rd_from' => $id ),
 				__METHOD__ );
 
 			return;
@@ -207,7 +212,7 @@ class RefreshLinks extends Maintenance {
 		if ( $rt === null ) {
 			// The page is not a redirect
 			// Delete any redirect table entry for it
-			$dbw->delete( 'redirect', [ 'rd_from' => $id ], __METHOD__ );
+			$dbw->delete( 'redirect', array( 'rd_from' => $id ), __METHOD__ );
 			$fieldValue = 0;
 		} else {
 			$page->insertRedirectEntry( $rt );
@@ -215,8 +220,8 @@ class RefreshLinks extends Maintenance {
 		}
 
 		// Update the page table to be sure it is an a consistent state
-		$dbw->update( 'page', [ 'page_is_redirect' => $fieldValue ],
-			[ 'page_id' => $id ], __METHOD__ );
+		$dbw->update( 'page', array( 'page_is_redirect' => $fieldValue ),
+			array( 'page_id' => $id ), __METHOD__ );
 	}
 
 	/**
@@ -237,8 +242,13 @@ class RefreshLinks extends Maintenance {
 			return;
 		}
 
+		$dbw = wfGetDB( DB_MASTER );
+		$dbw->begin( __METHOD__ );
+
 		$updates = $content->getSecondaryDataUpdates( $page->getTitle() );
 		DataUpdate::runUpdates( $updates );
+
+		$dbw->commit( __METHOD__ );
 	}
 
 	/**
@@ -257,7 +267,7 @@ class RefreshLinks extends Maintenance {
 	) {
 		wfWaitForSlaves();
 		$this->output( "Deleting illegal entries from the links tables...\n" );
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_SLAVE );
 		do {
 			// Find the start of the next chunk. This is based only
 			// on existent page_ids.
@@ -266,7 +276,7 @@ class RefreshLinks extends Maintenance {
 				'page_id',
 				self::intervalCond( $dbr, 'page_id', $start, $end ),
 				__METHOD__,
-				[ 'ORDER BY' => 'page_id', 'OFFSET' => $chunkSize ]
+				array( 'ORDER BY' => 'page_id', 'OFFSET' => $chunkSize )
 			);
 
 			if ( $nextStart !== false ) {
@@ -297,10 +307,10 @@ class RefreshLinks extends Maintenance {
 	 * @param int $batchSize The size of deletion batches
 	 */
 	private function dfnCheckInterval( $start = null, $end = null, $batchSize = 100 ) {
-		$dbw = $this->getDB( DB_MASTER );
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbw = wfGetDB( DB_MASTER );
+		$dbr = wfGetDB( DB_SLAVE );
 
-		$linksTables = [ // table name => page_id field
+		$linksTables = array( // table name => page_id field
 			'pagelinks' => 'pl_from',
 			'imagelinks' => 'il_from',
 			'categorylinks' => 'cl_from',
@@ -310,7 +320,7 @@ class RefreshLinks extends Maintenance {
 			'langlinks' => 'll_from',
 			'redirect' => 'rd_from',
 			'page_props' => 'pp_page',
-		];
+		);
 
 		foreach ( $linksTables as $table => $field ) {
 			$this->output( "    $table: 0" );
@@ -320,18 +330,18 @@ class RefreshLinks extends Maintenance {
 				$ids = $dbr->selectFieldValues(
 					$table,
 					$field,
-					[
+					array(
 						self::intervalCond( $dbr, $field, $tableStart, $end ),
 						"$field NOT IN ({$dbr->selectSQLText( 'page', 'page_id' )})",
-					],
+					),
 					__METHOD__,
-					[ 'DISTINCT', 'ORDER BY' => $field, 'LIMIT' => $batchSize ]
+					array( 'DISTINCT', 'ORDER BY' => $field, 'LIMIT' => $batchSize )
 				);
 
 				$numIds = count( $ids );
 				if ( $numIds ) {
 					$counter += $numIds;
-					$dbw->delete( $table, [ $field => $ids ], __METHOD__ );
+					$dbw->delete( $table, array( $field => $ids ), __METHOD__ );
 					$this->output( ", $counter" );
 					$tableStart = $ids[$numIds - 1] + 1;
 					wfWaitForSlaves();

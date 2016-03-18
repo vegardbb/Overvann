@@ -34,8 +34,7 @@ require_once __DIR__ . '/Maintenance.php';
 class DeleteOrphanedRevisions extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription(
-			'Maintenance script to delete revisions which refer to a nonexisting page' );
+		$this->mDescription = "Maintenance script to delete revisions which refer to a nonexisting page";
 		$this->addOption( 'report', 'Prints out a count of affected revisions but doesn\'t delete them' );
 	}
 
@@ -44,8 +43,8 @@ class DeleteOrphanedRevisions extends Maintenance {
 
 		$report = $this->hasOption( 'report' );
 
-		$dbw = $this->getDB( DB_MASTER );
-		$this->beginTransaction( $dbw, __METHOD__ );
+		$dbw = wfGetDB( DB_MASTER );
+		$dbw->begin( __METHOD__ );
 		list( $page, $revision ) = $dbw->tableNamesN( 'page', 'revision' );
 
 		# Find all the orphaned revisions
@@ -55,7 +54,7 @@ class DeleteOrphanedRevisions extends Maintenance {
 		$res = $dbw->query( $sql, 'deleteOrphanedRevisions' );
 
 		# Stash 'em all up for deletion (if needed)
-		$revisions = [];
+		$revisions = array();
 		foreach ( $res as $row ) {
 			$revisions[] = $row->rev_id;
 		}
@@ -64,7 +63,7 @@ class DeleteOrphanedRevisions extends Maintenance {
 
 		# Nothing to do?
 		if ( $report || $count == 0 ) {
-			$this->commitTransaction( $dbw, __METHOD__ );
+			$dbw->commit( __METHOD__ );
 			exit( 0 );
 		}
 
@@ -74,7 +73,7 @@ class DeleteOrphanedRevisions extends Maintenance {
 		$this->output( "done.\n" );
 
 		# Close the transaction and call the script to purge unused text records
-		$this->commitTransaction( $dbw, __METHOD__ );
+		$dbw->commit( __METHOD__ );
 		$this->purgeRedundantText( true );
 	}
 
@@ -87,9 +86,9 @@ class DeleteOrphanedRevisions extends Maintenance {
 	 */
 	private function deleteRevs( $id, &$dbw ) {
 		if ( !is_array( $id ) ) {
-			$id = [ $id ];
+			$id = array( $id );
 		}
-		$dbw->delete( 'revision', [ 'rev_id' => $id ], __METHOD__ );
+		$dbw->delete( 'revision', array( 'rev_id' => $id ), __METHOD__ );
 	}
 }
 

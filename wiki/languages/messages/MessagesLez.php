@@ -23,7 +23,7 @@
 
 $fallback = 'ru';
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Медиа',
 	NS_TALK             => 'веревирд_авун',
 	NS_USER             => 'Уртах',
@@ -37,9 +37,9 @@ $namespaceNames = [
 	NS_TEMPLATE_TALK    => 'Шаблон_веревирд_авун',
 	NS_CATEGORY         => 'Категория',
 	NS_CATEGORY_TALK    => 'Категория_веревирд_авун',
-];
+);
 
-$namespaceAliases = [
+$namespaceAliases = array(
 	# Russian namespaces
 	'Обсуждение'                         => NS_TALK,
 	'Участник'                           => NS_USER,
@@ -52,8 +52,8 @@ $namespaceAliases = [
 	'Обсуждение_справки'                 => NS_HELP_TALK,
 	'Категория'                          => NS_CATEGORY,
 	'Обсуждение_категории'               => NS_CATEGORY_TALK,
-];
+);
 
 // Remove Russian gender aliases
-$namespaceGenderAliases = [];
+$namespaceGenderAliases = array();
 

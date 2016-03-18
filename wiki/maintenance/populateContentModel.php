@@ -30,14 +30,14 @@ require_once __DIR__ . '/Maintenance.php';
 class PopulateContentModel extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Populate the various content_* fields' );
+		$this->mDescription = 'Populate the various content_* fields';
 		$this->addOption( 'ns', 'Namespace to run in, or "all" for all namespaces', true, true );
 		$this->addOption( 'table', 'Table to run in', true, true );
 		$this->setBatchSize( 100 );
 	}
 
 	public function execute() {
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 		$ns = $this->getOption( 'ns' );
 		if ( !ctype_digit( $ns ) && $ns !== 'all' ) {
 			$this->error( 'Invalid namespace', 1 );
@@ -62,8 +62,8 @@ class PopulateContentModel extends Maintenance {
 		$this->output( "Setting $count rows to $model..." );
 		$dbw->update(
 			'page',
-			[ 'page_content_model' => $model ],
-			[ 'page_id' => $pageIds ],
+			array( 'page_content_model' => $model ),
+			array( 'page_id' => $pageIds ),
 			__METHOD__
 		);
 		wfWaitForSlaves();
@@ -71,19 +71,19 @@ class PopulateContentModel extends Maintenance {
 	}
 
 	protected function populatePage( DatabaseBase $dbw, $ns ) {
-		$toSave = [];
+		$toSave = array();
 		$lastId = 0;
-		$nsCondition = $ns === 'all' ? [] : [ 'page_namespace' => $ns ];
+		$nsCondition = $ns === 'all' ? array() : array( 'page_namespace' => $ns );
 		do {
 			$rows = $dbw->select(
 				'page',
-				[ 'page_namespace', 'page_title', 'page_id' ],
-				[
+				array( 'page_namespace', 'page_title', 'page_id' ),
+				array(
 					'page_content_model' => null,
 					'page_id > ' . $dbw->addQuotes( $lastId ),
-				] + $nsCondition,
+				) + $nsCondition,
 				__METHOD__,
-				[ 'LIMIT' => $this->mBatchSize, 'ORDER BY' => 'page_id ASC' ]
+				array( 'LIMIT' => $this->mBatchSize, 'ORDER BY' => 'page_id ASC' )
 			);
 			$this->output( "Fetched {$rows->numRows()} rows.\n" );
 			foreach ( $rows as $row ) {
@@ -113,8 +113,8 @@ class PopulateContentModel extends Maintenance {
 		$this->output( "Setting $count rows to $model / $format..." );
 		$dbw->update(
 			$table,
-			[ $model_column => $model, $format_column => $format ],
-			[ $key => $ids ],
+			array( $model_column => $model, $format_column => $format ),
+			array( $key => $ids ),
 			__METHOD__
 		);
 		$this->output( "done.\n" );
@@ -127,29 +127,29 @@ class PopulateContentModel extends Maintenance {
 		$key = "{$prefix}_id";
 		if ( $table === 'archive' ) {
 			$selectTables = 'archive';
-			$fields = [ 'ar_namespace', 'ar_title' ];
-			$join_conds = [];
-			$where = $ns === 'all' ? [] : [ 'ar_namespace' => $ns ];
+			$fields = array( 'ar_namespace', 'ar_title' );
+			$join_conds = array();
+			$where = $ns === 'all' ? array() : array( 'ar_namespace' => $ns );
 		} else { // revision
-			$selectTables = [ 'revision', 'page' ];
-			$fields = [ 'page_title', 'page_namespace' ];
-			$join_conds = [ 'page' => [ 'INNER JOIN', 'rev_page=page_id' ] ];
-			$where = $ns === 'all' ? [] : [ 'page_namespace' => $ns ];
+			$selectTables = array( 'revision', 'page' );
+			$fields = array( 'page_title', 'page_namespace' );
+			$join_conds = array( 'page' => array( 'INNER JOIN', 'rev_page=page_id' ) );
+			$where = $ns === 'all' ? array() : array( 'page_namespace' => $ns );
 		}
 
-		$toSave = [];
+		$toSave = array();
 		$lastId = 0;
 		do {
 			$rows = $dbw->select(
 				$selectTables,
-				array_merge( $fields, [ $model_column, $format_column, $key ] ),
+				array_merge( $fields, array( $model_column, $format_column, $key ) ),
 				// @todo support populating format if model is already set
-				[
+				array(
 					$model_column => null,
 					"$key > " . $dbw->addQuotes( $lastId ),
-				] + $where,
+				) + $where,
 				__METHOD__,
-				[ 'LIMIT' => $this->mBatchSize, 'ORDER BY' => "$key ASC" ],
+				array( 'LIMIT' => $this->mBatchSize, 'ORDER BY' => "$key ASC" ),
 				$join_conds
 			);
 			$this->output( "Fetched {$rows->numRows()} rows.\n" );
@@ -178,11 +178,11 @@ class PopulateContentModel extends Maintenance {
 					if ( $dbFormat === $defaultFormat ) {
 						$toSave[$defaultModel][] = $row->{$key};
 					} else { // non-default format, just update now
-						$this->output( "Updating model to match format for $table $id of $title... " );
+						$this->output( "Updating model to match format for $table $id of $title... ");
 						$dbw->update(
 							$table,
-							[ $model_column => $defaultModel ],
-							[ $key => $id ],
+							array( $model_column => $defaultModel ),
+							array( $key => $id ),
 							__METHOD__
 						);
 						wfWaitForSlaves();

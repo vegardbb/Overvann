@@ -1,7 +1,7 @@
 <?php
 /**
  * @covers BadTitleError
- * @author Addshore
+ * @author Adam Shorland
  */
 class BadTitleErrorTest extends MediaWikiTestCase {
 

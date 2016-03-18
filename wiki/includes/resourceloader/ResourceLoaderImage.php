@@ -31,12 +31,12 @@ class ResourceLoaderImage {
 	 * Map of allowed file extensions to their MIME types.
 	 * @var array
 	 */
-	protected static $fileTypes = [
+	protected static $fileTypes = array(
 		'svg' => 'image/svg+xml',
 		'png' => 'image/png',
 		'gif' => 'image/gif',
 		'jpg' => 'image/jpg',
-	];
+	);
 
 	/**
 	 * @param string $name Image name
@@ -69,7 +69,7 @@ class ResourceLoaderImage {
 		}
 
 		// Ensure that all files have common extension.
-		$extensions = [];
+		$extensions = array();
 		$descriptor = (array)$descriptor;
 		array_walk_recursive( $descriptor, function ( $path ) use ( &$extensions ) {
 			$extensions[] = pathinfo( $path, PATHINFO_EXTENSION );
@@ -170,14 +170,14 @@ class ResourceLoaderImage {
 	 * @return string
 	 */
 	public function getUrl( ResourceLoaderContext $context, $script, $variant, $format ) {
-		$query = [
+		$query = array(
 			'modules' => $this->getModule(),
 			'image' => $this->getName(),
 			'variant' => $variant,
 			'format' => $format,
 			'lang' => $context->getLanguage(),
 			'version' => $context->getVersion(),
-		];
+		);
 
 		return wfExpandUrl( wfAppendQuery( $script, $query ), PROTO_RELATIVE );
 	}
@@ -272,7 +272,7 @@ class ResourceLoaderImage {
 	 */
 	protected function variantize( $variantConf, ResourceLoaderContext $context ) {
 		$dom = new DomDocument;
-		$dom->loadXml( file_get_contents( $this->getPath( $context ) ) );
+		$dom->load( $this->getPath( $context ) );
 		$root = $dom->documentElement;
 		$wrapper = $dom->createElement( 'g' );
 		while ( $root->firstChild ) {
@@ -315,23 +315,21 @@ class ResourceLoaderImage {
 	 * @return string|bool PNG image data, or false on failure
 	 */
 	protected function rasterize( $svg ) {
-		/**
-		 * This code should be factored out to a separate method on SvgHandler, or perhaps a separate
-		 * class, with a separate set of configuration settings.
-		 *
-		 * This is a distinct use case from regular SVG rasterization:
-		 * * We can skip many sanity and security checks (as the images come from a trusted source,
-		 *   rather than from the user).
-		 * * We need to provide extra options to some converters to achieve acceptable quality for very
-		 *   small images, which might cause performance issues in the general case.
-		 * * We want to directly pass image data to the converter, rather than a file path.
-		 *
-		 * See https://phabricator.wikimedia.org/T76473#801446 for examples of what happens with the
-		 * default settings.
-		 *
-		 * For now, we special-case rsvg (used in WMF production) and do a messy workaround for other
-		 * converters.
-		 */
+		// This code should be factored out to a separate method on SvgHandler, or perhaps a separate
+		// class, with a separate set of configuration settings.
+		//
+		// This is a distinct use case from regular SVG rasterization:
+		// * We can skip many sanity and security checks (as the images come from a trusted source,
+		//   rather than from the user).
+		// * We need to provide extra options to some converters to achieve acceptable quality for very
+		//   small images, which might cause performance issues in the general case.
+		// * We want to directly pass image data to the converter, rather than a file path.
+		//
+		// See https://phabricator.wikimedia.org/T76473#801446 for examples of what happens with the
+		// default settings.
+		//
+		// For now, we special-case rsvg (used in WMF production) and do a messy workaround for other
+		// converters.
 
 		global $wgSVGConverter, $wgSVGConverterPath;
 
@@ -346,7 +344,7 @@ class ResourceLoaderImage {
 
 			$process = proc_open(
 				$command,
-				[ 0 => [ 'pipe', 'r' ], 1 => [ 'pipe', 'w' ] ],
+				array( 0 => array( 'pipe', 'r' ), 1 => array( 'pipe', 'w' ) ),
 				$pipes
 			);
 

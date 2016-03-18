@@ -8,7 +8,7 @@
  *
  */
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'মিডিয়া',
 	NS_SPECIAL          => 'বিশেষ',
 	NS_TALK             => 'আলাপ',
@@ -25,16 +25,16 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'সাহায্য_আলোচনা',
 	NS_CATEGORY         => 'বিষয়শ্রেণী',
 	NS_CATEGORY_TALK    => 'বিষয়শ্রেণী_আলোচনা',
-];
+);
 
-$namespaceAliases = [
+$namespaceAliases = array(
 	'$1_আলাপ' => NS_PROJECT_TALK,
 	'চিত্র_আলাপ' => NS_FILE_TALK,
 	'MediaWiki_আলাপ' => NS_FILE_TALK,
-];
+);
 
 $datePreferences = false;
-$digitTransformTable = [
+$digitTransformTable = array(
 	'0' => '০',
 	'1' => '১',
 	'2' => '২',
@@ -45,7 +45,7 @@ $digitTransformTable = [
 	'7' => '৭',
 	'8' => '৮',
 	'9' => '৯'
-];
+);
 
 $digitGroupingPattern = "##,##,###";
 

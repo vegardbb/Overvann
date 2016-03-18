@@ -28,9 +28,9 @@ class SpecialJavaScriptTest extends SpecialPage {
 	/**
 	 * @var array Supported frameworks.
 	 */
-	private static $frameworks = [
+	private static $frameworks = array(
 		'qunit',
-	];
+	);
 
 	public function __construct() {
 		parent::__construct( 'JavaScriptTest' );
@@ -91,7 +91,7 @@ class SpecialJavaScriptTest extends SpecialPage {
 		// Custom actions
 		if ( isset( $pars[1] ) ) {
 			$action = $pars[1];
-			if ( !in_array( $action, [ 'export', 'plain' ] ) ) {
+			if ( !in_array( $action, array( 'export', 'plain' ) ) ) {
 				$out->setStatusCode( 404 );
 				$out->addHTML(
 					'<div class="error">'
@@ -105,6 +105,8 @@ class SpecialJavaScriptTest extends SpecialPage {
 			$this->$method();
 			return;
 		}
+
+		$out->addModules( 'mediawiki.special.javaScriptTest' );
 
 		$method = 'view' . ucfirst( $framework );
 		$this->$method();
@@ -126,7 +128,7 @@ class SpecialJavaScriptTest extends SpecialPage {
 		foreach ( self::$frameworks as $framework ) {
 			$list .= Html::rawElement(
 				'li',
-				[],
+				array(),
 				Linker::link(
 					$this->getPageTitle( $framework ),
 					// Message: javascripttest-qunit-name
@@ -174,12 +176,12 @@ HTML;
 		// are reusable in environments that preload QUnit (or a compatibility interface to
 		// another framework). Therefore we have to load it ourselves.
 		$out->addHtml( ResourceLoader::makeInlineScript(
-			Xml::encodeJsCall( 'mw.loader.using', [
-				[ 'jquery.qunit', 'jquery.qunit.completenessTest' ],
+			Xml::encodeJsCall( 'mw.loader.using', array(
+				array( 'jquery.qunit', 'jquery.qunit.completenessTest' ),
 				new XmlJsCode(
-					'function () {' . Xml::encodeJsCall( 'mw.loader.load', [ $modules ] ) . '}'
+					'function () {' . Xml::encodeJsCall( 'mw.loader.load', array( $modules ) ) . '}'
 				)
-			] )
+			) )
 		) );
 	}
 
@@ -199,12 +201,12 @@ HTML;
 
 		$rl = $out->getResourceLoader();
 
-		$query = [
+		$query = array(
 			'lang' => $this->getLanguage()->getCode(),
 			'skin' => $this->getSkin()->getSkinName(),
 			'debug' => ResourceLoader::inDebugMode() ? 'true' : 'false',
 			'target' => 'test',
-		];
+		);
 		$embedContext = new ResourceLoaderContext( $rl, new FauxRequest( $query ) );
 		$query['only'] = 'scripts';
 		$startupContext = new ResourceLoaderContext( $rl, new FauxRequest( $query ) );
@@ -225,18 +227,18 @@ HTML;
 			. '}';
 
 		// The below is essentially a pure-javascript version of OutputPage::getHeadScripts.
-		$startup = $rl->makeModuleResponse( $startupContext, [
+		$startup = $rl->makeModuleResponse( $startupContext, array(
 			'startup' => $rl->getModule( 'startup' ),
-		] );
+		) );
 		// Embed page-specific mw.config variables.
 		// The current Special page shouldn't be relevant to tests, but various modules (which
 		// are loaded before the test suites), reference mw.config while initialising.
 		$code = ResourceLoader::makeConfigSetScript( $out->getJSVars() );
 		// Embed private modules as they're not allowed to be loaded dynamically
-		$code .= $rl->makeModuleResponse( $embedContext, [
+		$code .= $rl->makeModuleResponse( $embedContext, array(
 			'user.options' => $rl->getModule( 'user.options' ),
 			'user.tokens' => $rl->getModule( 'user.tokens' ),
-		] );
+		) );
 		// Catch exceptions (such as "dependency missing" or "unknown module") so that we
 		// always start QUnit. Re-throw so that they are caught and reported as global exceptions
 		// by QUnit and Karma.
@@ -269,7 +271,7 @@ HTML;
 		// load before qunit/export.
 		$scripts = $out->makeResourceLoaderLink( 'jquery.qunit',
 			ResourceLoaderModule::TYPE_SCRIPTS,
-			[ 'raw' => true, 'sync' => true ]
+			array( 'raw' => true, 'sync' => true )
 		);
 
 		$head = implode( "\n", array_merge( $styles['html'], $scripts['html'] ) );
@@ -282,9 +284,9 @@ $summary
 <div id="qunit"></div>
 HTML;
 
-		$url = $this->getPageTitle( 'qunit/export' )->getFullURL( [
+		$url = $this->getPageTitle( 'qunit/export' )->getFullURL( array(
 			'debug' => ResourceLoader::inDebugMode() ? 'true' : 'false',
-		] );
+		) );
 		$html .= "\n" . Html::linkedScript( $url );
 
 		header( 'Content-Type: text/html; charset=utf-8' );

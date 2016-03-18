@@ -69,9 +69,9 @@ class ApiQueryContributions extends ApiQueryBase {
 			$this->multiUserMode = true;
 			$this->userprefix = $this->params['userprefix'];
 		} else {
-			$this->usernames = [];
+			$this->usernames = array();
 			if ( !is_array( $this->params['user'] ) ) {
-				$this->params['user'] = [ $this->params['user'] ];
+				$this->params['user'] = array( $this->params['user'] );
 			}
 			if ( !count( $this->params['user'] ) ) {
 				$this->dieUsage( 'User parameter may not be empty.', 'param_user' );
@@ -89,7 +89,7 @@ class ApiQueryContributions extends ApiQueryBase {
 		$res = $this->select( __METHOD__ );
 
 		if ( $this->fld_sizediff ) {
-			$revIds = [];
+			$revIds = array();
 			foreach ( $res as $row ) {
 				if ( $row->rev_parent_id ) {
 					$revIds[] = $row->rev_parent_id;
@@ -113,7 +113,7 @@ class ApiQueryContributions extends ApiQueryBase {
 			}
 
 			$vals = $this->extractRowInfo( $row );
-			$fit = $this->getResult()->addValue( [ 'query', $this->getModuleName() ], null, $vals );
+			$fit = $this->getResult()->addValue( array( 'query', $this->getModuleName() ), null, $vals );
 			if ( !$fit ) {
 				$this->setContinueEnumParameter( 'continue', $this->continueStr( $row ) );
 				break;
@@ -121,7 +121,7 @@ class ApiQueryContributions extends ApiQueryBase {
 		}
 
 		$this->getResult()->addIndexedTagName(
-			[ 'query', $this->getModuleName() ],
+			array( 'query', $this->getModuleName() ),
 			'item'
 		);
 	}
@@ -155,7 +155,7 @@ class ApiQueryContributions extends ApiQueryBase {
 		// row for anything we retrieve. We may also need the
 		// recentchanges row and/or tag summary row.
 		$user = $this->getUser();
-		$tables = [ 'page', 'revision' ]; // Order may change
+		$tables = array( 'page', 'revision' ); // Order may change
 		$this->addWhere( 'page_id=rev_page' );
 
 		// Handle continue parameter
@@ -224,6 +224,7 @@ class ApiQueryContributions extends ApiQueryBase {
 
 		$show = $this->params['show'];
 		if ( $this->params['toponly'] ) { // deprecated/old param
+			$this->logFeatureUsage( 'list=usercontribs&uctoponly' );
 			$show[] = 'top';
 		}
 		if ( !is_null( $show ) ) {
@@ -247,12 +248,12 @@ class ApiQueryContributions extends ApiQueryBase {
 			$this->addWhereIf( 'rev_parent_id = 0', isset( $show['new'] ) );
 		}
 		$this->addOption( 'LIMIT', $this->params['limit'] + 1 );
-		$index = [ 'revision' => 'usertext_timestamp' ];
+		$index = array( 'revision' => 'usertext_timestamp' );
 
 		// Mandatory fields: timestamp allows request continuation
 		// ns+title checks if the user has access rights for this page
 		// user_text is necessary if multiple users were specified
-		$this->addFields( [
+		$this->addFields( array(
 			'rev_id',
 			'rev_timestamp',
 			'page_namespace',
@@ -260,7 +261,7 @@ class ApiQueryContributions extends ApiQueryBase {
 			'rev_user',
 			'rev_user_text',
 			'rev_deleted'
-		] );
+		) );
 
 		if ( isset( $show['patrolled'] ) || isset( $show['!patrolled'] ) ||
 			$this->fld_patrolled
@@ -279,18 +280,18 @@ class ApiQueryContributions extends ApiQueryBase {
 			if ( isset( $show['patrolled'] ) || isset( $show['!patrolled'] ) ) {
 				// Put the tables in the right order for
 				// STRAIGHT_JOIN
-				$tables = [ 'revision', 'recentchanges', 'page' ];
+				$tables = array( 'revision', 'recentchanges', 'page' );
 				$this->addOption( 'STRAIGHT_JOIN' );
 				$this->addWhere( 'rc_user_text=rev_user_text' );
 				$this->addWhere( 'rc_timestamp=rev_timestamp' );
 				$this->addWhere( 'rc_this_oldid=rev_id' );
 			} else {
 				$tables[] = 'recentchanges';
-				$this->addJoinConds( [ 'recentchanges' => [
-					'LEFT JOIN', [
+				$this->addJoinConds( array( 'recentchanges' => array(
+					'LEFT JOIN', array(
 						'rc_user_text=rev_user_text',
 						'rc_timestamp=rev_timestamp',
-						'rc_this_oldid=rev_id' ] ] ] );
+						'rc_this_oldid=rev_id' ) ) ) );
 			}
 		}
 
@@ -307,7 +308,7 @@ class ApiQueryContributions extends ApiQueryBase {
 		if ( $this->fld_tags ) {
 			$this->addTables( 'tag_summary' );
 			$this->addJoinConds(
-				[ 'tag_summary' => [ 'LEFT JOIN', [ 'rev_id=ts_rev_id' ] ] ]
+				array( 'tag_summary' => array( 'LEFT JOIN', array( 'rev_id=ts_rev_id' ) ) )
 			);
 			$this->addFields( 'ts_tags' );
 		}
@@ -315,7 +316,7 @@ class ApiQueryContributions extends ApiQueryBase {
 		if ( isset( $this->params['tag'] ) ) {
 			$this->addTables( 'change_tag' );
 			$this->addJoinConds(
-				[ 'change_tag' => [ 'INNER JOIN', [ 'rev_id=ct_rev_id' ] ] ]
+				array( 'change_tag' => array( 'INNER JOIN', array( 'rev_id=ct_rev_id' ) ) )
 			);
 			$this->addWhereFld( 'ct_tag', $this->params['tag'] );
 		}
@@ -330,7 +331,7 @@ class ApiQueryContributions extends ApiQueryBase {
 	 * @return array
 	 */
 	private function extractRowInfo( $row ) {
-		$vals = [];
+		$vals = array();
 		$anyHidden = false;
 
 		if ( $row->rev_deleted & Revision::DELETED_TEXT ) {
@@ -417,7 +418,7 @@ class ApiQueryContributions extends ApiQueryBase {
 				ApiResult::setIndexedTagName( $tags, 'tag' );
 				$vals['tags'] = $tags;
 			} else {
-				$vals['tags'] = [];
+				$vals['tags'] = array();
 			}
 		}
 
@@ -443,44 +444,43 @@ class ApiQueryContributions extends ApiQueryBase {
 	}
 
 	public function getAllowedParams() {
-		return [
-			'limit' => [
+		return array(
+			'limit' => array(
 				ApiBase::PARAM_DFLT => 10,
 				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => ApiBase::LIMIT_BIG1,
 				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_BIG2
-			],
-			'start' => [
+			),
+			'start' => array(
 				ApiBase::PARAM_TYPE => 'timestamp'
-			],
-			'end' => [
+			),
+			'end' => array(
 				ApiBase::PARAM_TYPE => 'timestamp'
-			],
-			'continue' => [
+			),
+			'continue' => array(
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			],
-			'user' => [
-				ApiBase::PARAM_TYPE => 'user',
+			),
+			'user' => array(
 				ApiBase::PARAM_ISMULTI => true
-			],
+			),
 			'userprefix' => null,
-			'dir' => [
+			'dir' => array(
 				ApiBase::PARAM_DFLT => 'older',
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'newer',
 					'older'
-				],
+				),
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-direction',
-			],
-			'namespace' => [
+			),
+			'namespace' => array(
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_TYPE => 'namespace'
-			],
-			'prop' => [
+			),
+			'prop' => array(
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_DFLT => 'ids|title|timestamp|comment|size|flags',
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'ids',
 					'title',
 					'timestamp',
@@ -491,12 +491,12 @@ class ApiQueryContributions extends ApiQueryBase {
 					'flags',
 					'patrolled',
 					'tags'
-				],
-				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
-			],
-			'show' => [
+				),
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => array(),
+			),
+			'show' => array(
 				ApiBase::PARAM_ISMULTI => true,
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'minor',
 					'!minor',
 					'patrolled',
@@ -505,27 +505,27 @@ class ApiQueryContributions extends ApiQueryBase {
 					'!top',
 					'new',
 					'!new',
-				],
-				ApiBase::PARAM_HELP_MSG => [
+				),
+				ApiBase::PARAM_HELP_MSG => array(
 					'apihelp-query+usercontribs-param-show',
 					$this->getConfig()->get( 'RCMaxAge' )
-				],
-			],
+				),
+			),
 			'tag' => null,
-			'toponly' => [
+			'toponly' => array(
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_DEPRECATED => true,
-			],
-		];
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=query&list=usercontribs&ucuser=Example'
 				=> 'apihelp-query+usercontribs-example-user',
 			'action=query&list=usercontribs&ucuserprefix=192.0.2.'
 				=> 'apihelp-query+usercontribs-example-ipprefix',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

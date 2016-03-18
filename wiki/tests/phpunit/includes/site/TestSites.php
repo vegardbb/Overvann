@@ -36,7 +36,7 @@ class TestSites {
 	 * @return array
 	 */
 	public static function getSites() {
-		$sites = [];
+		$sites = array();
 
 		$site = new Site();
 		$site->setGlobalId( 'foobar' );
@@ -76,16 +76,16 @@ class TestSites {
 		 * aeb, ar, arc, arz, azb, bcc, bqi, ckb, dv, en_rtl, fa, glk, he, khw, kk_arab, kk_cn,
 		 * ks_arab, ku_arab, lrc, mzn, pnb, ps, sd, ug_arab, ur, yi).
 		 */
-		$languageCodes = [
+		$languageCodes = array(
 			'de',
 			'en',
-			'fa', // right-to-left
+			'fa', //right-to-left
 			'nl',
 			'nn',
 			'no',
 			'sr',
 			'sv',
-		];
+		);
 		foreach ( $languageCodes as $langCode ) {
 			$site = new MediaWikiSite();
 			$site->setGlobalId( $langCode . 'wiki' );

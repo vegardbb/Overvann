@@ -32,7 +32,7 @@ require_once __DIR__ . '/Maintenance.php';
 class SyncFileBackend extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Sync one file backend with another using the journal' );
+		$this->mDescription = "Sync one file backend with another using the journal";
 		$this->addOption( 'src', 'Name of backend to sync from', true, true );
 		$this->addOption( 'dst', 'Name of destination backend to sync', false, true );
 		$this->addOption( 'start', 'Starting journal ID', false, true );
@@ -172,7 +172,7 @@ class SyncFileBackend extends Maintenance {
 			$first = false;
 
 			$lastPosInBatch = 0;
-			$pathsInBatch = []; // changed paths
+			$pathsInBatch = array(); // changed paths
 			foreach ( $entries as $entry ) {
 				if ( $entry['op'] !== 'null' ) { // null ops are just for reference
 					$pathsInBatch[$entry['path']] = 1; // remove duplicates
@@ -223,20 +223,20 @@ class SyncFileBackend extends Maintenance {
 			return $status;
 		}
 
-		$src->preloadFileStat( [ 'srcs' => $sPaths, 'latest' => 1 ] );
-		$dst->preloadFileStat( [ 'srcs' => $dPaths, 'latest' => 1 ] );
+		$src->preloadFileStat( array( 'srcs' => $sPaths, 'latest' => 1 ) );
+		$dst->preloadFileStat( array( 'srcs' => $dPaths, 'latest' => 1 ) );
 
-		$ops = [];
-		$fsFiles = [];
+		$ops = array();
+		$fsFiles = array();
 		foreach ( $sPaths as $i => $sPath ) {
 			$dPath = $dPaths[$i]; // destination
-			$sExists = $src->fileExists( [ 'src' => $sPath, 'latest' => 1 ] );
+			$sExists = $src->fileExists( array( 'src' => $sPath, 'latest' => 1 ) );
 			if ( $sExists === true ) { // exists in source
 				if ( $this->filesAreSame( $src, $dst, $sPath, $dPath ) ) {
 					continue; // avoid local copies for non-FS backends
 				}
 				// Note: getLocalReference() is fast for FS backends
-				$fsFile = $src->getLocalReference( [ 'src' => $sPath, 'latest' => 1 ] );
+				$fsFile = $src->getLocalReference( array( 'src' => $sPath, 'latest' => 1 ) );
 				if ( !$fsFile ) {
 					$this->error( "Unable to sync '$dPath': could not get local copy." );
 					$status->fatal( 'backend-fail-internal', $src->getName() );
@@ -245,15 +245,15 @@ class SyncFileBackend extends Maintenance {
 				}
 				$fsFiles[] = $fsFile; // keep TempFSFile objects alive as needed
 				// Note: prepare() is usually fast for key/value backends
-				$status->merge( $dst->prepare( [
-					'dir' => dirname( $dPath ), 'bypassReadOnly' => 1 ] ) );
+				$status->merge( $dst->prepare( array(
+					'dir' => dirname( $dPath ), 'bypassReadOnly' => 1 ) ) );
 				if ( !$status->isOK() ) {
 					return $status;
 				}
-				$ops[] = [ 'op' => 'store',
-					'src' => $fsFile->getPath(), 'dst' => $dPath, 'overwrite' => 1 ];
+				$ops[] = array( 'op' => 'store',
+					'src' => $fsFile->getPath(), 'dst' => $dPath, 'overwrite' => 1 );
 			} elseif ( $sExists === false ) { // does not exist in source
-				$ops[] = [ 'op' => 'delete', 'src' => $dPath, 'ignoreMissingSource' => 1 ];
+				$ops[] = array( 'op' => 'delete', 'src' => $dPath, 'ignoreMissingSource' => 1 );
 			} else { // error
 				$this->error( "Unable to sync '$dPath': could not stat file." );
 				$status->fatal( 'backend-fail-internal', $src->getName() );
@@ -263,10 +263,10 @@ class SyncFileBackend extends Maintenance {
 		}
 
 		$t_start = microtime( true );
-		$status = $dst->doQuickOperations( $ops, [ 'bypassReadOnly' => 1 ] );
+		$status = $dst->doQuickOperations( $ops, array( 'bypassReadOnly' => 1 ) );
 		if ( !$status->isOK() ) {
 			sleep( 10 ); // wait and retry copy again
-			$status = $dst->doQuickOperations( $ops, [ 'bypassReadOnly' => 1 ] );
+			$status = $dst->doQuickOperations( $ops, array( 'bypassReadOnly' => 1 ) );
 		}
 		$ellapsed_ms = floor( ( microtime( true ) - $t_start ) * 1000 );
 		if ( $status->isOK() && $this->getOption( 'verbose' ) ) {
@@ -294,10 +294,10 @@ class SyncFileBackend extends Maintenance {
 
 	protected function filesAreSame( FileBackend $src, FileBackend $dst, $sPath, $dPath ) {
 		return (
-			( $src->getFileSize( [ 'src' => $sPath ] )
-				=== $dst->getFileSize( [ 'src' => $dPath ] ) // short-circuit
-			) && ( $src->getFileSha1Base36( [ 'src' => $sPath ] )
-				=== $dst->getFileSha1Base36( [ 'src' => $dPath ] )
+			( $src->getFileSize( array( 'src' => $sPath ) )
+				=== $dst->getFileSize( array( 'src' => $dPath ) ) // short-circuit
+			) && ( $src->getFileSha1Base36( array( 'src' => $sPath ) )
+				=== $dst->getFileSha1Base36( array( 'src' => $dPath ) )
 			)
 		);
 	}

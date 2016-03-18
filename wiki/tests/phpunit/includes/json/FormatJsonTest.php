@@ -6,36 +6,36 @@
 class FormatJsonTest extends MediaWikiTestCase {
 
 	public static function provideEncoderPrettyPrinting() {
-		return [
+		return array(
 			// Four spaces
-			[ true, '    ' ],
-			[ '    ', '    ' ],
+			array( true, '    ' ),
+			array( '    ', '    ' ),
 			// Two spaces
-			[ '  ', '  ' ],
+			array( '  ', '  ' ),
 			// One tab
-			[ "\t", "\t" ],
-		];
+			array( "\t", "\t" ),
+		);
 	}
 
 	/**
 	 * @dataProvider provideEncoderPrettyPrinting
 	 */
 	public function testEncoderPrettyPrinting( $pretty, $expectedIndent ) {
-		$obj = [
+		$obj = array(
 			'emptyObject' => new stdClass,
-			'emptyArray' => [],
+			'emptyArray' => array(),
 			'string' => 'foobar\\',
-			'filledArray' => [
-				[
+			'filledArray' => array(
+				array(
 					123,
 					456,
-				],
+				),
 				// Nested json works without problems
 				'"7":["8",{"9":"10"}]',
 				// Whitespace clean up doesn't touch strings that look alike
 				"{\n\t\"emptyObject\": {\n\t},\n\t\"emptyArray\": [ ]\n}",
-			],
-		];
+			),
+		);
 
 		// No trailing whitespace, no trailing linefeed
 		$json = '{
@@ -58,7 +58,7 @@ class FormatJsonTest extends MediaWikiTestCase {
 	}
 
 	public static function provideEncodeDefault() {
-		return self::getEncodeTestCases( [] );
+		return self::getEncodeTestCases( array() );
 	}
 
 	/**
@@ -69,7 +69,7 @@ class FormatJsonTest extends MediaWikiTestCase {
 	}
 
 	public static function provideEncodeUtf8() {
-		return self::getEncodeTestCases( [ 'unicode' ] );
+		return self::getEncodeTestCases( array( 'unicode' ) );
 	}
 
 	/**
@@ -80,7 +80,7 @@ class FormatJsonTest extends MediaWikiTestCase {
 	}
 
 	public static function provideEncodeXmlMeta() {
-		return self::getEncodeTestCases( [ 'xmlmeta' ] );
+		return self::getEncodeTestCases( array( 'xmlmeta' ) );
 	}
 
 	/**
@@ -91,7 +91,7 @@ class FormatJsonTest extends MediaWikiTestCase {
 	}
 
 	public static function provideEncodeAllOk() {
-		return self::getEncodeTestCases( [ 'unicode', 'xmlmeta' ] );
+		return self::getEncodeTestCases( array( 'unicode', 'xmlmeta' ) );
 	}
 
 	/**
@@ -124,20 +124,20 @@ class FormatJsonTest extends MediaWikiTestCase {
 	}
 
 	public static function provideParse() {
-		return [
-			[ null ],
-			[ true ],
-			[ false ],
-			[ 0 ],
-			[ 1 ],
-			[ 1.2 ],
-			[ '' ],
-			[ 'str' ],
-			[ [ 0, 1, 2 ] ],
-			[ [ 'a' => 'b' ] ],
-			[ [ 'a' => 'b' ] ],
-			[ [ 'a' => 'b', 'x' => [ 'c' => 'd' ] ] ],
-		];
+		return array(
+			array( null ),
+			array( true ),
+			array( false ),
+			array( 0 ),
+			array( 1 ),
+			array( 1.2 ),
+			array( '' ),
+			array( 'str' ),
+			array( array( 0, 1, 2 ) ),
+			array( array( 'a' => 'b' ) ),
+			array( array( 'a' => 'b' ) ),
+			array( array( 'a' => 'b', 'x' => array( 'c' => 'd' ) ) ),
+		);
 	}
 
 	/**
@@ -188,22 +188,22 @@ class FormatJsonTest extends MediaWikiTestCase {
 	 * json-c parsed result. Defaults to the second argument's value.
 	 */
 	public static function provideParseTryFixing() {
-		return [
-			[ "[,]", '[]', false ],
-			[ "[ , ]", '[]', false ],
-			[ "[ , }", false ],
-			[ '[1],', false, true, '[1]' ],
-			[ "[1,]", '[1]' ],
-			[ "[1\n,]", '[1]' ],
-			[ "[1,\n]", '[1]' ],
-			[ "[1,]\n", '[1]' ],
-			[ "[1\n,\n]\n", '[1]' ],
-			[ '["a,",]', '["a,"]' ],
-			[ "[[1,]\n,[2,\n],[3\n,]]", '[[1],[2],[3]]' ],
+		return array(
+			array( "[,]", '[]', false ),
+			array( "[ , ]", '[]', false ),
+			array( "[ , }", false ),
+			array( '[1],', false, true, '[1]' ),
+			array( "[1,]", '[1]' ),
+			array( "[1\n,]", '[1]' ),
+			array( "[1,\n]", '[1]' ),
+			array( "[1,]\n", '[1]' ),
+			array( "[1\n,\n]\n", '[1]' ),
+			array( '["a,",]', '["a,"]' ),
+			array( "[[1,]\n,[2,\n],[3\n,]]", '[[1],[2],[3]]' ),
 			// I wish we could parse this, but would need quote parsing
-			[ '[[1,],[2,],[3,]]', false, true, '[[1],[2],[3]]' ],
-			[ '[1,,]', false, false, '[1]' ],
-		];
+			array( '[[1,],[2,],[3,]]', false, true, '[[1],[2],[3]]' ),
+			array( '[1,,]', false, false, '[1]' ),
+		);
 	}
 
 	/**
@@ -244,10 +244,10 @@ class FormatJsonTest extends MediaWikiTestCase {
 	}
 
 	public static function provideParseErrors() {
-		return [
-			[ 'aaa' ],
-			[ '{"j": 1 ] }' ],
-		];
+		return array(
+			array( 'aaa' ),
+			array( '{"j": 1 ] }' ),
+		);
 	}
 
 	/**
@@ -261,29 +261,29 @@ class FormatJsonTest extends MediaWikiTestCase {
 	}
 
 	public function provideStripComments() {
-		return [
-			[ '{"a":"b"}', '{"a":"b"}' ],
-			[ "{\"a\":\"b\"}\n", "{\"a\":\"b\"}\n" ],
-			[ '/*c*/{"c":"b"}', '{"c":"b"}' ],
-			[ '{"a":"c"}/*c*/', '{"a":"c"}' ],
-			[ '/*c//d*/{"c":"b"}', '{"c":"b"}' ],
-			[ '{/*c*/"c":"b"}', '{"c":"b"}' ],
-			[ "/*\nc\r\n*/{\"c\":\"b\"}", '{"c":"b"}' ],
-			[ "//c\n{\"c\":\"b\"}", '{"c":"b"}' ],
-			[ "//c\r\n{\"c\":\"b\"}", '{"c":"b"}' ],
-			[ '{"a":"c"}//c', '{"a":"c"}' ],
-			[ "{\"a-c\"://c\n\"b\"}", '{"a-c":"b"}' ],
-			[ '{"/*a":"b"}', '{"/*a":"b"}' ],
-			[ '{"a":"//b"}', '{"a":"//b"}' ],
-			[ '{"a":"b/*c*/"}', '{"a":"b/*c*/"}' ],
-			[ "{\"\\\"/*a\":\"b\"}", "{\"\\\"/*a\":\"b\"}" ],
-			[ '', '' ],
-			[ '/*c', '' ],
-			[ '//c', '' ],
-			[ '"http://example.com"', '"http://example.com"' ],
-			[ "\0", "\0" ],
-			[ '"Blåbærsyltetøy"', '"Blåbærsyltetøy"' ],
-		];
+		return array(
+			array( '{"a":"b"}', '{"a":"b"}' ),
+			array( "{\"a\":\"b\"}\n", "{\"a\":\"b\"}\n" ),
+			array( '/*c*/{"c":"b"}', '{"c":"b"}' ),
+			array( '{"a":"c"}/*c*/', '{"a":"c"}' ),
+			array( '/*c//d*/{"c":"b"}', '{"c":"b"}' ),
+			array( '{/*c*/"c":"b"}', '{"c":"b"}' ),
+			array( "/*\nc\r\n*/{\"c\":\"b\"}", '{"c":"b"}' ),
+			array( "//c\n{\"c\":\"b\"}", '{"c":"b"}' ),
+			array( "//c\r\n{\"c\":\"b\"}", '{"c":"b"}' ),
+			array( '{"a":"c"}//c', '{"a":"c"}' ),
+			array( "{\"a-c\"://c\n\"b\"}", '{"a-c":"b"}' ),
+			array( '{"/*a":"b"}', '{"/*a":"b"}' ),
+			array( '{"a":"//b"}', '{"a":"//b"}' ),
+			array( '{"a":"b/*c*/"}', '{"a":"b/*c*/"}' ),
+			array( "{\"\\\"/*a\":\"b\"}", "{\"\\\"/*a\":\"b\"}" ),
+			array( '', '' ),
+			array( '/*c', '' ),
+			array( '//c', '' ),
+			array( '"http://example.com"', '"http://example.com"' ),
+			array( "\0", "\0" ),
+			array( '"Blåbærsyltetøy"', '"Blåbærsyltetøy"' ),
+		);
 	}
 
 	/**
@@ -297,11 +297,11 @@ class FormatJsonTest extends MediaWikiTestCase {
 	}
 
 	public function provideParseStripComments() {
-		return [
-			[ '/* blah */true', true ],
-			[ "// blah \ntrue", true ],
-			[ '[ "a" , /* blah */ "b" ]', [ 'a', 'b' ] ],
-		];
+		return array(
+			array( '/* blah */true', true ),
+			array( "// blah \ntrue", true ),
+			array( '[ "a" , /* blah */ "b" ]', array( 'a', 'b' ) ),
+		);
 	}
 
 	/**
@@ -325,8 +325,8 @@ class FormatJsonTest extends MediaWikiTestCase {
 	 * @return array Arrays of unencoded strings and corresponding encoded strings
 	 */
 	private static function getEncodeTestCases( array $unescapedGroups ) {
-		$groups = [
-			'always' => [
+		$groups = array(
+			'always' => array(
 				// Forward slash (always unescaped)
 				'/' => '/',
 
@@ -350,23 +350,23 @@ class FormatJsonTest extends MediaWikiTestCase {
 				// Line terminators
 				"\xe2\x80\xa8" => '\u2028',
 				"\xe2\x80\xa9" => '\u2029',
-			],
-			'unicode' => [
+			),
+			'unicode' => array(
 				"\xc3\xa9" => '\u00e9',
 				"\xf0\x9d\x92\x9e" => '\ud835\udc9e', // U+1D49E, outside the BMP
-			],
-			'xmlmeta' => [
+			),
+			'xmlmeta' => array(
 				'<' => '\u003C', // JSON_HEX_TAG uses uppercase hex digits
 				'>' => '\u003E',
 				'&' => '\u0026',
-			],
-		];
+			),
+		);
 
-		$cases = [];
+		$cases = array();
 		foreach ( $groups as $name => $rules ) {
 			$leaveUnescaped = in_array( $name, $unescapedGroups );
 			foreach ( $rules as $from => $to ) {
-				$cases[] = [ $from, '"' . ( $leaveUnescaped ? $from : $to ) . '"' ];
+				$cases[] = array( $from, '"' . ( $leaveUnescaped ? $from : $to ) . '"' );
 			}
 		}
 

@@ -43,18 +43,18 @@ class MostimagesPage extends ImageQueryPage {
 	}
 
 	function getQueryInfo() {
-		return [
-			'tables' => [ 'imagelinks' ],
-			'fields' => [
+		return array(
+			'tables' => array( 'imagelinks' ),
+			'fields' => array(
 				'namespace' => NS_FILE,
 				'title' => 'il_to',
 				'value' => 'COUNT(*)'
-			],
-			'options' => [
+			),
+			'options' => array(
 				'GROUP BY' => 'il_to',
 				'HAVING' => 'COUNT(*) > 1'
-			]
-		];
+			)
+		);
 	}
 
 	function getCellHtml( $row ) {

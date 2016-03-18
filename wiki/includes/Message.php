@@ -188,7 +188,7 @@ class Message implements MessageSpecifier, Serializable {
 	/**
 	 * @var array List of parameters which will be substituted into the message.
 	 */
-	protected $parameters = [];
+	protected $parameters = array();
 
 	/**
 	 * Format for the message.
@@ -234,7 +234,7 @@ class Message implements MessageSpecifier, Serializable {
 	 *
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct( $key, $params = [], Language $language = null ) {
+	public function __construct( $key, $params = array(), Language $language = null ) {
 		global $wgLang;
 
 		if ( $key instanceof MessageSpecifier ) {
@@ -269,16 +269,16 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return string
 	 */
 	public function serialize() {
-		return serialize( [
+		return serialize( array(
 			'interface' => $this->interface,
-			'language' => $this->language instanceof StubUserLang ? false : $this->language->getCode(),
+			'language' => $this->language->getCode(),
 			'key' => $this->key,
 			'keysToTry' => $this->keysToTry,
 			'parameters' => $this->parameters,
 			'format' => $this->format,
 			'useDatabase' => $this->useDatabase,
 			'title' => $this->title,
-		] );
+		) );
 	}
 
 	/**
@@ -287,8 +287,6 @@ class Message implements MessageSpecifier, Serializable {
 	 * @param string $serialized
 	 */
 	public function unserialize( $serialized ) {
-		global $wgLang;
-
 		$data = unserialize( $serialized );
 		$this->interface = $data['interface'];
 		$this->key = $data['key'];
@@ -296,7 +294,7 @@ class Message implements MessageSpecifier, Serializable {
 		$this->parameters = $data['parameters'];
 		$this->format = $data['format'];
 		$this->useDatabase = $data['useDatabase'];
-		$this->language = $data['language'] ? Language::factory( $data['language'] ) : $wgLang;
+		$this->language = Language::factory( $data['language'] );
 		$this->title = $data['title'];
 	}
 
@@ -442,7 +440,7 @@ class Message implements MessageSpecifier, Serializable {
 	 *
 	 * @since 1.17
 	 *
-	 * @param mixed ... Parameters as strings, or a single argument that is
+	 * @param mixed $params,... Parameters as strings, or a single argument that is
 	 * an array of strings.
 	 *
 	 * @return Message $this
@@ -780,7 +778,7 @@ class Message implements MessageSpecifier, Serializable {
 		# Replace $* with a list of parameters for &uselang=qqx.
 		if ( strpos( $string, '$*' ) !== false ) {
 			$paramlist = '';
-			if ( $this->parameters !== [] ) {
+			if ( $this->parameters !== array() ) {
 				$paramlist = ': $' . implode( ', $', range( 1, count( $this->parameters ) ) );
 			}
 			$string = str_replace( '$*', $paramlist, $string );
@@ -810,7 +808,7 @@ class Message implements MessageSpecifier, Serializable {
 
 	/**
 	 * Magic method implementation of the above (for PHP >= 5.2.0), so we can do, eg:
-	 *     $foo = new Message( $key );
+	 *     $foo = Message::get( $key );
 	 *     $string = "<abbr>$foo</abbr>";
 	 *
 	 * @since 1.18
@@ -943,7 +941,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return array Array with a single "raw" key.
 	 */
 	public static function rawParam( $raw ) {
-		return [ 'raw' => $raw ];
+		return array( 'raw' => $raw );
 	}
 
 	/**
@@ -954,7 +952,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return array Array with a single "num" key.
 	 */
 	public static function numParam( $num ) {
-		return [ 'num' => $num ];
+		return array( 'num' => $num );
 	}
 
 	/**
@@ -965,7 +963,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return int[] Array with a single "duration" key.
 	 */
 	public static function durationParam( $duration ) {
-		return [ 'duration' => $duration ];
+		return array( 'duration' => $duration );
 	}
 
 	/**
@@ -976,7 +974,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return string[] Array with a single "expiry" key.
 	 */
 	public static function expiryParam( $expiry ) {
-		return [ 'expiry' => $expiry ];
+		return array( 'expiry' => $expiry );
 	}
 
 	/**
@@ -987,7 +985,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return number[] Array with a single "period" key.
 	 */
 	public static function timeperiodParam( $period ) {
-		return [ 'period' => $period ];
+		return array( 'period' => $period );
 	}
 
 	/**
@@ -998,7 +996,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return int[] Array with a single "size" key.
 	 */
 	public static function sizeParam( $size ) {
-		return [ 'size' => $size ];
+		return array( 'size' => $size );
 	}
 
 	/**
@@ -1009,7 +1007,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return int[] Array with a single "bitrate" key.
 	 */
 	public static function bitrateParam( $bitrate ) {
-		return [ 'bitrate' => $bitrate ];
+		return array( 'bitrate' => $bitrate );
 	}
 
 	/**
@@ -1020,7 +1018,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return string[] Array with a single "plaintext" key.
 	 */
 	public static function plaintextParam( $plaintext ) {
-		return [ 'plaintext' => $plaintext ];
+		return array( 'plaintext' => $plaintext );
 	}
 
 	/**
@@ -1034,7 +1032,7 @@ class Message implements MessageSpecifier, Serializable {
 	 * @return string
 	 */
 	protected function replaceParameters( $message, $type = 'before' ) {
-		$replacementKeys = [];
+		$replacementKeys = array();
 		foreach ( $this->parameters as $n => $param ) {
 			list( $paramType, $value ) = $this->extractParam( $param );
 			if ( $type === $paramType ) {
@@ -1057,23 +1055,23 @@ class Message implements MessageSpecifier, Serializable {
 	protected function extractParam( $param ) {
 		if ( is_array( $param ) ) {
 			if ( isset( $param['raw'] ) ) {
-				return [ 'after', $param['raw'] ];
+				return array( 'after', $param['raw'] );
 			} elseif ( isset( $param['num'] ) ) {
 				// Replace number params always in before step for now.
 				// No support for combined raw and num params
-				return [ 'before', $this->language->formatNum( $param['num'] ) ];
+				return array( 'before', $this->language->formatNum( $param['num'] ) );
 			} elseif ( isset( $param['duration'] ) ) {
-				return [ 'before', $this->language->formatDuration( $param['duration'] ) ];
+				return array( 'before', $this->language->formatDuration( $param['duration'] ) );
 			} elseif ( isset( $param['expiry'] ) ) {
-				return [ 'before', $this->language->formatExpiry( $param['expiry'] ) ];
+				return array( 'before', $this->language->formatExpiry( $param['expiry'] ) );
 			} elseif ( isset( $param['period'] ) ) {
-				return [ 'before', $this->language->formatTimePeriod( $param['period'] ) ];
+				return array( 'before', $this->language->formatTimePeriod( $param['period'] ) );
 			} elseif ( isset( $param['size'] ) ) {
-				return [ 'before', $this->language->formatSize( $param['size'] ) ];
+				return array( 'before', $this->language->formatSize( $param['size'] ) );
 			} elseif ( isset( $param['bitrate'] ) ) {
-				return [ 'before', $this->language->formatBitrate( $param['bitrate'] ) ];
+				return array( 'before', $this->language->formatBitrate( $param['bitrate'] ) );
 			} elseif ( isset( $param['plaintext'] ) ) {
-				return [ 'after', $this->formatPlaintext( $param['plaintext'] ) ];
+				return array( 'after', $this->formatPlaintext( $param['plaintext'] ) );
 			} else {
 				$warning = 'Invalid parameter for message "' . $this->getKey() . '": ' .
 					htmlspecialchars( serialize( $param ) );
@@ -1081,15 +1079,15 @@ class Message implements MessageSpecifier, Serializable {
 				$e = new Exception;
 				wfDebugLog( 'Bug58676', $warning . "\n" . $e->getTraceAsString() );
 
-				return [ 'before', '[INVALID]' ];
+				return array( 'before', '[INVALID]' );
 			}
 		} elseif ( $param instanceof Message ) {
 			// Message objects should not be before parameters because
 			// then they'll get double escaped. If the message needs to be
 			// escaped, it'll happen right here when we call toString().
-			return [ 'after', $param->toString() ];
+			return array( 'after', $param->toString() );
 		} else {
-			return [ 'before', $param ];
+			return array( 'before', $param );
 		}
 	}
 
@@ -1212,7 +1210,7 @@ class RawMessage extends Message {
 	 *
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct( $text, $params = [] ) {
+	public function __construct( $text, $params = array() ) {
 		if ( !is_string( $text ) ) {
 			throw new InvalidArgumentException( '$text must be a string' );
 		}

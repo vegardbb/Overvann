@@ -235,8 +235,8 @@ abstract class FileCacheBase {
 	 * @return void
 	 */
 	public function incrMissesRecent( WebRequest $request ) {
+		global $wgMemc;
 		if ( mt_rand( 0, self::MISS_FACTOR - 1 ) == 0 ) {
-			$cache = ObjectCache::getLocalClusterInstance();
 			# Get a large IP range that should include the user  even if that
 			# person's IP address changes
 			$ip = $request->getIP();
@@ -249,17 +249,17 @@ abstract class FileCacheBase {
 
 			# Bail out if a request already came from this range...
 			$key = wfMemcKey( get_class( $this ), 'attempt', $this->mType, $this->mKey, $ip );
-			if ( $cache->get( $key ) ) {
+			if ( $wgMemc->get( $key ) ) {
 				return; // possibly the same user
 			}
-			$cache->set( $key, 1, self::MISS_TTL_SEC );
+			$wgMemc->set( $key, 1, self::MISS_TTL_SEC );
 
 			# Increment the number of cache misses...
 			$key = $this->cacheMissKey();
-			if ( $cache->get( $key ) === false ) {
-				$cache->set( $key, 1, self::MISS_TTL_SEC );
+			if ( $wgMemc->get( $key ) === false ) {
+				$wgMemc->set( $key, 1, self::MISS_TTL_SEC );
 			} else {
-				$cache->incr( $key );
+				$wgMemc->incr( $key );
 			}
 		}
 	}
@@ -269,9 +269,9 @@ abstract class FileCacheBase {
 	 * @return int
 	 */
 	public function getMissesRecent() {
-		$cache = ObjectCache::getLocalClusterInstance();
+		global $wgMemc;
 
-		return self::MISS_FACTOR * $cache->get( $this->cacheMissKey() );
+		return self::MISS_FACTOR * $wgMemc->get( $this->cacheMissKey() );
 	}
 
 	/**

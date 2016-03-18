@@ -1,4 +1,4 @@
-@chrome @firefox @vagrant
+@chrome @clean @firefox @phantomjs
 Feature: Main Page View History Links
 
   Background:

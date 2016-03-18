@@ -51,7 +51,7 @@ class PoolCounterWorkViaCallback extends PoolCounterWork {
 	 */
 	public function __construct( $type, $key, array $callbacks ) {
 		parent::__construct( $type, $key );
-		foreach ( [ 'doWork', 'doCachedWork', 'fallback', 'error' ] as $name ) {
+		foreach ( array( 'doWork', 'doCachedWork', 'fallback', 'error' ) as $name ) {
 			if ( isset( $callbacks[$name] ) ) {
 				if ( !is_callable( $callbacks[$name] ) ) {
 					throw new MWException( "Invalid callback provided for '$name' function." );
@@ -66,26 +66,26 @@ class PoolCounterWorkViaCallback extends PoolCounterWork {
 	}
 
 	public function doWork() {
-		return call_user_func_array( $this->doWork, [] );
+		return call_user_func_array( $this->doWork, array() );
 	}
 
 	public function getCachedWork() {
 		if ( $this->doCachedWork ) {
-			return call_user_func_array( $this->doCachedWork, [] );
+			return call_user_func_array( $this->doCachedWork, array() );
 		}
 		return false;
 	}
 
 	public function fallback() {
 		if ( $this->fallback ) {
-			return call_user_func_array( $this->fallback, [] );
+			return call_user_func_array( $this->fallback, array() );
 		}
 		return false;
 	}
 
 	public function error( $status ) {
 		if ( $this->error ) {
-			return call_user_func_array( $this->error, [ $status ] );
+			return call_user_func_array( $this->error, array( $status ) );
 		}
 		return false;
 	}

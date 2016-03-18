@@ -254,7 +254,7 @@ class SpecialNuke extends SpecialPage {
 			'rc_timestamp',
 		);
 
-		$where = array( "(rc_new = 1) OR (rc_log_type = 'import' AND rc_log_action = 'upload')" );
+		$where = array( "(rc_new = 1) OR (rc_log_type = 'upload' AND rc_log_action = 'upload')" );
 
 		if ( $username === '' ) {
 			$what[] = 'rc_user_text';

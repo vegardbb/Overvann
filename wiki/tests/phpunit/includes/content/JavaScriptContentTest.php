@@ -12,81 +12,81 @@ class JavaScriptContentTest extends TextContentTest {
 	}
 
 	public static function dataGetParserOutput() {
-		return [
-			[
+		return array(
+			array(
 				'MediaWiki:Test.js',
 				null,
 				"hello <world>\n",
 				"<pre class=\"mw-code mw-js\" dir=\"ltr\">\nhello &lt;world&gt;\n\n</pre>"
-			],
-			[
+			),
+			array(
 				'MediaWiki:Test.js',
 				null,
 				"hello(); // [[world]]\n",
 				"<pre class=\"mw-code mw-js\" dir=\"ltr\">\nhello(); // [[world]]\n\n</pre>",
-				[
-					'Links' => [
-						[ 'World' => 0 ]
-					]
-				]
-			],
+				array(
+					'Links' => array(
+						array( 'World' => 0 )
+					)
+				)
+			),
 
 			// TODO: more...?
-		];
+		);
 	}
 
 	// XXX: Unused function
 	public static function dataGetSection() {
-		return [
-			[ WikitextContentTest::$sections,
+		return array(
+			array( WikitextContentTest::$sections,
 				'0',
 				null
-			],
-			[ WikitextContentTest::$sections,
+			),
+			array( WikitextContentTest::$sections,
 				'2',
 				null
-			],
-			[ WikitextContentTest::$sections,
+			),
+			array( WikitextContentTest::$sections,
 				'8',
 				null
-			],
-		];
+			),
+		);
 	}
 
 	// XXX: Unused function
 	public static function dataReplaceSection() {
-		return [
-			[ WikitextContentTest::$sections,
+		return array(
+			array( WikitextContentTest::$sections,
 				'0',
 				'No more',
 				null,
 				null
-			],
-			[ WikitextContentTest::$sections,
+			),
+			array( WikitextContentTest::$sections,
 				'',
 				'No more',
 				null,
 				null
-			],
-			[ WikitextContentTest::$sections,
+			),
+			array( WikitextContentTest::$sections,
 				'2',
 				"== TEST ==\nmore fun",
 				null,
 				null
-			],
-			[ WikitextContentTest::$sections,
+			),
+			array( WikitextContentTest::$sections,
 				'8',
 				'No more',
 				null,
 				null
-			],
-			[ WikitextContentTest::$sections,
+			),
+			array( WikitextContentTest::$sections,
 				'new',
 				'No more',
 				'New',
 				null
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -101,44 +101,42 @@ class JavaScriptContentTest extends TextContentTest {
 
 	// XXX: currently, preSaveTransform is applied to scripts. this may change or become optional.
 	public static function dataPreSaveTransform() {
-		return [
-			[ 'hello this is ~~~',
+		return array(
+			array( 'hello this is ~~~',
 				"hello this is [[Special:Contributions/127.0.0.1|127.0.0.1]]",
-			],
-			[ 'hello \'\'this\'\' is <nowiki>~~~</nowiki>',
+			),
+			array( 'hello \'\'this\'\' is <nowiki>~~~</nowiki>',
 				'hello \'\'this\'\' is <nowiki>~~~</nowiki>',
-			],
-			[ " Foo \n ",
+			),
+			array( " Foo \n ",
 				" Foo",
-			],
-		];
+			),
+		);
 	}
 
 	public static function dataPreloadTransform() {
-		return [
-			[
+		return array(
+			array( 'hello this is ~~~',
 				'hello this is ~~~',
-				'hello this is ~~~',
-			],
-			[
+			),
+			array( 'hello \'\'this\'\' is <noinclude>foo</noinclude><includeonly>bar</includeonly>',
 				'hello \'\'this\'\' is <noinclude>foo</noinclude><includeonly>bar</includeonly>',
-				'hello \'\'this\'\' is <noinclude>foo</noinclude><includeonly>bar</includeonly>',
-			],
-		];
+			),
+		);
 	}
 
 	public static function dataGetRedirectTarget() {
-		return [
-			[ '#REDIRECT [[Test]]',
+		return array(
+			array( '#REDIRECT [[Test]]',
 				null,
-			],
-			[ '#REDIRECT Test',
+			),
+			array( '#REDIRECT Test',
 				null,
-			],
-			[ '* #REDIRECT [[Test]]',
+			),
+			array( '* #REDIRECT [[Test]]',
 				null,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -162,80 +160,80 @@ class JavaScriptContentTest extends TextContentTest {
 	*/
 
 	public static function dataIsCountable() {
-		return [
-			[ '',
+		return array(
+			array( '',
 				null,
 				'any',
 				true
-			],
-			[ 'Foo',
+			),
+			array( 'Foo',
 				null,
 				'any',
 				true
-			],
-			[ 'Foo',
+			),
+			array( 'Foo',
 				null,
 				'comma',
 				false
-			],
-			[ 'Foo, bar',
+			),
+			array( 'Foo, bar',
 				null,
 				'comma',
 				false
-			],
-			[ 'Foo',
+			),
+			array( 'Foo',
 				null,
 				'link',
 				false
-			],
-			[ 'Foo [[bar]]',
+			),
+			array( 'Foo [[bar]]',
 				null,
 				'link',
 				false
-			],
-			[ 'Foo',
+			),
+			array( 'Foo',
 				true,
 				'link',
 				false
-			],
-			[ 'Foo [[bar]]',
+			),
+			array( 'Foo [[bar]]',
 				false,
 				'link',
 				false
-			],
-			[ '#REDIRECT [[bar]]',
+			),
+			array( '#REDIRECT [[bar]]',
 				true,
 				'any',
 				true
-			],
-			[ '#REDIRECT [[bar]]',
+			),
+			array( '#REDIRECT [[bar]]',
 				true,
 				'comma',
 				false
-			],
-			[ '#REDIRECT [[bar]]',
+			),
+			array( '#REDIRECT [[bar]]',
 				true,
 				'link',
 				false
-			],
-		];
+			),
+		);
 	}
 
 	public static function dataGetTextForSummary() {
-		return [
-			[ "hello\nworld.",
+		return array(
+			array( "hello\nworld.",
 				16,
 				'hello world.',
-			],
-			[ 'hello world.',
+			),
+			array( 'hello world.',
 				8,
 				'hello...',
-			],
-			[ '[[hello world]].',
+			),
+			array( '[[hello world]].',
 				8,
 				'[[hel...',
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -255,13 +253,11 @@ class JavaScriptContentTest extends TextContentTest {
 	 * @covers JavaScriptContent::updateRedirect
 	 * @dataProvider provideUpdateRedirect
 	 */
-	public function testUpdateRedirect( $oldText, $expectedText ) {
-		$this->setMwGlobals( [
+	public function testUpdateRedirect( $oldText, $expectedText) {
+		$this->setMwGlobals( array(
 			'wgServer' => '//example.org',
-			'wgScriptPath' => '/w',
-			'wgScript' => '/w/index.php',
-			'wgResourceBasePath' => '/w',
-		] );
+			'wgScriptPath' => '/w/index.php',
+		) );
 		$target = Title::newFromText( "testUpdateRedirect_target" );
 
 		$content = new JavaScriptContent( $oldText );
@@ -271,19 +267,16 @@ class JavaScriptContentTest extends TextContentTest {
 	}
 
 	public static function provideUpdateRedirect() {
-		return [
-			[
+		return array(
+			array(
 				'#REDIRECT [[Someplace]]',
 				'#REDIRECT [[Someplace]]',
-			],
-
-			// @codingStandardsIgnoreStart Generic.Files.LineLength
+			),
 			array(
 				'/* #REDIRECT */mw.loader.load("//example.org/w/index.php?title=MediaWiki:MonoBook.js\u0026action=raw\u0026ctype=text/javascript");',
 				'/* #REDIRECT */mw.loader.load("//example.org/w/index.php?title=TestUpdateRedirect_target\u0026action=raw\u0026ctype=text/javascript");'
 			)
-			// @codingStandardsIgnoreEnd
-		];
+		);
 	}
 
 	/**
@@ -305,24 +298,22 @@ class JavaScriptContentTest extends TextContentTest {
 	}
 
 	public static function dataEquals() {
-		return [
-			[ new JavaScriptContent( "hallo" ), null, false ],
-			[ new JavaScriptContent( "hallo" ), new JavaScriptContent( "hallo" ), true ],
-			[ new JavaScriptContent( "hallo" ), new CssContent( "hallo" ), false ],
-			[ new JavaScriptContent( "hallo" ), new JavaScriptContent( "HALLO" ), false ],
-		];
+		return array(
+			array( new JavaScriptContent( "hallo" ), null, false ),
+			array( new JavaScriptContent( "hallo" ), new JavaScriptContent( "hallo" ), true ),
+			array( new JavaScriptContent( "hallo" ), new CssContent( "hallo" ), false ),
+			array( new JavaScriptContent( "hallo" ), new JavaScriptContent( "HALLO" ), false ),
+		);
 	}
 
 	/**
 	 * @dataProvider provideGetRedirectTarget
 	 */
 	public function testGetRedirectTarget( $title, $text ) {
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgServer' => '//example.org',
-			'wgScriptPath' => '/w',
-			'wgScript' => '/w/index.php',
-			'wgResourceBasePath' => '/w',
-		] );
+			'wgScriptPath' => '/w/index.php',
+		) );
 		$content = new JavaScriptContent( $text );
 		$target = $content->getRedirectTarget();
 		$this->assertEquals( $title, $target ? $target->getPrefixedText() : null );
@@ -332,7 +323,6 @@ class JavaScriptContentTest extends TextContentTest {
 	 * Keep this in sync with JavaScriptContentHandlerTest::provideMakeRedirectContent()
 	 */
 	public static function provideGetRedirectTarget() {
-		// @codingStandardsIgnoreStart Generic.Files.LineLength
 		return array(
 			array( 'MediaWiki:MonoBook.js', '/* #REDIRECT */mw.loader.load("//example.org/w/index.php?title=MediaWiki:MonoBook.js\u0026action=raw\u0026ctype=text/javascript");' ),
 			array( 'User:FooBar/common.js', '/* #REDIRECT */mw.loader.load("//example.org/w/index.php?title=User:FooBar/common.js\u0026action=raw\u0026ctype=text/javascript");' ),
@@ -342,6 +332,5 @@ class JavaScriptContentTest extends TextContentTest {
 			// Different domain
 			array( null, '/* #REDIRECT */mw.loader.load("//example.com/w/index.php?title=MediaWiki:OtherWiki.js\u0026action=raw\u0026ctype=text/javascript");' ),
 		);
-		// @codingStandardsIgnoreEnd
 	}
 }

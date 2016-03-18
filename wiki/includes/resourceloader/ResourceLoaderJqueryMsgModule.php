@@ -34,7 +34,7 @@ class ResourceLoaderJqueryMsgModule extends ResourceLoaderFileModule {
 		$fileScript = parent::getScript( $context );
 
 		$tagData = Sanitizer::getRecognizedTagData();
-		$parserDefaults = [];
+		$parserDefaults = array();
 		$parserDefaults['allowedHtmlElements'] = array_merge(
 			array_keys( $tagData['htmlpairs'] ),
 			array_diff(
@@ -43,7 +43,7 @@ class ResourceLoaderJqueryMsgModule extends ResourceLoaderFileModule {
 			)
 		);
 
-		$dataScript = Xml::encodeJsCall( 'mw.jqueryMsg.setParserDefaults', [ $parserDefaults ] );
+		$dataScript = Xml::encodeJsCall( 'mw.jqueryMsg.setParserDefaults', array( $parserDefaults ) );
 
 		return $fileScript . $dataScript;
 	}

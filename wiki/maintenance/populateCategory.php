@@ -25,7 +25,7 @@
 require_once __DIR__ . '/Maintenance.php';
 
 /**
- * Maintenance script to populate the category table.
+ * Mainteance script to populate the category table.
  *
  * @ingroup Maintenance
  */
@@ -35,8 +35,7 @@ class PopulateCategory extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription(
-			<<<TEXT
+		$this->mDescription = <<<TEXT
 This script will populate the category table, added in MediaWiki 1.13.  It will
 print out progress indicators every 1000 categories it adds to the table.  The
 script is perfectly safe to run on large, live wikis, and running it multiple
@@ -50,9 +49,8 @@ added after the software update and so will be populated anyway.
 
 When the script has finished, it will make a note of this in the database, and
 will not run again without the --force option.
-TEXT
-		);
-
+TEXT;
+# '
 		$this->addOption(
 			'begin',
 			'Only do categories whose names are alphabetically after the provided name',
@@ -73,13 +71,13 @@ TEXT
 		$throttle = $this->getOption( 'throttle', 0 );
 		$force = $this->getOption( 'force', false );
 
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 
 		if ( !$force ) {
 			$row = $dbw->selectRow(
 				'updatelog',
 				'1',
-				[ 'ul_key' => 'populate category' ],
+				array( 'ul_key' => 'populate category' ),
 				__METHOD__
 			);
 			if ( $row ) {
@@ -106,9 +104,9 @@ TEXT
 				'cl_to',
 				$where,
 				__METHOD__,
-				[
+				array(
 					'ORDER BY' => 'cl_to'
-				]
+				)
 			);
 			if ( !$row ) {
 				# Done, hopefully.
@@ -135,7 +133,7 @@ TEXT
 
 		if ( $dbw->insert(
 			'updatelog',
-			[ 'ul_key' => 'populate category' ],
+			array( 'ul_key' => 'populate category' ),
 			__METHOD__,
 			'IGNORE'
 		) ) {

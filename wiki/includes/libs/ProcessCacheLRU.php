@@ -28,10 +28,10 @@ use Wikimedia\Assert\Assert;
  */
 class ProcessCacheLRU {
 	/** @var Array */
-	protected $cache = []; // (key => prop => value)
+	protected $cache = array(); // (key => prop => value)
 
 	/** @var Array */
-	protected $cacheTimes = []; // (key => prop => UNIX timestamp)
+	protected $cacheTimes = array(); // (key => prop => UNIX timestamp)
 
 	protected $maxCacheKeys; // integer; max entries
 
@@ -55,7 +55,7 @@ class ProcessCacheLRU {
 	 */
 	public function set( $key, $prop, $value ) {
 		if ( isset( $this->cache[$key] ) ) {
-			$this->ping( $key );
+			$this->ping( $key ); // push to top
 		} elseif ( count( $this->cache ) >= $this->maxCacheKeys ) {
 			reset( $this->cache );
 			$evictKey = key( $this->cache );
@@ -94,11 +94,13 @@ class ProcessCacheLRU {
 	 * @return mixed
 	 */
 	public function get( $key, $prop ) {
-		if ( !isset( $this->cache[$key][$prop] ) ) {
+		if ( isset( $this->cache[$key][$prop] ) ) {
+			// push to top
+			$this->ping( $key );
+			return $this->cache[$key][$prop];
+		} else {
 			return null;
 		}
-		$this->ping( $key );
-		return $this->cache[$key][$prop];
 	}
 
 	/**
@@ -109,8 +111,8 @@ class ProcessCacheLRU {
 	 */
 	public function clear( $keys = null ) {
 		if ( $keys === null ) {
-			$this->cache = [];
-			$this->cacheTimes = [];
+			$this->cache = array();
+			$this->cacheTimes = array();
 		} else {
 			foreach ( (array)$keys as $key ) {
 				unset( $this->cache[$key] );
@@ -128,7 +130,7 @@ class ProcessCacheLRU {
 	 */
 	public function resize( $maxKeys ) {
 		Assert::parameterType( 'integer', $maxKeys, '$maxKeys' );
-		Assert::parameter( $maxKeys > 0, '$maxKeys', 'must be above zero' );
+		Assert::parameter( $maxKeys >= 1, '$maxKeys', 'must be >= 1' );
 
 		$this->maxCacheKeys = $maxKeys;
 		while ( count( $this->cache ) > $this->maxCacheKeys ) {

@@ -23,6 +23,8 @@
 .link-mailto {
 	background: url(images/mail.png) center right no-repeat;
 	/* @embed */
+	background-image: -webkit-linear-gradient(transparent, transparent), url(images/mail.svg);
+	/* @embed */
 	background-image: linear-gradient(transparent, transparent), url(images/mail.svg);
 	padding-right: 15px;
 }
@@ -30,6 +32,8 @@
 .mw-body a.external[href^="ftp://"],
 .link-ftp {
 	background: url(images/ftp-ltr.png) center right no-repeat;
+	/* @embed */
+	background-image: -webkit-linear-gradient(transparent, transparent), url(images/ftp-ltr.svg);
 	/* @embed */
 	background-image: linear-gradient(transparent, transparent), url(images/ftp-ltr.svg);
 	padding-right: 15px;
@@ -39,6 +43,8 @@
 .mw-body a.external[href^="ircs://"],
 .link-irc {
 	background: url(images/chat-ltr.png) center right no-repeat;
+	/* @embed */
+	background-image: -webkit-linear-gradient(transparent, transparent), url(images/chat-ltr.svg);
 	/* @embed */
 	background-image: linear-gradient(transparent, transparent), url(images/chat-ltr.svg);
 	padding-right: 15px;
@@ -53,6 +59,8 @@
 .link-audio {
 	background: url(images/audio-ltr.png) center right no-repeat;
 	/* @embed */
+	background-image: -webkit-linear-gradient(transparent, transparent), url(images/audio-ltr.svg);
+	/* @embed */
 	background-image: linear-gradient(transparent, transparent), url(images/audio-ltr.svg);
 	padding-right: 15px;
 }
@@ -64,6 +72,8 @@
 .link-video {
 	background: url(images/video.png) center right no-repeat;
 	/* @embed */
+	background-image: -webkit-linear-gradient(transparent, transparent), url(images/video.svg);
+	/* @embed */
 	background-image: linear-gradient(transparent, transparent), url(images/video.svg);
 	padding-right: 15px;
 }
@@ -73,6 +83,8 @@
 .mw-body a.external[href*=".pdf?"], .mw-body a.external[href*=".PDF?"],
 .link-document {
 	background: url(images/document-ltr.png) center right no-repeat;
+	/* @embed */
+	background-image: -webkit-linear-gradient(transparent, transparent), url(images/document-ltr.svg);
 	/* @embed */
 	background-image: linear-gradient(transparent, transparent), url(images/document-ltr.svg);
 	padding-right: 15px;

@@ -41,9 +41,11 @@ class LessFileCompilationTest extends ResourceLoaderTestCase {
 		$rlContext = $this->getResourceLoaderContext();
 
 		// Bleh
-		$method = new ReflectionMethod( $this->module, 'compileLessFile' );
+		$method = new ReflectionMethod( $this->module, 'getLessCompiler' );
 		$method->setAccessible( true );
-		$this->assertNotNull( $method->invoke( $this->module, $this->file, $rlContext ) );
+		$compiler = $method->invoke( $this->module, $rlContext );
+
+		$this->assertNotNull( $compiler->parseFile( $this->file )->getCss() );
 	}
 
 	public function toString() {

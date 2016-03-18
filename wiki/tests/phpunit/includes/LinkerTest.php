@@ -11,10 +11,10 @@ class LinkerTest extends MediaWikiLangTestCase {
 	 * @covers Linker::userLink
 	 */
 	public function testUserLink( $expected, $userId, $userName, $altUserName = false, $msg = '' ) {
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgArticlePath' => '/wiki/$1',
 			'wgWellFormedXml' => true,
-		] );
+		) );
 
 		$this->assertEquals( $expected,
 			Linker::userLink( $userId, $userName, $altUserName, $msg )
@@ -28,63 +28,63 @@ class LinkerTest extends MediaWikiLangTestCase {
 		# - username
 		# - optional altUserName
 		# - optional message
-		return [
+		return array(
 
-			# ## ANONYMOUS USER ########################################
-			[
+			### ANONYMOUS USER ########################################
+			array(
 				'<a href="/wiki/Special:Contributions/JohnDoe" '
 					. 'title="Special:Contributions/JohnDoe" '
 					. 'class="mw-userlink mw-anonuserlink">JohnDoe</a>',
 				0, 'JohnDoe', false,
-			],
-			[
+			),
+			array(
 				'<a href="/wiki/Special:Contributions/::1" '
 					. 'title="Special:Contributions/::1" '
 					. 'class="mw-userlink mw-anonuserlink">::1</a>',
 				0, '::1', false,
 				'Anonymous with pretty IPv6'
-			],
-			[
+			),
+			array(
 				'<a href="/wiki/Special:Contributions/0:0:0:0:0:0:0:1" '
 					. 'title="Special:Contributions/0:0:0:0:0:0:0:1" '
 					. 'class="mw-userlink mw-anonuserlink">::1</a>',
 				0, '0:0:0:0:0:0:0:1', false,
 				'Anonymous with almost pretty IPv6'
-			],
-			[
+			),
+			array(
 				'<a href="/wiki/Special:Contributions/0000:0000:0000:0000:0000:0000:0000:0001" '
 					. 'title="Special:Contributions/0000:0000:0000:0000:0000:0000:0000:0001" '
 					. 'class="mw-userlink mw-anonuserlink">::1</a>',
 				0, '0000:0000:0000:0000:0000:0000:0000:0001', false,
 				'Anonymous with full IPv6'
-			],
-			[
+			),
+			array(
 				'<a href="/wiki/Special:Contributions/::1" '
 					. 'title="Special:Contributions/::1" '
 					. 'class="mw-userlink mw-anonuserlink">AlternativeUsername</a>',
 				0, '::1', 'AlternativeUsername',
 				'Anonymous with pretty IPv6 and an alternative username'
-			],
+			),
 
 			# IPV4
-			[
+			array(
 				'<a href="/wiki/Special:Contributions/127.0.0.1" '
 					. 'title="Special:Contributions/127.0.0.1" '
 					. 'class="mw-userlink mw-anonuserlink">127.0.0.1</a>',
 				0, '127.0.0.1', false,
 				'Anonymous with IPv4'
-			],
-			[
+			),
+			array(
 				'<a href="/wiki/Special:Contributions/127.0.0.1" '
 					. 'title="Special:Contributions/127.0.0.1" '
 					. 'class="mw-userlink mw-anonuserlink">AlternativeUsername</a>',
 				0, '127.0.0.1', 'AlternativeUsername',
 				'Anonymous with IPv4 and an alternative username'
-			],
+			),
 
-			# ## Regular user ##########################################
+			### Regular user ##########################################
 			# TODO!
-		];
+		);
 	}
 
 	/**
@@ -93,29 +93,27 @@ class LinkerTest extends MediaWikiLangTestCase {
 	 * @covers Linker::formatAutocomments
 	 * @covers Linker::formatLinksInComment
 	 */
-	public function testFormatComment(
-		$expected, $comment, $title = false, $local = false, $wikiId = null
-	) {
+	public function testFormatComment( $expected, $comment, $title = false, $local = false, $wikiId = null ) {
 		$conf = new SiteConfiguration();
-		$conf->settings = [
-			'wgServer' => [
+		$conf->settings = array(
+			'wgServer' => array(
 				'enwiki' => '//en.example.org',
 				'dewiki' => '//de.example.org',
-			],
-			'wgArticlePath' => [
+			),
+			'wgArticlePath' => array(
 				'enwiki' => '/w/$1',
 				'dewiki' => '/w/$1',
-			],
-		];
-		$conf->suffixes = [ 'wiki' ];
+			),
+		);
+		$conf->suffixes = array( 'wiki' );
 
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgScript' => '/wiki/index.php',
 			'wgArticlePath' => '/wiki/$1',
 			'wgWellFormedXml' => true,
 			'wgCapitalLinks' => true,
 			'wgConf' => $conf,
-		] );
+		) );
 
 		if ( $title === false ) {
 			// We need a page title that exists
@@ -131,7 +129,6 @@ class LinkerTest extends MediaWikiLangTestCase {
 	public function provideCasesForFormatComment() {
 		$wikiId = 'enwiki'; // $wgConf has a fake entry for this
 
-		// @codingStandardsIgnoreStart Generic.Files.LineLength
 		return array(
 			// Linker::formatComment
 			array(
@@ -255,7 +252,6 @@ class LinkerTest extends MediaWikiLangTestCase {
 				false, false, $wikiId
 			)
 		);
-		// @codingStandardsIgnoreEnd
 	}
 
 	/**
@@ -265,22 +261,22 @@ class LinkerTest extends MediaWikiLangTestCase {
 	public function testFormatLinksInComment( $expected, $input, $wiki ) {
 
 		$conf = new SiteConfiguration();
-		$conf->settings = [
-			'wgServer' => [
+		$conf->settings = array(
+			'wgServer' => array(
 				'enwiki' => '//en.example.org'
-			],
-			'wgArticlePath' => [
+			),
+			'wgArticlePath' => array(
 				'enwiki' => '/w/$1',
-			],
-		];
-		$conf->suffixes = [ 'wiki' ];
-		$this->setMwGlobals( [
+			),
+		);
+		$conf->suffixes = array( 'wiki' );
+		$this->setMwGlobals( array(
 			'wgScript' => '/wiki/index.php',
 			'wgArticlePath' => '/wiki/$1',
 			'wgWellFormedXml' => true,
 			'wgCapitalLinks' => true,
 			'wgConf' => $conf,
-		] );
+		) );
 
 		$this->assertEquals(
 			$expected,
@@ -289,7 +285,6 @@ class LinkerTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideCasesForFormatLinksInComment() {
-		// @codingStandardsIgnoreStart Generic.Files.LineLength
 		return array(
 			array(
 				'foo bar <a href="/wiki/Special:BlankPage" title="Special:BlankPage">Special:BlankPage</a>',
@@ -307,6 +302,5 @@ class LinkerTest extends MediaWikiLangTestCase {
 				'enwiki',
 			),
 		);
-		// @codingStandardsIgnoreEnd
 	}
 }

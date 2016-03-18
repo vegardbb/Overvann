@@ -25,7 +25,7 @@ class TitledElement extends ElementMixin {
 	 * @param array $config Configuration options
 	 * @param string $config['title'] Title. If not provided, the static property 'title' is used.
 	 */
-	public function __construct( Element $element, array $config = [] ) {
+	public function __construct( Element $element, array $config = array() ) {
 		// Parent constructor
 		$target = isset( $config['titled'] ) ? $config['titled'] : $element;
 		parent::__construct( $element, $target, $config );
@@ -41,15 +41,15 @@ class TitledElement extends ElementMixin {
 	 * Set title.
 	 *
 	 * @param string|null $title Title text or null for no title
-	 * @return $this
+	 * @chainable
 	 */
 	public function setTitle( $title ) {
 		if ( $this->title !== $title ) {
 			$this->title = $title;
 			if ( $title !== null ) {
-				$this->target->setAttributes( [ 'title' => $title ] );
+				$this->target->setAttributes( array( 'title' => $title ) );
 			} else {
-				$this->target->removeAttributes( [ 'title' ] );
+				$this->target->removeAttributes( array( 'title' ) );
 			}
 		}
 

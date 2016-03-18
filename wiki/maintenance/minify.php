@@ -40,10 +40,15 @@ class MinifyScript extends Maintenance {
 			"Directory for output. If this is not specified, and neither is --outfile, then the\n" .
 			"output files will be sent to the same directories as the input files.",
 			false, true );
-		$this->addDescription( "Minify a file or set of files.\n\n" .
+		$this->addOption( 'js-statements-on-own-line',
+			"Boolean value for putting statements on their own line when minifying JavaScript.",
+			false, true );
+		$this->addOption( 'js-max-line-length',
+			"Maximum line length for JavaScript minification.",
+			false, true );
+		$this->mDescription = "Minify a file or set of files.\n\n" .
 			"If --outfile is not specified, then the output file names will have a .min extension\n" .
-			"added, e.g. jquery.js -> jquery.min.js."
-		);
+			"added, e.g. jquery.js -> jquery.min.js.";
 	}
 
 	public function execute() {
@@ -103,6 +108,8 @@ class MinifyScript extends Maintenance {
 	}
 
 	public function minify( $inPath, $outPath ) {
+		global $wgResourceLoaderMinifierStatementsOnOwnLine, $wgResourceLoaderMinifierMaxLineLength;
+
 		$extension = $this->getExtension( $inPath );
 		$this->output( basename( $inPath ) . ' -> ' . basename( $outPath ) . '...' );
 
@@ -119,7 +126,10 @@ class MinifyScript extends Maintenance {
 
 		switch ( $extension ) {
 			case 'js':
-				$outText = JavaScriptMinifier::minify( $inText );
+				$outText = JavaScriptMinifier::minify( $inText,
+					$this->getOption( 'js-statements-on-own-line', $wgResourceLoaderMinifierStatementsOnOwnLine ),
+					$this->getOption( 'js-max-line-length', $wgResourceLoaderMinifierMaxLineLength )
+				);
 				break;
 			case 'css':
 				$outText = CSSMin::minify( $inText );

@@ -1,4 +1,4 @@
-/*!
+/**
  * TableSorter for MediaWiki
  *
  * Written 2011 Leo Koppelkamm
@@ -12,46 +12,64 @@
  * and mw.language.months.
  *
  * Uses 'tableSorterCollation' in mw.config (if available)
+ */
+/**
  *
- * Create a sortable table with multi-column sorting capabilities
+ * @description Create a sortable table with multi-column sorting capabilities
  *
- *      // Create a simple tablesorter interface
- *      $( 'table' ).tablesorter();
+ * @example $( 'table' ).tablesorter();
+ * @desc Create a simple tablesorter interface.
  *
- *      // Create a tablesorter interface, initially sorting on the first and second column
- *      $( 'table' ).tablesorter( { sortList: [ { 0: 'desc' }, { 1: 'asc' } ] } );
+ * @example $( 'table' ).tablesorter( { sortList: [ { 0: 'desc' }, { 1: 'asc' } ] } );
+ * @desc Create a tablesorter interface initially sorting on the first and second column.
  *
- * @param {string} [cssHeader="header"] A string of the class name to be appended to sortable
- *         tr elements in the thead of the table.
+ * @option String cssHeader ( optional ) A string of the class name to be appended
+ *         to sortable tr elements in the thead of the table. Default value:
+ *         "header"
  *
- * @param {string} [cssAsc="headerSortUp"] A string of the class name to be appended to
- *         sortable tr elements in the thead on a ascending sort.
+ * @option String cssAsc ( optional ) A string of the class name to be appended to
+ *         sortable tr elements in the thead on a ascending sort. Default value:
+ *         "headerSortUp"
  *
- * @param {string} [cssDesc="headerSortDown"] A string of the class name to be appended to
- *         sortable tr elements in the thead on a descending sort.
+ * @option String cssDesc ( optional ) A string of the class name to be appended
+ *         to sortable tr elements in the thead on a descending sort. Default
+ *         value: "headerSortDown"
  *
- * @param {string} [sortMultisortKey="shiftKey"] A string of the multi-column sort key.
+ * @option String sortMultisortKey ( optional ) A string of the multi-column sort
+ *         key. Default value: "shiftKey"
  *
- * @param {boolean} [cancelSelection=true] Boolean flag indicating iftablesorter should cancel
- *         selection of the table headers text.
+ * @option Boolean cancelSelection ( optional ) Boolean flag indicating if
+ *         tablesorter should cancel selection of the table headers text.
+ *         Default value: true
  *
- * @param {Array} [sortList] An array containing objects specifying sorting. By passing more
- *         than one object, multi-sorting will be applied. Object structure:
+ * @option Array sortList ( optional ) An array containing objects specifying sorting.
+ *         By passing more than one object, multi-sorting will be applied. Object structure:
  *         { <Integer column index>: <String 'asc' or 'desc'> }
+ *         Default value: []
  *
  * @event sortEnd.tablesorter: Triggered as soon as any sorting has been applied.
  *
+ * @type jQuery
+ *
+ * @name tablesorter
+ *
+ * @cat Plugins/Tablesorter
+ *
  * @author Christian Bach/christian.bach@polyester.se
  */
+
 ( function ( $, mw ) {
+	/* Local scope */
+
 	var ts,
 		parsers = [];
 
 	/* Parser utility functions */
 
 	function getParserById( name ) {
-		var i;
-		for ( i = 0; i < parsers.length; i++ ) {
+		var i,
+			len = parsers.length;
+		for ( i = 0; i < len; i++ ) {
 			if ( parsers[ i ].id.toLowerCase() === name.toLowerCase() ) {
 				return parsers[ i ];
 			}
@@ -70,24 +88,25 @@
 			// Cast any numbers or other stuff to a string, methods
 			// like charAt, toLowerCase and split are expected.
 			return String( data );
-		}
-		if ( !node ) {
-			return $node.text();
-		}
-		if ( node.tagName.toLowerCase() === 'img' ) {
-			return $node.attr( 'alt' ) || ''; // handle undefined alt
-		}
-		return $.map( $.makeArray( node.childNodes ), function ( elem ) {
-			if ( elem.nodeType === Node.ELEMENT_NODE ) {
-				return getElementSortKey( elem );
+		} else {
+			if ( !node ) {
+				return $node.text();
+			} else if ( node.tagName.toLowerCase() === 'img' ) {
+				return $node.attr( 'alt' ) || ''; // handle undefined alt
+			} else {
+				return $.map( $.makeArray( node.childNodes ), function ( elem ) {
+					if ( elem.nodeType === Node.ELEMENT_NODE ) {
+						return getElementSortKey( elem );
+					} else {
+						return $.text( elem );
+					}
+				} ).join( '' );
 			}
-			return $.text( elem );
-		} ).join( '' );
+		}
 	}
 
 	function detectParserForColumn( table, rows, column ) {
 		var l = parsers.length,
-			config = $( table ).data( 'tablesorter' ).config,
 			cellIndex,
 			nodeValue,
 			// Start with 1 because 0 is the fallback parser
@@ -99,8 +118,7 @@
 			needed = ( rows.length > 4 ) ? 5 : rows.length;
 
 		while ( i < l ) {
-			// if this is a child row, continue to the next row (as buildCache())
-			if ( rows[ rowIndex ] && !$( rows[ rowIndex ] ).hasClass( config.cssChildRow ) ) {
+			if ( rows[ rowIndex ] ) {
 				if ( rowIndex !== lastRowIndex ) {
 					lastRowIndex = rowIndex;
 					cellIndex = $( rows[ rowIndex ] ).data( 'columnToCell' )[ column ];
@@ -227,6 +245,7 @@
 			pos = normalized[ i ][ checkCell ];
 
 			l = row[ pos ].length;
+
 			for ( j = 0; j < l; j++ ) {
 				fragment.appendChild( row[ pos ][ j ] );
 			}
@@ -278,7 +297,7 @@
 
 	function uniqueElements( array ) {
 		var uniques = [];
-		$.each( array, function ( i, elem ) {
+		$.each( array, function ( index, elem ) {
 			if ( elem !== undefined && $.inArray( elem, uniques ) === -1 ) {
 				uniques.push( elem );
 			}
@@ -301,7 +320,6 @@
 			exploded,
 			$tableHeaders = $( [] ),
 			$tableRows = $( 'thead:eq(0) > tr', table );
-
 		if ( $tableRows.length <= 1 ) {
 			$tableHeaders = $tableRows.children( 'th' );
 		} else {
@@ -393,8 +411,9 @@
 	}
 
 	function isValueInArray( v, a ) {
-		var i;
-		for ( i = 0; i < a.length; i++ ) {
+		var i,
+				len = a.length;
+		for ( i = 0; i < len; i++ ) {
 			if ( a[ i ][ 0 ] === v ) {
 				return true;
 			}
@@ -407,8 +426,8 @@
 	 * in default (ascending) order when their header cell is clicked the next time.
 	 *
 	 * @param {jQuery} $headers
-	 * @param {number[][]} sortList
-	 * @param {number[][]} headerToColumns
+	 * @param {Number[][]} sortList
+	 * @param {Number[][]} headerToColumns
 	 */
 	function setHeadersOrder( $headers, sortList, headerToColumns ) {
 		// Loop through all headers to retrieve the indices of the columns the header spans across:
@@ -446,8 +465,7 @@
 		$headers.removeClass( css[ 0 ] ).removeClass( css[ 1 ] ).attr( 'title', msg[ 1 ] );
 
 		for ( var i = 0; i < list.length; i++ ) {
-			$headers
-				.eq( columnToHeader[ list[ i ][ 0 ] ] )
+			$headers.eq( columnToHeader[ list[ i ][ 0 ] ] )
 				.addClass( css[ list[ i ][ 1 ] ] )
 				.attr( 'title', msg[ list[ i ][ 1 ] ] );
 		}
@@ -463,14 +481,14 @@
 
 	function multisort( table, sortList, cache ) {
 		var i,
-			sortFn = [];
-
-		for ( i = 0; i < sortList.length; i++ ) {
+			sortFn = [],
+			len = sortList.length;
+		for ( i = 0; i < len; i++ ) {
 			sortFn[ i ] = ( sortList[ i ][ 1 ] ) ? sortTextDesc : sortText;
 		}
 		cache.normalized.sort( function ( array1, array2 ) {
 			var i, col, ret;
-			for ( i = 0; i < sortList.length; i++ ) {
+			for ( i = 0; i < len; i++ ) {
 				col = sortList[ i ][ 0 ];
 				ret = sortFn[ i ].call( this, array1[ col ], array2[ col ] );
 				if ( ret !== 0 ) {
@@ -498,7 +516,7 @@
 			ascii = separatorTransformTable[ 0 ].split( '\t' ).concat( digitTransformTable[ 0 ].split( '\t' ) );
 			localised = separatorTransformTable[ 1 ].split( '\t' ).concat( digitTransformTable[ 1 ].split( '\t' ) );
 
-			// Construct regexes for number identification
+			// Construct regex for number identification
 			for ( i = 0; i < ascii.length; i++ ) {
 				ts.transformTable[ localised[ i ] ] = ascii[ i ];
 				digits.push( mw.RegExp.escape( localised[ i ] ) );
@@ -568,8 +586,8 @@
 		$table.find( '> tbody > tr' ).each( function () {
 			var i,
 				col = 0,
-				len = this.cells.length;
-			for ( i = 0; i < len; i++ ) {
+				l = this.cells.length;
+			for ( i = 0; i < l; i++ ) {
 				$( this.cells[ i ] ).data( 'tablesorter', {
 					realCellIndex: col,
 					realRowIndex: this.rowIndex
@@ -722,8 +740,7 @@
 				new RegExp( /(https?|ftp|file):\/\// )
 			],
 			isoDate: [
-				new RegExp( /^([-+]?\d{1,4})-([01]\d)-([0-3]\d)([T\s]((([01]\d|2[0-3])(:?[0-5]\d)?|24:?00)?(:?([0-5]\d|60))?([.,]\d+)?)([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?/ ),
-				new RegExp( /^([-+]?\d{1,4})-([01]\d)-([0-3]\d)/ )
+				new RegExp( /^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/ )
 			],
 			usLongDate: [
 				new RegExp( /^[A-Za-z]{3,10}\.? [0-9]{1,2}, ([0-9]{4}|'?[0-9]{2}) (([0-2]?[0-9]:[0-5][0-9])|([0-1]?[0-9]:[0-5][0-9]\s(AM|PM)))$/ )
@@ -738,9 +755,10 @@
 	 * Converts sort objects [ { Integer: String }, ... ] to the internally used nested array
 	 * structure [ [ Integer , Integer ], ... ]
 	 *
-	 * @param {Array} sortObjects List of sort objects.
+	 * @param sortObjects {Array} List of sort objects.
 	 * @return {Array} List of internal sort definitions.
 	 */
+
 	function convertSortList( sortObjects ) {
 		var sortList = [];
 		$.each( sortObjects, function ( i, sortObject ) {
@@ -995,7 +1013,15 @@
 			},
 
 			addParser: function ( parser ) {
-				if ( !getParserById( parser.id ) ) {
+				var i,
+					len = parsers.length,
+					a = true;
+				for ( i = 0; i < len; i++ ) {
+					if ( parsers[ i ].id.toLowerCase() === parser.id.toLowerCase() ) {
+						a = false;
+					}
+				}
+				if ( a ) {
 					parsers.push( parser );
 				}
 			},
@@ -1082,8 +1108,9 @@
 		format: function ( s ) {
 			var i, item,
 				a = s.split( '.' ),
-				r = '';
-			for ( i = 0; i < a.length; i++ ) {
+				r = '',
+				len = a.length;
+			for ( i = 0; i < len; i++ ) {
 				item = a[ i ];
 				if ( item.length === 1 ) {
 					r += '00' + item;
@@ -1126,22 +1153,8 @@
 			return ts.rgx.isoDate[ 0 ].test( s );
 		},
 		format: function ( s ) {
-			var isodate, matches;
-			if ( !Date.prototype.toISOString ) {
-				// Old browsers don't understand iso, Fallback to US date parsing and ignore the time part.
-				matches = $.trim( s ).match( ts.rgx.isoDate[ 1 ] );
-				if ( !matches ) {
-					return $.tablesorter.formatFloat( 0 );
-				}
-				isodate = new Date( matches[ 2 ]  + '/' + matches[ 3 ] + '/' + matches[ 1 ] );
-			} else {
-				matches = s.match( ts.rgx.isoDate[ 0 ] );
-				if ( !matches ) {
-					return $.tablesorter.formatFloat( 0 );
-				}
-				isodate = new Date( $.trim( matches[ 0 ] ) );
-			}
-			return $.tablesorter.formatFloat( ( isodate !== undefined ) ? isodate.getTime() : 0 );
+			return $.tablesorter.formatFloat( ( s !== '' ) ? new Date( s.replace(
+			new RegExp( /-/g ), '/' ) ).getTime() : '0' );
 		},
 		type: 'numeric'
 	} );

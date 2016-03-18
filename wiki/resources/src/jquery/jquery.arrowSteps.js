@@ -51,7 +51,7 @@
 		$stepDiv = $steps.filter( ':not(:last-child)' ).addClass( 'arrow' ).find( 'div' );
 
 		// Execute when complete page is fully loaded, including all frames, objects and images
-		$( window ).on( 'load', function () {
+		$( window ).load( function () {
 			arrowWidth = parseInt( $el.outerHeight(), 10 );
 			$stepDiv.css( paddingSide, arrowWidth.toString() + 'px' );
 		} );

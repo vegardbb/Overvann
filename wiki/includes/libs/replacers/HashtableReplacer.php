@@ -41,3 +41,4 @@ class HashtableReplacer extends Replacer {
 		return $this->table[$matches[$this->index]];
 	}
 }
+

@@ -144,11 +144,10 @@ class PoolWorkArticleView extends PoolCounterWork {
 		if ( $time > 3 ) {
 			// TODO: Use Parser's logger (once it has one)
 			$logger = MediaWiki\Logger\LoggerFactory::getInstance( 'slow-parse' );
-			$logger->info( '{time} {title}', [
+			$logger->info( '{time} {title}', array(
 				'time' => number_format( $time, 2 ),
 				'title' => $this->page->getTitle()->getPrefixedDBkey(),
-				'trigger' => 'view',
-			] );
+			) );
 		}
 
 		if ( $this->cacheable && $this->parserOutput->isCacheable() && $isCurrent ) {

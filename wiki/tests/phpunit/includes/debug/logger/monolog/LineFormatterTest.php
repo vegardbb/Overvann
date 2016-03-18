@@ -36,7 +36,7 @@ class LineFormatterTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * @covers MediaWiki\Logger\Monolog\LineFormatter::normalizeException
+	 * @covers LineFormatter::normalizeException
 	 */
 	public function testNormalizeExceptionNoTrace() {
 		$fixture = new LineFormatter();
@@ -55,7 +55,7 @@ class LineFormatterTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * @covers MediaWiki\Logger\Monolog\LineFormatter::normalizeException
+	 * @covers LineFormatter::normalizeException
 	 */
 	public function testNormalizeExceptionTrace() {
 		$fixture = new LineFormatter();

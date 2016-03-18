@@ -30,8 +30,8 @@
  * version are hardcoded here
  */
 function wfEntryPointCheck( $entryPoint ) {
-	$mwVersion = '1.27';
-	$minimumVersionPHP = '5.5.9';
+	$mwVersion = '1.26';
+	$minimumVersionPHP = '5.3.3';
 	$phpVersion = PHP_VERSION;
 
 	if ( !function_exists( 'version_compare' )
@@ -40,9 +40,7 @@ function wfEntryPointCheck( $entryPoint ) {
 		wfPHPVersionError( $entryPoint, $mwVersion, $minimumVersionPHP, $phpVersion );
 	}
 
-	// @codingStandardsIgnoreStart MediaWiki.Usage.DirUsage.FunctionFound
 	if ( !file_exists( dirname( __FILE__ ) . '/../vendor/autoload.php' ) ) {
-		// @codingStandardsIgnoreEnd
 		wfMissingVendorError( $entryPoint, $mwVersion );
 	}
 }
@@ -162,7 +160,7 @@ function wfPHPVersionError( $type, $mwVersion, $minimumVersionPHP, $phpVersion )
 
 	$longHtml = <<<HTML
 			Please consider <a href="http://www.php.net/downloads.php">upgrading your copy of PHP</a>.
-			PHP versions less than 5.5.0 are no longer supported by the PHP Group and will not receive
+			PHP versions less than 5.3.0 are no longer supported by the PHP Group and will not receive
 			security or bugfix updates.
 		</p>
 		<p>
@@ -190,14 +188,12 @@ function wfMissingVendorError( $type, $mwVersion ) {
 		. "https://www.mediawiki.org/wiki/Download_from_Git#Fetch_external_libraries\n"
 		. "for help on installing the required components.";
 
-	// @codingStandardsIgnoreStart Generic.Files.LineLength
 	$longHtml = <<<HTML
-		MediaWiki now also has some external dependencies that need to be installed via
-		composer or from a separate git repo. Please see
-		<a href="https://www.mediawiki.org/wiki/Download_from_Git#Fetch_external_libraries">mediawiki.org</a>
-		for help on installing the required components.
+			MediaWiki now also has some external dependencies that need to be installed via
+			composer or from a separate git repo. Please see
+			<a href="https://www.mediawiki.org/wiki/Download_from_Git#Fetch_external_libraries">mediawiki.org</a>
+			for help on installing the required components.
 HTML;
-	// @codingStandardsIgnoreEnd
 
 	wfGenericError( $type, $mwVersion, 'External dependencies', $shortText, $longText, $longHtml );
 }

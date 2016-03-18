@@ -72,7 +72,7 @@ class ApiParse extends ApiBase {
 			$this->section = $params['section'];
 			if ( !preg_match( '/^((T-)?\d+|new)$/', $this->section ) ) {
 				$this->dieUsage(
-					'The section parameter must be a valid section id or "new"', 'invalidsection'
+					"The section parameter must be a valid section id or 'new'", "invalidsection"
 				);
 			}
 		} else {
@@ -131,9 +131,9 @@ class ApiParse extends ApiBase {
 				}
 			} else { // Not $oldid, but $pageid or $page
 				if ( $params['redirects'] ) {
-					$reqParams = [
+					$reqParams = array(
 						'redirects' => '',
-					];
+					);
 					if ( !is_null( $pageid ) ) {
 						$reqParams['pageids'] = $pageid;
 					} else { // $page
@@ -149,11 +149,11 @@ class ApiParse extends ApiBase {
 					foreach ( $pageSet->getRedirectTitles() as $title ) {
 						$to = $title->getFullText();
 					}
-					$pageParams = [ 'title' => $to ];
+					$pageParams = array( 'title' => $to );
 				} elseif ( !is_null( $pageid ) ) {
-					$pageParams = [ 'pageid' => $pageid ];
+					$pageParams = array( 'pageid' => $pageid );
 				} else { // $page
-					$pageParams = [ 'title' => $page ];
+					$pageParams = array( 'title' => $page );
 				}
 
 				$pageObj = $this->getTitleOrPageId( $pageParams, 'fromdb' );
@@ -191,7 +191,7 @@ class ApiParse extends ApiBase {
 		} else { // Not $oldid, $pageid, $page. Hence based on $text
 			$titleObj = Title::newFromText( $title );
 			if ( !$titleObj || $titleObj->isExternal() ) {
-				$this->dieUsageMsg( [ 'invalidtitle', $title ] );
+				$this->dieUsageMsg( array( 'invalidtitle', $title ) );
 			}
 			$wgTitle = $titleObj;
 			if ( $titleObj->canExist() ) {
@@ -245,7 +245,7 @@ class ApiParse extends ApiBase {
 			}
 			if ( $params['onlypst'] ) {
 				// Build a result and bail out
-				$result_array = [];
+				$result_array = array();
 				$result_array['text'] = $this->pstContent->serialize( $format );
 				$result_array[ApiResult::META_BC_SUBELEMENTS][] = 'text';
 				if ( isset( $prop['wikitext'] ) ) {
@@ -272,10 +272,10 @@ class ApiParse extends ApiBase {
 			}
 		}
 
-		$result_array = [];
+		$result_array = array();
 
 		$result_array['title'] = $titleObj->getPrefixedText();
-		$result_array['pageid'] = $pageid ?: $pageObj->getId();
+		$result_array['pageid'] = $pageid ? $pageid : $pageObj->getId();
 
 		if ( !is_null( $oldid ) ) {
 			$result_array['revid'] = intval( $oldid );
@@ -307,8 +307,8 @@ class ApiParse extends ApiBase {
 			if ( $params['effectivelanglinks'] ) {
 				// Link flags are ignored for now, but may in the future be
 				// included in the result.
-				$linkFlags = [];
-				Hooks::run( 'LanguageLinks', [ $titleObj, &$langlinks, &$linkFlags ] );
+				$linkFlags = array();
+				Hooks::run( 'LanguageLinks', array( $titleObj, &$langlinks, &$linkFlags ) );
 			}
 		} else {
 			$langlinks = false;
@@ -341,7 +341,8 @@ class ApiParse extends ApiBase {
 		}
 
 		if ( isset( $prop['displaytitle'] ) ) {
-			$result_array['displaytitle'] = $p_result->getDisplayTitle() ?:
+			$result_array['displaytitle'] = $p_result->getDisplayTitle() ?
+				$p_result->getDisplayTitle() :
 				$titleObj->getPrefixedText();
 		}
 
@@ -355,7 +356,7 @@ class ApiParse extends ApiBase {
 
 				$css = $this->formatCss( $context->getOutput()->buildCssLinksArray() );
 
-				$scripts = [ $context->getOutput()->getHeadScripts() ];
+				$scripts = array( $context->getOutput()->getHeadScripts() );
 
 				$result_array['headitems'] = array_merge( $headItems, $css, $scripts );
 			}
@@ -371,7 +372,7 @@ class ApiParse extends ApiBase {
 			$result_array['modulescripts'] = array_values( array_unique( $p_result->getModuleScripts() ) );
 			$result_array['modulestyles'] = array_values( array_unique( $p_result->getModuleStyles() ) );
 			// To be removed in 1.27
-			$result_array['modulemessages'] = [];
+			$result_array['modulemessages'] = array();
 			$this->setWarning( 'modulemessages is deprecated since MediaWiki 1.26' );
 		}
 
@@ -389,9 +390,9 @@ class ApiParse extends ApiBase {
 
 		if ( isset( $prop['modules'] ) &&
 			!isset( $prop['jsconfigvars'] ) && !isset( $prop['encodedjsconfigvars'] ) ) {
-			$this->setWarning( 'Property "modules" was set but not "jsconfigvars" ' .
-				'or "encodedjsconfigvars". Configuration variables are necessary ' .
-				'for proper module usage.' );
+			$this->setWarning( "Property 'modules' was set but not 'jsconfigvars' " .
+				"or 'encodedjsconfigvars'. Configuration variables are necessary " .
+				"for proper module usage." );
 		}
 
 		if ( isset( $prop['indicators'] ) ) {
@@ -426,13 +427,16 @@ class ApiParse extends ApiBase {
 		}
 
 		if ( isset( $prop['parsetree'] ) || $params['generatexml'] ) {
+			if ( !isset( $prop['parsetree'] ) ) {
+				$this->logFeatureUsage( 'action=parse&generatexml' );
+			}
 			if ( $this->content->getModel() != CONTENT_MODEL_WIKITEXT ) {
-				$this->dieUsage( 'parsetree is only supported for wikitext content', 'notwikitext' );
+				$this->dieUsage( "parsetree is only supported for wikitext content", "notwikitext" );
 			}
 
 			$wgParser->startExternalParse( $titleObj, $popts, Parser::OT_PREPROCESS );
 			$dom = $wgParser->preprocessToDom( $this->content->getNativeData() );
-			if ( is_callable( [ $dom, 'saveXML' ] ) ) {
+			if ( is_callable( array( $dom, 'saveXML' ) ) ) {
 				$xml = $dom->saveXML();
 			} else {
 				$xml = $dom->__toString();
@@ -441,7 +445,7 @@ class ApiParse extends ApiBase {
 			$result_array[ApiResult::META_BC_SUBELEMENTS][] = 'parsetree';
 		}
 
-		$result_mapping = [
+		$result_mapping = array(
 			'redirects' => 'r',
 			'langlinks' => 'll',
 			'categories' => 'cl',
@@ -459,7 +463,7 @@ class ApiParse extends ApiBase {
 			'modulemessages' => 'm',
 			'properties' => 'pp',
 			'limitreportdata' => 'lr',
-		];
+		);
 		$this->setIndexedTagNames( $result_array, $result_mapping );
 		$result->addValue( null, $this->getModuleName(), $result_array );
 	}
@@ -522,7 +526,7 @@ class ApiParse extends ApiBase {
 	 * @return Content
 	 */
 	private function getContent( WikiPage $page, $pageId = null ) {
-		$content = $page->getContent( Revision::RAW ); // XXX: really raw?
+		$content = $page->getContent( Revision::RAW ); //XXX: really raw?
 
 		if ( $this->section !== false && $content !== null ) {
 			$content = $this->getSectionContent(
@@ -544,10 +548,10 @@ class ApiParse extends ApiBase {
 		// Not cached (save or load)
 		$section = $content->getSection( $this->section );
 		if ( $section === false ) {
-			$this->dieUsage( "There is no section {$this->section} in $what", 'nosuchsection' );
+			$this->dieUsage( "There is no section {$this->section} in " . $what, 'nosuchsection' );
 		}
 		if ( $section === null ) {
-			$this->dieUsage( "Sections are not supported by $what", 'nosuchsection' );
+			$this->dieUsage( "Sections are not supported by " . $what, 'nosuchsection' );
 			$section = false;
 		}
 
@@ -580,9 +584,9 @@ class ApiParse extends ApiBase {
 	}
 
 	private function formatLangLinks( $links ) {
-		$result = [];
+		$result = array();
 		foreach ( $links as $link ) {
-			$entry = [];
+			$entry = array();
 			$bits = explode( ':', $link, 2 );
 			$title = Title::newFromText( $link );
 
@@ -606,7 +610,7 @@ class ApiParse extends ApiBase {
 	}
 
 	private function formatCategoryLinks( $links ) {
-		$result = [];
+		$result = array();
 
 		if ( !$links ) {
 			return $result;
@@ -614,27 +618,26 @@ class ApiParse extends ApiBase {
 
 		// Fetch hiddencat property
 		$lb = new LinkBatch;
-		$lb->setArray( [ NS_CATEGORY => $links ] );
+		$lb->setArray( array( NS_CATEGORY => $links ) );
 		$db = $this->getDB();
-		$res = $db->select( [ 'page', 'page_props' ],
-			[ 'page_title', 'pp_propname' ],
+		$res = $db->select( array( 'page', 'page_props' ),
+			array( 'page_title', 'pp_propname' ),
 			$lb->constructSet( 'page', $db ),
 			__METHOD__,
-			[],
-			[ 'page_props' => [
-				'LEFT JOIN', [ 'pp_propname' => 'hiddencat', 'pp_page = page_id' ]
-			] ]
+			array(),
+			array( 'page_props' => array(
+				'LEFT JOIN', array( 'pp_propname' => 'hiddencat', 'pp_page = page_id' )
+			) )
 		);
-		$hiddencats = [];
+		$hiddencats = array();
 		foreach ( $res as $row ) {
 			$hiddencats[$row->page_title] = isset( $row->pp_propname );
 		}
 
 		foreach ( $links as $link => $sortkey ) {
-			$entry = [];
+			$entry = array();
 			$entry['sortkey'] = $sortkey;
-			// array keys will cast numeric category names to ints, so cast back to string
-			ApiResult::setContentValue( $entry, 'category', (string)$link );
+			ApiResult::setContentValue( $entry, 'category', $link );
 			if ( !isset( $hiddencats[$link] ) ) {
 				$entry['missing'] = true;
 			} elseif ( $hiddencats[$link] ) {
@@ -654,10 +657,10 @@ class ApiParse extends ApiBase {
 	}
 
 	private function formatLinks( $links ) {
-		$result = [];
+		$result = array();
 		foreach ( $links as $ns => $nslinks ) {
 			foreach ( $nslinks as $title => $id ) {
-				$entry = [];
+				$entry = array();
 				$entry['ns'] = $ns;
 				ApiResult::setContentValue( $entry, 'title', Title::makeTitle( $ns, $title )->getFullText() );
 				$entry['exists'] = $id != 0;
@@ -669,10 +672,10 @@ class ApiParse extends ApiBase {
 	}
 
 	private function formatIWLinks( $iw ) {
-		$result = [];
+		$result = array();
 		foreach ( $iw as $prefix => $titles ) {
 			foreach ( array_keys( $titles ) as $title ) {
-				$entry = [];
+				$entry = array();
 				$entry['prefix'] = $prefix;
 
 				$title = Title::newFromText( "{$prefix}:{$title}" );
@@ -689,9 +692,9 @@ class ApiParse extends ApiBase {
 	}
 
 	private function formatHeadItems( $headItems ) {
-		$result = [];
+		$result = array();
 		foreach ( $headItems as $tag => $content ) {
-			$entry = [];
+			$entry = array();
 			$entry['tag'] = $tag;
 			ApiResult::setContentValue( $entry, 'content', $content );
 			$result[] = $entry;
@@ -701,9 +704,9 @@ class ApiParse extends ApiBase {
 	}
 
 	private function formatCss( $css ) {
-		$result = [];
+		$result = array();
 		foreach ( $css as $file => $link ) {
-			$entry = [];
+			$entry = array();
 			$entry['file'] = $file;
 			ApiResult::setContentValue( $entry, 'link', $link );
 			$result[] = $entry;
@@ -713,13 +716,14 @@ class ApiParse extends ApiBase {
 	}
 
 	private function formatLimitReportData( $limitReportData ) {
-		$result = [];
+		$result = array();
+		$apiResult = $this->getResult();
 
 		foreach ( $limitReportData as $name => $value ) {
-			$entry = [];
+			$entry = array();
 			$entry['name'] = $name;
 			if ( !is_array( $value ) ) {
-				$value = [ $value ];
+				$value = array( $value );
 			}
 			ApiResult::setIndexedTagNameRecursive( $value, 'param' );
 			$entry = array_merge( $entry, $value );
@@ -738,25 +742,25 @@ class ApiParse extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
+		return array(
 			'title' => null,
-			'text' => [
+			'text' => array(
 				ApiBase::PARAM_TYPE => 'text',
-			],
+			),
 			'summary' => null,
 			'page' => null,
-			'pageid' => [
+			'pageid' => array(
 				ApiBase::PARAM_TYPE => 'integer',
-			],
+			),
 			'redirects' => false,
-			'oldid' => [
+			'oldid' => array(
 				ApiBase::PARAM_TYPE => 'integer',
-			],
-			'prop' => [
+			),
+			'prop' => array(
 				ApiBase::PARAM_DFLT => 'text|langlinks|categories|links|templates|' .
 					'images|externallinks|sections|revid|displaytitle|iwlinks|properties',
 				ApiBase::PARAM_ISMULTI => true,
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'text',
 					'langlinks',
 					'categories',
@@ -780,46 +784,46 @@ class ApiParse extends ApiBase {
 					'limitreportdata',
 					'limitreporthtml',
 					'parsetree',
-				],
-				ApiBase::PARAM_HELP_MSG_PER_VALUE => [
-					'parsetree' => [ 'apihelp-parse-paramvalue-prop-parsetree', CONTENT_MODEL_WIKITEXT ],
-				],
-			],
+				),
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => array(
+					'parsetree' => array( 'apihelp-parse-paramvalue-prop-parsetree', CONTENT_MODEL_WIKITEXT ),
+				),
+			),
 			'pst' => false,
 			'onlypst' => false,
 			'effectivelanglinks' => false,
 			'section' => null,
-			'sectiontitle' => [
+			'sectiontitle' => array(
 				ApiBase::PARAM_TYPE => 'string',
-			],
-			'disablepp' => [
+			),
+			'disablepp' => array(
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_DEPRECATED => true,
-			],
+			),
 			'disablelimitreport' => false,
 			'disableeditsection' => false,
 			'disabletidy' => false,
-			'generatexml' => [
+			'generatexml' => array(
 				ApiBase::PARAM_DFLT => false,
-				ApiBase::PARAM_HELP_MSG => [
+				ApiBase::PARAM_HELP_MSG => array(
 					'apihelp-parse-param-generatexml', CONTENT_MODEL_WIKITEXT
-				],
+				),
 				ApiBase::PARAM_DEPRECATED => true,
-			],
+			),
 			'preview' => false,
 			'sectionpreview' => false,
 			'disabletoc' => false,
-			'contentformat' => [
+			'contentformat' => array(
 				ApiBase::PARAM_TYPE => ContentHandler::getAllContentFormats(),
-			],
-			'contentmodel' => [
+			),
+			'contentmodel' => array(
 				ApiBase::PARAM_TYPE => ContentHandler::getContentModels(),
-			]
-		];
+			)
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=parse&page=Project:Sandbox'
 				=> 'apihelp-parse-example-page',
 			'action=parse&text={{Project:Sandbox}}&contentmodel=wikitext'
@@ -828,7 +832,7 @@ class ApiParse extends ApiBase {
 				=> 'apihelp-parse-example-texttitle',
 			'action=parse&summary=Some+[[link]]&prop='
 				=> 'apihelp-parse-example-summary',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

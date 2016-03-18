@@ -29,40 +29,40 @@ class NamespaceImportTitleFactoryTest extends MediaWikiTestCase {
 	protected function setUp() {
 		parent::setUp();
 
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgLanguageCode' => 'en',
 			'wgContLang' => Language::factory( 'en' ),
-		] );
+		) );
 	}
 
 	public function basicProvider() {
-		return [
-			[
+		return array(
+			array(
 				new ForeignTitle( 0, '', 'MainNamespaceArticle' ),
 				0,
 				Title::newFromText( 'MainNamespaceArticle' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 0, '', 'MainNamespaceArticle' ),
 				2,
 				Title::newFromText( 'User:MainNamespaceArticle' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 1, 'Discussion', 'Nice_talk' ),
 				0,
 				Title::newFromText( 'Nice_talk' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 0, '', 'Bogus:Nice_talk' ),
 				0,
 				Title::newFromText( 'Bogus:Nice_talk' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 0, '', 'Bogus:Nice_talk' ),
 				2,
 				Title::newFromText( 'User:Bogus:Nice_talk' )
-			],
-		];
+			),
+		);
 	}
 
 	/**

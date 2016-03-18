@@ -55,8 +55,8 @@ class SpecialNewpages extends IncludableSpecialPage {
 		$opts->add( 'tagfilter', '' );
 		$opts->add( 'invert', false );
 
-		$this->customFilters = [];
-		Hooks::run( 'SpecialNewPagesFilters', [ $this, &$this->customFilters ] );
+		$this->customFilters = array();
+		Hooks::run( 'SpecialNewPagesFilters', array( $this, &$this->customFilters ) );
 		foreach ( $this->customFilters as $key => $params ) {
 			$opts->add( $key, $params['default'] );
 		}
@@ -93,7 +93,7 @@ class SpecialNewpages extends IncludableSpecialPage {
 				$this->opts->setValue( 'limit', intval( $bit ) );
 			}
 
-			$m = [];
+			$m = array();
 			if ( preg_match( '/^limit=(\d+)$/', $bit, $m ) ) {
 				$this->opts->setValue( 'limit', intval( $m[1] ) );
 			}
@@ -162,15 +162,15 @@ class SpecialNewpages extends IncludableSpecialPage {
 
 	protected function filterLinks() {
 		// show/hide links
-		$showhide = [ $this->msg( 'show' )->escaped(), $this->msg( 'hide' )->escaped() ];
+		$showhide = array( $this->msg( 'show' )->escaped(), $this->msg( 'hide' )->escaped() );
 
 		// Option value -> message mapping
-		$filters = [
+		$filters = array(
 			'hideliu' => 'rcshowhideliu',
 			'hidepatrolled' => 'rcshowhidepatr',
 			'hidebots' => 'rcshowhidebots',
 			'hideredirs' => 'whatlinkshere-hideredirs'
-		];
+		);
 		foreach ( $this->customFilters as $key => $params ) {
 			$filters[$key] = $params['msg'];
 		}
@@ -183,15 +183,15 @@ class SpecialNewpages extends IncludableSpecialPage {
 			unset( $filters['hidepatrolled'] );
 		}
 
-		$links = [];
+		$links = array();
 		$changed = $this->opts->getChangedValues();
 		unset( $changed['offset'] ); // Reset offset if query type changes
 
 		$self = $this->getPageTitle();
 		foreach ( $filters as $key => $msg ) {
 			$onoff = 1 - $this->opts->getValue( $key );
-			$link = Linker::link( $self, $showhide[$onoff], [],
-				[ $key => $onoff ] + $changed
+			$link = Linker::link( $self, $showhide[$onoff], array(),
+				array( $key => $onoff ) + $changed
 			);
 			$links[$key] = $this->msg( $msg )->rawParams( $link )->escaped();
 		}
@@ -215,33 +215,33 @@ class SpecialNewpages extends IncludableSpecialPage {
 		$userText = $ut ? $ut->getText() : '';
 
 		// Store query values in hidden fields so that form submission doesn't lose them
-		$hidden = [];
+		$hidden = array();
 		foreach ( $this->opts->getUnconsumedValues() as $key => $value ) {
 			$hidden[] = Html::hidden( $key, $value );
 		}
 		$hidden = implode( "\n", $hidden );
 
-		$form = [
-			'namespace' => [
+		$form = array(
+			'namespace' => array(
 				'type' => 'namespaceselect',
 				'name' => 'namespace',
 				'label-message' => 'namespace',
 				'default' => $namespace,
-			],
-			'nsinvert' => [
+			),
+			'nsinvert' => array(
 				'type' => 'check',
 				'name' => 'invert',
 				'label-message' => 'invert',
 				'default' => $nsinvert,
 				'tooltip' => 'invert',
-			],
-			'tagFilter' => [
+			),
+			'tagFilter' => array(
 				'type' => 'tagfilter',
 				'name' => 'tagfilter',
 				'label-raw' => $this->msg( 'tag-filter' )->parse(),
 				'default' => $tagFilterVal,
-			],
-			'username' => [
+			),
+			'username' => array(
 				'type' => 'text',
 				'name' => 'username',
 				'label-message' => 'newpages-username',
@@ -249,12 +249,12 @@ class SpecialNewpages extends IncludableSpecialPage {
 				'id' => 'mw-np-username',
 				'size' => 30,
 				'cssclass' => 'mw-autocomplete-user', // used by mediawiki.userSuggest
-			],
-		];
+			),
+		);
 
 		$htmlForm = new HTMLForm( $form, $this->getContext() );
 
-		$htmlForm->setSubmitText( $this->msg( 'newpages-submit' )->text() );
+		$htmlForm->setSubmitText( $this->msg( 'allpagessubmit' )->text() );
 		$htmlForm->setSubmitProgressive();
 		// The form should be visible on each request (inclusive requests with submitted forms), so
 		// return always false here.
@@ -290,54 +290,54 @@ class SpecialNewpages extends IncludableSpecialPage {
 		$title = Title::newFromRow( $result );
 
 		# Revision deletion works on revisions, so we should cast one
-		$row = [
+		$row = array(
 			'comment' => $result->rc_comment,
 			'deleted' => $result->rc_deleted,
 			'user_text' => $result->rc_user_text,
 			'user' => $result->rc_user,
-		];
+		);
 		$rev = new Revision( $row );
 		$rev->setTitle( $title );
 
-		$classes = [];
+		$classes = array();
 
 		$lang = $this->getLanguage();
 		$dm = $lang->getDirMark();
 
-		$spanTime = Html::element( 'span', [ 'class' => 'mw-newpages-time' ],
+		$spanTime = Html::element( 'span', array( 'class' => 'mw-newpages-time' ),
 			$lang->userTimeAndDate( $result->rc_timestamp, $this->getUser() )
 		);
 		$time = Linker::linkKnown(
 			$title,
 			$spanTime,
-			[],
-			[ 'oldid' => $result->rc_this_oldid ],
-			[]
+			array(),
+			array( 'oldid' => $result->rc_this_oldid ),
+			array()
 		);
 
-		$query = $title->isRedirect() ? [ 'redirect' => 'no' ] : [];
+		$query = array( 'redirect' => 'no' );
 
 		// Linker::linkKnown() uses 'known' and 'noclasses' options.
 		// This breaks the colouration for stubs.
 		$plink = Linker::link(
 			$title,
 			null,
-			[ 'class' => 'mw-newpages-pagename' ],
+			array( 'class' => 'mw-newpages-pagename' ),
 			$query,
-			[ 'known' ]
+			array( 'known' )
 		);
 		$histLink = Linker::linkKnown(
 			$title,
 			$this->msg( 'hist' )->escaped(),
-			[],
-			[ 'action' => 'history' ]
+			array(),
+			array( 'action' => 'history' )
 		);
-		$hist = Html::rawElement( 'span', [ 'class' => 'mw-newpages-history' ],
+		$hist = Html::rawElement( 'span', array( 'class' => 'mw-newpages-history' ),
 			$this->msg( 'parentheses' )->rawParams( $histLink )->escaped() );
 
 		$length = Html::rawElement(
 			'span',
-			[ 'class' => 'mw-newpages-length' ],
+			array( 'class' => 'mw-newpages-length' ),
 			$this->msg( 'brackets' )->rawParams(
 				$this->msg( 'nbytes' )->numParams( $result->length )->escaped()
 			)->escaped()
@@ -359,8 +359,7 @@ class SpecialNewpages extends IncludableSpecialPage {
 		if ( isset( $result->ts_tags ) ) {
 			list( $tagDisplay, $newClasses ) = ChangeTags::formatSummaryRow(
 				$result->ts_tags,
-				'newpages',
-				$this->getContext()
+				'newpages'
 			);
 			$classes = array_merge( $classes, $newClasses );
 		} else {
@@ -464,7 +463,7 @@ class SpecialNewpages extends IncludableSpecialPage {
 	protected function feedItemDesc( $row ) {
 		$revision = Revision::newFromId( $row->rev_id );
 		if ( $revision ) {
-			// XXX: include content model/type in feed item?
+			//XXX: include content model/type in feed item?
 			return '<p>' . htmlspecialchars( $revision->getUserText() ) .
 				$this->msg( 'colon-separator' )->inContentLanguage()->escaped() .
 				htmlspecialchars( FeedItem::stripComment( $revision->getComment() ) ) .
@@ -499,7 +498,7 @@ class NewPagesPager extends ReverseChronologicalPager {
 	}
 
 	function getQueryInfo() {
-		$conds = [];
+		$conds = array();
 		$conds['rc_new'] = 1;
 
 		$namespace = $this->opts->getValue( 'namespace' );
@@ -508,7 +507,7 @@ class NewPagesPager extends ReverseChronologicalPager {
 		$username = $this->opts->getValue( 'username' );
 		$user = Title::makeTitleSafe( NS_USER, $username );
 
-		$rcIndexes = [];
+		$rcIndexes = array();
 
 		if ( $namespace !== false ) {
 			if ( $this->opts->getValue( 'invert' ) ) {
@@ -542,31 +541,31 @@ class NewPagesPager extends ReverseChronologicalPager {
 		}
 
 		// Allow changes to the New Pages query
-		$tables = [ 'recentchanges', 'page' ];
-		$fields = [
+		$tables = array( 'recentchanges', 'page' );
+		$fields = array(
 			'rc_namespace', 'rc_title', 'rc_cur_id', 'rc_user', 'rc_user_text',
 			'rc_comment', 'rc_timestamp', 'rc_patrolled', 'rc_id', 'rc_deleted',
 			'length' => 'page_len', 'rev_id' => 'page_latest', 'rc_this_oldid',
 			'page_namespace', 'page_title'
-		];
-		$join_conds = [ 'page' => [ 'INNER JOIN', 'page_id=rc_cur_id' ] ];
+		);
+		$join_conds = array( 'page' => array( 'INNER JOIN', 'page_id=rc_cur_id' ) );
 
 		Hooks::run( 'SpecialNewpagesConditions',
-			[ &$this, $this->opts, &$conds, &$tables, &$fields, &$join_conds ] );
+			array( &$this, $this->opts, &$conds, &$tables, &$fields, &$join_conds ) );
 
-		$options = [];
+		$options = array();
 
 		if ( $rcIndexes ) {
-			$options = [ 'USE INDEX' => [ 'recentchanges' => $rcIndexes ] ];
+			$options = array( 'USE INDEX' => array( 'recentchanges' => $rcIndexes ) );
 		}
 
-		$info = [
+		$info = array(
 			'tables' => $tables,
 			'fields' => $fields,
 			'conds' => $conds,
 			'options' => $options,
 			'join_conds' => $join_conds
-		];
+		);
 
 		// Modify query for tags
 		ChangeTags::modifyDisplayQuery(

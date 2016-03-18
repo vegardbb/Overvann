@@ -42,7 +42,7 @@ class RecentChangesUpdateJob extends Job {
 	 */
 	final public static function newPurgeJob() {
 		return new self(
-			SpecialPage::getTitleFor( 'Recentchanges' ), [ 'type' => 'purge' ]
+			SpecialPage::getTitleFor( 'Recentchanges' ), array( 'type' => 'purge' )
 		);
 	}
 
@@ -52,7 +52,7 @@ class RecentChangesUpdateJob extends Job {
 	 */
 	final public static function newCacheUpdateJob() {
 		return new self(
-			SpecialPage::getTitleFor( 'Recentchanges' ), [ 'type' => 'cacheUpdate' ]
+			SpecialPage::getTitleFor( 'Recentchanges' ), array( 'type' => 'cacheUpdate' )
 		);
 	}
 
@@ -86,21 +86,19 @@ class RecentChangesUpdateJob extends Job {
 		do {
 			$rcIds = $dbw->selectFieldValues( 'recentchanges',
 				'rc_id',
-				[ 'rc_timestamp < ' . $dbw->addQuotes( $cutoff ) ],
+				array( 'rc_timestamp < ' . $dbw->addQuotes( $cutoff ) ),
 				__METHOD__,
-				[ 'LIMIT' => $batchSize ]
+				array( 'LIMIT' => $batchSize )
 			);
 			if ( $rcIds ) {
-				$dbw->delete( 'recentchanges', [ 'rc_id' => $rcIds ], __METHOD__ );
+				$dbw->delete( 'recentchanges', array( 'rc_id' => $rcIds ), __METHOD__ );
 			}
 			// Commit in chunks to avoid slave lag
 			$dbw->commit( __METHOD__, 'flush' );
 
 			if ( count( $rcIds ) === $batchSize ) {
 				// There might be more, so try waiting for slaves
-				try {
-					wfGetLBFactory()->waitForReplication( [ 'timeout' => 3 ] );
-				} catch ( DBReplicationWaitError $e ) {
+				if ( !wfWaitForSlaves( null, false, false, /* $timeout = */ 3 ) ) {
 					// Another job will continue anyway
 					break;
 				}
@@ -123,18 +121,18 @@ class RecentChangesUpdateJob extends Job {
 		// onTransactionIdle() will run immediately since there is no trx.
 		$dbw->onTransactionIdle( function() use ( $dbw, $days, $window ) {
 			// Avoid disconnect/ping() cycle that makes locks fall off
-			$dbw->setSessionOptions( [ 'connTimeout' => 900 ] );
+			$dbw->setSessionOptions( array( 'connTimeout' => 900 ) );
 
 			$lockKey = wfWikiID() . '-activeusers';
 			if ( !$dbw->lock( $lockKey, __METHOD__, 1 ) ) {
-				return; // exclusive update (avoids duplicate entries)
+				return false; // exclusive update (avoids duplicate entries)
 			}
 
 			$nowUnix = time();
 			// Get the last-updated timestamp for the cache
 			$cTime = $dbw->selectField( 'querycache_info',
 				'qci_timestamp',
-				[ 'qci_type' => 'activeusers' ]
+				array( 'qci_type' => 'activeusers' )
 			);
 			$cTimeUnix = $cTime ? wfTimestamp( TS_UNIX, $cTime ) : 1;
 
@@ -146,43 +144,43 @@ class RecentChangesUpdateJob extends Job {
 
 			// Get all the users active since the last update
 			$res = $dbw->select(
-				[ 'recentchanges' ],
-				[ 'rc_user_text', 'lastedittime' => 'MAX(rc_timestamp)' ],
-				[
+				array( 'recentchanges' ),
+				array( 'rc_user_text', 'lastedittime' => 'MAX(rc_timestamp)' ),
+				array(
 					'rc_user > 0', // actual accounts
 					'rc_type != ' . $dbw->addQuotes( RC_EXTERNAL ), // no wikidata
 					'rc_log_type IS NULL OR rc_log_type != ' . $dbw->addQuotes( 'newusers' ),
 					'rc_timestamp >= ' . $dbw->addQuotes( $dbw->timestamp( $sTimestamp ) ),
 					'rc_timestamp <= ' . $dbw->addQuotes( $dbw->timestamp( $eTimestamp ) )
-				],
+				),
 				__METHOD__,
-				[
-					'GROUP BY' => [ 'rc_user_text' ],
+				array(
+					'GROUP BY' => array( 'rc_user_text' ),
 					'ORDER BY' => 'NULL' // avoid filesort
-				]
+				)
 			);
-			$names = [];
+			$names = array();
 			foreach ( $res as $row ) {
 				$names[$row->rc_user_text] = $row->lastedittime;
 			}
 
 			// Rotate out users that have not edited in too long (according to old data set)
 			$dbw->delete( 'querycachetwo',
-				[
+				array(
 					'qcc_type' => 'activeusers',
 					'qcc_value < ' . $dbw->addQuotes( $nowUnix - $days * 86400 ) // TS_UNIX
-				],
+				),
 				__METHOD__
 			);
 
 			// Find which of the recently active users are already accounted for
 			if ( count( $names ) ) {
 				$res = $dbw->select( 'querycachetwo',
-					[ 'user_name' => 'qcc_title' ],
-					[
+					array( 'user_name' => 'qcc_title' ),
+					array(
 						'qcc_type' => 'activeusers',
 						'qcc_namespace' => NS_USER,
-						'qcc_title' => array_keys( $names ) ],
+						'qcc_title' => array_keys( $names ) ),
 					__METHOD__
 				);
 				foreach ( $res as $row ) {
@@ -192,20 +190,20 @@ class RecentChangesUpdateJob extends Job {
 
 			// Insert the users that need to be added to the list
 			if ( count( $names ) ) {
-				$newRows = [];
+				$newRows = array();
 				foreach ( $names as $name => $lastEditTime ) {
-					$newRows[] = [
+					$newRows[] = array(
 						'qcc_type' => 'activeusers',
 						'qcc_namespace' => NS_USER,
 						'qcc_title' => $name,
 						'qcc_value' => wfTimestamp( TS_UNIX, $lastEditTime ),
 						'qcc_namespacetwo' => 0, // unused
 						'qcc_titletwo' => '' // unused
-					];
+					);
 				}
 				foreach ( array_chunk( $newRows, 500 ) as $rowBatch ) {
 					$dbw->insert( 'querycachetwo', $rowBatch, __METHOD__ );
-					wfGetLBFactory()->waitForReplication();
+					wfWaitForSlaves();
 				}
 			}
 
@@ -215,9 +213,9 @@ class RecentChangesUpdateJob extends Job {
 
 			// Touch the data freshness timestamp
 			$dbw->replace( 'querycache_info',
-				[ 'qci_type' ],
-				[ 'qci_type' => 'activeusers',
-					'qci_timestamp' => $dbw->timestamp( $asOfTimestamp ) ], // not always $now
+				array( 'qci_type' ),
+				array( 'qci_type' => 'activeusers',
+					'qci_timestamp' => $dbw->timestamp( $asOfTimestamp ) ), // not always $now
 				__METHOD__
 			);
 

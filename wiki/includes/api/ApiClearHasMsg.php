@@ -43,10 +43,10 @@ class ApiClearHasMsg extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=clearhasmsg'
 				=> 'apihelp-clearhasmsg-example-1',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

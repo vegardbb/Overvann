@@ -35,7 +35,7 @@
  */
 abstract class VirtualRESTService {
 	/** @var array Key/value map */
-	protected $params = [];
+	protected $params = array();
 
 	/**
 	 * @param array $params Key/value map
@@ -78,7 +78,7 @@ abstract class VirtualRESTService {
 	 * @return array Modified HTTP request array map
 	 */
 	public function onRequests( array $reqs, Closure $idGeneratorFunc ) {
-		$result = [];
+		$result = array();
 		foreach ( $reqs as $key => $req ) {
 			// The default encoding treats the URL as a REST style path that uses
 			// forward slash as a hierarchical delimiter (and never otherwise).

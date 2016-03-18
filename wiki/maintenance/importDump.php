@@ -49,8 +49,7 @@ class BackupReader extends Maintenance {
 			? 'ok'
 			: '(disabled; requires PHP bzip2 module)';
 
-		$this->addDescription(
-			<<<TEXT
+		$this->mDescription = <<<TEXT
 This script reads pages from an XML file as produced from Special:Export or
 dumpBackup.php, and saves them into the current wiki.
 
@@ -62,16 +61,13 @@ Compressed XML files may be read directly:
 Note that for very large data sets, importDump.php may be slow; there are
 alternate methods which can be much faster for full site restoration:
 <https://www.mediawiki.org/wiki/Manual:Importing_XML_dumps>
-TEXT
-		);
+TEXT;
 		$this->stderr = fopen( "php://stderr", "wt" );
 		$this->addOption( 'report',
 			'Report position and speed after every n pages processed', false, true );
 		$this->addOption( 'namespaces',
 			'Import only the pages from namespaces belonging to the list of ' .
 			'pipe-separated namespace names or namespace indexes', false, true );
-		$this->addOption( 'rootpage', 'Pages will be imported as subpages of the specified page',
-			false, true );
 		$this->addOption( 'dry-run', 'Parse dump without actually importing pages' );
 		$this->addOption( 'debug', 'Output extra verbose debug information' );
 		$this->addOption( 'uploads', 'Process file upload data if included (experimental)' );
@@ -118,13 +114,12 @@ TEXT
 
 			return;
 		}
-		$this->nsFilter = array_unique( array_map( [ $this, 'getNsIndex' ], $namespaces ) );
+		$this->nsFilter = array_unique( array_map( array( $this, 'getNsIndex' ), $namespaces ) );
 	}
 
 	private function getNsIndex( $namespace ) {
 		global $wgContLang;
-		$result = $wgContLang->getNsIndex( $namespace );
-		if ( $result !== false ) {
+		if ( ( $result = $wgContLang->getNsIndex( $namespace ) ) !== false ) {
 			return $result;
 		}
 		$ns = intval( $namespace );
@@ -139,23 +134,15 @@ TEXT
 	 * @return bool
 	 */
 	private function skippedNamespace( $obj ) {
-		$title = null;
 		if ( $obj instanceof Title ) {
-			$title = $obj;
+			$ns = $obj->getNamespace();
 		} elseif ( $obj instanceof Revision ) {
-			$title = $obj->getTitle();
+			$ns = $obj->getTitle()->getNamespace();
 		} elseif ( $obj instanceof WikiRevision ) {
-			$title = $obj->title;
+			$ns = $obj->title->getNamespace();
 		} else {
 			throw new MWException( "Cannot get namespace of object in " . __METHOD__ );
 		}
-
-		if ( is_null( $title ) ) {
-			// Probably a log entry
-			return false;
-		}
-
-		$ns = $title->getNamespace();
 
 		return is_array( $this->nsFilter ) && !in_array( $ns, $this->nsFilter );
 	}
@@ -203,9 +190,9 @@ TEXT
 			if ( !$this->dryRun ) {
 				// bluuuh hack
 				// call_user_func( $this->uploadCallback, $revision );
-				$dbw = $this->getDB( DB_MASTER );
+				$dbw = wfGetDB( DB_MASTER );
 
-				return $dbw->deadlockLoop( [ $revision, 'importUpload' ] );
+				return $dbw->deadlockLoop( array( $revision, 'importUpload' ) );
 			}
 		}
 
@@ -248,6 +235,8 @@ TEXT
 			}
 		}
 		wfWaitForSlaves();
+		// XXX: Don't let deferred jobs array get absurdly large (bug 24375)
+		DeferredUpdates::doUpdates( 'commit' );
 	}
 
 	function progress( $string ) {
@@ -289,21 +278,13 @@ TEXT
 		if ( $this->hasOption( 'no-updates' ) ) {
 			$importer->setNoUpdates( true );
 		}
-		if ( $this->hasOption( 'rootpage' ) ) {
-			$statusRootPage = $importer->setTargetRootPage( $this->getOption( 'rootpage' ) );
-			if ( !$statusRootPage->isGood() ) {
-				// Die here so that it doesn't print "Done!"
-				$this->error( $statusRootPage->getMessage()->text(), 1 );
-				return false;
-			}
-		}
-		$importer->setPageCallback( [ $this, 'reportPage' ] );
+		$importer->setPageCallback( array( &$this, 'reportPage' ) );
 		$this->importCallback = $importer->setRevisionCallback(
-			[ $this, 'handleRevision' ] );
+			array( &$this, 'handleRevision' ) );
 		$this->uploadCallback = $importer->setUploadCallback(
-			[ $this, 'handleUpload' ] );
+			array( &$this, 'handleUpload' ) );
 		$this->logItemCallback = $importer->setLogItemCallback(
-			[ $this, 'handleLogItem' ] );
+			array( &$this, 'handleLogItem' ) );
 		if ( $this->uploads ) {
 			$importer->setImportUploads( true );
 		}

@@ -1,6 +1,6 @@
 <?php
 /**
- * ResourceLoader module for skin stylesheets.
+ * Resource loader module for skin stylesheets.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,17 +30,11 @@ class ResourceLoaderSkinModule extends ResourceLoaderFileModule {
 	 * @return array
 	 */
 	public function getStyles( ResourceLoaderContext $context ) {
-		$conf = $this->getConfig();
-		$logo = $conf->get( 'Logo' );
-		$logoHD = $conf->get( 'LogoHD' );
-
-		$logo1 = OutputPage::transformResourcePath( $conf, $logo );
-		$logo15 = OutputPage::transformResourcePath( $conf, $logoHD['1.5x'] );
-		$logo2 = OutputPage::transformResourcePath( $conf, $logoHD['2x'] );
-
+		$logo = $this->getConfig()->get( 'Logo' );
+		$logoHD = $this->getConfig()->get( 'LogoHD' );
 		$styles = parent::getStyles( $context );
 		$styles['all'][] = '.mw-wiki-logo { background-image: ' .
-			CSSMin::buildUrlValue( $logo1 ) .
+			CSSMin::buildUrlValue( $logo ) .
 			'; }';
 		if ( $logoHD ) {
 			if ( isset( $logoHD['1.5x'] ) ) {
@@ -50,7 +44,7 @@ class ResourceLoaderSkinModule extends ResourceLoaderFileModule {
 					'(min-resolution: 1.5dppx), ' .
 					'(min-resolution: 144dpi)'
 				][] = '.mw-wiki-logo { background-image: ' .
-				CSSMin::buildUrlValue( $logo15 ) . ';' .
+				CSSMin::buildUrlValue( $logoHD['1.5x'] ) . ';' .
 				'background-size: 135px auto; }';
 			}
 			if ( isset( $logoHD['2x'] ) ) {
@@ -60,7 +54,7 @@ class ResourceLoaderSkinModule extends ResourceLoaderFileModule {
 					'(min-resolution: 2dppx), ' .
 					'(min-resolution: 192dpi)'
 				][] = '.mw-wiki-logo { background-image: ' .
-				CSSMin::buildUrlValue( $logo2 ) . ';' .
+				CSSMin::buildUrlValue( $logoHD['2x'] ) . ';' .
 				'background-size: 135px auto; }';
 			}
 		}

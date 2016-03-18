@@ -14,9 +14,9 @@ class FlaggedElement extends ElementMixin {
 	/**
 	 * Flags.
 	 *
-	 * @var string[]
+	 * @var string
 	 */
-	protected $flags = [];
+	protected $flags = array();
 
 	public static $targetPropertyName = 'flagged';
 
@@ -26,7 +26,7 @@ class FlaggedElement extends ElementMixin {
 	 * @param string|string[] $config['flags'] Flags describing importance and functionality, e.g.
 	 *   'primary', 'safe', 'progressive', 'destructive' or 'constructive'
 	 */
-	public function __construct( Element $element, array $config = [] ) {
+	public function __construct( Element $element, array $config = array() ) {
 		// Parent constructor
 		$target = isset( $config['flagged'] ) ? $config['flagged'] : $element;
 		parent::__construct( $element, $target, $config );
@@ -57,10 +57,10 @@ class FlaggedElement extends ElementMixin {
 	/**
 	 * Clear all flags.
 	 *
-	 * @return $this
+	 * @chainable
 	 */
 	public function clearFlags() {
-		$remove = [];
+		$remove = array();
 		$classPrefix = 'oo-ui-flaggedElement-';
 
 		foreach ( $this->flags as $flag ) {
@@ -68,7 +68,7 @@ class FlaggedElement extends ElementMixin {
 		}
 
 		$this->target->removeClasses( $remove );
-		$this->flags = [];
+		$this->flags = array();
 
 		return $this;
 	}
@@ -78,11 +78,11 @@ class FlaggedElement extends ElementMixin {
 	 *
 	 * @param string|array $flags One or more flags to add, or an array keyed by flag name
 	 *   containing boolean set/remove instructions.
-	 * @return $this
+	 * @chainable
 	 */
 	public function setFlags( $flags ) {
-		$add = [];
-		$remove = [];
+		$add = array();
+		$remove = array();
 		$classPrefix = 'oo-ui-flaggedElement-';
 
 		if ( is_string( $flags ) ) {

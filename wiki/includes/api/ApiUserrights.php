@@ -49,14 +49,6 @@ class ApiUserrights extends ApiBase {
 	}
 
 	public function execute() {
-		$pUser = $this->getUser();
-
-		// Deny if the user is blocked and doesn't have the full 'userrights' permission.
-		// This matches what Special:UserRights does for the web UI.
-		if ( $pUser->isBlocked() && !$pUser->isAllowed( 'userrights' ) ) {
-			$this->dieBlocked( $pUser->getBlock() );
-		}
-
 		$params = $this->extractRequestParams();
 
 		$user = $this->getUrUser( $params );
@@ -110,29 +102,29 @@ class ApiUserrights extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
-			'user' => [
-				ApiBase::PARAM_TYPE => 'user',
-			],
-			'userid' => [
+		return array(
+			'user' => array(
+				ApiBase::PARAM_TYPE => 'string',
+			),
+			'userid' => array(
 				ApiBase::PARAM_TYPE => 'integer',
-			],
-			'add' => [
+			),
+			'add' => array(
 				ApiBase::PARAM_TYPE => $this->getAllGroups(),
 				ApiBase::PARAM_ISMULTI => true
-			],
-			'remove' => [
+			),
+			'remove' => array(
 				ApiBase::PARAM_TYPE => $this->getAllGroups(),
 				ApiBase::PARAM_ISMULTI => true
-			],
-			'reason' => [
+			),
+			'reason' => array(
 				ApiBase::PARAM_DFLT => ''
-			],
-			'token' => [
+			),
+			'token' => array(
 				// Standard definition automatically inserted
-				ApiBase::PARAM_HELP_MSG_APPEND => [ 'api-help-param-token-webui' ],
-			],
-		];
+				ApiBase::PARAM_HELP_MSG_APPEND => array( 'api-help-param-token-webui' ),
+			),
+		);
 	}
 
 	public function needsToken() {
@@ -144,12 +136,12 @@ class ApiUserrights extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=userrights&user=FooBot&add=bot&remove=sysop|bureaucrat&token=123ABC'
 				=> 'apihelp-userrights-example-user',
 			'action=userrights&userid=123&add=bot&remove=sysop|bureaucrat&token=123ABC'
 				=> 'apihelp-userrights-example-userid',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

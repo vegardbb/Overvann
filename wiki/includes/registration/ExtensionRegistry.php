@@ -29,7 +29,7 @@ class ExtensionRegistry {
 	/**
 	 * Bump whenever the registration cache needs resetting
 	 */
-	const CACHE_VERSION = 3;
+	const CACHE_VERSION = 1;
 
 	/**
 	 * Special key that defines the merge strategy
@@ -48,14 +48,14 @@ class ExtensionRegistry {
 	 *
 	 * @var array
 	 */
-	private $loaded = [];
+	private $loaded = array();
 
 	/**
 	 * List of paths that should be loaded
 	 *
 	 * @var array
 	 */
-	protected $queued = [];
+	protected $queued = array();
 
 	/**
 	 * Items in the JSON file that aren't being
@@ -63,7 +63,7 @@ class ExtensionRegistry {
 	 *
 	 * @var array
 	 */
-	protected $attributes = [];
+	protected $attributes = array();
 
 	/**
 	 * @var ExtensionRegistry
@@ -86,7 +86,7 @@ class ExtensionRegistry {
 		// we don't want to fail here if $wgObjectCaches is not configured
 		// properly for APC setup
 		try {
-			$this->cache = ObjectCache::getLocalServerInstance();
+			$this->cache = ObjectCache::newAccelerator();
 		} catch ( MWException $e ) {
 			$this->cache = new EmptyBagOStuff();
 		}
@@ -114,22 +114,12 @@ class ExtensionRegistry {
 	}
 
 	public function loadFromQueue() {
-		global $wgVersion;
 		if ( !$this->queued ) {
 			return;
 		}
 
-		// A few more things to vary the cache on
-		$versions = [
-			'registration' => self::CACHE_VERSION,
-			'mediawiki' => $wgVersion
-		];
-
 		// See if this queue is in APC
-		$key = wfMemcKey(
-			'registration',
-			md5( json_encode( $this->queued + $versions ) )
-		);
+		$key = wfMemcKey( 'registration', md5( json_encode( $this->queued ) ), self::CACHE_VERSION );
 		$data = $this->cache->get( $key );
 		if ( $data ) {
 			$this->exportExtractedData( $data );
@@ -142,7 +132,7 @@ class ExtensionRegistry {
 			unset( $data['autoload'] );
 			$this->cache->set( $key, $data, 60 * 60 * 24 );
 		}
-		$this->queued = [];
+		$this->queued = array();
 	}
 
 	/**
@@ -160,7 +150,7 @@ class ExtensionRegistry {
 	 * outside of the installer.
 	 */
 	public function clearQueue() {
-		$this->queued = [];
+		$this->queued = array();
 	}
 
 	/**
@@ -172,10 +162,9 @@ class ExtensionRegistry {
 	 */
 	public function readFromQueue( array $queue ) {
 		global $wgVersion;
-		$autoloadClasses = [];
-		$autoloaderPaths = [];
+		$autoloadClasses = array();
 		$processor = new ExtensionProcessor();
-		$incompatible = [];
+		$incompatible = array();
 		$coreVersionParser = new CoreVersionChecker( $wgVersion );
 		foreach ( $queue as $path => $mtime ) {
 			$json = file_get_contents( $path );
@@ -205,13 +194,10 @@ class ExtensionRegistry {
 			) {
 				// Doesn't match, mark it as incompatible.
 				$incompatible[] = "{$info['name']} is not compatible with the current "
-					. "MediaWiki core (version {$wgVersion}), it requires: " . $requires[self::MEDIAWIKI_CORE]
+					. "MediaWiki core (version {$wgVersion}), it requires: ". $requires[self::MEDIAWIKI_CORE]
 					. '.';
 				continue;
 			}
-			// Get extra paths for later inclusion
-			$autoloaderPaths = array_merge( $autoloaderPaths,
-				$processor->getExtraAutoloaderPaths( dirname( $path ), $info ) );
 			// Compatible, read and extract info
 			$processor->extractInfo( $path, $info, $version );
 		}
@@ -224,9 +210,12 @@ class ExtensionRegistry {
 		}
 		$data = $processor->getExtractedInfo();
 		// Need to set this so we can += to it later
-		$data['globals']['wgAutoloadClasses'] = [];
+		$data['globals']['wgAutoloadClasses'] = array();
+		foreach ( $data['credits'] as $credit ) {
+			$data['globals']['wgExtensionCredits'][$credit['type']][] = $credit;
+		}
+		$data['globals']['wgExtensionCredits'][self::MERGE_STRATEGY] = 'array_merge_recursive';
 		$data['autoload'] = $autoloadClasses;
-		$data['autoloaderPaths'] = $autoloaderPaths;
 		return $data;
 	}
 
@@ -234,7 +223,9 @@ class ExtensionRegistry {
 		foreach ( $info['globals'] as $key => $val ) {
 			// If a merge strategy is set, read it and remove it from the value
 			// so it doesn't accidentally end up getting set.
-			if ( is_array( $val ) && isset( $val[self::MERGE_STRATEGY] ) ) {
+			// Need to check $val is an array for PHP 5.3 which will return
+			// true on isset( 'string'['foo'] ).
+			if ( isset( $val[self::MERGE_STRATEGY] ) && is_array( $val ) ) {
 				$mergeStrategy = $val[self::MERGE_STRATEGY];
 				unset( $val[self::MERGE_STRATEGY] );
 			} else {
@@ -278,11 +269,8 @@ class ExtensionRegistry {
 			call_user_func( $cb );
 		}
 
-		foreach ( $info['autoloaderPaths'] as $path ) {
-			require_once $path;
-		}
-
 		$this->loaded += $info['credits'];
+
 		if ( $info['attributes'] ) {
 			if ( !$this->attributes ) {
 				$this->attributes = $info['attributes'];
@@ -323,7 +311,7 @@ class ExtensionRegistry {
 		if ( isset( $this->attributes[$name] ) ) {
 			return $this->attributes[$name];
 		} else {
-			return [];
+			return array();
 		}
 	}
 
@@ -360,7 +348,7 @@ class ExtensionRegistry {
 				return "$dir/$file";
 			}, $info['AutoloadClasses'] );
 		} else {
-			return [];
+			return array();
 		}
 	}
 }

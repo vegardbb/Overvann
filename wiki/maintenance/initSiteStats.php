@@ -33,7 +33,7 @@ require_once __DIR__ . '/Maintenance.php';
 class InitSiteStats extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Re-initialise the site statistics tables' );
+		$this->mDescription = "Re-initialise the site statistics tables";
 		$this->addOption( 'update', 'Update the existing statistics' );
 		$this->addOption( 'active', 'Also update active users count' );
 		$this->addOption( 'use-master', 'Count using the master database' );
@@ -63,14 +63,11 @@ class InitSiteStats extends Maintenance {
 			$this->output( "\nUpdating site statistics..." );
 			$counter->refresh();
 			$this->output( "done.\n" );
-		} else {
-			$this->output( "\nTo update the site statistics table, run the script "
-				. "with the --update option.\n" );
 		}
 
 		if ( $this->hasOption( 'active' ) ) {
 			$this->output( "\nCounting and updating active users..." );
-			$active = SiteStatsUpdate::cacheUpdate( $this->getDB( DB_MASTER ) );
+			$active = SiteStatsUpdate::cacheUpdate( wfGetDB( DB_MASTER ) );
 			$this->output( "{$active}\n" );
 		}
 

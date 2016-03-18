@@ -15,7 +15,7 @@ require_once dirname( dirname( __DIR__ ) ) . "/maintenance/Maintenance.php";
 
 class PHPUnitMaintClass extends Maintenance {
 
-	public static $additionalOptions = [
+	public static $additionalOptions = array(
 		'regex' => false,
 		'file' => false,
 		'use-filebackend' => false,
@@ -25,7 +25,7 @@ class PHPUnitMaintClass extends Maintenance {
 		'use-normal-tables' => false,
 		'reuse-db' => false,
 		'wiki' => false,
-	];
+	);
 
 	public function __construct() {
 		parent::__construct();
@@ -42,40 +42,23 @@ class PHPUnitMaintClass extends Maintenance {
 			false, # not required
 			false # no arg needed
 		);
-		$this->addOption(
-			'regex',
-			'Only run parser tests that match the given regex.',
-			false,
-			true
-		);
+		$this->addOption( 'regex', 'Only run parser tests that match the given regex.', false, true );
 		$this->addOption( 'file', 'File describing parser tests.', false, true );
 		$this->addOption( 'use-filebackend', 'Use filebackend', false, true );
 		$this->addOption( 'use-bagostuff', 'Use bagostuff', false, true );
 		$this->addOption( 'use-jobqueue', 'Use jobqueue', false, true );
-		$this->addOption(
-			'keep-uploads',
-			'Re-use the same upload directory for each test, don\'t delete it.',
-			false,
-			false
-		);
+		$this->addOption( 'keep-uploads', 'Re-use the same upload directory for each test, don\'t delete it.', false, false );
 		$this->addOption( 'use-normal-tables', 'Use normal DB tables.', false, false );
-		$this->addOption(
-			'reuse-db', 'Init DB only if tables are missing and keep after finish.',
-			false,
-			false
-		);
+		$this->addOption( 'reuse-db', 'Init DB only if tables are missing and keep after finish.', false, false );
 	}
 
 	public function finalSetup() {
 		parent::finalSetup();
 
 		global $wgMainCacheType, $wgMessageCacheType, $wgParserCacheType, $wgMainWANCache;
-		global $wgMainStash;
 		global $wgLanguageConverterCacheType, $wgUseDatabaseMessages;
 		global $wgLocaltimezone, $wgLocalisationCacheConf;
 		global $wgDevelopmentWarnings;
-		global $wgSessionProviders;
-		global $wgJobTypeConf;
 
 		// Inject test autoloader
 		require_once __DIR__ . '/../TestsAutoLoader.php';
@@ -83,25 +66,11 @@ class PHPUnitMaintClass extends Maintenance {
 		// wfWarn should cause tests to fail
 		$wgDevelopmentWarnings = true;
 
-		// Make sure all caches and stashes are either disabled or use
-		// in-process cache only to prevent tests from using any preconfigured
-		// cache meant for the local wiki from outside the test run.
-		// See also MediaWikiTestCase::run() which mocks CACHE_DB and APC.
-
-		// Disabled in DefaultSettings, override local settings
-		$wgMainWANCache =
 		$wgMainCacheType = CACHE_NONE;
-		// Uses CACHE_ANYTHING in DefaultSettings, use hash instead of db
-		$wgMessageCacheType =
-		$wgParserCacheType =
-		$wgSessionCacheType =
-		$wgLanguageConverterCacheType = 'hash';
-		// Uses db-replicated in DefaultSettings
-		$wgMainStash = 'hash';
-		// Use memory job queue
-		$wgJobTypeConf = [
-			'default' => [ 'class' => 'JobQueueMemory', 'order' => 'fifo' ],
-		];
+		$wgMainWANCache = CACHE_NONE;
+		$wgMessageCacheType = CACHE_NONE;
+		$wgParserCacheType = CACHE_NONE;
+		$wgLanguageConverterCacheType = CACHE_NONE;
 
 		$wgUseDatabaseMessages = false; # Set for future resets
 
@@ -109,19 +78,6 @@ class PHPUnitMaintClass extends Maintenance {
 		$wgLocaltimezone = 'UTC';
 
 		$wgLocalisationCacheConf['storeClass'] = 'LCStoreNull';
-
-		// Generic MediaWiki\Session\SessionManager configuration for tests
-		// We use CookieSessionProvider because things might be expecting
-		// cookies to show up in a FauxRequest somewhere.
-		$wgSessionProviders = [
-			[
-				'class' => 'MediaWiki\\Session\\CookieSessionProvider',
-				'args' => [ [
-					'priority' => 30,
-					'callUserSetCookiesHook' => true,
-				] ],
-			],
-		];
 
 		// Bug 44192 Do not attempt to send a real e-mail
 		Hooks::clear( 'AlternateUserMailer' );
@@ -133,11 +89,6 @@ class PHPUnitMaintClass extends Maintenance {
 		);
 		// xdebug's default of 100 is too low for MediaWiki
 		ini_set( 'xdebug.max_nesting_level', 1000 );
-
-		// Bug T116683 serialize_precision of 100
-		// may break testing against floating point values
-		// treated with PHP's serialize()
-		ini_set( 'serialize_precision', 17 );
 	}
 
 	public function execute() {
@@ -153,9 +104,9 @@ class PHPUnitMaintClass extends Maintenance {
 
 		# Make sure we have --configuration or PHPUnit might complain
 		if ( !in_array( '--configuration', $_SERVER['argv'] ) ) {
-			// Hack to eliminate the need to use the Makefile (which sucks ATM)
+			//Hack to eliminate the need to use the Makefile (which sucks ATM)
 			array_splice( $_SERVER['argv'], 1, 0,
-				[ '--configuration', $IP . '/tests/phpunit/suite.xml' ] );
+				array( '--configuration', $IP . '/tests/phpunit/suite.xml' ) );
 		}
 
 		# --with-phpunitdir let us override the default PHPUnit version
@@ -174,6 +125,19 @@ class PHPUnitMaintClass extends Maintenance {
 			unset( $_SERVER['argv'][$key] ); // the option
 			unset( $_SERVER['argv'][$key + 1] ); // its value
 			$_SERVER['argv'] = array_values( $_SERVER['argv'] );
+		}
+
+		if ( !wfIsWindows() ) {
+			# If we are not running on windows then we can enable phpunit colors
+			# Windows does not come anymore with ANSI.SYS loaded by default
+			# PHPUnit uses the suite.xml parameters to enable/disable colors
+			# which can be then forced to be enabled with --colors.
+			# The below code injects a parameter just like if the user called
+			# Probably fix bug 29226
+			$key = array_search( '--colors', $_SERVER['argv'] );
+			if ( $key === false ) {
+				array_splice( $_SERVER['argv'], 1, 0, '--colors' );
+			}
 		}
 
 		# Makes MediaWiki PHPUnit directory includable so the PHPUnit will
@@ -221,7 +185,7 @@ class PHPUnitMaintClass extends Maintenance {
 	 *  - Split args such as "wiki=enwiki" into two separate arg elements "wiki" and "enwiki"
 	 */
 	private function forceFormatServerArgv() {
-		$argv = [];
+		$argv = array();
 		foreach ( $_SERVER['argv'] as $key => $arg ) {
 			if ( $key === 0 ) {
 				$argv[0] = $arg;
@@ -241,27 +205,29 @@ class PHPUnitMaintClass extends Maintenance {
 $maintClass = 'PHPUnitMaintClass';
 require RUN_MAINTENANCE_IF_MAIN;
 
+// Prevent segfault when we have lots of unit tests (bug 62623)
+if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
+	register_shutdown_function( function () {
+		gc_collect_cycles();
+		gc_disable();
+	} );
+}
+
+
 $ok = false;
 
 if ( class_exists( 'PHPUnit_TextUI_Command' ) ) {
 	echo "PHPUnit already present\n";
 	$ok = true;
 } else {
-	foreach ( [
+	foreach ( array(
 				stream_resolve_include_path( 'phpunit.phar' ),
-				stream_resolve_include_path( 'phpunit-old.phar' ),
 				'PHPUnit/Runner/Version.php',
 				'PHPUnit/Autoload.php'
-			] as $includePath ) {
-
-		if ( $includePath === false ) {
-			// stream_resolve_include_path can return false
-			continue;
-		}
-
-		\MediaWiki\suppressWarnings();
-		include_once $includePath;
-		\MediaWiki\restoreWarnings();
+			) as $includePath ) {
+		// @codingStandardsIgnoreStart
+		@include_once $includePath;
+		// @codingStandardsIgnoreEnd
 		if ( class_exists( 'PHPUnit_TextUI_Command' ) ) {
 			$ok = true;
 			echo "Using PHPUnit from $includePath\n";
@@ -280,9 +246,5 @@ if ( $puVersion !== '@package_version@' && version_compare( $puVersion, '3.7.0',
 	echo "PHPUnit 3.7.0 or later required; you have {$puVersion}.\n";
 	exit( 1 );
 }
-
-echo defined( 'HHVM_VERSION' ) ?
-	'Using HHVM ' . HHVM_VERSION . ' (' . PHP_VERSION . ")\n" :
-	'Using PHP ' . PHP_VERSION . "\n";
 
 PHPUnit_TextUI_Command::main();

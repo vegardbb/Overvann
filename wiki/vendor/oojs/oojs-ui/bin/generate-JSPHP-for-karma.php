@@ -4,7 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $testSuiteJSON = file_get_contents( __DIR__ . '/../tests/JSPHP-suite.json' );
 $testSuite = json_decode( $testSuiteJSON, true );
-$testSuiteOutput = [];
+$testSuiteOutput = array();
 
 // @codingStandardsIgnoreStart
 function new_OOUI( $class, $config = array() ) {
@@ -22,7 +22,7 @@ function unstub( &$value ) {
 	}
 }
 // Keep synchronized with tests/index.php
-$themes = [ 'ApexTheme', 'MediaWikiTheme' ];
+$themes = array( 'ApexTheme', 'MediaWikiTheme' );
 foreach ( $themes as $theme ) {
 	OOUI\Theme::setSingleton( new_OOUI( $theme ) );
 	foreach ( $testSuite as $className => $tests ) {

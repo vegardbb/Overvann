@@ -26,7 +26,7 @@ use Psr\Log\LogLevel;
 class LegacyLoggerTest extends MediaWikiTestCase {
 
 	/**
-	 * @covers MediaWiki\Logger\LegacyLogger::interpolate
+	 * @covers LegacyLogger::interpolate
 	 * @dataProvider provideInterpolate
 	 */
 	public function testInterpolate( $message, $context, $expect ) {
@@ -37,136 +37,136 @@ class LegacyLoggerTest extends MediaWikiTestCase {
 	public function provideInterpolate() {
 		$e = new \Exception( 'boom!' );
 		$d = new \DateTime();
-		return [
-			[
+		return array(
+			array(
 				'no-op',
-				[],
+				array(),
 				'no-op',
-			],
-			[
+			),
+			array(
 				'Hello {world}!',
-				[
+				array(
 					'world' => 'World',
-				],
+				),
 				'Hello World!',
-			],
-			[
+			),
+			array(
 				'{greeting} {user}',
-				[
+				array(
 					'greeting' => 'Goodnight',
 					'user' => 'Moon',
-				],
+				),
 				'Goodnight Moon',
-			],
-			[
+			),
+			array(
 				'Oops {key_not_set}',
-				[],
+				array(),
 				'Oops {key_not_set}',
-			],
-			[
+			),
+			array(
 				'{ not interpolated }',
-				[
+				array(
 					'not interpolated' => 'This should NOT show up in the message',
-				],
+				),
 				'{ not interpolated }',
-			],
-			[
+			),
+			array(
 				'{null}',
-				[
+				array(
 					'null' => null,
-				],
+				),
 				'[Null]',
-			],
-			[
+			),
+			array(
 				'{bool}',
-				[
+				array(
 					'bool' => true,
-				],
+				),
 				'true',
-			],
-			[
+			),
+			array(
 				'{float}',
-				[
+				array(
 					'float' => 1.23,
-				],
+				),
 				'1.23',
-			],
-			[
+			),
+			array(
 				'{array}',
-				[
-					'array' => [ 1, 2, 3 ],
-				],
+				array(
+					'array' => array( 1, 2, 3 ),
+				),
 				'[Array(3)]',
-			],
-			[
+			),
+			array(
 				'{exception}',
-				[
+				array(
 					'exception' => $e,
-				],
+				),
 				'[Exception ' . get_class( $e ) . '( ' .
 				$e->getFile() . ':' . $e->getLine() . ') ' .
 				$e->getMessage() . ']',
-			],
-			[
+			),
+			array(
 				'{datetime}',
-				[
+				array(
 					'datetime' => $d,
-				],
+				),
 				$d->format( 'c' ),
-			],
-			[
+			),
+			array(
 				'{object}',
-				[
+				array(
 					'object' => new \stdClass,
-				],
+				),
 				'[Object stdClass]',
-			],
-		];
+			),
+		);
 	}
 
 	/**
-	 * @covers MediaWiki\Logger\LegacyLogger::shouldEmit
+	 * @covers LegacyLogger::shouldEmit
 	 * @dataProvider provideShouldEmit
 	 */
 	public function testShouldEmit( $level, $config, $expected ) {
-		$this->setMwGlobals( 'wgDebugLogGroups', [ 'fakechannel' => $config ] );
+		$this->setMwGlobals( 'wgDebugLogGroups', array( 'fakechannel' => $config ) );
 		$this->assertEquals(
 			$expected,
-			LegacyLogger::shouldEmit( 'fakechannel', 'some message', $level, [] )
+			LegacyLogger::shouldEmit( 'fakechannel', 'some message', $level, array() )
 		);
 	}
 
 	public static function provideShouldEmit() {
-		$dest = [ 'destination' => 'foobar' ];
-		$tests = [
-			[
+		$dest = array( 'destination' => 'foobar' );
+		$tests = array(
+			array(
 				LogLevel::DEBUG,
 				$dest,
 				true
-			],
-			[
+			),
+			array(
 				LogLevel::WARNING,
-				$dest + [ 'level' => LogLevel::INFO ],
+				$dest + array( 'level' => LogLevel::INFO ),
 				true,
-			],
-			[
+			),
+			array(
 				LogLevel::INFO,
-				$dest + [ 'level' => LogLevel::CRITICAL ],
+				$dest + array( 'level' => LogLevel::CRITICAL ),
 				false,
-			],
-		];
+			),
+		);
 
 		if ( class_exists( '\Monolog\Logger' ) ) {
-			$tests[] = [
+			$tests[] = array(
 				\Monolog\Logger::INFO,
-				$dest + [ 'level' => LogLevel::INFO ],
+				$dest + array( 'level' => LogLevel::INFO ),
 				true,
-			];
-			$tests[] = [
+			);
+			$tests[] = array(
 				\Monolog\Logger::WARNING,
-				$dest + [ 'level' => LogLevel::EMERGENCY ],
+				$dest + array( 'level' => LogLevel::EMERGENCY ),
 				false,
-			];
+			);
 		}
 
 		return $tests;

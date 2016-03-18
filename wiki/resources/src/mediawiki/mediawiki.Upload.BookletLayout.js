@@ -1,5 +1,4 @@
-/*global moment*/
-( function ( $, mw, moment ) {
+( function ( $, mw ) {
 
 	/**
 	 * mw.Upload.BookletLayout encapsulates the process of uploading a file
@@ -53,7 +52,7 @@
 	 * {@link #createUpload createUpload} method to
 	 * return the new model. The {@link #saveFile saveFile}, and
 	 * the {@link #uploadFile uploadFile} methods need to be
-	 * overridden to use the new model and data returned from the forms.
+	 * overriden to use the new model and data returned from the forms.
 	 *
 	 * @class
 	 * @extends OO.ui.BookletLayout
@@ -96,14 +95,6 @@
 	OO.inheritClass( mw.Upload.BookletLayout, OO.ui.BookletLayout );
 
 	/* Events */
-
-	/**
-	 * Progress events for the uploaded file
-	 *
-	 * @event fileUploadProgress
-	 * @param {number} progress In percentage
-	 * @param {Object} duration Duration object from `moment.duration()`
-	 */
 
 	/**
 	 * The file has finished uploading
@@ -156,37 +147,11 @@
 
 	/**
 	 * Initialize for a new upload
-	 *
-	 * @return {jQuery.Promise} Promise resolved when everything is initialized
 	 */
 	mw.Upload.BookletLayout.prototype.initialize = function () {
-		var booklet = this;
-
 		this.clear();
 		this.upload = this.createUpload();
 		this.setPage( 'upload' );
-
-		return this.upload.getApi().then(
-			function ( api ) {
-				// If the user can't upload anything, don't give them the option to.
-				return api.getUserInfo().then(
-					function ( userInfo ) {
-						if ( userInfo.rights.indexOf( 'upload' ) === -1 ) {
-							// TODO Use a better error message when not all logged-in users can upload
-							booklet.getPage( 'upload' ).$element.msg( 'api-error-mustbeloggedin' );
-						}
-						return $.Deferred().resolve();
-					},
-					function () {
-						return $.Deferred().resolve();
-					}
-				);
-			},
-			function ( errorMsg ) {
-				booklet.getPage( 'upload' ).$element.msg( errorMsg );
-				return $.Deferred().resolve();
-			}
-		);
 	};
 
 	/**
@@ -207,23 +172,20 @@
 	 * file object.
 	 *
 	 * @protected
-	 * @fires fileUploadProgress
 	 * @fires fileUploaded
 	 * @return {jQuery.Promise}
 	 */
 	mw.Upload.BookletLayout.prototype.uploadFile = function () {
 		var deferred = $.Deferred(),
-			startTime = new Date(),
 			layout = this,
 			file = this.getFile();
 
-		this.setFilename( file.name );
-
+		this.filenameWidget.setValue( file.name );
 		this.setPage( 'info' );
 
 		this.upload.setFile( file );
-		// The original file name might contain invalid characters, so use our sanitized one
-		this.upload.setFilename( this.getFilename() );
+		// Explicitly set the filename so that the old filename isn't used in case of retry
+		this.upload.setFilenameFromFile();
 
 		this.uploadPromise = this.upload.uploadToStash();
 		this.uploadPromise.then( function () {
@@ -235,11 +197,6 @@
 			// really be an error...
 			var errorMessage = layout.getErrorMessageForStateDetails();
 			deferred.reject( errorMessage );
-		}, function ( progress ) {
-			var elapsedTime = new Date() - startTime,
-				estimatedTotalTime = ( 1 / progress ) * elapsedTime,
-				estimatedRemainingTime = moment.duration( estimatedTotalTime - elapsedTime );
-			layout.emit( 'fileUploadProgress', progress, estimatedRemainingTime );
 		} );
 
 		// If there is an error in uploading, come back to the upload page
@@ -258,7 +215,7 @@
 	 *
 	 * @protected
 	 * @fires fileSaved
-	 * @return {jQuery.Promise} Rejects the promise with an
+	 * @returns {jQuery.Promise} Rejects the promise with an
 	 * {@link OO.ui.Error error}, or resolves if the upload was successful.
 	 */
 	mw.Upload.BookletLayout.prototype.saveFile = function () {
@@ -293,7 +250,7 @@
 	 * state and state details.
 	 *
 	 * @protected
-	 * @return {OO.ui.Error} Error to display for given state and details.
+	 * @returns {OO.ui.Error} Error to display for given state and details.
 	 */
 	mw.Upload.BookletLayout.prototype.getErrorMessageForStateDetails = function () {
 		var message,
@@ -303,21 +260,15 @@
 			warnings = stateDetails.upload && stateDetails.upload.warnings;
 
 		if ( state === mw.Upload.State.ERROR ) {
-			if ( !error ) {
-				// If there's an 'exception' key, this might be a timeout, or other connection problem
-				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-unknownerror', JSON.stringify( stateDetails ) ),
-					{ recoverable: false }
-				);
-			}
-
 			// HACK We should either have a hook here to allow TitleBlacklist to handle this, or just have
 			// TitleBlacklist produce sane error messages that can be displayed without arcane knowledge
 			if ( error.info === 'TitleBlacklist prevents this title from being created' ) {
 				// HACK Apparently the only reliable way to determine whether TitleBlacklist was involved
 				return new OO.ui.Error(
-					// HACK TitleBlacklist doesn't have a sensible message, this one is from UploadWizard
-					$( '<p>' ).msg( 'api-error-blacklisted' ),
+					$( '<p>' ).html(
+						// HACK TitleBlacklist doesn't have a sensible message, this one is from UploadWizard
+						mw.message( 'api-error-blacklisted' ).parse()
+					),
 					{ recoverable: false }
 				);
 			}
@@ -327,7 +278,9 @@
 				message = mw.message( 'api-error-unknownerror', JSON.stringify( stateDetails ) );
 			}
 			return new OO.ui.Error(
-				$( '<p>' ).append( message.parseDom() ),
+				$( '<p>' ).html(
+					message.parse()
+				),
 				{ recoverable: false }
 			);
 		}
@@ -338,50 +291,68 @@
 			// won't help the fact that the file already exists.
 			if ( warnings.stashfailed !== undefined ) {
 				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-stashfailed' ),
+					$( '<p>' ).html(
+						mw.message( 'api-error-stashfailed' ).parse()
+					),
 					{ recoverable: false }
 				);
 			} else if ( warnings.exists !== undefined ) {
 				return new OO.ui.Error(
-					$( '<p>' ).msg( 'fileexists', 'File:' + warnings.exists ),
+					$( '<p>' ).html(
+						mw.message( 'fileexists', 'File:' + warnings.exists ).parse()
+					),
 					{ recoverable: false }
 				);
 			} else if ( warnings[ 'page-exists' ] !== undefined ) {
 				return new OO.ui.Error(
-					$( '<p>' ).msg( 'filepageexists', 'File:' + warnings[ 'page-exists' ] ),
+					$( '<p>' ).html(
+						mw.message( 'filepageexists', 'File:' + warnings[ 'page-exists' ] ).parse()
+					),
 					{ recoverable: false }
 				);
 			} else if ( warnings.duplicate !== undefined ) {
 				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-duplicate', warnings.duplicate.length ),
+					$( '<p>' ).html(
+						mw.message( 'api-error-duplicate', warnings.duplicate.length ).parse()
+					),
 					{ recoverable: false }
 				);
 			} else if ( warnings[ 'thumb-name' ] !== undefined ) {
 				return new OO.ui.Error(
-					$( '<p>' ).msg( 'filename-thumb-name' ),
+					$( '<p>' ).html(
+						mw.message( 'filename-thumb-name' ).parse()
+					),
 					{ recoverable: false }
 				);
 			} else if ( warnings[ 'bad-prefix' ] !== undefined ) {
 				return new OO.ui.Error(
-					$( '<p>' ).msg( 'filename-bad-prefix', warnings[ 'bad-prefix' ] ),
+					$( '<p>' ).html(
+						mw.message( 'filename-bad-prefix', warnings[ 'bad-prefix' ] ).parse()
+					),
 					{ recoverable: false }
 				);
 			} else if ( warnings[ 'duplicate-archive' ] !== undefined ) {
 				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-duplicate-archive', 1 ),
+					$( '<p>' ).html(
+						mw.message( 'api-error-duplicate-archive', 1 ).parse()
+					),
 					{ recoverable: false }
 				);
 			} else if ( warnings.badfilename !== undefined ) {
 				// Change the name if the current name isn't acceptable
 				// TODO This might not really be the best place to do this
-				this.setFilename( warnings.badfilename );
+				this.filenameWidget.setValue( warnings.badfilename );
 				return new OO.ui.Error(
-					$( '<p>' ).msg( 'badfilename', warnings.badfilename )
+					$( '<p>' ).html(
+						mw.message( 'badfilename', warnings.badfilename ).parse()
+					)
 				);
 			} else {
 				return new OO.ui.Error(
-					// Let's get all the help we can if we can't pin point the error
-					$( '<p>' ).msg( 'api-error-unknown-warning', JSON.stringify( stateDetails ) ),
+					$( '<p>' ).html(
+						// Let's get all the help we can if we can't pin point the error
+						mw.message( 'api-error-unknown-warning', JSON.stringify( stateDetails ) ).parse()
+					),
 					{ recoverable: false }
 				);
 			}
@@ -396,49 +367,20 @@
 	 *
 	 * @protected
 	 * @fires selectFile
-	 * @return {OO.ui.FormLayout}
+	 * @returns {OO.ui.FormLayout}
 	 */
 	mw.Upload.BookletLayout.prototype.renderUploadForm = function () {
-		var fieldset,
-			layout = this;
+		var fieldset;
 
-		this.selectFileWidget = new OO.ui.SelectFileWidget( {
-			showDropTarget: true
-		} );
-		fieldset = new OO.ui.FieldsetLayout();
+		this.selectFileWidget = new OO.ui.SelectFileWidget();
+		fieldset = new OO.ui.FieldsetLayout( { label: mw.msg( 'upload-form-label-select-file' ) } );
 		fieldset.addItems( [ this.selectFileWidget ] );
 		this.uploadForm = new OO.ui.FormLayout( { items: [ fieldset ] } );
 
 		// Validation
 		this.selectFileWidget.on( 'change', this.onUploadFormChange.bind( this ) );
 
-		this.selectFileWidget.on( 'change', function () {
-			layout.updateFilePreview();
-		} );
-
 		return this.uploadForm;
-	};
-
-	/**
-	 * Updates the file preview on the info form when a file is added.
-	 *
-	 * @protected
-	 */
-	mw.Upload.BookletLayout.prototype.updateFilePreview = function () {
-		this.selectFileWidget.loadAndGetImageUrl().done( function ( url ) {
-			this.filePreview.$element.find( 'p' ).remove();
-			this.filePreview.$element.css( 'background-image', 'url(' + url + ')' );
-			this.infoForm.$element.addClass( 'mw-upload-bookletLayout-hasThumbnail' );
-		}.bind( this ) ).fail( function () {
-			this.filePreview.$element.find( 'p' ).remove();
-			if ( this.selectFileWidget.getValue() ) {
-				this.filePreview.$element.append(
-					$( '<p>' ).text( this.selectFileWidget.getValue().name )
-				);
-			}
-			this.filePreview.$element.css( 'background-image', '' );
-			this.infoForm.$element.removeClass( 'mw-upload-bookletLayout-hasThumbnail' );
-		}.bind( this ) );
 	};
 
 	/**
@@ -457,18 +399,10 @@
 	 * property.
 	 *
 	 * @protected
-	 * @return {OO.ui.FormLayout}
+	 * @returns {OO.ui.FormLayout}
 	 */
 	mw.Upload.BookletLayout.prototype.renderInfoForm = function () {
 		var fieldset;
-
-		this.filePreview = new OO.ui.Widget( {
-			classes: [ 'mw-upload-bookletLayout-filePreview' ]
-		} );
-		this.progressBarWidget = new OO.ui.ProgressBarWidget( {
-			progress: 0
-		} );
-		this.filePreview.$element.append( this.progressBarWidget.$element );
 
 		this.filenameWidget = new OO.ui.TextInputWidget( {
 			indicator: 'required',
@@ -478,7 +412,7 @@
 		this.descriptionWidget = new OO.ui.TextInputWidget( {
 			indicator: 'required',
 			required: true,
-			validate: /\S+/,
+			validate: /.+/,
 			multiline: true,
 			autosize: true
 		} );
@@ -489,23 +423,14 @@
 		fieldset.addItems( [
 			new OO.ui.FieldLayout( this.filenameWidget, {
 				label: mw.msg( 'upload-form-label-infoform-name' ),
-				align: 'top',
-				help: mw.msg( 'upload-form-label-infoform-name-tooltip' )
+				align: 'top'
 			} ),
 			new OO.ui.FieldLayout( this.descriptionWidget, {
 				label: mw.msg( 'upload-form-label-infoform-description' ),
-				align: 'top',
-				help: mw.msg( 'upload-form-label-infoform-description-tooltip' )
+				align: 'top'
 			} )
 		] );
-		this.infoForm = new OO.ui.FormLayout( {
-			classes: [ 'mw-upload-bookletLayout-infoForm' ],
-			items: [ this.filePreview, fieldset ]
-		} );
-
-		this.on( 'fileUploadProgress', function ( progress ) {
-			this.progressBarWidget.setProgress( progress * 100 );
-		}.bind( this ) );
+		this.infoForm = new OO.ui.FormLayout( { items: [ fieldset ] } );
 
 		this.filenameWidget.on( 'change', this.onInfoFormChange.bind( this ) );
 		this.descriptionWidget.on( 'change', this.onInfoFormChange.bind( this ) );
@@ -536,7 +461,7 @@
 	 * sets the {@link #insertForm insertForm} property.
 	 *
 	 * @protected
-	 * @return {OO.ui.FormLayout}
+	 * @returns {OO.ui.FormLayout}
 	 */
 	mw.Upload.BookletLayout.prototype.renderInsertForm = function () {
 		var fieldset;
@@ -563,7 +488,7 @@
 	 * {@link #uploadForm upload form}.
 	 *
 	 * @protected
-	 * @return {File|null}
+	 * @returns {File|null}
 	 */
 	mw.Upload.BookletLayout.prototype.getFile = function () {
 		return this.selectFileWidget.getValue();
@@ -574,33 +499,10 @@
 	 * {@link #infoForm information form}.
 	 *
 	 * @protected
-	 * @return {string}
+	 * @returns {string}
 	 */
 	mw.Upload.BookletLayout.prototype.getFilename = function () {
-		var filename = this.filenameWidget.getValue();
-		if ( this.filenameExtension ) {
-			filename += '.' + this.filenameExtension;
-		}
-		return filename;
-	};
-
-	/**
-	 * Prefills the {@link #infoForm information form} with the given filename.
-	 *
-	 * @protected
-	 * @param {string} filename
-	 */
-	mw.Upload.BookletLayout.prototype.setFilename = function ( filename ) {
-		var title = mw.Title.newFromFileName( filename );
-
-		if ( title ) {
-			this.filenameWidget.setValue( title.getNameText() );
-			this.filenameExtension = mw.Title.normalizeExtension( title.getExtension() );
-		} else {
-			// Seems to happen for files with no extension, which should fail some checks anyway...
-			this.filenameWidget.setValue( filename );
-			this.filenameExtension = null;
-		}
+		return this.filenameWidget.getValue();
 	};
 
 	/**
@@ -608,7 +510,7 @@
 	 * {@link #infoForm information form}.
 	 *
 	 * @protected
-	 * @return {string}
+	 * @returns {string}
 	 */
 	mw.Upload.BookletLayout.prototype.getText = function () {
 		return this.descriptionWidget.getValue();
@@ -633,10 +535,9 @@
 	 */
 	mw.Upload.BookletLayout.prototype.clear = function () {
 		this.selectFileWidget.setValue( null );
-		this.progressBarWidget.setProgress( 0 );
 		this.filenameWidget.setValue( null ).setValidityFlag( true );
 		this.descriptionWidget.setValue( null ).setValidityFlag( true );
 		this.filenameUsageWidget.setValue( null );
 	};
 
-}( jQuery, mediaWiki, moment ) );
+}( jQuery, mediaWiki ) );

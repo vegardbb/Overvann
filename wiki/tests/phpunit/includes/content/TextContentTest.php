@@ -19,17 +19,17 @@ class TextContentTest extends MediaWikiLangTestCase {
 		$this->context->setTitle( Title::newFromText( 'Test' ) );
 		$this->context->setUser( $user );
 
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgUser' => $user,
-			'wgTextModelsToParse' => [
+			'wgTextModelsToParse' => array(
 				CONTENT_MODEL_WIKITEXT,
 				CONTENT_MODEL_CSS,
 				CONTENT_MODEL_JAVASCRIPT,
-			],
+			),
 			'wgUseTidy' => false,
 			'wgCapitalLinks' => true,
-			'wgHooks' => [], // bypass hook ContentGetParserOutput that force custom rendering
-		] );
+			'wgHooks' => array(), // bypass hook ContentGetParserOutput that force custom rendering
+		) );
 
 		MWTidy::destroySingleton();
 	}
@@ -44,17 +44,17 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function dataGetParserOutput() {
-		return [
-			[
+		return array(
+			array(
 				'TextContentTest_testGetParserOutput',
 				CONTENT_MODEL_TEXT,
 				"hello ''world'' & [[stuff]]\n", "hello ''world'' &amp; [[stuff]]",
-				[
-					'Links' => []
-				]
-			],
+				array(
+					'Links' => array()
+				)
+			),
 			// TODO: more...?
-		];
+		);
 	}
 
 	/**
@@ -77,7 +77,7 @@ class TextContentTest extends MediaWikiLangTestCase {
 		if ( $expectedFields ) {
 			foreach ( $expectedFields as $field => $exp ) {
 				$f = 'get' . ucfirst( $field );
-				$v = call_user_func( [ $po, $f ] );
+				$v = call_user_func( array( $po, $f ) );
 
 				if ( is_array( $exp ) ) {
 					$this->assertArrayEquals( $exp, $v );
@@ -91,18 +91,18 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function dataPreSaveTransform() {
-		return [
-			[
-				# 0: no signature resolution
+		return array(
+			array(
+				#0: no signature resolution
 				'hello this is ~~~',
 				'hello this is ~~~',
-			],
-			[
-				# 1: rtrim
+			),
+			array(
+				#1: rtrim
 				" Foo \n ",
 				' Foo',
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -125,12 +125,12 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function dataPreloadTransform() {
-		return [
-			[
+		return array(
+			array(
 				'hello this is ~~~',
 				'hello this is ~~~',
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -148,11 +148,11 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function dataGetRedirectTarget() {
-		return [
-			[ '#REDIRECT [[Test]]',
+		return array(
+			array( '#REDIRECT [[Test]]',
 				null,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -201,28 +201,28 @@ class TextContentTest extends MediaWikiLangTestCase {
 	*/
 
 	public static function dataIsCountable() {
-		return [
-			[ '',
+		return array(
+			array( '',
 				null,
 				'any',
 				true
-			],
-			[ 'Foo',
+			),
+			array( 'Foo',
 				null,
 				'any',
 				true
-			],
-			[ 'Foo',
+			),
+			array( 'Foo',
 				null,
 				'comma',
 				false
-			],
-			[ 'Foo, bar',
+			),
+			array( 'Foo, bar',
 				null,
 				'comma',
 				false
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -247,20 +247,20 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function dataGetTextForSummary() {
-		return [
-			[ "hello\nworld.",
+		return array(
+			array( "hello\nworld.",
 				16,
 				'hello world.',
-			],
-			[ 'hello world.',
+			),
+			array( 'hello world.',
 				8,
 				'hello...',
-			],
-			[ '[[hello world]].',
+			),
+			array( '[[hello world]].',
 				8,
 				'[[hel...',
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -339,12 +339,12 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function dataIsEmpty() {
-		return [
-			[ '', true ],
-			[ '  ', false ],
-			[ '0', false ],
-			[ 'hallo welt.', false ],
-		];
+		return array(
+			array( '', true ),
+			array( '  ', false ),
+			array( '0', false ),
+			array( 'hallo welt.', false ),
+		);
 	}
 
 	/**
@@ -358,13 +358,13 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function dataEquals() {
-		return [
-			[ new TextContent( "hallo" ), null, false ],
-			[ new TextContent( "hallo" ), new TextContent( "hallo" ), true ],
-			[ new TextContent( "hallo" ), new JavaScriptContent( "hallo" ), false ],
-			[ new TextContent( "hallo" ), new WikitextContent( "hallo" ), false ],
-			[ new TextContent( "hallo" ), new TextContent( "HALLO" ), false ],
-		];
+		return array(
+			array( new TextContent( "hallo" ), null, false ),
+			array( new TextContent( "hallo" ), new TextContent( "hallo" ), true ),
+			array( new TextContent( "hallo" ), new JavaScriptContent( "hallo" ), false ),
+			array( new TextContent( "hallo" ), new WikitextContent( "hallo" ), false ),
+			array( new TextContent( "hallo" ), new TextContent( "HALLO" ), false ),
+		);
 	}
 
 	/**
@@ -376,17 +376,17 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function dataGetDeletionUpdates() {
-		return [
-			[ "TextContentTest_testGetSecondaryDataUpdates_1",
+		return array(
+			array( "TextContentTest_testGetSecondaryDataUpdates_1",
 				CONTENT_MODEL_TEXT, "hello ''world''\n",
-				[]
-			],
-			[ "TextContentTest_testGetSecondaryDataUpdates_2",
+				array()
+			),
+			array( "TextContentTest_testGetSecondaryDataUpdates_2",
 				CONTENT_MODEL_TEXT, "hello [[world test 21344]]\n",
-				[]
-			],
+				array()
+			),
 			// TODO: more...?
-		];
+		);
 	}
 
 	/**
@@ -421,7 +421,7 @@ class TextContentTest extends MediaWikiLangTestCase {
 			$update = $updates[$class];
 
 			foreach ( $fieldValues as $field => $value ) {
-				$v = $update->$field; # if the field doesn't exist, just crash and burn
+				$v = $update->$field; #if the field doesn't exist, just crash and burn
 				$this->assertEquals( $value, $v, "unexpected value for field $field in instance of $class" );
 			}
 		}
@@ -430,32 +430,32 @@ class TextContentTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideConvert() {
-		return [
-			[ // #0
+		return array(
+			array( // #0
 				'Hallo Welt',
 				CONTENT_MODEL_WIKITEXT,
 				'lossless',
 				'Hallo Welt'
-			],
-			[ // #1
+			),
+			array( // #1
 				'Hallo Welt',
 				CONTENT_MODEL_WIKITEXT,
 				'lossless',
 				'Hallo Welt'
-			],
-			[ // #1
+			),
+			array( // #1
 				'Hallo Welt',
 				CONTENT_MODEL_CSS,
 				'lossless',
 				'Hallo Welt'
-			],
-			[ // #1
+			),
+			array( // #1
 				'Hallo Welt',
 				CONTENT_MODEL_JAVASCRIPT,
 				'lossless',
 				'Hallo Welt'
-			],
-		];
+			),
+		);
 	}
 
 	/**

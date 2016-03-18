@@ -79,7 +79,7 @@ class FileBackendDBRepoWrapper extends FileBackend {
 	 * @return string
 	 */
 	public function getBackendPath( $path, $latest = true ) {
-		$paths = $this->getBackendPaths( [ $path ], $latest );
+		$paths = $this->getBackendPaths( array( $path ), $latest );
 		return current( $paths );
 	}
 
@@ -97,7 +97,7 @@ class FileBackendDBRepoWrapper extends FileBackend {
 		$db = $this->getDB( $latest ? DB_MASTER : DB_SLAVE );
 
 		// @TODO: batching
-		$resolved = [];
+		$resolved = array();
 		foreach ( $paths as $i => $path ) {
 			if ( !$latest && $this->resolvedPathCache->has( $path, 'target', 10 ) ) {
 				$resolved[$i] = $this->resolvedPathCache->get( $path, 'target' );
@@ -110,12 +110,12 @@ class FileBackendDBRepoWrapper extends FileBackend {
 				$name = basename( $path );
 				if ( strpos( $path, '!' ) !== false ) {
 					$sha1 = $db->selectField( 'oldimage', 'oi_sha1',
-						[ 'oi_archive_name' => $name ],
+						array( 'oi_archive_name' => $name ),
 						__METHOD__
 					);
 				} else {
 					$sha1 = $db->selectField( 'image', 'img_sha1',
-						[ 'img_name' => $name ],
+						array( 'img_name' => $name ),
 						__METHOD__
 					);
 				}
@@ -135,7 +135,7 @@ class FileBackendDBRepoWrapper extends FileBackend {
 			}
 		}
 
-		$res = [];
+		$res = array();
 		foreach ( $paths as $i => $path ) {
 			$res[$i] = $resolved[$i];
 		}
@@ -324,7 +324,7 @@ class FileBackendDBRepoWrapper extends FileBackend {
 
 		$results = $this->backend->$function( $params );
 
-		$contents = [];
+		$contents = array();
 		foreach ( $results as $path => $result ) {
 			$contents[$pathMap[$path]] = $result;
 		}
@@ -342,7 +342,7 @@ class FileBackendDBRepoWrapper extends FileBackend {
 	 */
 	protected function mungeOpPaths( array $ops ) {
 		// Ops that use 'src' and do not mutate core file data there
-		static $srcRefOps = [ 'store', 'copy', 'describe' ];
+		static $srcRefOps = array( 'store', 'copy', 'describe' );
 		foreach ( $ops as &$op ) {
 			if ( isset( $op['src'] ) && in_array( $op['op'], $srcRefOps ) ) {
 				$op['src'] = $this->getBackendPath( $op['src'], true );

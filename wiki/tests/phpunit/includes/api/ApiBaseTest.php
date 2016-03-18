@@ -13,7 +13,7 @@ class ApiBaseTest extends ApiTestCase {
 	public function testRequireOnlyOneParameterDefault() {
 		$mock = new MockApi();
 		$mock->requireOnlyOneParameter(
-			[ "filename" => "foo.txt", "enablechunks" => false ],
+			array( "filename" => "foo.txt", "enablechunks" => false ),
 			"filename", "enablechunks"
 		);
 		$this->assertTrue( true );
@@ -26,7 +26,7 @@ class ApiBaseTest extends ApiTestCase {
 	public function testRequireOnlyOneParameterZero() {
 		$mock = new MockApi();
 		$mock->requireOnlyOneParameter(
-			[ "filename" => "foo.txt", "enablechunks" => 0 ],
+			array( "filename" => "foo.txt", "enablechunks" => 0 ),
 			"filename", "enablechunks"
 		);
 	}
@@ -38,7 +38,7 @@ class ApiBaseTest extends ApiTestCase {
 	public function testRequireOnlyOneParameterTrue() {
 		$mock = new MockApi();
 		$mock->requireOnlyOneParameter(
-			[ "filename" => "foo.txt", "enablechunks" => true ],
+			array( "filename" => "foo.txt", "enablechunks" => true ),
 			"filename", "enablechunks"
 		);
 	}

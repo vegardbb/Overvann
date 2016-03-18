@@ -58,7 +58,7 @@ class StubObject {
 	 * @param string $class Name of the class of the real object.
 	 * @param array $params Parameters to pass to constructor of the real object.
 	 */
-	public function __construct( $global = null, $class = null, $params = [] ) {
+	public function __construct( $global = null, $class = null, $params = array() ) {
 		$this->global = $global;
 		$this->class = $class;
 		$this->params = $params;
@@ -102,7 +102,7 @@ class StubObject {
 	 */
 	public function _call( $name, $args ) {
 		$this->_unstub( $name, 5 );
-		return call_user_func_array( [ $GLOBALS[$this->global], $name ], $args );
+		return call_user_func_array( array( $GLOBALS[$this->global], $name ), $args );
 	}
 
 	/**
@@ -110,11 +110,11 @@ class StubObject {
 	 * @return object
 	 */
 	public function _newObject() {
-		return ObjectFactory::getObjectFromSpec( [
+		return ObjectFactory::getObjectFromSpec( array(
 			'class' => $this->class,
 			'args' => $this->params,
 			'closure_expansion' => false,
-		] );
+		) );
 	}
 
 	/**

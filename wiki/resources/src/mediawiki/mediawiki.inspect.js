@@ -20,7 +20,7 @@
 	function humanSize( bytes ) {
 		if ( !$.isNumeric( bytes ) || bytes === 0 ) { return bytes; }
 		var i = 0,
-			units = [ '', ' KiB', ' MiB', ' GiB', ' TiB', ' PiB' ];
+			units = [ '', ' kB', ' MB', ' GB', ' TB', ' PB' ];
 
 		for ( ; bytes >= 1024; bytes /= 1024 ) { i++; }
 		// Maintain one decimal for kB and above, but don't
@@ -107,11 +107,15 @@
 		 */
 		auditSelectors: function ( css ) {
 			var selectors = { total: 0, matched: 0 },
-				style = document.createElement( 'style' );
+				style = document.createElement( 'style' ),
+				sheet, rules;
 
 			style.textContent = css;
 			document.body.appendChild( style );
-			$.each( style.sheet.cssRules, function ( index, rule ) {
+			// Standards-compliant browsers use .sheet.cssRules, IE8 uses .styleSheet.rules…
+			sheet = style.sheet || style.styleSheet;
+			rules = sheet.cssRules || sheet.rules;
+			$.each( rules, function ( index, rule ) {
 				selectors.total++;
 				// document.querySelector() on prefixed pseudo-elements can throw exceptions
 				// in Firefox and Safari. Ignore these exceptions.
@@ -166,7 +170,7 @@
 		 * Generate and print one more reports. When invoked with no arguments,
 		 * print all reports.
 		 *
-		 * @param {...string} [reports] Report names to run, or unset to print
+		 * @param {string...} [reports] Report names to run, or unset to print
 		 *  all available reports.
 		 */
 		runReports: function () {

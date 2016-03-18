@@ -28,7 +28,7 @@
 /**
  * @ingroup Database
  */
-class DatabaseMssql extends Database {
+class DatabaseMssql extends DatabaseBase {
 	protected $mInsertId = null;
 	protected $mLastResult = null;
 	protected $mAffectedRows = null;
@@ -106,7 +106,7 @@ class DatabaseMssql extends Database {
 		$this->mPassword = $password;
 		$this->mDBname = $dbName;
 
-		$connectionInfo = [];
+		$connectionInfo = array();
 
 		if ( $dbName ) {
 			$connectionInfo['Database'] = $dbName;
@@ -145,8 +145,8 @@ class DatabaseMssql extends Database {
 	 * @param bool|MssqlResultWrapper|resource $result
 	 * @return bool|MssqlResultWrapper
 	 */
-	protected function resultObject( $result ) {
-		if ( !$result ) {
+	public function resultObject( $result ) {
+		if ( empty( $result ) ) {
 			return false;
 		} elseif ( $result instanceof MssqlResultWrapper ) {
 			return $result;
@@ -192,17 +192,17 @@ class DatabaseMssql extends Database {
 		// has a bug in the sqlsrv driver where wchar_t types (such as nvarchar) that are empty
 		// strings make php throw a fatal error "Severe error translating Unicode"
 		if ( $this->mScrollableCursor ) {
-			$scrollArr = [ 'Scrollable' => SQLSRV_CURSOR_STATIC ];
+			$scrollArr = array( 'Scrollable' => SQLSRV_CURSOR_STATIC );
 		} else {
-			$scrollArr = [];
+			$scrollArr = array();
 		}
 
 		if ( $this->mPrepareStatements ) {
 			// we do prepare + execute so we can get its field metadata for later usage if desired
-			$stmt = sqlsrv_prepare( $this->mConn, $sql, [], $scrollArr );
+			$stmt = sqlsrv_prepare( $this->mConn, $sql, array(), $scrollArr );
 			$success = sqlsrv_execute( $stmt );
 		} else {
-			$stmt = sqlsrv_query( $this->mConn, $sql, [], $scrollArr );
+			$stmt = sqlsrv_query( $this->mConn, $sql, array(), $scrollArr );
 			$success = (bool)$stmt;
 		}
 
@@ -301,7 +301,8 @@ class DatabaseMssql extends Database {
 			$res = $res->result;
 		}
 
-		return sqlsrv_field_metadata( $res )[$n]['Name'];
+		$metadata = sqlsrv_field_metadata( $res );
+		return $metadata[$n]['Name'];
 	}
 
 	/**
@@ -384,7 +385,7 @@ class DatabaseMssql extends Database {
 	 * @throws Exception
 	 */
 	public function select( $table, $vars, $conds = '', $fname = __METHOD__,
-		$options = [], $join_conds = []
+		$options = array(), $join_conds = array()
 	) {
 		$sql = $this->selectSQLText( $table, $vars, $conds, $fname, $options, $join_conds );
 		if ( isset( $options['EXPLAIN'] ) ) {
@@ -436,7 +437,7 @@ class DatabaseMssql extends Database {
 	 * @return string The SQL text
 	 */
 	public function selectSQLText( $table, $vars, $conds = '', $fname = __METHOD__,
-		$options = [], $join_conds = []
+		$options = array(), $join_conds = array()
 	) {
 		if ( isset( $options['EXPLAIN'] ) ) {
 			unset( $options['EXPLAIN'] );
@@ -446,7 +447,7 @@ class DatabaseMssql extends Database {
 
 		// try to rewrite aggregations of bit columns (currently MAX and MIN)
 		if ( strpos( $sql, 'MAX(' ) !== false || strpos( $sql, 'MIN(' ) !== false ) {
-			$bitColumns = [];
+			$bitColumns = array();
 			if ( is_array( $table ) ) {
 				foreach ( $table as $t ) {
 					$bitColumns += $this->getBitColumns( $this->tableName( $t ) );
@@ -456,10 +457,10 @@ class DatabaseMssql extends Database {
 			}
 
 			foreach ( $bitColumns as $col => $info ) {
-				$replace = [
+				$replace = array(
 					"MAX({$col})" => "MAX(CAST({$col} AS tinyint))",
 					"MIN({$col})" => "MIN(CAST({$col} AS tinyint))",
-				];
+				);
 				$sql = str_replace( array_keys( $replace ), array_values( $replace ), $sql );
 			}
 		}
@@ -505,7 +506,7 @@ class DatabaseMssql extends Database {
 	 * @return int
 	 */
 	public function estimateRowCount( $table, $vars = '*', $conds = '',
-		$fname = __METHOD__, $options = []
+		$fname = __METHOD__, $options = array()
 	) {
 		// http://msdn2.microsoft.com/en-us/library/aa259203.aspx
 		$options['EXPLAIN'] = true;
@@ -542,7 +543,7 @@ class DatabaseMssql extends Database {
 			return null;
 		}
 
-		$result = [];
+		$result = array();
 		foreach ( $res as $row ) {
 			if ( $row->index_name == $index ) {
 				$row->Non_unique = !stristr( $row->index_description, "unique" );
@@ -579,20 +580,20 @@ class DatabaseMssql extends Database {
 	 * @return bool
 	 * @throws Exception
 	 */
-	public function insert( $table, $arrToInsert, $fname = __METHOD__, $options = [] ) {
+	public function insert( $table, $arrToInsert, $fname = __METHOD__, $options = array() ) {
 		# No rows to insert, easy just return now
 		if ( !count( $arrToInsert ) ) {
 			return true;
 		}
 
 		if ( !is_array( $options ) ) {
-			$options = [ $options ];
+			$options = array( $options );
 		}
 
 		$table = $this->tableName( $table );
 
 		if ( !( isset( $arrToInsert[0] ) && is_array( $arrToInsert[0] ) ) ) { // Not multi row
-			$arrToInsert = [ 0 => $arrToInsert ]; // make everything multi row compatible
+			$arrToInsert = array( 0 => $arrToInsert ); // make everything multi row compatible
 		}
 
 		// We know the table we're inserting into, get its identity column
@@ -617,7 +618,7 @@ class DatabaseMssql extends Database {
 		// INSERT IGNORE is not supported by SQL Server
 		// remove IGNORE from options list and set ignore flag to true
 		if ( in_array( 'IGNORE', $options ) ) {
-			$options = array_diff( $options, [ 'IGNORE' ] );
+			$options = array_diff( $options, array( 'IGNORE' ) );
 			$this->mIgnoreDupKeyErrors = true;
 		}
 
@@ -719,7 +720,7 @@ class DatabaseMssql extends Database {
 	 * @throws Exception
 	 */
 	public function insertSelect( $destTable, $srcTable, $varMap, $conds, $fname = __METHOD__,
-		$insertOptions = [], $selectOptions = []
+		$insertOptions = array(), $selectOptions = array()
 	) {
 		$this->mScrollableCursor = false;
 		try {
@@ -767,14 +768,14 @@ class DatabaseMssql extends Database {
 	 * @throws Exception
 	 * @throws MWException
 	 */
-	function update( $table, $values, $conds, $fname = __METHOD__, $options = [] ) {
+	function update( $table, $values, $conds, $fname = __METHOD__, $options = array() ) {
 		$table = $this->tableName( $table );
 		$binaryColumns = $this->getBinaryColumns( $table );
 
 		$opts = $this->makeUpdateOptions( $options );
 		$sql = "UPDATE $opts $table SET " . $this->makeList( $values, LIST_SET, $binaryColumns );
 
-		if ( $conds !== [] && $conds !== '*' ) {
+		if ( $conds !== array() && $conds !== '*' ) {
 			$sql .= " WHERE " . $this->makeList( $conds, LIST_AND, $binaryColumns );
 		}
 
@@ -805,7 +806,7 @@ class DatabaseMssql extends Database {
 	 * @throws MWException|DBUnexpectedError
 	 * @return string
 	 */
-	public function makeList( $a, $mode = LIST_COMMA, $binaryColumns = [] ) {
+	public function makeList( $a, $mode = LIST_COMMA, $binaryColumns = array() ) {
 		if ( !is_array( $a ) ) {
 			throw new DBUnexpectedError( $this,
 				'DatabaseBase::makeList called with incorrect parameters' );
@@ -873,7 +874,7 @@ class DatabaseMssql extends Database {
 			}
 		} else {
 			// This one is fun, we need to pull out the select list as well as any ORDER BY clause
-			$select = $orderby = [];
+			$select = $orderby = array();
 			$s1 = preg_match( '#SELECT\s+(.+?)\s+FROM#Dis', $sql, $select );
 			$s2 = preg_match( '#(ORDER BY\s+.+?)(\s*FOR XML .*)?$#Dis', $sql, $orderby );
 			$overOrder = $postOrder = '';
@@ -1154,7 +1155,7 @@ class DatabaseMssql extends Database {
 		$tailOpts = '';
 		$startOpts = '';
 
-		$noKeyOptions = [];
+		$noKeyOptions = array();
 		foreach ( $options as $key => $option ) {
 			if ( is_numeric( $key ) ) {
 				$noKeyOptions[$option] = true;
@@ -1175,7 +1176,7 @@ class DatabaseMssql extends Database {
 		}
 
 		// we want this to be compatible with the output of parent::makeSelectOptions()
-		return [ $startOpts, '', $tailOpts, '' ];
+		return array( $startOpts, '', $tailOpts, '' );
 	}
 
 	/**
@@ -1212,7 +1213,7 @@ class DatabaseMssql extends Database {
 	 * @since 1.23
 	 */
 	public function buildGroupConcatField( $delim, $table, $field, $conds = '',
-		$join_conds = []
+		$join_conds = array()
 	) {
 		$gcsq = 'gcsq_' . $this->mSubqueryId;
 		$this->mSubqueryId++;
@@ -1220,7 +1221,7 @@ class DatabaseMssql extends Database {
 		$delimLen = strlen( $delim );
 		$fld = "{$field} + {$this->addQuotes( $delim )}";
 		$sql = "(SELECT LEFT({$field}, LEN({$field}) - {$delimLen}) FROM ("
-			. $this->selectSQLText( $table, $fld, $conds, null, [ 'FOR XML' ], $join_conds )
+			. $this->selectSQLText( $table, $fld, $conds, null, array( 'FOR XML' ), $join_conds )
 			. ") {$gcsq} ({$field}))";
 
 		return $sql;
@@ -1249,7 +1250,7 @@ class DatabaseMssql extends Database {
 
 		return isset( $this->mBinaryColumnCache[$tableRaw] )
 			? $this->mBinaryColumnCache[$tableRaw]
-			: [];
+			: array();
 	}
 
 	/**
@@ -1266,19 +1267,19 @@ class DatabaseMssql extends Database {
 
 		return isset( $this->mBitColumnCache[$tableRaw] )
 			? $this->mBitColumnCache[$tableRaw]
-			: [];
+			: array();
 	}
 
 	private function populateColumnCaches() {
 		$res = $this->select( 'INFORMATION_SCHEMA.COLUMNS', '*',
-			[
+			array(
 				'TABLE_CATALOG' => $this->mDBname,
 				'TABLE_SCHEMA' => $this->mSchema,
-				'DATA_TYPE' => [ 'varbinary', 'binary', 'image', 'bit' ]
-			] );
+				'DATA_TYPE' => array( 'varbinary', 'binary', 'image', 'bit' )
+			) );
 
-		$this->mBinaryColumnCache = [];
-		$this->mBitColumnCache = [];
+		$this->mBinaryColumnCache = array();
+		$this->mBitColumnCache = array();
 		foreach ( $res as $row ) {
 			if ( $row->DATA_TYPE == 'bit' ) {
 				$this->mBitColumnCache[$row->TABLE_NAME][$row->COLUMN_NAME] = $row;
@@ -1428,7 +1429,7 @@ class MssqlResultWrapper extends ResultWrapper {
 		$res = $this->result;
 
 		if ( $this->mSeekTo !== null ) {
-			$result = sqlsrv_fetch_object( $res, 'stdClass', [],
+			$result = sqlsrv_fetch_object( $res, 'stdClass', array(),
 				SQLSRV_SCROLL_ABSOLUTE, $this->mSeekTo );
 			$this->mSeekTo = null;
 		} else {

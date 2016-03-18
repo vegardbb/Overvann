@@ -22,9 +22,7 @@
 
 // Bail on old versions of PHP, or if composer has not been run yet to install
 // dependencies. Using dirname( __FILE__ ) here because __DIR__ is PHP5.3+.
-// @codingStandardsIgnoreStart MediaWiki.Usage.DirUsage.FunctionFound
 require_once dirname( __FILE__ ) . '/../includes/PHPVersionCheck.php';
-// @codingStandardsIgnoreEnd
 wfEntryPointCheck( 'cli' );
 
 /**
@@ -63,19 +61,19 @@ abstract class Maintenance {
 	const STDIN_ALL = 'all';
 
 	// This is the desired params
-	protected $mParams = [];
+	protected $mParams = array();
 
 	// Array of mapping short parameters to long ones
-	protected $mShortParamsMap = [];
+	protected $mShortParamsMap = array();
 
 	// Array of desired args
-	protected $mArgList = [];
+	protected $mArgList = array();
 
 	// This is the list of options that were actually passed
-	protected $mOptions = [];
+	protected $mOptions = array();
 
 	// This is the list of arguments that were actually passed
-	protected $mArgs = [];
+	protected $mArgs = array();
 
 	// Name of the script currently running
 	protected $mSelf;
@@ -84,7 +82,7 @@ abstract class Maintenance {
 	protected $mQuiet = false;
 	protected $mDbUser, $mDbPass;
 
-	// A description of the script, children should change this via addDescription()
+	// A description of the script, children should change this
 	protected $mDescription = '';
 
 	// Have we already loaded our user input?
@@ -99,18 +97,15 @@ abstract class Maintenance {
 	protected $mBatchSize = null;
 
 	// Generic options added by addDefaultParams()
-	private $mGenericParameters = [];
+	private $mGenericParameters = array();
 	// Generic options which might or not be supported by the script
-	private $mDependantParameters = [];
+	private $mDependantParameters = array();
 
 	/**
 	 * Used by getDB() / setDB()
-	 * @var IDatabase
+	 * @var DatabaseBase
 	 */
 	private $mDb = null;
-
-	/** @var float UNIX timestamp */
-	private $lastSlaveWait = 0.0;
 
 	/**
 	 * Used when creating separate schema files.
@@ -126,19 +121,6 @@ abstract class Maintenance {
 	private $config;
 
 	/**
-	 * Used to read the options in the order they were passed.
-	 * Useful for option chaining (Ex. dumpBackup.php). It will
-	 * be an empty array if the options are passed in through
-	 * loadParamsAndArgs( $self, $opts, $args ).
-	 *
-	 * This is an array of arrays where
-	 * 0 => the option and 1 => parameter value.
-	 *
-	 * @var array
-	 */
-	public $orderedOptions = [];
-
-	/**
 	 * Default constructor. Children should call this *first* if implementing
 	 * their own constructors
 	 */
@@ -150,7 +132,7 @@ abstract class Maintenance {
 			: realpath( __DIR__ . '/..' );
 
 		$this->addDefaultParams();
-		register_shutdown_function( [ $this, 'outputChanneled' ], false );
+		register_shutdown_function( array( $this, 'outputChanneled' ), false );
 	}
 
 	/**
@@ -176,7 +158,7 @@ abstract class Maintenance {
 		if ( $bt[0]['class'] !== 'Maintenance' || $bt[0]['function'] !== 'shouldExecute' ) {
 			return false; // last call should be to this function
 		}
-		$includeFuncs = [ 'require_once', 'require', 'include', 'include_once' ];
+		$includeFuncs = array( 'require_once', 'require', 'include', 'include_once' );
 		for ( $i = 1; $i < $count; $i++ ) {
 			if ( !in_array( $bt[$i]['function'], $includeFuncs ) ) {
 				return false; // previous calls should all be "requires"
@@ -200,18 +182,16 @@ abstract class Maintenance {
 	 * @param bool $required Is the param required?
 	 * @param bool $withArg Is an argument required with this option?
 	 * @param string $shortName Character to use as short name
-	 * @param bool $multiOccurrence Can this option be passed multiple times?
 	 */
 	protected function addOption( $name, $description, $required = false,
-		$withArg = false, $shortName = false, $multiOccurrence = false
+		$withArg = false, $shortName = false
 	) {
-		$this->mParams[$name] = [
+		$this->mParams[$name] = array(
 			'desc' => $description,
 			'require' => $required,
 			'withArg' => $withArg,
-			'shortName' => $shortName,
-			'multiOccurrence' => $multiOccurrence
-		];
+			'shortName' => $shortName
+		);
 
 		if ( $shortName !== false ) {
 			$this->mShortParamsMap[$shortName] = $name;
@@ -228,11 +208,7 @@ abstract class Maintenance {
 	}
 
 	/**
-	 * Get an option, or return the default.
-	 *
-	 * If the option was added to support multiple occurrences,
-	 * this will return an array.
-	 *
+	 * Get an option, or return the default
 	 * @param string $name The name of the param
 	 * @param mixed $default Anything you want, default null
 	 * @return mixed
@@ -255,11 +231,11 @@ abstract class Maintenance {
 	 * @param bool $required Is this required?
 	 */
 	protected function addArg( $arg, $description, $required = true ) {
-		$this->mArgList[] = [
+		$this->mArgList[] = array(
 			'name' => $arg,
 			'desc' => $description,
 			'require' => $required
-		];
+		);
 	}
 
 	/**
@@ -484,7 +460,7 @@ abstract class Maintenance {
 		}
 
 		# Save additional script dependant options to display
-		#  them separately in help
+		# them separately in help
 		$this->mDependantParameters = array_diff_key( $this->mParams, $this->mGenericParameters );
 	}
 
@@ -635,9 +611,9 @@ abstract class Maintenance {
 		if ( is_array( $wgProfiler ) && isset( $wgProfiler['class'] ) ) {
 			$class = $wgProfiler['class'];
 			$profiler = new $class(
-				[ 'sampling' => 1, 'output' => [ $output ] ]
+				array( 'sampling' => 1, 'output' => array( $output ) )
 					+ $wgProfiler
-					+ [ 'threshold' => $wgProfileLimit ]
+					+ array( 'threshold' => $wgProfileLimit )
 			);
 			$profiler->setTemplated( true );
 			Profiler::replaceStubInstance( $profiler );
@@ -652,118 +628,9 @@ abstract class Maintenance {
 	 * Clear all params and arguments.
 	 */
 	public function clearParamsAndArgs() {
-		$this->mOptions = [];
-		$this->mArgs = [];
+		$this->mOptions = array();
+		$this->mArgs = array();
 		$this->mInputLoaded = false;
-	}
-
-	/**
-	 * Load params and arguments from a given array
-	 * of command-line arguments
-	 *
-	 * @since 1.27
-	 * @param array $argv
-	 */
-	public function loadWithArgv( $argv ) {
-		$options = [];
-		$args = [];
-		$this->orderedOptions = [];
-
-		# Parse arguments
-		for ( $arg = reset( $argv ); $arg !== false; $arg = next( $argv ) ) {
-			if ( $arg == '--' ) {
-				# End of options, remainder should be considered arguments
-				$arg = next( $argv );
-				while ( $arg !== false ) {
-					$args[] = $arg;
-					$arg = next( $argv );
-				}
-				break;
-			} elseif ( substr( $arg, 0, 2 ) == '--' ) {
-				# Long options
-				$option = substr( $arg, 2 );
-				if ( isset( $this->mParams[$option] ) && $this->mParams[$option]['withArg'] ) {
-					$param = next( $argv );
-					if ( $param === false ) {
-						$this->error( "\nERROR: $option parameter needs a value after it\n" );
-						$this->maybeHelp( true );
-					}
-
-					$this->setParam( $options, $option, $param );
-				} else {
-					$bits = explode( '=', $option, 2 );
-					if ( count( $bits ) > 1 ) {
-						$option = $bits[0];
-						$param = $bits[1];
-					} else {
-						$param = 1;
-					}
-
-					$this->setParam( $options, $option, $param );
-				}
-			} elseif ( $arg == '-' ) {
-				# Lonely "-", often used to indicate stdin or stdout.
-				$args[] = $arg;
-			} elseif ( substr( $arg, 0, 1 ) == '-' ) {
-				# Short options
-				$argLength = strlen( $arg );
-				for ( $p = 1; $p < $argLength; $p++ ) {
-					$option = $arg[$p];
-					if ( !isset( $this->mParams[$option] ) && isset( $this->mShortParamsMap[$option] ) ) {
-						$option = $this->mShortParamsMap[$option];
-					}
-
-					if ( isset( $this->mParams[$option]['withArg'] ) && $this->mParams[$option]['withArg'] ) {
-						$param = next( $argv );
-						if ( $param === false ) {
-							$this->error( "\nERROR: $option parameter needs a value after it\n" );
-							$this->maybeHelp( true );
-						}
-						$this->setParam( $options, $option, $param );
-					} else {
-						$this->setParam( $options, $option, 1 );
-					}
-				}
-			} else {
-				$args[] = $arg;
-			}
-		}
-
-		$this->mOptions = $options;
-		$this->mArgs = $args;
-		$this->loadSpecialVars();
-		$this->mInputLoaded = true;
-	}
-
-	/**
-	 * Helper function used solely by loadParamsAndArgs
-	 * to prevent code duplication
-	 *
-	 * This sets the param in the options array based on
-	 * whether or not it can be specified multiple times.
-	 *
-	 * @since 1.27
-	 * @param array $options
-	 * @param string $option
-	 * @param mixed $value
-	 */
-	private function setParam( &$options, $option, $value ) {
-		$this->orderedOptions[] = [ $option, $value ];
-
-		if ( isset( $this->mParams[$option] ) ) {
-			$multi = $this->mParams[$option]['multiOccurrence'];
-			$exists = array_key_exists( $option, $options );
-			if ( $multi && $exists ) {
-				$options[$option][] = $value;
-			} elseif ( $multi ) {
-				$options[$option] = [ $value ];
-			} elseif ( !$exists ) {
-				$options[$option] = $value;
-			} else {
-				$this->error( "\nERROR: $option parameter given twice\n" );
-				$this->maybeHelp( true );
-			}
-		}
 	}
 
 	/**
@@ -800,8 +667,80 @@ abstract class Maintenance {
 		}
 
 		global $argv;
-		$this->mSelf = $argv[0];
-		$this->loadWithArgv( array_slice( $argv, 1 ) );
+		$this->mSelf = array_shift( $argv );
+
+		$options = array();
+		$args = array();
+
+		# Parse arguments
+		for ( $arg = reset( $argv ); $arg !== false; $arg = next( $argv ) ) {
+			if ( $arg == '--' ) {
+				# End of options, remainder should be considered arguments
+				$arg = next( $argv );
+				while ( $arg !== false ) {
+					$args[] = $arg;
+					$arg = next( $argv );
+				}
+				break;
+			} elseif ( substr( $arg, 0, 2 ) == '--' ) {
+				# Long options
+				$option = substr( $arg, 2 );
+				if ( array_key_exists( $option, $options ) ) {
+					$this->error( "\nERROR: $option parameter given twice\n" );
+					$this->maybeHelp( true );
+				}
+				if ( isset( $this->mParams[$option] ) && $this->mParams[$option]['withArg'] ) {
+					$param = next( $argv );
+					if ( $param === false ) {
+						$this->error( "\nERROR: $option parameter needs a value after it\n" );
+						$this->maybeHelp( true );
+					}
+					$options[$option] = $param;
+				} else {
+					$bits = explode( '=', $option, 2 );
+					if ( count( $bits ) > 1 ) {
+						$option = $bits[0];
+						$param = $bits[1];
+					} else {
+						$param = 1;
+					}
+					$options[$option] = $param;
+				}
+			} elseif ( $arg == '-' ) {
+				# Lonely "-", often used to indicate stdin or stdout.
+				$args[] = $arg;
+			} elseif ( substr( $arg, 0, 1 ) == '-' ) {
+				# Short options
+				$argLength = strlen( $arg );
+				for ( $p = 1; $p < $argLength; $p++ ) {
+					$option = $arg[$p];
+					if ( !isset( $this->mParams[$option] ) && isset( $this->mShortParamsMap[$option] ) ) {
+						$option = $this->mShortParamsMap[$option];
+					}
+					if ( array_key_exists( $option, $options ) ) {
+						$this->error( "\nERROR: $option parameter given twice\n" );
+						$this->maybeHelp( true );
+					}
+					if ( isset( $this->mParams[$option]['withArg'] ) && $this->mParams[$option]['withArg'] ) {
+						$param = next( $argv );
+						if ( $param === false ) {
+							$this->error( "\nERROR: $option parameter needs a value after it\n" );
+							$this->maybeHelp( true );
+						}
+						$options[$option] = $param;
+					} else {
+						$options[$option] = 1;
+					}
+				}
+			} else {
+				$args[] = $arg;
+			}
+		}
+
+		$this->mOptions = $options;
+		$this->mArgs = $args;
+		$this->loadSpecialVars();
+		$this->mInputLoaded = true;
 	}
 
 	/**
@@ -1085,11 +1024,11 @@ abstract class Maintenance {
 	public function purgeRedundantText( $delete = true ) {
 		# Data should come off the master, wrapped in a transaction
 		$dbw = $this->getDB( DB_MASTER );
-		$this->beginTransaction( $dbw, __METHOD__ );
+		$dbw->begin( __METHOD__ );
 
 		# Get "active" text records from the revisions table
 		$this->output( 'Searching for active text records in revisions table...' );
-		$res = $dbw->select( 'revision', 'rev_text_id', [], __METHOD__, [ 'DISTINCT' ] );
+		$res = $dbw->select( 'revision', 'rev_text_id', array(), __METHOD__, array( 'DISTINCT' ) );
 		foreach ( $res as $row ) {
 			$cur[] = $row->rev_text_id;
 		}
@@ -1097,7 +1036,7 @@ abstract class Maintenance {
 
 		# Get "active" text records from the archive table
 		$this->output( 'Searching for active text records in archive table...' );
-		$res = $dbw->select( 'archive', 'ar_text_id', [], __METHOD__, [ 'DISTINCT' ] );
+		$res = $dbw->select( 'archive', 'ar_text_id', array(), __METHOD__, array( 'DISTINCT' ) );
 		foreach ( $res as $row ) {
 			# old pre-MW 1.5 records can have null ar_text_id's.
 			if ( $row->ar_text_id !== null ) {
@@ -1109,8 +1048,8 @@ abstract class Maintenance {
 		# Get the IDs of all text records not in these sets
 		$this->output( 'Searching for inactive text records...' );
 		$cond = 'old_id NOT IN ( ' . $dbw->makeList( $cur ) . ' )';
-		$res = $dbw->select( 'text', 'old_id', [ $cond ], __METHOD__, [ 'DISTINCT' ] );
-		$old = [];
+		$res = $dbw->select( 'text', 'old_id', array( $cond ), __METHOD__, array( 'DISTINCT' ) );
+		$old = array();
 		foreach ( $res as $row ) {
 			$old[] = $row->old_id;
 		}
@@ -1123,12 +1062,12 @@ abstract class Maintenance {
 		# Delete as appropriate
 		if ( $delete && $count ) {
 			$this->output( 'Deleting...' );
-			$dbw->delete( 'text', [ 'old_id' => $old ], __METHOD__ );
+			$dbw->delete( 'text', array( 'old_id' => $old ), __METHOD__ );
 			$this->output( "done.\n" );
 		}
 
 		# Done
-		$this->commitTransaction( $dbw, __METHOD__ );
+		$dbw->commit( __METHOD__ );
 	}
 
 	/**
@@ -1144,12 +1083,9 @@ abstract class Maintenance {
 	 * If not set, wfGetDB() will be used.
 	 * This function has the same parameters as wfGetDB()
 	 *
-	 * @param integer $db DB index (DB_SLAVE/DB_MASTER)
-	 * @param array $groups; default: empty array
-	 * @param string|bool $wiki; default: current wiki
-	 * @return IDatabase
+	 * @return DatabaseBase
 	 */
-	protected function getDB( $db, $groups = [], $wiki = false ) {
+	protected function getDB( $db, $groups = array(), $wiki = false ) {
 		if ( is_null( $this->mDb ) ) {
 			return wfGetDB( $db, $groups, $wiki );
 		} else {
@@ -1160,58 +1096,10 @@ abstract class Maintenance {
 	/**
 	 * Sets database object to be returned by getDB().
 	 *
-	 * @param IDatabase $db Database object to be used
+	 * @param DatabaseBase $db Database object to be used
 	 */
-	public function setDB( IDatabase $db ) {
+	public function setDB( $db ) {
 		$this->mDb = $db;
-	}
-
-	/**
-	 * Begin a transcation on a DB
-	 *
-	 * This method makes it clear that begin() is called from a maintenance script,
-	 * which has outermost scope. This is safe, unlike $dbw->begin() called in other places.
-	 *
-	 * @param IDatabase $dbw
-	 * @param string $fname Caller name
-	 * @since 1.27
-	 */
-	protected function beginTransaction( IDatabase $dbw, $fname ) {
-		$dbw->begin( $fname );
-	}
-
-	/**
-	 * Commit the transcation on a DB handle and wait for slaves to catch up
-	 *
-	 * This method makes it clear that commit() is called from a maintenance script,
-	 * which has outermost scope. This is safe, unlike $dbw->commit() called in other places.
-	 *
-	 * @param IDatabase $dbw
-	 * @param string $fname Caller name
-	 * @return bool Whether the slave wait succeeded
-	 * @since 1.27
-	 */
-	protected function commitTransaction( IDatabase $dbw, $fname ) {
-		$dbw->commit( $fname );
-
-		$ok = wfWaitForSlaves( $this->lastSlaveWait, false, '*', 30 );
-		$this->lastSlaveWait = microtime( true );
-
-		return $ok;
-	}
-
-	/**
-	 * Rollback the transcation on a DB handle
-	 *
-	 * This method makes it clear that rollback() is called from a maintenance script,
-	 * which has outermost scope. This is safe, unlike $dbw->rollback() called in other places.
-	 *
-	 * @param IDatabase $dbw
-	 * @param string $fname Caller name
-	 * @since 1.27
-	 */
-	protected function rollbackTransaction( IDatabase $dbw, $fname ) {
-		$dbw->rollback( $fname );
 	}
 
 	/**
@@ -1219,16 +1107,8 @@ abstract class Maintenance {
 	 * @param DatabaseBase &$db
 	 */
 	private function lockSearchindex( $db ) {
-		$write = [ 'searchindex' ];
-		$read = [
-			'page',
-			'revision',
-			'text',
-			'interwiki',
-			'l10n_cache',
-			'user',
-			'page_restrictions'
-		];
+		$write = array( 'searchindex' );
+		$read = array( 'page', 'revision', 'text', 'interwiki', 'l10n_cache', 'user', 'page_restrictions' );
 		$db->lockTables( $read, $write, __CLASS__ . '::' . __METHOD__ );
 	}
 
@@ -1371,13 +1251,13 @@ abstract class Maintenance {
 	 * @return string
 	 */
 	private static function readlineEmulation( $prompt ) {
-		$bash = Installer::locateExecutableInDefaultPaths( [ 'bash' ] );
+		$bash = Installer::locateExecutableInDefaultPaths( array( 'bash' ) );
 		if ( !wfIsWindows() && $bash ) {
 			$retval = false;
 			$encPrompt = wfEscapeShellArg( $prompt );
 			$command = "read -er -p $encPrompt && echo \"\$REPLY\"";
 			$encCommand = wfEscapeShellArg( $command );
-			$line = wfShellExec( "$bash -c $encCommand", $retval, [], [ 'walltime' => 0 ] );
+			$line = wfShellExec( "$bash -c $encCommand", $retval, array(), array( 'walltime' => 0 ) );
 
 			if ( $retval == 0 ) {
 				return $line;
@@ -1428,7 +1308,7 @@ abstract class LoggedUpdateMaintenance extends Maintenance {
 		$key = $this->getUpdateKey();
 
 		if ( !$this->hasOption( 'force' )
-			&& $db->selectRow( 'updatelog', '1', [ 'ul_key' => $key ], __METHOD__ )
+			&& $db->selectRow( 'updatelog', '1', array( 'ul_key' => $key ), __METHOD__ )
 		) {
 			$this->output( "..." . $this->updateSkippedMessage() . "\n" );
 
@@ -1439,7 +1319,7 @@ abstract class LoggedUpdateMaintenance extends Maintenance {
 			return false;
 		}
 
-		if ( $db->insert( 'updatelog', [ 'ul_key' => $key ], __METHOD__, 'IGNORE' ) ) {
+		if ( $db->insert( 'updatelog', array( 'ul_key' => $key ), __METHOD__, 'IGNORE' ) ) {
 			return true;
 		} else {
 			$this->output( $this->updatelogFailedMessage() . "\n" );

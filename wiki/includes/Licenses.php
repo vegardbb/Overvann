@@ -32,7 +32,7 @@ class Licenses extends HTMLFormField {
 	protected $msg;
 
 	/** @var array */
-	protected $licenses = [];
+	protected $licenses = array();
 
 	/** @var string */
 	protected $html;
@@ -56,7 +56,7 @@ class Licenses extends HTMLFormField {
 	 * @private
 	 */
 	protected function makeLicenses() {
-		$levels = [];
+		$levels = array();
 		$lines = explode( "\n", $this->msg );
 
 		foreach ( $lines as $line ) {
@@ -88,7 +88,7 @@ class Licenses extends HTMLFormField {
 	 */
 	protected function trimStars( $str ) {
 		$numStars = strspn( $str, '*' );
-		return [ $numStars, ltrim( substr( $str, $numStars ), ' ' ) ];
+		return array( $numStars, ltrim( substr( $str, $numStars ), ' ' ) );
 	}
 
 	/**
@@ -115,17 +115,17 @@ class Licenses extends HTMLFormField {
 			if ( is_array( $val ) ) {
 				$this->html .= $this->outputOption(
 					$key, '',
-					[
+					array(
 						'disabled' => 'disabled',
 						'style' => 'color: GrayText', // for MSIE
-					],
+					),
 					$depth
 				);
 				$this->makeHtml( $val, $depth + 1 );
 			} else {
 				$this->html .= $this->outputOption(
 					$val->text, $val->template,
-					[ 'title' => '{{' . $val->template . '}}' ],
+					array( 'title' => '{{' . $val->template . '}}' ),
 					$depth
 				);
 			}
@@ -173,13 +173,13 @@ class Licenses extends HTMLFormField {
 		$this->selected = $value;
 
 		$this->html = $this->outputOption( wfMessage( 'nolicense' )->text(), '',
-			(bool)$this->selected ? null : [ 'selected' => 'selected' ] );
+			(bool)$this->selected ? null : array( 'selected' => 'selected' ) );
 		$this->makeHtml( $this->getLicenses() );
 
-		$attribs = [
+		$attribs = array(
 			'name' => $this->mName,
 			'id' => $this->mID
-		];
+		);
 		if ( !empty( $this->mParams['disabled'] ) ) {
 			$attibs['disabled'] = 'disabled';
 		}

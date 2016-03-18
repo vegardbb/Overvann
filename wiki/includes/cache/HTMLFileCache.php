@@ -65,7 +65,7 @@ class HTMLFileCache extends FileCacheBase {
 	 * @return array
 	 */
 	protected static function cacheablePageActions() {
-		return [ 'view', 'history' ];
+		return array( 'view', 'history' );
 	}
 
 	/**
@@ -96,12 +96,12 @@ class HTMLFileCache extends FileCacheBase {
 	 * @return bool
 	 */
 	public static function useFileCache( IContextSource $context ) {
-		global $wgUseFileCache, $wgDebugToolbar, $wgContLang;
+		global $wgUseFileCache, $wgShowIPinHeader, $wgDebugToolbar, $wgContLang;
 		if ( !$wgUseFileCache ) {
 			return false;
 		}
-		if ( $wgDebugToolbar ) {
-			wfDebug( "HTML file cache skipped. \$wgDebugToolbar on\n" );
+		if ( $wgShowIPinHeader || $wgDebugToolbar ) {
+			wfDebug( "HTML file cache skipped. Either \$wgShowIPinHeader and/or \$wgDebugToolbar on\n" );
 
 			return false;
 		}
@@ -132,7 +132,7 @@ class HTMLFileCache extends FileCacheBase {
 			return false;
 		}
 		// Allow extensions to disable caching
-		return Hooks::run( 'HTMLFileCache::useFileCache', [ $context ] );
+		return Hooks::run( 'HTMLFileCache::useFileCache', array( $context ) );
 	}
 
 	/**
@@ -178,7 +178,7 @@ class HTMLFileCache extends FileCacheBase {
 			return $text;
 		}
 
-		wfDebug( __METHOD__ . "()\n", 'private' );
+		wfDebug( __METHOD__ . "()\n", 'log' );
 
 		$now = wfTimestampNow();
 		if ( $this->useGzip() ) {

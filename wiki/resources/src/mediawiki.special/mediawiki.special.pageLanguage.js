@@ -1,11 +1,9 @@
-/*!
- * JavaScript module used on Special:PageLanguage
- */
-( function ( $, OO ) {
-	$( function () {
+( function ( $ ) {
+	$( document ).ready( function () {
+
 		// Select the 'Language select' option if user is trying to select language
-		OO.ui.infuse( 'mw-pl-languageselector' ).on( 'change', function () {
-			OO.ui.infuse( 'mw-pl-options' ).setValue( '2' );
+		$( '#mw-pl-languageselector' ).on( 'click', function () {
+			$( '#mw-pl-options-2' ).prop( 'checked', true );
 		} );
 	} );
-}( jQuery, OO ) );
+}( jQuery ) );

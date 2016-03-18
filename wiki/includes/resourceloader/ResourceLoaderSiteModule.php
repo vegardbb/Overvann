@@ -1,6 +1,6 @@
 <?php
 /**
- * ResourceLoader module for site customizations.
+ * Resource loader module for site customizations.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,15 +34,15 @@ class ResourceLoaderSiteModule extends ResourceLoaderWikiModule {
 	 * @return array List of pages
 	 */
 	protected function getPages( ResourceLoaderContext $context ) {
-		$pages = [];
+		$pages = array();
 		if ( $this->getConfig()->get( 'UseSiteJs' ) ) {
-			$pages['MediaWiki:Common.js'] = [ 'type' => 'script' ];
-			$pages['MediaWiki:' . ucfirst( $context->getSkin() ) . '.js'] = [ 'type' => 'script' ];
+			$pages['MediaWiki:Common.js'] = array( 'type' => 'script' );
+			$pages['MediaWiki:' . ucfirst( $context->getSkin() ) . '.js'] = array( 'type' => 'script' );
 		}
 		if ( $this->getConfig()->get( 'UseSiteCss' ) ) {
-			$pages['MediaWiki:Common.css'] = [ 'type' => 'style' ];
-			$pages['MediaWiki:' . ucfirst( $context->getSkin() ) . '.css'] = [ 'type' => 'style' ];
-			$pages['MediaWiki:Print.css'] = [ 'type' => 'style', 'media' => 'print' ];
+			$pages['MediaWiki:Common.css'] = array( 'type' => 'style' );
+			$pages['MediaWiki:' . ucfirst( $context->getSkin() ) . '.css'] = array( 'type' => 'style' );
+			$pages['MediaWiki:Print.css'] = array( 'type' => 'style', 'media' => 'print' );
 
 		}
 		return $pages;

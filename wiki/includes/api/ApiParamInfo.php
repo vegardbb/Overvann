@@ -48,28 +48,30 @@ class ApiParamInfo extends ApiBase {
 		if ( is_array( $params['modules'] ) ) {
 			$modules = $params['modules'];
 		} else {
-			$modules = [];
+			$modules = array();
 		}
 
 		if ( is_array( $params['querymodules'] ) ) {
+			$this->logFeatureUsage( 'action=paraminfo&querymodules' );
 			$queryModules = $params['querymodules'];
 			foreach ( $queryModules as $m ) {
 				$modules[] = 'query+' . $m;
 			}
 		} else {
-			$queryModules = [];
+			$queryModules = array();
 		}
 
 		if ( is_array( $params['formatmodules'] ) ) {
+			$this->logFeatureUsage( 'action=paraminfo&formatmodules' );
 			$formatModules = $params['formatmodules'];
 			foreach ( $formatModules as $m ) {
 				$modules[] = $m;
 			}
 		} else {
-			$formatModules = [];
+			$formatModules = array();
 		}
 
-		$res = [];
+		$res = array();
 
 		foreach ( $modules as $m ) {
 			try {
@@ -100,17 +102,19 @@ class ApiParamInfo extends ApiBase {
 		}
 
 		$result = $this->getResult();
-		$result->addValue( [ $this->getModuleName() ], 'helpformat', $this->helpFormat );
+		$result->addValue( array( $this->getModuleName() ), 'helpformat', $this->helpFormat );
 
 		foreach ( $res as $key => $stuff ) {
 			ApiResult::setIndexedTagName( $res[$key], 'module' );
 		}
 
 		if ( $params['mainmodule'] ) {
+			$this->logFeatureUsage( 'action=paraminfo&mainmodule' );
 			$res['mainmodule'] = $this->getModuleInfo( $this->getMain() );
 		}
 
 		if ( $params['pagesetmodule'] ) {
+			$this->logFeatureUsage( 'action=paraminfo&pagesetmodule' );
 			$pageSet = new ApiPageSet( $this->getMain()->getModuleManager()->getModule( 'query' ) );
 			$res['pagesetmodule'] = $this->getModuleInfo( $pageSet );
 			unset( $res['pagesetmodule']['name'] );
@@ -133,22 +137,22 @@ class ApiParamInfo extends ApiBase {
 				break;
 
 			case 'wikitext':
-				$ret = [];
+				$ret = array();
 				foreach ( $msgs as $m ) {
 					$ret[] = $m->setContext( $this->context )->text();
 				}
-				$res[$key] = implode( "\n\n", $ret );
+				$res[$key] = join( "\n\n", $ret );
 				if ( $joinLists ) {
 					$res[$key] = preg_replace( '!^(([*#:;])[^\n]*)\n\n(?=\2)!m', "$1\n", $res[$key] );
 				}
 				break;
 
 			case 'html':
-				$ret = [];
+				$ret = array();
 				foreach ( $msgs as $m ) {
 					$ret[] = $m->setContext( $this->context )->parseAsBlock();
 				}
-				$ret = implode( "\n", $ret );
+				$ret = join( "\n", $ret );
 				if ( $joinLists ) {
 					$ret = preg_replace( '!\s*</([oud]l)>\s*<\1>\s*!', "\n", $ret );
 				}
@@ -156,12 +160,12 @@ class ApiParamInfo extends ApiBase {
 				break;
 
 			case 'raw':
-				$res[$key] = [];
+				$res[$key] = array();
 				foreach ( $msgs as $m ) {
-					$a = [
+					$a = array(
 						'key' => $m->getKey(),
 						'params' => $m->getParams(),
-					];
+					);
 					if ( $m instanceof ApiHelpParamValueMessage ) {
 						$a['forvalue'] = $m->getParamValue();
 					}
@@ -177,7 +181,8 @@ class ApiParamInfo extends ApiBase {
 	 * @return ApiResult
 	 */
 	private function getModuleInfo( $module ) {
-		$ret = [];
+		$result = $this->getResult();
+		$ret = array();
 		$path = $module->getModulePath();
 
 		$ret['name'] = $module->getModuleName();
@@ -199,7 +204,7 @@ class ApiParamInfo extends ApiBase {
 				$ret['sourcename'] = $ret['source'];
 			}
 
-			$link = SpecialPage::getTitleFor( 'Version', 'License/' . $sourceInfo['name'] )->getFullURL();
+			$link = SpecialPage::getTitleFor( 'Version', 'License/' . $sourceInfo['name'] )->getFullUrl();
 			if ( isset( $sourceInfo['license-name'] ) ) {
 				$ret['licensetag'] = $sourceInfo['license-name'];
 				$ret['licenselink'] = (string)$link;
@@ -216,23 +221,23 @@ class ApiParamInfo extends ApiBase {
 
 		$ret['helpurls'] = (array)$module->getHelpUrls();
 		if ( isset( $ret['helpurls'][0] ) && $ret['helpurls'][0] === false ) {
-			$ret['helpurls'] = [];
+			$ret['helpurls'] = array();
 		}
 		ApiResult::setIndexedTagName( $ret['helpurls'], 'helpurl' );
 
 		if ( $this->helpFormat !== 'none' ) {
-			$ret['examples'] = [];
+			$ret['examples'] = array();
 			$examples = $module->getExamplesMessages();
 			foreach ( $examples as $qs => $msg ) {
-				$item = [
+				$item = array(
 					'query' => $qs
-				];
-				$msg = ApiBase::makeMessage( $msg, $this->context, [
+				);
+				$msg = ApiBase::makeMessage( $msg, $this->context, array(
 					$module->getModulePrefix(),
 					$module->getModuleName(),
 					$module->getModulePath()
-				] );
-				$this->formatHelpMessages( $item, 'description', [ $msg ] );
+				) );
+				$this->formatHelpMessages( $item, 'description', array( $msg ) );
 				if ( isset( $item['description'] ) ) {
 					if ( is_array( $item['description'] ) ) {
 						$item['description'] = $item['description'][0];
@@ -245,17 +250,17 @@ class ApiParamInfo extends ApiBase {
 			ApiResult::setIndexedTagName( $ret['examples'], 'example' );
 		}
 
-		$ret['parameters'] = [];
+		$ret['parameters'] = array();
 		$params = $module->getFinalParams( ApiBase::GET_VALUES_FOR_HELP );
 		$paramDesc = $module->getFinalParamDescription();
 		foreach ( $params as $name => $settings ) {
 			if ( !is_array( $settings ) ) {
-				$settings = [ ApiBase::PARAM_DFLT => $settings ];
+				$settings = array( ApiBase::PARAM_DFLT => $settings );
 			}
 
-			$item = [
+			$item = array(
 				'name' => $name
-			];
+			);
 			if ( isset( $paramDesc[$name] ) ) {
 				$this->formatHelpMessages( $item, 'description', $paramDesc[$name], true );
 			}
@@ -330,7 +335,7 @@ class ApiParamInfo extends ApiBase {
 						sort( $item['type'] );
 						$prefix = $module->isMain()
 							? '' : ( $module->getModulePath() . '+' );
-						$item['submodules'] = [];
+						$item['submodules'] = array();
 						foreach ( $item['type'] as $v ) {
 							$item['submodules'][$v] = $prefix . $v;
 						}
@@ -338,8 +343,6 @@ class ApiParamInfo extends ApiBase {
 					if ( isset( $settings[ApiBase::PARAM_SUBMODULE_PARAM_PREFIX] ) ) {
 						$item['submoduleparamprefix'] = $settings[ApiBase::PARAM_SUBMODULE_PARAM_PREFIX];
 					}
-				} elseif ( $settings[ApiBase::PARAM_TYPE] === 'tags' ) {
-					$item['type'] = ChangeTags::listExplicitlyDefinedTags();
 				} else {
 					$item['type'] = $settings[ApiBase::PARAM_TYPE];
 				}
@@ -363,22 +366,22 @@ class ApiParamInfo extends ApiBase {
 			}
 
 			if ( !empty( $settings[ApiBase::PARAM_HELP_MSG_INFO] ) ) {
-				$item['info'] = [];
+				$item['info'] = array();
 				foreach ( $settings[ApiBase::PARAM_HELP_MSG_INFO] as $i ) {
 					$tag = array_shift( $i );
-					$info = [
+					$info = array(
 						'name' => $tag,
-					];
+					);
 					if ( count( $i ) ) {
 						$info['values'] = $i;
 						ApiResult::setIndexedTagName( $info['values'], 'v' );
 					}
-					$this->formatHelpMessages( $info, 'text', [
+					$this->formatHelpMessages( $info, 'text', array(
 						$this->context->msg( "apihelp-{$path}-paraminfo-{$tag}" )
 							->numParams( count( $i ) )
 							->params( $this->context->getLanguage()->commaList( $i ) )
 							->params( $module->getModulePrefix() )
-					] );
+					) );
 					ApiResult::setSubelementsList( $info, 'text' );
 					$item['info'][] = $info;
 				}
@@ -388,20 +391,6 @@ class ApiParamInfo extends ApiBase {
 			$ret['parameters'][] = $item;
 		}
 		ApiResult::setIndexedTagName( $ret['parameters'], 'param' );
-
-		$dynamicParams = $module->dynamicParameterDocumentation();
-		if ( $dynamicParams !== null ) {
-			if ( $this->helpFormat === 'none' ) {
-				$ret['dynamicparameters'] = true;
-			} else {
-				$dynamicParams = ApiBase::makeMessage( $dynamicParams, $this->context, [
-					$module->getModulePrefix(),
-					$module->getModuleName(),
-					$module->getModulePath()
-				] );
-				$this->formatHelpMessages( $ret, 'dynamicparameters', [ $dynamicParams ] );
-			}
-		}
 
 		return $ret;
 	}
@@ -418,39 +407,39 @@ class ApiParamInfo extends ApiBase {
 		$formatmodules = $this->getMain()->getModuleManager()->getNames( 'format' );
 		sort( $formatmodules );
 
-		return [
-			'modules' => [
+		return array(
+			'modules' => array(
 				ApiBase::PARAM_ISMULTI => true,
-			],
-			'helpformat' => [
+			),
+			'helpformat' => array(
 				ApiBase::PARAM_DFLT => 'none',
-				ApiBase::PARAM_TYPE => [ 'html', 'wikitext', 'raw', 'none' ],
-			],
+				ApiBase::PARAM_TYPE => array( 'html', 'wikitext', 'raw', 'none' ),
+			),
 
-			'querymodules' => [
+			'querymodules' => array(
 				ApiBase::PARAM_DEPRECATED => true,
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_TYPE => $querymodules,
-			],
-			'mainmodule' => [
+			),
+			'mainmodule' => array(
 				ApiBase::PARAM_DEPRECATED => true,
-			],
-			'pagesetmodule' => [
+			),
+			'pagesetmodule' => array(
 				ApiBase::PARAM_DEPRECATED => true,
-			],
-			'formatmodules' => [
+			),
+			'formatmodules' => array(
 				ApiBase::PARAM_DEPRECATED => true,
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_TYPE => $formatmodules,
-			]
-		];
+			)
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=paraminfo&modules=parse|phpfm|query+allpages|query+siteinfo'
 				=> 'apihelp-paraminfo-example-1',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

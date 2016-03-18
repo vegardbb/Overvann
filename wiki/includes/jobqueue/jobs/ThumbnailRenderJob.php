@@ -59,16 +59,14 @@ class ThumbnailRenderJob extends Job {
 				if ( $status === 200 || $status === 301 || $status === 302 || $status === 400 ) {
 					return true;
 				} elseif ( $status ) {
-					$this->setLastError( __METHOD__ . ': incorrect HTTP status ' .
-						$status . ' when hitting ' . $thumbUrl );
+					$this->setLastError( __METHOD__ . ': incorrect HTTP status ' . $status . ' when hitting ' . $thumbUrl );
 					return false;
 				} else {
 					$this->setLastError( __METHOD__ . ': HTTP request failure' );
 					return false;
 				}
 			} else {
-				$this->setLastError( __METHOD__ . ': unknown thumbnail render method ' .
-					$wgUploadThumbnailRenderMethod );
+				$this->setLastError( __METHOD__ . ': unknown thumbnail render method ' . $wgUploadThumbnailRenderMethod );
 				return false;
 			}
 		} else {
@@ -96,7 +94,7 @@ class ThumbnailRenderJob extends Job {
 		wfDebug( __METHOD__ . ": hitting url {$thumbUrl}\n" );
 
 		$request = MWHttpRequest::factory( $thumbUrl,
-			[ 'method' => 'HEAD', 'followRedirects' => true ],
+			array( 'method' => 'HEAD', 'followRedirects' => true ),
 			__METHOD__
 		);
 

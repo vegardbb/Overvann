@@ -178,7 +178,7 @@ class MediaWiki {
 		}
 
 		$unused = null; // To pass it by reference
-		Hooks::run( 'BeforeInitialize', [ &$title, &$unused, &$output, &$user, $request, $this ] );
+		Hooks::run( 'BeforeInitialize', array( &$title, &$unused, &$output, &$user, $request, $this ) );
 
 		// Invalid titles. Bug 21776: The interwikis must redirect even if the page name is empty.
 		if ( is_null( $title ) || ( $title->getDBkey() == '' && !$title->isExternal() )
@@ -197,7 +197,7 @@ class MediaWiki {
 		// We have to check here to catch special pages etc.
 		// We will check again in Article::view().
 		$permErrors = $title->isSpecial( 'RunJobs' )
-			? [] // relies on HMAC key signature alone
+			? array() // relies on HMAC key signature alone
 			: $title->getUserPermissionsErrors( 'read', $user );
 		if ( count( $permErrors ) ) {
 			// Bug 32276: allowing the skin to generate output with $wgTitle or
@@ -206,9 +206,10 @@ class MediaWiki {
 			// curid and oldid request  parameters would allow page titles to be enumerated even
 			// when they are not guessable. So we reset the title to Special:Badtitle before the
 			// permissions error is displayed.
-
+			//
 			// The skin mostly uses $this->context->getTitle() these days, but some extensions
 			// still use $wgTitle.
+
 			$badTitle = SpecialPage::getTitleFor( 'Badtitle' );
 			$this->context->setTitle( $badTitle );
 			$wgTitle = $badTitle;
@@ -220,7 +221,7 @@ class MediaWiki {
 		if ( $title->isExternal() ) {
 			$rdfrom = $request->getVal( 'rdfrom' );
 			if ( $rdfrom ) {
-				$url = $title->getFullURL( [ 'rdfrom' => $rdfrom ] );
+				$url = $title->getFullURL( array( 'rdfrom' => $rdfrom ) );
 			} else {
 				$query = $request->getValues();
 				unset( $query['title'] );
@@ -247,31 +248,29 @@ class MediaWiki {
 			// Prevent information leak via Special:MyPage et al (T109724)
 			if ( $title->isSpecialPage() ) {
 				$specialPage = SpecialPageFactory::getPage( $title->getDBKey() );
-				if ( $specialPage instanceof RedirectSpecialPage ) {
-					$specialPage->setContext( $this->context );
-					if ( $this->config->get( 'HideIdentifiableRedirects' )
-						&& $specialPage->personallyIdentifiableTarget()
-					) {
-						list( , $subpage ) = SpecialPageFactory::resolveAlias( $title->getDBKey() );
-						$target = $specialPage->getRedirect( $subpage );
-						// target can also be true. We let that case fall through to normal processing.
-						if ( $target instanceof Title ) {
-							$query = $specialPage->getRedirectQuery() ?: [];
-							$request = new DerivativeRequest( $this->context->getRequest(), $query );
-							$request->setRequestURL( $this->context->getRequest()->getRequestURL() );
-							$this->context->setRequest( $request );
-							// Do not varnish cache these. May vary even for anons
-							$this->context->getOutput()->lowerCdnMaxage( 0 );
-							$this->context->setTitle( $target );
-							$wgTitle = $target;
-							// Reset action type cache. (Special pages have only view)
-							$this->action = null;
-							$title = $target;
-							$output->addJsConfigVars( [
-								'wgInternalRedirectTargetUrl' => $target->getFullURL( $query ),
-							] );
-							$output->addModules( 'mediawiki.action.view.redirect' );
-						}
+				if ( $specialPage instanceof RedirectSpecialPage
+					&& $this->config->get( 'HideIdentifiableRedirects' )
+					&& $specialPage->personallyIdentifiableTarget()
+				) {
+					list( , $subpage ) = SpecialPageFactory::resolveAlias( $title->getDBKey() );
+					$target = $specialPage->getRedirect( $subpage );
+					// target can also be true. We let that case fall through to normal processing.
+					if ( $target instanceof Title ) {
+						$query = $specialPage->getRedirectQuery() ?: array();
+						$request = new DerivativeRequest( $this->context->getRequest(), $query );
+						$request->setRequestURL( $this->context->getRequest()->getRequestURL() );
+						$this->context->setRequest( $request );
+						// Do not varnish cache these. May vary even for anons
+						$this->context->getOutput()->lowerCdnMaxage( 0 );
+						$this->context->setTitle( $target );
+						$wgTitle = $target;
+						// Reset action type cache. (Special pages have only view)
+						$this->action = null;
+						$title = $target;
+						$output->addJsConfigVars( array(
+							'wgInternalRedirectTargetUrl' => $target->getFullURL( $query ),
+						) );
+						$output->addModules( 'mediawiki.action.view.redirect' );
 					}
 				}
 			}
@@ -326,8 +325,8 @@ class MediaWiki {
 
 		if ( $request->getVal( 'action', 'view' ) != 'view'
 			|| $request->wasPosted()
-			|| count( $request->getValueNames( [ 'action', 'title' ] ) )
-			|| !Hooks::run( 'TestCanonicalRedirect', [ $request, $title, $output ] )
+			|| count( $request->getValueNames( array( 'action', 'title' ) ) )
+			|| !Hooks::run( 'TestCanonicalRedirect', array( $request, $title, $output ) )
 		) {
 			return false;
 		}
@@ -342,7 +341,7 @@ class MediaWiki {
 		$targetUrl = wfExpandUrl( $title->getFullURL(), PROTO_CURRENT );
 
 		if ( $targetUrl != $request->getFullRequestURL() ) {
-			$output->setCdnMaxage( 1200 );
+			$output->setSquidMaxage( 1200 );
 			$output->redirect( $targetUrl, '301' );
 			return true;
 		}
@@ -381,25 +380,22 @@ class MediaWiki {
 	 * Initialize the main Article object for "standard" actions (view, etc)
 	 * Create an Article object for the page, following redirects if needed.
 	 *
-	 * @return Article|string An Article, or a string to redirect to another URL
+	 * @return mixed An Article, or a string to redirect to another URL
 	 */
 	private function initializeArticle() {
+
 		$title = $this->context->getTitle();
 		if ( $this->context->canUseWikiPage() ) {
 			// Try to use request context wiki page, as there
 			// is already data from db saved in per process
 			// cache there from this->getAction() call.
 			$page = $this->context->getWikiPage();
+			$article = Article::newFromWikiPage( $page, $this->context );
 		} else {
 			// This case should not happen, but just in case.
-			// @TODO: remove this or use an exception
-			$page = WikiPage::factory( $title );
-			$this->context->setWikiPage( $page );
-			wfWarn( "RequestContext::canUseWikiPage() returned false" );
+			$article = Article::newFromTitle( $title, $this->context );
+			$this->context->setWikiPage( $article->getPage() );
 		}
-
-		// Make GUI wrapper for the WikiPage
-		$article = Article::newFromWikiPage( $page, $this->context );
 
 		// Skip some unnecessary code if the content model doesn't support redirects
 		if ( !ContentHandler::getForTitle( $title )->supportsRedirects() ) {
@@ -411,7 +407,7 @@ class MediaWiki {
 		// Namespace might change when using redirects
 		// Check for redirects ...
 		$action = $request->getVal( 'action', 'view' );
-		$file = ( $page instanceof WikiFilePage ) ? $page->getFile() : null;
+		$file = ( $title->getNamespace() == NS_FILE ) ? $article->getFile() : null;
 		if ( ( $action == 'view' || $action == 'render' ) // ... for actions that show content
 			&& !$request->getVal( 'oldid' ) // ... and are not old revisions
 			&& !$request->getVal( 'diff' ) // ... and not when showing diff
@@ -423,14 +419,13 @@ class MediaWiki {
 			$ignoreRedirect = $target = false;
 
 			Hooks::run( 'InitializeArticleMaybeRedirect',
-				[ &$title, &$request, &$ignoreRedirect, &$target, &$article ] );
-			$page = $article->getPage(); // reflect any hook changes
+				array( &$title, &$request, &$ignoreRedirect, &$target, &$article ) );
 
 			// Follow redirects only for... redirects.
 			// If $target is set, then a hook wanted to redirect.
-			if ( !$ignoreRedirect && ( $target || $page->isRedirect() ) ) {
+			if ( !$ignoreRedirect && ( $target || $article->isRedirect() ) ) {
 				// Is the target already set by an extension?
-				$target = $target ? $target : $page->followRedirect();
+				$target = $target ? $target : $article->followRedirect();
 				if ( is_string( $target ) ) {
 					if ( !$this->config->get( 'DisableHardRedirects' ) ) {
 						// we'll need to redirect
@@ -439,19 +434,16 @@ class MediaWiki {
 				}
 				if ( is_object( $target ) ) {
 					// Rewrite environment to redirected article
-					$rpage = WikiPage::factory( $target );
-					$rpage->loadPageData();
-					if ( $rpage->exists() || ( is_object( $file ) && !$file->isLocal() ) ) {
-						$rarticle = Article::newFromWikiPage( $rpage, $this->context );
+					$rarticle = Article::newFromTitle( $target, $this->context );
+					$rarticle->loadPageData();
+					if ( $rarticle->exists() || ( is_object( $file ) && !$file->isLocal() ) ) {
 						$rarticle->setRedirectedFrom( $title );
-
 						$article = $rarticle;
 						$this->context->setTitle( $target );
 						$this->context->setWikiPage( $article->getPage() );
 					}
 				}
 			} else {
-				// Article may have been changed by hook
 				$this->context->setTitle( $article->getTitle() );
 				$this->context->setWikiPage( $article->getPage() );
 			}
@@ -467,47 +459,43 @@ class MediaWiki {
 	 * @param Title $requestTitle The original title, before any redirects were applied
 	 */
 	private function performAction( Page $page, Title $requestTitle ) {
+
 		$request = $this->context->getRequest();
 		$output = $this->context->getOutput();
 		$title = $this->context->getTitle();
 		$user = $this->context->getUser();
 
 		if ( !Hooks::run( 'MediaWikiPerformAction',
-				[ $output, $page, $title, $user, $request, $this ] )
+				array( $output, $page, $title, $user, $request, $this ) )
 		) {
 			return;
 		}
 
 		$act = $this->getAction();
+
 		$action = Action::factory( $act, $page, $this->context );
 
 		if ( $action instanceof Action ) {
-			// Narrow DB query expectations for this HTTP request
-			$trxLimits = $this->config->get( 'TrxProfilerLimits' );
-			$trxProfiler = Profiler::instance()->getTransactionProfiler();
-			if ( $request->wasPosted() && !$action->doesWrites() ) {
-				$trxProfiler->setExpectations( $trxLimits['POST-nonwrite'], __METHOD__ );
-			}
-
-			# Let CDN cache things if we can purge them.
+			# Let Squid cache things if we can purge them.
 			if ( $this->config->get( 'UseSquid' ) &&
 				in_array(
-					// Use PROTO_INTERNAL because that's what getCdnUrls() uses
+					// Use PROTO_INTERNAL because that's what getSquidURLs() uses
 					wfExpandUrl( $request->getRequestURL(), PROTO_INTERNAL ),
-					$requestTitle->getCdnUrls()
+					$requestTitle->getSquidURLs()
 				)
 			) {
-				$output->setCdnMaxage( $this->config->get( 'SquidMaxage' ) );
+				$output->setSquidMaxage( $this->config->get( 'SquidMaxage' ) );
 			}
 
 			$action->show();
 			return;
 		}
 
-		if ( Hooks::run( 'UnknownAction', [ $request->getVal( 'action', 'view' ), $page ] ) ) {
+		if ( Hooks::run( 'UnknownAction', array( $request->getVal( 'action', 'view' ), $page ) ) ) {
 			$output->setStatusCode( 404 );
 			$output->showErrorPage( 'nosuchaction', 'nosuchactiontext' );
 		}
+
 	}
 
 	/**
@@ -515,6 +503,7 @@ class MediaWiki {
 	 */
 	public function run() {
 		try {
+			$this->checkMaxLag();
 			try {
 				$this->main();
 			} catch ( ErrorPageError $e ) {
@@ -532,59 +521,21 @@ class MediaWiki {
 	}
 
 	/**
-	 * @see MediaWiki::preOutputCommit()
-	 * @since 1.26
-	 */
-	public function doPreOutputCommit() {
-		self::preOutputCommit( $this->context );
-	}
-
-	/**
 	 * This function commits all DB changes as needed before
 	 * the user can receive a response (in case commit fails)
 	 *
-	 * @param IContextSource $context
-	 * @since 1.27
+	 * @since 1.26
 	 */
-	public static function preOutputCommit( IContextSource $context ) {
+	public function doPreOutputCommit() {
 		// Either all DBs should commit or none
 		ignore_user_abort( true );
 
-		$config = $context->getConfig();
-
+		// Commit all changes and record ChronologyProtector positions
 		$factory = wfGetLBFactory();
-		// Commit all changes
-		$factory->commitMasterChanges(
-			__METHOD__,
-			// Abort if any transaction was too big
-			[ 'maxWriteDuration' => $config->get( 'MaxUserDBWriteDuration' ) ]
-		);
-		// Record ChronologyProtector positions
+		$factory->commitMasterChanges();
 		$factory->shutdown();
-		wfDebug( __METHOD__ . ': all transactions committed' );
 
-		DeferredUpdates::doUpdates( 'enqueue', DeferredUpdates::PRESEND );
-		wfDebug( __METHOD__ . ': pre-send deferred updates completed' );
-
-		// Set a cookie to tell all CDN edge nodes to "stick" the user to the DC that handles this
-		// POST request (e.g. the "master" data center). Also have the user briefly bypass CDN so
-		// ChronologyProtector works for cacheable URLs.
-		$request = $context->getRequest();
-		if ( $request->wasPosted() && $factory->hasOrMadeRecentMasterChanges() ) {
-			$expires = time() + $config->get( 'DataCenterUpdateStickTTL' );
-			$options = [ 'prefix' => '' ];
-			$request->response()->setCookie( 'UseDC', 'master', $expires, $options );
-			$request->response()->setCookie( 'UseCDNCache', 'false', $expires, $options );
-		}
-
-		// Avoid letting a few seconds of slave lag cause a month of stale data. This logic is
-		// also intimately related to the value of $wgCdnReboundPurgeDelay.
-		if ( $factory->laggedSlaveUsed() ) {
-			$maxAge = $config->get( 'CdnMaxageLagged' );
-			$context->getOutput()->lowerCdnMaxage( $maxAge );
-			$request->response()->header( "X-Database-Lagged: true" );
-			wfDebugLog( 'replication', "Lagged DB used; CDN cache TTL limited to $maxAge seconds" );
-		}
+		wfDebug( __METHOD__ . ' completed; all transactions committed' );
 	}
 
 	/**
@@ -598,9 +549,6 @@ class MediaWiki {
 	 * @since 1.26
 	 */
 	public function doPostOutputShutdown( $mode = 'normal' ) {
-		$timing = $this->context->getTiming();
-		$timing->mark( 'requestShutdown' );
-
 		// Show visible profiling data if enabled (which cannot be post-send)
 		Profiler::instance()->logDataPageOutputOnly();
 
@@ -630,8 +578,35 @@ class MediaWiki {
 		}
 	}
 
+	/**
+	 * Checks if the request should abort due to a lagged server,
+	 * for given maxlag parameter.
+	 * @return bool
+	 */
+	private function checkMaxLag() {
+		$maxLag = $this->context->getRequest()->getVal( 'maxlag' );
+		if ( !is_null( $maxLag ) ) {
+			list( $host, $lag ) = wfGetLB()->getMaxLag();
+			if ( $lag > $maxLag ) {
+				$resp = $this->context->getRequest()->response();
+				$resp->statusHeader( 503 );
+				$resp->header( 'Retry-After: ' . max( intval( $maxLag ), 5 ) );
+				$resp->header( 'X-Database-Lag: ' . intval( $lag ) );
+				$resp->header( 'Content-Type: text/plain' );
+				if ( $this->config->get( 'ShowHostnames' ) ) {
+					echo "Waiting for $host: $lag seconds lagged\n";
+				} else {
+					echo "Waiting for a database server: $lag seconds lagged\n";
+				}
+
+				exit;
+			}
+		}
+		return true;
+	}
+
 	private function main() {
-		global $wgTitle;
+		global $wgTitle, $wgTrxProfilerLimits;
 
 		$request = $this->context->getRequest();
 
@@ -655,14 +630,17 @@ class MediaWiki {
 		$action = $this->getAction();
 		$wgTitle = $title;
 
-		// Set DB query expectations for this HTTP request
-		$trxLimits = $this->config->get( 'TrxProfilerLimits' );
 		$trxProfiler = Profiler::instance()->getTransactionProfiler();
 		$trxProfiler->setLogger( LoggerFactory::getInstance( 'DBPerformance' ) );
-		if ( $request->wasPosted() ) {
-			$trxProfiler->setExpectations( $trxLimits['POST'], __METHOD__ );
+
+		// Aside from rollback, master queries should not happen on GET requests.
+		// Periodic or "in passing" updates on GET should use the job queue.
+		if ( !$request->wasPosted()
+			&& in_array( $action, array( 'view', 'edit', 'history' ) )
+		) {
+			$trxProfiler->setExpectations( $wgTrxProfilerLimits['GET'], __METHOD__ );
 		} else {
-			$trxProfiler->setExpectations( $trxLimits['GET'], __METHOD__ );
+			$trxProfiler->setExpectations( $wgTrxProfilerLimits['POST'], __METHOD__ );
 		}
 
 		// If the user has forceHTTPS set to true, or if the user
@@ -673,10 +651,8 @@ class MediaWiki {
 		if (
 			$request->getProtocol() == 'http' &&
 			(
-				$request->getSession()->shouldForceHTTPS() ||
-				// Check the cookie manually, for paranoia
 				$request->getCookie( 'forceHTTPS', '' ) ||
-				// check for prefixed version that was used for a time in older MW versions
+				// check for prefixed version for currently logged in users
 				$request->getCookie( 'forceHTTPS' ) ||
 				// Avoid checking the user and groups unless it's enabled.
 				(
@@ -689,7 +665,7 @@ class MediaWiki {
 			$redirUrl = preg_replace( '#^http://#', 'https://', $oldUrl );
 
 			// ATTENTION: This hook is likely to be removed soon due to overall design of the system.
-			if ( Hooks::run( 'BeforeHttpsRedirect', [ $this->context, &$redirUrl ] ) ) {
+			if ( Hooks::run( 'BeforeHttpsRedirect', array( $this->context, &$redirUrl ) ) ) {
 
 				if ( $request->wasPosted() ) {
 					// This is weird and we'd hope it almost never happens. This
@@ -697,7 +673,7 @@ class MediaWiki {
 					// redirecting to HTTPS. It's likely such a request is going
 					// to fail due to post data being lost, but let's try anyway
 					// and just log the instance.
-
+					//
 					// @todo FIXME: See if we could issue a 307 or 308 here, need
 					// to see how clients (automated & browser) behave when we do
 					wfDebugLog( 'RedirectedPosts', "Redirected from HTTP to HTTPS: $oldUrl" );
@@ -752,14 +728,14 @@ class MediaWiki {
 	 */
 	public function restInPeace( $mode = 'fast' ) {
 		// Assure deferred updates are not in the main transaction
-		wfGetLBFactory()->commitMasterChanges( __METHOD__ );
+		wfGetLBFactory()->commitMasterChanges();
 
 		// Ignore things like master queries/connections on GET requests
 		// as long as they are in deferred updates (which catch errors).
 		Profiler::instance()->getTransactionProfiler()->resetExpectations();
 
 		// Do any deferred jobs
-		DeferredUpdates::doUpdates( 'enqueue' );
+		DeferredUpdates::doUpdates( 'commit' );
 
 		// Make sure any lazy jobs are pushed
 		JobQueueGroup::pushLazyJobs();
@@ -775,8 +751,8 @@ class MediaWiki {
 
 		// Commit and close up!
 		$factory = wfGetLBFactory();
-		$factory->commitMasterChanges( __METHOD__ );
-		$factory->shutdown( LBFactory::SHUTDOWN_NO_CHRONPROT );
+		$factory->commitMasterChanges();
+		$factory->shutdown();
 
 		wfDebug( "Request ended normally\n" );
 	}
@@ -809,7 +785,7 @@ class MediaWiki {
 		if ( !$this->config->get( 'RunJobsAsync' ) ) {
 			// Fall back to running the job here while the user waits
 			$runner = new JobRunner( $runJobsLogger );
-			$runner->run( [ 'maxJobs'  => $n ] );
+			$runner->run( array( 'maxJobs'  => $n ) );
 			return;
 		}
 
@@ -822,8 +798,8 @@ class MediaWiki {
 			return; // do not make the site unavailable
 		}
 
-		$query = [ 'title' => 'Special:RunJobs',
-			'tasks' => 'jobs', 'maxjobs' => $n, 'sigexpiry' => time() + 5 ];
+		$query = array( 'title' => 'Special:RunJobs',
+			'tasks' => 'jobs', 'maxjobs' => $n, 'sigexpiry' => time() + 5 );
 		$query['signature'] = SpecialRunJobs::getQuerySignature(
 			$query, $this->config->get( 'SecretKey' ) );
 
@@ -844,7 +820,7 @@ class MediaWiki {
 			$runJobsLogger->error( "Failed to start cron API (socket error $errno): $errstr" );
 			// Fall back to running the job here while the user waits
 			$runner = new JobRunner( $runJobsLogger );
-			$runner->run( [ 'maxJobs'  => $n ] );
+			$runner->run( array( 'maxJobs'  => $n ) );
 			return;
 		}
 

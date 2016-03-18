@@ -11,15 +11,15 @@
 
 $fallback = 'ru';
 
-$separatorTransformTable = [
+$separatorTransformTable = array(
 	',' => "\xc2\xa0", # nbsp
 	'.' => ','
-];
+);
 
 $fallback8bitEncoding = 'windows-1251';
 $linkPrefixExtension = true;
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Медиа',
 	NS_SPECIAL          => 'Къуллугъирал_лажин',
 	NS_TALK             => 'Ихтилат',
@@ -36,10 +36,10 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Кумаграясса_ихтилат',
 	NS_CATEGORY         => 'Категория',
 	NS_CATEGORY_TALK    => 'Категориялиясса_ихтилат',
-];
+);
 
 // Remove Russian aliases
-$namespaceGenderAliases = [];
+$namespaceGenderAliases = array();
 
 $linkTrail = '/^([a-zабвгдеёжзийклмнопрстуфхцчшщъыьэюяӀ1“»]+)(.*)$/sDu';
 

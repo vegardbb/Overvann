@@ -11,8 +11,7 @@
 		color: lighten( @mainColor, @colorLightenPercentage );
 	}
 	// Focus and active states
-	&:focus,
-	&:active {
+	&:focus, &:active {
 		color: darken( @mainColor, @colorDarkenPercentage );
 		outline: none; // outline fix
 	}
@@ -75,8 +74,7 @@ Styleguide 6.2.1.
 	&:hover {
 		color: @mainColor;
 	}
-	&:focus,
-	&:active {
+	&:focus, &:active {
 		color: darken( @mainColor, @colorDarkenPercentage );
 	}
 }

@@ -40,8 +40,8 @@
  * Introduced by r47317
  */
 class BacklinkCache {
-	/** @var BacklinkCache */
-	protected static $instance;
+	/** @var ProcessCacheLRU */
+	protected static $cache;
 
 	/**
 	 * Multi dimensions array representing batches. Keys are:
@@ -53,9 +53,8 @@ class BacklinkCache {
 	 * @see BacklinkCache::partitionResult()
 	 *
 	 * Cleared with BacklinkCache::clear()
-	 * @var array[]
 	 */
-	protected $partitionCache = [];
+	protected $partitionCache = array();
 
 	/**
 	 * Contains the whole links from a database result.
@@ -63,9 +62,8 @@ class BacklinkCache {
 	 *
 	 * Initialized with BacklinkCache::getLinks()
 	 * Cleared with BacklinkCache::clear()
-	 * @var ResultWrapper[]
 	 */
-	protected $fullResultCache = [];
+	protected $fullResultCache = array();
 
 	/**
 	 * Local copy of a database object.
@@ -101,10 +99,15 @@ class BacklinkCache {
 	 * @return BacklinkCache
 	 */
 	public static function get( Title $title ) {
-		if ( !self::$instance || !self::$instance->title->equals( $title ) ) {
-			self::$instance = new self( $title );
+		if ( !self::$cache ) { // init cache
+			self::$cache = new ProcessCacheLRU( 1 );
 		}
-		return self::$instance;
+		$dbKey = $title->getPrefixedDBkey();
+		if ( !self::$cache->has( $dbKey, 'obj', 3600 ) ) {
+			self::$cache->set( $dbKey, 'obj', new self( $title ) );
+		}
+
+		return self::$cache->get( $dbKey, 'obj' );
 	}
 
 	/**
@@ -115,22 +118,22 @@ class BacklinkCache {
 	 * @return array
 	 */
 	function __sleep() {
-		return [ 'partitionCache', 'fullResultCache', 'title' ];
+		return array( 'partitionCache', 'fullResultCache', 'title' );
 	}
 
 	/**
 	 * Clear locally stored data and database object.
 	 */
 	public function clear() {
-		$this->partitionCache = [];
-		$this->fullResultCache = [];
+		$this->partitionCache = array();
+		$this->fullResultCache = array();
 		unset( $this->db );
 	}
 
 	/**
 	 * Set the Database object to use
 	 *
-	 * @param IDatabase $db
+	 * @param DatabaseBase $db
 	 */
 	public function setDB( $db ) {
 		$this->db = $db;
@@ -190,7 +193,7 @@ class BacklinkCache {
 			if ( $endId ) {
 				$conds[] = "$fromField <= " . intval( $endId );
 			}
-			$options = [ 'ORDER BY' => $fromField ];
+			$options = array( 'ORDER BY' => $fromField );
 			if ( is_finite( $max ) && $max > 0 ) {
 				$options['LIMIT'] = $max;
 			}
@@ -199,7 +202,7 @@ class BacklinkCache {
 				// Just select from the backlink table and ignore the page JOIN
 				$res = $this->getDB()->select(
 					$table,
-					[ $this->getPrefix( $table ) . '_from AS page_id' ],
+					array( $this->getPrefix( $table ) . '_from AS page_id' ),
 					array_filter( $conds, function ( $clause ) { // kind of janky
 						return !preg_match( '/(\b|=)page_id(\b|=)/', $clause );
 					} ),
@@ -209,11 +212,11 @@ class BacklinkCache {
 			} else {
 				// Select from the backlink table and JOIN with page title information
 				$res = $this->getDB()->select(
-					[ $table, 'page' ],
-					[ 'page_namespace', 'page_title', 'page_id' ],
+					array( $table, 'page' ),
+					array( 'page_namespace', 'page_title', 'page_id' ),
 					$conds,
 					__METHOD__,
-					array_merge( [ 'STRAIGHT_JOIN' ], $options )
+					array_merge( array( 'STRAIGHT_JOIN' ), $options )
 				);
 			}
 
@@ -235,19 +238,19 @@ class BacklinkCache {
 	 * @return null|string
 	 */
 	protected function getPrefix( $table ) {
-		static $prefixes = [
+		static $prefixes = array(
 			'pagelinks' => 'pl',
 			'imagelinks' => 'il',
 			'categorylinks' => 'cl',
 			'templatelinks' => 'tl',
 			'redirect' => 'rd',
-		];
+		);
 
 		if ( isset( $prefixes[$table] ) ) {
 			return $prefixes[$table];
 		} else {
 			$prefix = null;
-			Hooks::run( 'BacklinkCacheGetPrefix', [ $table, &$prefix ] );
+			Hooks::run( 'BacklinkCacheGetPrefix', array( $table, &$prefix ) );
 			if ( $prefix ) {
 				return $prefix;
 			} else {
@@ -269,33 +272,33 @@ class BacklinkCache {
 		switch ( $table ) {
 			case 'pagelinks':
 			case 'templatelinks':
-				$conds = [
+				$conds = array(
 					"{$prefix}_namespace" => $this->title->getNamespace(),
 					"{$prefix}_title" => $this->title->getDBkey(),
 					"page_id={$prefix}_from"
-				];
+				);
 				break;
 			case 'redirect':
-				$conds = [
+				$conds = array(
 					"{$prefix}_namespace" => $this->title->getNamespace(),
 					"{$prefix}_title" => $this->title->getDBkey(),
-					$this->getDb()->makeList( [
+					$this->getDb()->makeList( array(
 						"{$prefix}_interwiki" => '',
 						"{$prefix}_interwiki IS NULL",
-					], LIST_OR ),
+					), LIST_OR ),
 					"page_id={$prefix}_from"
-				];
+				);
 				break;
 			case 'imagelinks':
 			case 'categorylinks':
-				$conds = [
+				$conds = array(
 					"{$prefix}_to" => $this->title->getDBkey(),
 					"page_id={$prefix}_from"
-				];
+				);
 				break;
 			default:
 				$conds = null;
-				Hooks::run( 'BacklinkCacheGetConditions', [ $table, $this->title, &$conds ] );
+				Hooks::run( 'BacklinkCacheGetConditions', array( $table, $this->title, &$conds ) );
 				if ( !$conds ) {
 					throw new MWException( "Invalid table \"$table\" in " . __CLASS__ );
 				}
@@ -320,9 +323,8 @@ class BacklinkCache {
 	 * @return int
 	 */
 	public function getNumLinks( $table, $max = INF ) {
-		global $wgUpdateRowsPerJob;
+		global $wgMemc, $wgUpdateRowsPerJob;
 
-		$cache = ObjectCache::getMainWANInstance();
 		// 1) try partition cache ...
 		if ( isset( $this->partitionCache[$table] ) ) {
 			$entry = reset( $this->partitionCache[$table] );
@@ -338,7 +340,7 @@ class BacklinkCache {
 		$memcKey = wfMemcKey( 'numbacklinks', md5( $this->title->getPrefixedDBkey() ), $table );
 
 		// 3) ... fallback to memcached ...
-		$count = $cache->get( $memcKey );
+		$count = $wgMemc->get( $memcKey );
 		if ( $count ) {
 			return min( $max, $count );
 		}
@@ -353,7 +355,7 @@ class BacklinkCache {
 			// Fetch the full title info, since the caller will likely need it next
 			$count = $this->getLinks( $table, false, false, $max )->count();
 			if ( $count < $max ) { // full count
-				$cache->set( $memcKey, $count, self::CACHE_EXPIRY );
+				$wgMemc->set( $memcKey, $count, self::CACHE_EXPIRY );
 			}
 		}
 
@@ -370,6 +372,8 @@ class BacklinkCache {
 	 * @return array
 	 */
 	public function partition( $table, $batchSize ) {
+		global $wgMemc;
+
 		// 1) try partition cache ...
 		if ( isset( $this->partitionCache[$table][$batchSize] ) ) {
 			wfDebug( __METHOD__ . ": got from partition cache\n" );
@@ -377,7 +381,6 @@ class BacklinkCache {
 			return $this->partitionCache[$table][$batchSize]['batches'];
 		}
 
-		$cache = ObjectCache::getMainWANInstance();
 		$this->partitionCache[$table][$batchSize] = false;
 		$cacheEntry =& $this->partitionCache[$table][$batchSize];
 
@@ -397,7 +400,7 @@ class BacklinkCache {
 		);
 
 		// 3) ... fallback to memcached ...
-		$memcValue = $cache->get( $memcKey );
+		$memcValue = $wgMemc->get( $memcKey );
 		if ( is_array( $memcValue ) ) {
 			$cacheEntry = $memcValue;
 			wfDebug( __METHOD__ . ": got from memcached $memcKey\n" );
@@ -406,7 +409,7 @@ class BacklinkCache {
 		}
 
 		// 4) ... finally fetch from the slow database :(
-		$cacheEntry = [ 'numRows' => 0, 'batches' => [] ]; // final result
+		$cacheEntry = array( 'numRows' => 0, 'batches' => array() ); // final result
 		// Do the selects in batches to avoid client-side OOMs (bug 43452).
 		// Use a LIMIT that plays well with $batchSize to keep equal sized partitions.
 		$selectSize = max( $batchSize, 200000 - ( 200000 % $batchSize ) );
@@ -429,11 +432,11 @@ class BacklinkCache {
 		}
 
 		// Save partitions to memcached
-		$cache->set( $memcKey, $cacheEntry, self::CACHE_EXPIRY );
+		$wgMemc->set( $memcKey, $cacheEntry, self::CACHE_EXPIRY );
 
 		// Save backlink count to memcached
 		$memcKey = wfMemcKey( 'numbacklinks', md5( $this->title->getPrefixedDBkey() ), $table );
-		$cache->set( $memcKey, $cacheEntry['numRows'], self::CACHE_EXPIRY );
+		$wgMemc->set( $memcKey, $cacheEntry['numRows'], self::CACHE_EXPIRY );
 
 		wfDebug( __METHOD__ . ": got from database\n" );
 
@@ -449,7 +452,7 @@ class BacklinkCache {
 	 * @return array
 	 */
 	protected function partitionResult( $res, $batchSize, $isComplete = true ) {
-		$batches = [];
+		$batches = array();
 		$numRows = $res->numRows();
 		$numBatches = ceil( $numRows / $batchSize );
 
@@ -477,10 +480,10 @@ class BacklinkCache {
 				throw new MWException( __METHOD__ . ': Internal error: query result out of order' );
 			}
 
-			$batches[] = [ $start, $end ];
+			$batches[] = array( $start, $end );
 		}
 
-		return [ 'numRows' => $numRows, 'batches' => $batches ];
+		return array( 'numRows' => $numRows, 'batches' => $batches );
 	}
 
 	/**
@@ -493,37 +496,37 @@ class BacklinkCache {
 		$dbr = $this->getDB();
 
 		// @todo: use UNION without breaking tests that use temp tables
-		$resSets = [];
+		$resSets = array();
 		$resSets[] = $dbr->select(
-			[ 'templatelinks', 'page_restrictions', 'page' ],
-			[ 'page_namespace', 'page_title', 'page_id' ],
-			[
+			array( 'templatelinks', 'page_restrictions', 'page' ),
+			array( 'page_namespace', 'page_title', 'page_id' ),
+			array(
 				'tl_namespace' => $this->title->getNamespace(),
 				'tl_title' => $this->title->getDBkey(),
 				'tl_from = pr_page',
 				'pr_cascade' => 1,
 				'page_id = tl_from'
-			],
+			),
 			__METHOD__,
-			[ 'DISTINCT' ]
+			array( 'DISTINCT' )
 		);
 		if ( $this->title->getNamespace() == NS_FILE ) {
 			$resSets[] = $dbr->select(
-				[ 'imagelinks', 'page_restrictions', 'page' ],
-				[ 'page_namespace', 'page_title', 'page_id' ],
-				[
+				array( 'imagelinks', 'page_restrictions', 'page' ),
+				array( 'page_namespace', 'page_title', 'page_id' ),
+				array(
 					'il_to' => $this->title->getDBkey(),
 					'il_from = pr_page',
 					'pr_cascade' => 1,
 					'page_id = il_from'
-				],
+				),
 				__METHOD__,
-				[ 'DISTINCT' ]
+				array( 'DISTINCT' )
 			);
 		}
 
 		// Combine and de-duplicate the results
-		$mergedRes = [];
+		$mergedRes = array();
 		foreach ( $resSets as $res ) {
 			foreach ( $res as $row ) {
 				$mergedRes[$row->page_id] = $row;

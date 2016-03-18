@@ -46,12 +46,11 @@
 		if ( this.target === 'local' ) {
 			// If local uploads were requested, but they are disabled, fail.
 			if ( !mw.config.get( 'wgEnableUploads' ) ) {
-				this.apiPromise = $.Deferred().reject( 'uploaddisabledtext' );
-			} else {
-				// We'll ignore the CORS and centralauth stuff if the target is
-				// the local wiki.
-				this.apiPromise = $.Deferred().resolve( new mw.Api( apiconfig ) );
+				throw new Error( 'Local uploads are disabled' );
 			}
+			// We'll ignore the CORS and centralauth stuff if the target is
+			// the local wiki.
+			this.apiPromise = $.Deferred().resolve( new mw.Api( apiconfig ) );
 		} else {
 			api = new mw.Api();
 			this.apiPromise = api.get( {
@@ -77,7 +76,7 @@
 					}
 				}
 
-				return $.Deferred().reject( 'upload-foreign-cant-upload' );
+				throw new Error( 'Can not upload to requested foreign repo' );
 			} );
 		}
 
@@ -109,13 +108,6 @@
 	 * Defaults to the first available foreign upload target,
 	 * or to local uploads if no foreign target is configured.
 	 */
-
-	/**
-	 * @inheritdoc
-	 */
-	ForeignUpload.prototype.getApi = function () {
-		return this.apiPromise;
-	};
 
 	/**
 	 * Override from mw.Upload to make sure the API info is found and allowed

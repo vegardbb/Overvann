@@ -42,7 +42,7 @@ class UnifiedDiffFormatter extends DiffFormatter {
 	 */
 	protected function lines( $lines, $prefix = ' ' ) {
 		foreach ( $lines as $line ) {
-			$this->writeOutput( "{$prefix}{$line}\n" );
+			echo "{$prefix}{$line}\n";
 		}
 	}
 

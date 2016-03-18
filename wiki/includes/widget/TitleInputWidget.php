@@ -15,25 +15,16 @@ class TitleInputWidget extends \OOUI\TextInputWidget {
 	protected $namespace = null;
 	protected $relative = null;
 	protected $suggestions = null;
-	protected $highlightFirst = null;
-	protected $validateTitle = null;
 
 	/**
 	 * @param array $config Configuration options
 	 * @param int|null $config['namespace'] Namespace to prepend to queries
-	 * @param bool|null $config['relative'] If a namespace is set,
-	 *  return a title relative to it (default: true)
+	 * @param bool|null $config['relative'] If a namespace is set, return a title relative to it (default: true)
 	 * @param bool|null $config['suggestions'] Display search suggestions (default: true)
-	 * @param bool|null $config['highlightFirst'] Automatically highlight
-	 *  the first result (default: true)
-	 * @param bool|null $config['validateTitle'] Whether the input must
-	 *  be a valid title (default: true)
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Parent constructor
-		parent::__construct(
-			array_merge( [ 'infusable' => true, 'maxLength' => 255 ], $config )
-		);
+		parent::__construct( array_merge( array( 'infusable' => true, 'maxLength' => 255 ), $config ) );
 
 		// Properties, which are ignored in PHP and just shipped back to JS
 		if ( isset( $config['namespace'] ) ) {
@@ -45,15 +36,9 @@ class TitleInputWidget extends \OOUI\TextInputWidget {
 		if ( isset( $config['suggestions'] ) ) {
 			$this->suggestions = $config['suggestions'];
 		}
-		if ( isset( $config['highlightFirst'] ) ) {
-			$this->highlightFirst = $config['highlightFirst'];
-		}
-		if ( isset( $config['validateTitle'] ) ) {
-			$this->validateTitle = $config['validateTitle'];
-		}
 
 		// Initialization
-		$this->addClasses( [ 'mw-widget-titleInputWidget' ] );
+		$this->addClasses( array( 'mw-widget-titleInputWidget' ) );
 	}
 
 	protected function getJavaScriptClassName() {
@@ -69,12 +54,6 @@ class TitleInputWidget extends \OOUI\TextInputWidget {
 		}
 		if ( $this->suggestions !== null ) {
 			$config['suggestions'] = $this->suggestions;
-		}
-		if ( $this->highlightFirst !== null ) {
-			$config['highlightFirst'] = $this->highlightFirst;
-		}
-		if ( $this->validateTitle !== null ) {
-			$config['validateTitle'] = $this->validateTitle;
 		}
 		return parent::getConfig( $config );
 	}

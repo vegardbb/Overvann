@@ -55,12 +55,12 @@ class MockFSFile extends FSFile {
 	}
 
 	public function getProps( $ext = true ) {
-		return [
+		return array(
 			'fileExists' => $this->exists(),
 			'size' => $this->getSize(),
 			'file-mime' => $this->getMimeType(),
 			'sha1' => $this->getSha1Base36(),
-		];
+		);
 	}
 
 	public function getSha1Base36( $recache = false ) {

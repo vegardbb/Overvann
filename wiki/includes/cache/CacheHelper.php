@@ -61,7 +61,7 @@ interface ICacheHelper {
 	 *
 	 * @return mixed
 	 */
-	function getCachedValue( $computeFunction, $args = [], $key = null );
+	function getCachedValue( $computeFunction, $args = array(), $key = null );
 
 	/**
 	 * Saves the HTML to the cache in case it got recomputed.
@@ -150,7 +150,7 @@ class CacheHelper implements ICacheHelper {
 	 * @since 1.20
 	 * @var array
 	 */
-	protected $cacheKey = [];
+	protected $cacheKey = array();
 
 	/**
 	 * Sets if the cache should be enabled or not.
@@ -220,7 +220,7 @@ class CacheHelper implements ICacheHelper {
 			$message .= ' ' . Linker::link(
 				$context->getTitle( $subPage ),
 				$context->msg( 'cachedspecial-refresh-now' )->escaped(),
-				[],
+				array(),
 				$refreshArgs
 			);
 		}
@@ -239,7 +239,7 @@ class CacheHelper implements ICacheHelper {
 			$cachedChunks = wfGetCache( CACHE_ANYTHING )->get( $this->getCacheKeyString() );
 
 			$this->hasCached = is_array( $cachedChunks );
-			$this->cachedChunks = $this->hasCached ? $cachedChunks : [];
+			$this->cachedChunks = $this->hasCached ? $cachedChunks : array();
 
 			if ( $this->onInitHandler !== false ) {
 				call_user_func( $this->onInitHandler, $this->hasCached );
@@ -261,7 +261,7 @@ class CacheHelper implements ICacheHelper {
 	 *
 	 * @return mixed
 	 */
-	public function getCachedValue( $computeFunction, $args = [], $key = null ) {
+	public function getCachedValue( $computeFunction, $args = array(), $key = null ) {
 		$this->initCaching();
 
 		if ( $this->cacheEnabled && $this->hasCached ) {
@@ -289,7 +289,7 @@ class CacheHelper implements ICacheHelper {
 			}
 		} else {
 			if ( !is_array( $args ) ) {
-				$args = [ $args ];
+				$args = array( $args );
 			}
 
 			$value = call_user_func_array( $computeFunction, $args );
@@ -344,7 +344,7 @@ class CacheHelper implements ICacheHelper {
 	 * @throws MWException
 	 */
 	protected function getCacheKeyString() {
-		if ( $this->cacheKey === [] ) {
+		if ( $this->cacheKey === array() ) {
 			throw new MWException( 'No cache key set, so cannot obtain or save the CacheHelper values.' );
 		}
 

@@ -38,7 +38,7 @@ class ApiQueryUsers extends ApiQueryBase {
 	 * contains anything not listed here, the cache mode will never be public for logged-in users.
 	 * @var array
 	 */
-	protected static $publicProps = [
+	protected static $publicProps = array(
 		// everything except 'blockinfo' which might show hidden records if the user
 		// making the request has the appropriate permissions
 		'groups',
@@ -48,8 +48,7 @@ class ApiQueryUsers extends ApiQueryBase {
 		'registration',
 		'emailable',
 		'gender',
-		'centralids',
-	];
+	);
 
 	public function __construct( ApiQuery $query, $moduleName ) {
 		parent::__construct( $query, $moduleName, 'us' );
@@ -71,13 +70,13 @@ class ApiQueryUsers extends ApiQueryBase {
 		// If we're in a mode that breaks the same-origin policy, no tokens can
 		// be obtained
 		if ( $this->lacksSameOriginSecurity() ) {
-			return [];
+			return array();
 		}
 
-		$this->tokenFunctions = [
-			'userrights' => [ 'ApiQueryUsers', 'getUserrightsToken' ],
-		];
-		Hooks::run( 'APIQueryUsersTokens', [ &$this->tokenFunctions ] );
+		$this->tokenFunctions = array(
+			'userrights' => array( 'ApiQueryUsers', 'getUserrightsToken' ),
+		);
+		Hooks::run( 'APIQueryUsersTokens', array( &$this->tokenFunctions ) );
 
 		return $this->tokenFunctions;
 	}
@@ -101,23 +100,23 @@ class ApiQueryUsers extends ApiQueryBase {
 		if ( !is_null( $params['prop'] ) ) {
 			$this->prop = array_flip( $params['prop'] );
 		} else {
-			$this->prop = [];
+			$this->prop = array();
 		}
 
 		$users = (array)$params['users'];
-		$goodNames = $done = [];
+		$goodNames = $done = array();
 		$result = $this->getResult();
 		// Canonicalize user names
 		foreach ( $users as $u ) {
 			$n = User::getCanonicalName( $u );
 			if ( $n === false || $n === '' ) {
-				$vals = [ 'name' => $u, 'invalid' => true ];
-				$fit = $result->addValue( [ 'query', $this->getModuleName() ],
+				$vals = array( 'name' => $u, 'invalid' => true );
+				$fit = $result->addValue( array( 'query', $this->getModuleName() ),
 					null, $vals );
 				if ( !$fit ) {
 					$this->setContinueEnumParameter( 'users',
 						implode( '|', array_diff( $users, $done ) ) );
-					$goodNames = [];
+					$goodNames = array();
 					break;
 				}
 				$done[] = $u;
@@ -135,19 +134,19 @@ class ApiQueryUsers extends ApiQueryBase {
 
 			$this->showHiddenUsersAddBlockInfo( isset( $this->prop['blockinfo'] ) );
 
-			$data = [];
+			$data = array();
 			$res = $this->select( __METHOD__ );
 			$this->resetQueryParams();
 
 			// get user groups if needed
 			if ( isset( $this->prop['groups'] ) || isset( $this->prop['rights'] ) ) {
-				$userGroups = [];
+				$userGroups = array();
 
 				$this->addTables( 'user' );
 				$this->addWhereFld( 'user_name', $goodNames );
 				$this->addTables( 'user_groups' );
-				$this->addJoinConds( [ 'user_groups' => [ 'INNER JOIN', 'ug_user=user_id' ] ] );
-				$this->addFields( [ 'user_name', 'ug_group' ] );
+				$this->addJoinConds( array( 'user_groups' => array( 'INNER JOIN', 'ug_user=user_id' ) ) );
+				$this->addFields( array( 'user_name', 'ug_group' ) );
 				$userGroupsRes = $this->select( __METHOD__ );
 
 				foreach ( $userGroupsRes as $row ) {
@@ -162,9 +161,9 @@ class ApiQueryUsers extends ApiQueryBase {
 					$user = User::newFromRow( $row );
 				} else {
 					if ( !isset( $userGroups[$row->user_name] ) || !is_array( $userGroups[$row->user_name] ) ) {
-						$userGroups[$row->user_name] = [];
+						$userGroups[$row->user_name] = array();
 					}
-					$user = User::newFromRow( $row, [ 'user_groups' => $userGroups[$row->user_name] ] );
+					$user = User::newFromRow( $row, array( 'user_groups' => $userGroups[$row->user_name] ) );
 				}
 				$name = $user->getName();
 
@@ -214,12 +213,6 @@ class ApiQueryUsers extends ApiQueryBase {
 					$data[$name]['gender'] = $gender;
 				}
 
-				if ( isset( $this->prop['centralids'] ) ) {
-					$data[$name] += ApiQueryUserInfo::getCentralUserInfo(
-						$this->getConfig(), $user, $params['attachedwiki']
-					);
-				}
-
 				if ( !is_null( $params['token'] ) ) {
 					$tokenFunctions = $this->getTokenFunctions();
 					foreach ( $params['token'] as $t ) {
@@ -238,7 +231,7 @@ class ApiQueryUsers extends ApiQueryBase {
 		// Second pass: add result data to $retval
 		foreach ( $goodNames as $u ) {
 			if ( !isset( $data[$u] ) ) {
-				$data[$u] = [ 'name' => $u ];
+				$data[$u] = array( 'name' => $u );
 				$urPage = new UserrightsPage;
 				$urPage->setContext( $context );
 				$iwUser = $urPage->fetchUser( $u );
@@ -276,7 +269,7 @@ class ApiQueryUsers extends ApiQueryBase {
 				}
 			}
 
-			$fit = $result->addValue( [ 'query', $this->getModuleName() ],
+			$fit = $result->addValue( array( 'query', $this->getModuleName() ),
 				null, $data[$u] );
 			if ( !$fit ) {
 				$this->setContinueEnumParameter( 'users',
@@ -285,7 +278,7 @@ class ApiQueryUsers extends ApiQueryBase {
 			}
 			$done[] = $u;
 		}
-		$result->addIndexedTagName( [ 'query', $this->getModuleName() ], 'user' );
+		$result->addIndexedTagName( array( 'query', $this->getModuleName() ), 'user' );
 	}
 
 	public function getCacheMode( $params ) {
@@ -299,10 +292,11 @@ class ApiQueryUsers extends ApiQueryBase {
 	}
 
 	public function getAllowedParams() {
-		return [
-			'prop' => [
+		return array(
+			'prop' => array(
+				ApiBase::PARAM_DFLT => null,
 				ApiBase::PARAM_ISMULTI => true,
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'blockinfo',
 					'groups',
 					'implicitgroups',
@@ -311,28 +305,25 @@ class ApiQueryUsers extends ApiQueryBase {
 					'registration',
 					'emailable',
 					'gender',
-					'centralids',
-				],
-				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
-			],
-			'attachedwiki' => null,
-			'users' => [
-				ApiBase::PARAM_TYPE => 'user',
+				),
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => array(),
+			),
+			'users' => array(
 				ApiBase::PARAM_ISMULTI => true
-			],
-			'token' => [
+			),
+			'token' => array(
 				ApiBase::PARAM_DEPRECATED => true,
 				ApiBase::PARAM_TYPE => array_keys( $this->getTokenFunctions() ),
 				ApiBase::PARAM_ISMULTI => true
-			],
-		];
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=query&list=users&ususers=Example&usprop=groups|editcount|gender'
 				=> 'apihelp-query+users-example-simple',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

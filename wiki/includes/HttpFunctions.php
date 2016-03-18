@@ -60,7 +60,7 @@ class Http {
 	 * @param string $caller The method making this request, for profiling
 	 * @return string|bool (bool)false on failure or a string on success
 	 */
-	public static function request( $method, $url, $options = [], $caller = __METHOD__ ) {
+	public static function request( $method, $url, $options = array(), $caller = __METHOD__ ) {
 		wfDebug( "HTTP: $method: $url\n" );
 
 		$options['method'] = strtoupper( $method );
@@ -80,8 +80,7 @@ class Http {
 		} else {
 			$errors = $status->getErrorsByType( 'error' );
 			$logger = LoggerFactory::getInstance( 'http' );
-			$logger->warning( $status->getWikiText(),
-				[ 'error' => $errors, 'caller' => $caller, 'content' => $req->getContent() ] );
+			$logger->warning( $status->getWikiText(), array( 'caller' => $caller ) );
 			return false;
 		}
 	}
@@ -95,16 +94,16 @@ class Http {
 	 * @param string $url
 	 * @param array $options
 	 * @param string $caller The method making this request, for profiling
-	 * @return string|bool false on error
+	 * @return string
 	 */
-	public static function get( $url, $options = [], $caller = __METHOD__ ) {
+	public static function get( $url, $options = array(), $caller = __METHOD__ ) {
 		$args = func_get_args();
 		if ( isset( $args[1] ) && ( is_string( $args[1] ) || is_numeric( $args[1] ) ) ) {
 			// Second was used to be the timeout
 			// And third parameter used to be $options
 			wfWarn( "Second parameter should not be a timeout.", 2 );
 			$options = isset( $args[2] ) && is_array( $args[2] ) ?
-				$args[2] : [];
+				$args[2] : array();
 			$options['timeout'] = $args[1];
 			$caller = __METHOD__;
 		}
@@ -118,9 +117,9 @@ class Http {
 	 * @param string $url
 	 * @param array $options
 	 * @param string $caller The method making this request, for profiling
-	 * @return string|bool false on error
+	 * @return string
 	 */
-	public static function post( $url, $options = [], $caller = __METHOD__ ) {
+	public static function post( $url, $options = array(), $caller = __METHOD__ ) {
 		return Http::request( 'POST', $url, $options, $caller );
 	}
 
@@ -131,14 +130,14 @@ class Http {
 	 * @return bool
 	 */
 	public static function isLocalURL( $url ) {
-		global $wgCommandLineMode, $wgLocalVirtualHosts;
+		global $wgCommandLineMode, $wgLocalVirtualHosts, $wgConf;
 
 		if ( $wgCommandLineMode ) {
 			return false;
 		}
 
 		// Extract host part
-		$matches = [];
+		$matches = array();
 		if ( preg_match( '!^http://([\w.-]+)[/:].*$!', $url, $matches ) ) {
 			$host = $matches[1];
 			// Split up dotwise
@@ -156,7 +155,9 @@ class Http {
 					$domain = $domainPart . '.' . $domain;
 				}
 
-				if ( in_array( $domain, $wgLocalVirtualHosts ) ) {
+				if ( in_array( $domain, $wgLocalVirtualHosts )
+					|| $wgConf->isLocalVHost( $domain )
+				) {
 					return true;
 				}
 			}
@@ -214,7 +215,7 @@ class MWHttpRequest {
 	protected $sslVerifyCert = true;
 	protected $caInfo = null;
 	protected $method = "GET";
-	protected $reqHeaders = [];
+	protected $reqHeaders = array();
 	protected $url;
 	protected $parsedUrl;
 	protected $callback;
@@ -226,10 +227,10 @@ class MWHttpRequest {
 	 */
 	protected $cookieJar;
 
-	protected $headerList = [];
+	protected $headerList = array();
 	protected $respVersion = "0.9";
 	protected $respStatus = "200 Ok";
-	protected $respHeaders = [];
+	protected $respHeaders = array();
 
 	public $status;
 
@@ -249,9 +250,7 @@ class MWHttpRequest {
 	 * @param string $caller The method making this request, for profiling
 	 * @param Profiler $profiler An instance of the profiler for profiling, or null
 	 */
-	protected function __construct(
-		$url, $options = [], $caller = __METHOD__, $profiler = null
-	) {
+	protected function __construct( $url, $options = array(), $caller = __METHOD__, $profiler = null ) {
 		global $wgHTTPTimeout, $wgHTTPConnectTimeout;
 
 		$this->url = wfExpandUrl( $url, PROTO_HTTP );
@@ -277,8 +276,8 @@ class MWHttpRequest {
 			$this->setUserAgent( $options['userAgent'] );
 		}
 
-		$members = [ "postData", "proxy", "noProxy", "sslVerifyHost", "caInfo",
-				"method", "followRedirects", "maxRedirects", "sslVerifyCert", "callback" ];
+		$members = array( "postData", "proxy", "noProxy", "sslVerifyHost", "caInfo",
+				"method", "followRedirects", "maxRedirects", "sslVerifyCert", "callback" );
 
 		foreach ( $members as $o ) {
 			if ( isset( $options[$o] ) ) {
@@ -409,7 +408,7 @@ class MWHttpRequest {
 	 * @return array
 	 */
 	public function getHeaderList() {
-		$list = [];
+		$list = array();
 
 		if ( $this->cookieJar ) {
 			$this->reqHeaders['Cookie'] =
@@ -480,7 +479,7 @@ class MWHttpRequest {
 		$this->proxySetup(); // set up any proxy as needed
 
 		if ( !$this->callback ) {
-			$this->setCallback( [ $this, 'read' ] );
+			$this->setCallback( array( $this, 'read' ) );
 		}
 
 		if ( !isset( $this->reqHeaders['User-Agent'] ) ) {
@@ -679,7 +678,7 @@ class MWHttpRequest {
 	public function getFinalUrl() {
 		$headers = $this->getResponseHeaders();
 
-		// return full url (fix for incorrect but handled relative location)
+		//return full url (fix for incorrect but handled relative location)
 		if ( isset( $headers['location'] ) ) {
 			$locations = $headers['location'];
 			$domain = '';
@@ -691,7 +690,7 @@ class MWHttpRequest {
 
 				if ( isset( $url['host'] ) ) {
 					$domain = $url['scheme'] . '://' . $url['host'];
-					break; // found correct URI (with host)
+					break; //found correct URI (with host)
 				} else {
 					$foundRelativeURI = true;
 				}
@@ -731,7 +730,7 @@ class MWHttpRequest {
 class CurlHttpRequest extends MWHttpRequest {
 	const SUPPORTS_FILE_POSTS = true;
 
-	protected $curlOptions = [];
+	protected $curlOptions = array();
 	protected $headerText = "";
 
 	/**
@@ -762,7 +761,7 @@ class CurlHttpRequest extends MWHttpRequest {
 
 		$this->curlOptions[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_0;
 		$this->curlOptions[CURLOPT_WRITEFUNCTION] = $this->callback;
-		$this->curlOptions[CURLOPT_HEADERFUNCTION] = [ $this, "readHeader" ];
+		$this->curlOptions[CURLOPT_HEADERFUNCTION] = array( $this, "readHeader" );
 		$this->curlOptions[CURLOPT_MAXREDIRS] = $this->maxRedirects;
 		$this->curlOptions[CURLOPT_ENCODING] = ""; # Enable compression
 
@@ -788,7 +787,7 @@ class CurlHttpRequest extends MWHttpRequest {
 			// but we support lower versions, and the option doesn't exist in HHVM 5.6.99.
 			if ( defined( 'CURLOPT_SAFE_UPLOAD' ) ) {
 				$this->curlOptions[CURLOPT_SAFE_UPLOAD] = true;
-			} elseif ( is_array( $postData ) ) {
+			} else if ( is_array( $postData ) ) {
 				// In PHP 5.2 and later, '@' is interpreted as a file upload if POSTFIELDS
 				// is an array, but not if it's a string. So convert $req['body'] to a string
 				// for safety.
@@ -816,7 +815,7 @@ class CurlHttpRequest extends MWHttpRequest {
 			MediaWiki\suppressWarnings();
 			if ( !curl_setopt( $curlHandle, CURLOPT_FOLLOWLOCATION, true ) ) {
 				wfDebug( __METHOD__ . ": Couldn't set CURLOPT_FOLLOWLOCATION. " .
-					"Probably open_basedir is set.\n" );
+					"Probably safe_mode or open_basedir is set.\n" );
 				// Continue the processing. If it were in curl_setopt_array,
 				// processing would have halted on its entry
 			}
@@ -854,17 +853,15 @@ class CurlHttpRequest extends MWHttpRequest {
 	 * @return bool
 	 */
 	public function canFollowRedirects() {
+		if ( strval( ini_get( 'open_basedir' ) ) !== '' || wfIniGetBool( 'safe_mode' ) ) {
+			wfDebug( "Cannot follow redirects in safe mode\n" );
+			return false;
+		}
+
 		$curlVersionInfo = curl_version();
 		if ( $curlVersionInfo['version_number'] < 0x071304 ) {
 			wfDebug( "Cannot follow redirects with libcurl < 7.19.4 due to CVE-2009-0037\n" );
 			return false;
-		}
-
-		if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
-			if ( strval( ini_get( 'open_basedir' ) ) !== '' ) {
-				wfDebug( "Cannot follow redirects when open_basedir is set\n" );
-				return false;
-			}
 		}
 
 		return true;
@@ -873,7 +870,7 @@ class CurlHttpRequest extends MWHttpRequest {
 
 class PhpHttpRequest extends MWHttpRequest {
 
-	private $fopenErrors = [];
+	private $fopenErrors = array();
 
 	/**
 	 * @param string $url
@@ -886,28 +883,23 @@ class PhpHttpRequest extends MWHttpRequest {
 	}
 
 	/**
-	 * Returns an array with a 'capath' or 'cafile' key
-	 * that is suitable to be merged into the 'ssl' sub-array of
-	 * a stream context options array.
-	 * Uses the 'caInfo' option of the class if it is provided, otherwise uses the system
+	 * Returns an array with a 'capath' or 'cafile' key that is suitable to be merged into the 'ssl' sub-array of a
+	 * stream context options array. Uses the 'caInfo' option of the class if it is provided, otherwise uses the system
 	 * default CA bundle if PHP supports that, or searches a few standard locations.
 	 * @return array
 	 * @throws DomainException
 	 */
 	protected function getCertOptions() {
-		$certOptions = [];
-		$certLocations = [];
+		$certOptions = array();
+		$certLocations = array();
 		if ( $this->caInfo ) {
-			$certLocations = [ 'manual' => $this->caInfo ];
+			$certLocations = array( 'manual' => $this->caInfo );
 		} elseif ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
-			// @codingStandardsIgnoreStart Generic.Files.LineLength
 			// Default locations, based on
 			// https://www.happyassassin.net/2015/01/12/a-note-about-ssltls-trusted-certificate-stores-and-platforms/
-			// PHP 5.5 and older doesn't have any defaults, so we try to guess ourselves.
-			// PHP 5.6+ gets the CA location from OpenSSL as long as it is not set manually,
-			// so we should leave capath/cafile empty there.
-			// @codingStandardsIgnoreEnd
-			$certLocations = array_filter( [
+			// PHP 5.5 and older doesn't have any defaults, so we try to guess ourselves. PHP 5.6+ gets the CA location
+			// from OpenSSL as long as it is not set manually, so we should leave capath/cafile empty there.
+			$certLocations = array_filter( array(
 				getenv( 'SSL_CERT_DIR' ),
 				getenv( 'SSL_CERT_PATH' ),
 				'/etc/pki/tls/certs/ca-bundle.crt', # Fedora et al
@@ -915,10 +907,10 @@ class PhpHttpRequest extends MWHttpRequest {
 				'/etc/pki/tls/certs/ca-bundle.trust.crt',
 				'/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem',
 				'/System/Library/OpenSSL', # OSX
-			] );
+			) );
 		}
 
-		foreach ( $certLocations as $key => $cert ) {
+		foreach( $certLocations as $key => $cert ) {
 			if ( is_dir( $cert ) ) {
 				$certOptions['capath'] = $cert;
 				break;
@@ -935,15 +927,13 @@ class PhpHttpRequest extends MWHttpRequest {
 	}
 
 	/**
-	 * Custom error handler for dealing with fopen() errors.
-	 * fopen() tends to fire multiple errors in succession, and the last one
-	 * is completely useless (something like "fopen: failed to open stream")
-	 * so normal methods of handling errors programmatically
+	 * Custom error handler for dealing with fopen() errors. fopen() tends to fire multiple errors in succession, and the last one
+	 * is completely useless (something like "fopen: failed to open stream") so normal methods of handling errors programmatically
 	 * like get_last_error() don't work.
 	 */
 	public function errorHandler( $errno, $errstr ) {
 		$n = count( $this->fopenErrors ) + 1;
-		$this->fopenErrors += [ "errno$n" => $errno, "errstr$n" => $errstr ];
+		$this->fopenErrors += array( "errno$n" => $errno, "errstr$n" => $errstr );
 	}
 
 	public function execute() {
@@ -970,8 +960,8 @@ class PhpHttpRequest extends MWHttpRequest {
 		}
 
 		// Set up PHP stream context
-		$options = [
-			'http' => [
+		$options = array(
+			'http' => array(
 				'method' => $this->method,
 				'header' => implode( "\r\n", $this->getHeaderList() ),
 				'protocol_version' => '1.1',
@@ -981,14 +971,12 @@ class PhpHttpRequest extends MWHttpRequest {
 				// Curl options in case curlwrappers are installed
 				'curl_verify_ssl_host' => $this->sslVerifyHost ? 2 : 0,
 				'curl_verify_ssl_peer' => $this->sslVerifyCert,
-			],
-			'ssl' => [
+			),
+			'ssl' => array(
 				'verify_peer' => $this->sslVerifyCert,
 				'SNI_enabled' => true,
-				'ciphers' => 'HIGH:!SSLv2:!SSLv3:-ADH:-kDH:-kECDH:-DSS',
-				'disable_compression' => true,
-			],
-		];
+			),
+		);
 
 		if ( $this->proxy ) {
 			$options['http']['proxy'] = $this->urlToTCP( $this->proxy );
@@ -1013,11 +1001,11 @@ class PhpHttpRequest extends MWHttpRequest {
 
 		$context = stream_context_create( $options );
 
-		$this->headerList = [];
+		$this->headerList = array();
 		$reqCount = 0;
 		$url = $this->url;
 
-		$result = [];
+		$result = array();
 
 		if ( $this->profiler ) {
 			$profileSection = $this->profiler->scopedProfileIn(
@@ -1026,8 +1014,8 @@ class PhpHttpRequest extends MWHttpRequest {
 		}
 		do {
 			$reqCount++;
-			$this->fopenErrors = [];
-			set_error_handler( [ $this, 'errorHandler' ] );
+			$this->fopenErrors = array();
+			set_error_handler( array( $this, 'errorHandler' ) );
 			$fh = fopen( $url, "r", false, $context );
 			restore_error_handler();
 

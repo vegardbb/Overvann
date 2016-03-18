@@ -42,35 +42,25 @@ class ApiProtect extends ApiBase {
 			$this->dieUsageMsg( reset( $errors ) );
 		}
 
-		$user = $this->getUser();
-		$tags = $params['tags'];
-
-		// Check if user can add tags
-		if ( !is_null( $tags ) ) {
-			$ableToTag = ChangeTags::canAddTagsAccompanyingChange( $tags, $user );
-			if ( !$ableToTag->isOK() ) {
-				$this->dieStatus( $ableToTag );
-			}
-		}
-
 		$expiry = (array)$params['expiry'];
 		if ( count( $expiry ) != count( $params['protections'] ) ) {
 			if ( count( $expiry ) == 1 ) {
 				$expiry = array_fill( 0, count( $params['protections'] ), $expiry[0] );
 			} else {
-				$this->dieUsageMsg( [
+				$this->dieUsageMsg( array(
 					'toofewexpiries',
 					count( $expiry ),
 					count( $params['protections'] )
-				] );
+				) );
 			}
 		}
 
 		$restrictionTypes = $titleObj->getRestrictionTypes();
+		$db = $this->getDB();
 
-		$protections = [];
-		$expiryarray = [];
-		$resultProtections = [];
+		$protections = array();
+		$expiryarray = array();
+		$resultProtections = array();
 		foreach ( $params['protections'] as $i => $prot ) {
 			$p = explode( '=', $prot );
 			$protections[$p[0]] = ( $p[1] == 'all' ? '' : $p[1] );
@@ -83,10 +73,10 @@ class ApiProtect extends ApiBase {
 			}
 
 			if ( !in_array( $p[0], $restrictionTypes ) && $p[0] != 'create' ) {
-				$this->dieUsageMsg( [ 'protect-invalidaction', $p[0] ] );
+				$this->dieUsageMsg( array( 'protect-invalidaction', $p[0] ) );
 			}
 			if ( !in_array( $p[1], $this->getConfig()->get( 'RestrictionLevels' ) ) && $p[1] != 'all' ) {
-				$this->dieUsageMsg( [ 'protect-invalidlevel', $p[1] ] );
+				$this->dieUsageMsg( array( 'protect-invalidlevel', $p[1] ) );
 			}
 
 			if ( wfIsInfinity( $expiry[$i] ) ) {
@@ -94,23 +84,26 @@ class ApiProtect extends ApiBase {
 			} else {
 				$exp = strtotime( $expiry[$i] );
 				if ( $exp < 0 || !$exp ) {
-					$this->dieUsageMsg( [ 'invalidexpiry', $expiry[$i] ] );
+					$this->dieUsageMsg( array( 'invalidexpiry', $expiry[$i] ) );
 				}
 
 				$exp = wfTimestamp( TS_MW, $exp );
 				if ( $exp < wfTimestampNow() ) {
-					$this->dieUsageMsg( [ 'pastexpiry', $expiry[$i] ] );
+					$this->dieUsageMsg( array( 'pastexpiry', $expiry[$i] ) );
 				}
 				$expiryarray[$p[0]] = $exp;
 			}
-			$resultProtections[] = [
+			$resultProtections[] = array(
 				$p[0] => $protections[$p[0]],
 				'expiry' => $wgContLang->formatExpiry( $expiryarray[$p[0]], TS_ISO_8601, 'infinite' ),
-			];
+			);
 		}
 
 		$cascade = $params['cascade'];
 
+		if ( $params['watch'] ) {
+			$this->logFeatureUsage( 'action=protect&watch' );
+		}
 		$watch = $params['watch'] ? 'watch' : $params['watchlist'];
 		$this->setWatch( $watch, $titleObj, 'watchdefault' );
 
@@ -119,17 +112,16 @@ class ApiProtect extends ApiBase {
 			$expiryarray,
 			$cascade,
 			$params['reason'],
-			$user,
-			$tags
+			$this->getUser()
 		);
 
 		if ( !$status->isOK() ) {
 			$this->dieStatus( $status );
 		}
-		$res = [
+		$res = array(
 			'title' => $titleObj->getPrefixedText(),
 			'reason' => $params['reason']
-		];
+		);
 		if ( $cascade ) {
 			$res['cascade'] = true;
 		}
@@ -148,42 +140,38 @@ class ApiProtect extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
-			'title' => [
+		return array(
+			'title' => array(
 				ApiBase::PARAM_TYPE => 'string',
-			],
-			'pageid' => [
+			),
+			'pageid' => array(
 				ApiBase::PARAM_TYPE => 'integer',
-			],
-			'protections' => [
+			),
+			'protections' => array(
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_REQUIRED => true,
-			],
-			'expiry' => [
+			),
+			'expiry' => array(
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_ALLOW_DUPLICATES => true,
 				ApiBase::PARAM_DFLT => 'infinite',
-			],
+			),
 			'reason' => '',
-			'tags' => [
-				ApiBase::PARAM_TYPE => 'tags',
-				ApiBase::PARAM_ISMULTI => true,
-			],
 			'cascade' => false,
-			'watch' => [
+			'watch' => array(
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_DEPRECATED => true,
-			],
-			'watchlist' => [
+			),
+			'watchlist' => array(
 				ApiBase::PARAM_DFLT => 'preferences',
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'watch',
 					'unwatch',
 					'preferences',
 					'nochange'
-				],
-			],
-		];
+				),
+			),
+		);
 	}
 
 	public function needsToken() {
@@ -191,7 +179,7 @@ class ApiProtect extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=protect&title=Main%20Page&token=123ABC&' .
 				'protections=edit=sysop|move=sysop&cascade=&expiry=20070901163000|never'
 				=> 'apihelp-protect-example-protect',
@@ -201,7 +189,7 @@ class ApiProtect extends ApiBase {
 			'action=protect&title=Main%20Page&token=123ABC&' .
 				'protections=&reason=Lifting%20restrictions'
 				=> 'apihelp-protect-example-unprotect2',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

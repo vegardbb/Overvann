@@ -16,19 +16,19 @@ class IconWidget extends Widget {
 	/**
 	 * @param array $config Configuration options
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Parent constructor
 		parent::__construct( $config );
 
 		// Mixins
 		$this->mixin( new IconElement( $this,
-			array_merge( $config, [ 'iconElement' => $this ] ) ) );
+			array_merge( $config, array( 'iconElement' => $this ) ) ) );
 		$this->mixin( new TitledElement( $this,
-			array_merge( $config, [ 'titled' => $this ] ) ) );
+			array_merge( $config, array( 'titled' => $this ) ) ) );
 		$this->mixin( new FlaggedElement( $this,
-			array_merge( $config, [ 'flagged' => $this ] ) ) );
+			array_merge( $config, array( 'flagged' => $this ) ) ) );
 
 		// Initialization
-		$this->addClasses( [ 'oo-ui-iconWidget' ] );
+		$this->addClasses( array( 'oo-ui-iconWidget' ) );
 	}
 }

@@ -14,13 +14,13 @@ class HTMLCheckField extends HTMLFormField {
 		$attr = $this->getTooltipAndAccessKey();
 		$attr['id'] = $this->mID;
 
-		$attr += $this->getAttributes( [ 'disabled', 'tabindex' ] );
+		$attr += $this->getAttributes( array( 'disabled', 'tabindex' ) );
 
 		if ( $this->mClass !== '' ) {
 			$attr['class'] = $this->mClass;
 		}
 
-		$attrLabel = [ 'for' => $this->mID ];
+		$attrLabel = array( 'for' => $this->mID );
 		if ( isset( $attr['title'] ) ) {
 			// propagate tooltip to label
 			$attrLabel['title'] = $attr['title'];
@@ -33,7 +33,7 @@ class HTMLCheckField extends HTMLFormField {
 		if ( $wgUseMediaWikiUIEverywhere || $this->mParent instanceof VFormHTMLForm ) {
 			$chkLabel = Html::rawElement(
 				'div',
-				[ 'class' => 'mw-ui-checkbox' ],
+				array( 'class' => 'mw-ui-checkbox' ),
 				$chkLabel
 			);
 		}
@@ -45,7 +45,7 @@ class HTMLCheckField extends HTMLFormField {
 	 * Get the OOUI version of this field.
 	 * @since 1.26
 	 * @param string $value
-	 * @return OOUI\CheckboxInputWidget The checkbox widget.
+	 * @return OOUI\\CheckboxInputWidget The checkbox widget.
 	 */
 	public function getInputOOUI( $value ) {
 		if ( !empty( $this->mParams['invert'] ) ) {
@@ -56,13 +56,10 @@ class HTMLCheckField extends HTMLFormField {
 		$attr['id'] = $this->mID;
 		$attr['name'] = $this->mName;
 
-		$attr += $this->getAttributes(
-			[ 'disabled', 'tabindex' ],
-			[ 'tabindex' => 'tabIndex' ]
-		);
+		$attr += $this->getAttributes( array( 'disabled', 'tabindex' ), array( 'tabindex' => 'tabIndex' ) );
 
 		if ( $this->mClass !== '' ) {
-			$attr['classes'] = [ $this->mClass ];
+			$attr['classes'] = array( $this->mClass );
 		}
 
 		$attr['selected'] = $value;

@@ -32,7 +32,7 @@ class GetSlaveServer extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->addOption( "group", "Query group to check specifically" );
-		$this->addDescription( 'Report the hostname of a slave server' );
+		$this->mDescription = "Report the hostname of a slave server";
 	}
 
 	public function execute() {
@@ -40,7 +40,7 @@ class GetSlaveServer extends Maintenance {
 		if ( $wgAllDBsAreLocalhost ) {
 			$host = 'localhost';
 		} elseif ( $this->hasOption( 'group' ) ) {
-			$db = $this->getDB( DB_SLAVE, $this->getOption( 'group' ) );
+			$db = wfGetDB( DB_SLAVE, $this->getOption( 'group' ) );
 			$host = $db->getServer();
 		} else {
 			$lb = wfGetLB();

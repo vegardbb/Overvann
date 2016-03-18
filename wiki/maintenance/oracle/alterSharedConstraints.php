@@ -32,7 +32,7 @@ require_once __DIR__ . '/../Maintenance.php';
 class AlterSharedConstraints extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Alter foreign key to reference master tables in shared database setup.' );
+		$this->mDescription = "Alter foreign key to reference master tables in shared database setup.";
 	}
 
 	public function getDbType() {
@@ -48,7 +48,7 @@ class AlterSharedConstraints extends Maintenance {
 			return;
 		}
 
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 		foreach ( $wgSharedTables as $table ) {
 			$stable = $dbw->tableNameInternal( $table );
 			if ( $wgSharedPrefix != null ) {

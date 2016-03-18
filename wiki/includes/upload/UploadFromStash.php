@@ -36,7 +36,7 @@ class UploadFromStash extends UploadBase {
 	// an instance of UploadStash
 	private $stash;
 
-	// LocalFile repo
+	//LocalFile repo
 	private $repo;
 
 	/**
@@ -178,10 +178,17 @@ class UploadFromStash extends UploadBase {
 	}
 
 	/**
-	 * Remove the database record after a successful upload.
+	 * Perform the upload, then remove the database record afterward.
+	 * @param string $comment
+	 * @param string $pageText
+	 * @param bool $watch
+	 * @param User $user
+	 * @return Status
 	 */
-	public function postProcessUpload() {
-		parent::postProcessUpload();
+	public function performUpload( $comment, $pageText, $watch, $user ) {
+		$rv = parent::performUpload( $comment, $pageText, $watch, $user );
 		$this->unsaveUploadedFile();
+
+		return $rv;
 	}
 }

@@ -60,372 +60,372 @@ class XMPInfo {
 	 *
 	 * Currently this just has a bunch of EXIF values as this class is only half-done.
 	 */
-	static private $items = [
-		'http://ns.adobe.com/exif/1.0/' => [
-			'ApertureValue' => [
+	static private $items = array(
+		'http://ns.adobe.com/exif/1.0/' => array(
+			'ApertureValue' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'BrightnessValue' => [
+			),
+			'BrightnessValue' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'CompressedBitsPerPixel' => [
+			),
+			'CompressedBitsPerPixel' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'DigitalZoomRatio' => [
+			),
+			'DigitalZoomRatio' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'ExposureBiasValue' => [
+			),
+			'ExposureBiasValue' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'ExposureIndex' => [
+			),
+			'ExposureIndex' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'ExposureTime' => [
+			),
+			'ExposureTime' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'FlashEnergy' => [
+			),
+			'FlashEnergy' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational',
-			],
-			'FNumber' => [
+			),
+			'FNumber' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'FocalLength' => [
+			),
+			'FocalLength' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'FocalPlaneXResolution' => [
+			),
+			'FocalPlaneXResolution' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'FocalPlaneYResolution' => [
+			),
+			'FocalPlaneYResolution' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'GPSAltitude' => [
+			),
+			'GPSAltitude' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational',
-			],
-			'GPSDestBearing' => [
+			),
+			'GPSDestBearing' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'GPSDestDistance' => [
+			),
+			'GPSDestDistance' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'GPSDOP' => [
+			),
+			'GPSDOP' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'GPSImgDirection' => [
+			),
+			'GPSImgDirection' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'GPSSpeed' => [
+			),
+			'GPSSpeed' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'GPSTrack' => [
+			),
+			'GPSTrack' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'MaxApertureValue' => [
+			),
+			'MaxApertureValue' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'ShutterSpeedValue' => [
+			),
+			'ShutterSpeedValue' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
-			'SubjectDistance' => [
+			),
+			'SubjectDistance' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational'
-			],
+			),
 			/* Flash */
-			'Flash' => [
+			'Flash' => array(
 				'mode' => XMPReader::MODE_STRUCT,
-				'children' => [
+				'children' => array(
 					'Fired' => true,
 					'Function' => true,
 					'Mode' => true,
 					'RedEyeMode' => true,
 					'Return' => true,
-				],
+				),
 				'validate' => 'validateFlash',
 				'map_group' => 'exif',
-			],
-			'Fired' => [
+			),
+			'Fired' => array(
 				'map_group' => 'exif',
 				'validate' => 'validateBoolean',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'Function' => [
+			),
+			'Function' => array(
 				'map_group' => 'exif',
 				'validate' => 'validateBoolean',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'Mode' => [
+			),
+			'Mode' => array(
 				'map_group' => 'exif',
 				'validate' => 'validateClosed',
 				'mode' => XMPReader::MODE_SIMPLE,
-				'choices' => [ '0' => true, '1' => true,
-					'2' => true, '3' => true ],
+				'choices' => array( '0' => true, '1' => true,
+					'2' => true, '3' => true ),
 				'structPart' => true,
-			],
-			'Return' => [
+			),
+			'Return' => array(
 				'map_group' => 'exif',
 				'validate' => 'validateClosed',
 				'mode' => XMPReader::MODE_SIMPLE,
-				'choices' => [ '0' => true,
-					'2' => true, '3' => true ],
+				'choices' => array( '0' => true,
+					'2' => true, '3' => true ),
 				'structPart' => true,
-			],
-			'RedEyeMode' => [
+			),
+			'RedEyeMode' => array(
 				'map_group' => 'exif',
 				'validate' => 'validateBoolean',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
+			),
 			/* End Flash */
-			'ISOSpeedRatings' => [
+			'ISOSpeedRatings' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateInteger'
-			],
+			),
 			/* end rational things */
-			'ColorSpace' => [
+			'ColorSpace' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '1' => true, '65535' => true ],
-			],
-			'ComponentsConfiguration' => [
+				'choices' => array( '1' => true, '65535' => true ),
+			),
+			'ComponentsConfiguration' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateClosed',
-				'choices' => [ '1' => true, '2' => true, '3' => true, '4' => true,
-					'5' => true, '6' => true ]
-			],
-			'Contrast' => [
+				'choices' => array( '1' => true, '2' => true, '3' => true, '4' => true,
+					'5' => true, '6' => true )
+			),
+			'Contrast' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '0' => true, '1' => true, '2' => true ]
-			],
-			'CustomRendered' => [
+				'choices' => array( '0' => true, '1' => true, '2' => true )
+			),
+			'CustomRendered' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '0' => true, '1' => true ]
-			],
-			'DateTimeOriginal' => [
+				'choices' => array( '0' => true, '1' => true )
+			),
+			'DateTimeOriginal' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateDate',
-			],
-			'DateTimeDigitized' => [ /* xmp:CreateDate */
+			),
+			'DateTimeDigitized' => array( /* xmp:CreateDate */
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateDate',
-			],
+			),
 			/* todo: there might be interesting information in
 			 * exif:DeviceSettingDescription, but need to find an
 			 * example
 			 */
-			'ExifVersion' => [
+			'ExifVersion' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'ExposureMode' => [
+			),
+			'ExposureMode' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 0,
 				'rangeHigh' => 2,
-			],
-			'ExposureProgram' => [
+			),
+			'ExposureProgram' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 0,
 				'rangeHigh' => 8,
-			],
-			'FileSource' => [
+			),
+			'FileSource' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '3' => true ]
-			],
-			'FlashpixVersion' => [
+				'choices' => array( '3' => true )
+			),
+			'FlashpixVersion' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'FocalLengthIn35mmFilm' => [
+			),
+			'FocalLengthIn35mmFilm' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateInteger',
-			],
-			'FocalPlaneResolutionUnit' => [
+			),
+			'FocalPlaneResolutionUnit' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '2' => true, '3' => true ],
-			],
-			'GainControl' => [
+				'choices' => array( '2' => true, '3' => true ),
+			),
+			'GainControl' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 0,
 				'rangeHigh' => 4,
-			],
+			),
 			/* this value is post-processed out later */
-			'GPSAltitudeRef' => [
+			'GPSAltitudeRef' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '0' => true, '1' => true ],
-			],
-			'GPSAreaInformation' => [
+				'choices' => array( '0' => true, '1' => true ),
+			),
+			'GPSAreaInformation' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'GPSDestBearingRef' => [
-				'map_group' => 'exif',
-				'mode' => XMPReader::MODE_SIMPLE,
-				'validate' => 'validateClosed',
-				'choices' => [ 'T' => true, 'M' => true ],
-			],
-			'GPSDestDistanceRef' => [
+			),
+			'GPSDestBearingRef' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ 'K' => true, 'M' => true,
-					'N' => true ],
-			],
-			'GPSDestLatitude' => [
+				'choices' => array( 'T' => true, 'M' => true ),
+			),
+			'GPSDestDistanceRef' => array(
+				'map_group' => 'exif',
+				'mode' => XMPReader::MODE_SIMPLE,
+				'validate' => 'validateClosed',
+				'choices' => array( 'K' => true, 'M' => true,
+					'N' => true ),
+			),
+			'GPSDestLatitude' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateGPS',
-			],
-			'GPSDestLongitude' => [
+			),
+			'GPSDestLongitude' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateGPS',
-			],
-			'GPSDifferential' => [
+			),
+			'GPSDifferential' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '0' => true, '1' => true ],
-			],
-			'GPSImgDirectionRef' => [
+				'choices' => array( '0' => true, '1' => true ),
+			),
+			'GPSImgDirectionRef' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ 'T' => true, 'M' => true ],
-			],
-			'GPSLatitude' => [
+				'choices' => array( 'T' => true, 'M' => true ),
+			),
+			'GPSLatitude' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateGPS',
-			],
-			'GPSLongitude' => [
+			),
+			'GPSLongitude' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateGPS',
-			],
-			'GPSMapDatum' => [
+			),
+			'GPSMapDatum' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'GPSMeasureMode' => [
-				'map_group' => 'exif',
-				'mode' => XMPReader::MODE_SIMPLE,
-				'validate' => 'validateClosed',
-				'choices' => [ '2' => true, '3' => true ]
-			],
-			'GPSProcessingMethod' => [
-				'map_group' => 'exif',
-				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'GPSSatellites' => [
-				'map_group' => 'exif',
-				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'GPSSpeedRef' => [
+			),
+			'GPSMeasureMode' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ 'K' => true, 'M' => true,
-					'N' => true ],
-			],
-			'GPSStatus' => [
+				'choices' => array( '2' => true, '3' => true )
+			),
+			'GPSProcessingMethod' => array(
+				'map_group' => 'exif',
+				'mode' => XMPReader::MODE_SIMPLE,
+			),
+			'GPSSatellites' => array(
+				'map_group' => 'exif',
+				'mode' => XMPReader::MODE_SIMPLE,
+			),
+			'GPSSpeedRef' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ 'A' => true, 'V' => true ]
-			],
-			'GPSTimeStamp' => [
+				'choices' => array( 'K' => true, 'M' => true,
+					'N' => true ),
+			),
+			'GPSStatus' => array(
+				'map_group' => 'exif',
+				'mode' => XMPReader::MODE_SIMPLE,
+				'validate' => 'validateClosed',
+				'choices' => array( 'A' => true, 'V' => true )
+			),
+			'GPSTimeStamp' => array(
 				'map_group' => 'exif',
 				// Note: in exif, GPSDateStamp does not include
 				// the time, where here it does.
 				'map_name' => 'GPSDateStamp',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateDate',
-			],
-			'GPSTrackRef' => [
+			),
+			'GPSTrackRef' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ 'T' => true, 'M' => true ]
-			],
-			'GPSVersionID' => [
+				'choices' => array( 'T' => true, 'M' => true )
+			),
+			'GPSVersionID' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'ImageUniqueID' => [
+			),
+			'ImageUniqueID' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'LightSource' => [
+			),
+			'LightSource' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				/* can't use a range, as it skips... */
-				'choices' => [ '0' => true, '1' => true,
+				'choices' => array( '0' => true, '1' => true,
 					'2' => true, '3' => true, '4' => true,
 					'9' => true, '10' => true, '11' => true,
 					'12' => true, '13' => true,
@@ -435,146 +435,146 @@ class XMPInfo {
 					'21' => true, '22' => true,
 					'23' => true, '24' => true,
 					'255' => true,
-				],
-			],
-			'MeteringMode' => [
+				),
+			),
+			'MeteringMode' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 0,
 				'rangeHigh' => 6,
-				'choices' => [ '255' => true ],
-			],
+				'choices' => array( '255' => true ),
+			),
 			/* Pixel(X|Y)Dimension are rather useless, but for
 			 * completeness since we do it with exif.
 			 */
-			'PixelXDimension' => [
+			'PixelXDimension' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateInteger',
-			],
-			'PixelYDimension' => [
+			),
+			'PixelYDimension' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateInteger',
-			],
-			'Saturation' => [
+			),
+			'Saturation' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 0,
 				'rangeHigh' => 2,
-			],
-			'SceneCaptureType' => [
+			),
+			'SceneCaptureType' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 0,
 				'rangeHigh' => 3,
-			],
-			'SceneType' => [
+			),
+			'SceneType' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '1' => true ],
-			],
+				'choices' => array( '1' => true ),
+			),
 			// Note, 6 is not valid SensingMethod.
-			'SensingMethod' => [
+			'SensingMethod' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 1,
 				'rangeHigh' => 5,
-				'choices' => [ '7' => true, 8 => true ],
-			],
-			'Sharpness' => [
+				'choices' => array( '7' => true, 8 => true ),
+			),
+			'Sharpness' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 0,
 				'rangeHigh' => 2,
-			],
-			'SpectralSensitivity' => [
+			),
+			'SpectralSensitivity' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
+			),
 			// This tag should perhaps be displayed to user better.
-			'SubjectArea' => [
+			'SubjectArea' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateInteger',
-			],
-			'SubjectDistanceRange' => [
+			),
+			'SubjectDistanceRange' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
 				'rangeLow' => 0,
 				'rangeHigh' => 3,
-			],
-			'SubjectLocation' => [
+			),
+			'SubjectLocation' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateInteger',
-			],
-			'UserComment' => [
+			),
+			'UserComment' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_LANG,
-			],
-			'WhiteBalance' => [
+			),
+			'WhiteBalance' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '0' => true, '1' => true ]
-			],
-		],
-		'http://ns.adobe.com/tiff/1.0/' => [
-			'Artist' => [
+				'choices' => array( '0' => true, '1' => true )
+			),
+		),
+		'http://ns.adobe.com/tiff/1.0/' => array(
+			'Artist' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'BitsPerSample' => [
+			),
+			'BitsPerSample' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateInteger',
-			],
-			'Compression' => [
+			),
+			'Compression' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '1' => true, '6' => true ],
-			],
+				'choices' => array( '1' => true, '6' => true ),
+			),
 			/* this prop should not be used in XMP. dc:rights is the correct prop */
-			'Copyright' => [
+			'Copyright' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_LANG,
-			],
-			'DateTime' => [ /* proper prop is xmp:ModifyDate */
+			),
+			'DateTime' => array( /* proper prop is xmp:ModifyDate */
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateDate',
-			],
-			'ImageDescription' => [ /* proper one is dc:description */
+			),
+			'ImageDescription' => array( /* proper one is dc:description */
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_LANG,
-			],
-			'ImageLength' => [
+			),
+			'ImageLength' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateInteger',
-			],
-			'ImageWidth' => [
+			),
+			'ImageWidth' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateInteger',
-			],
-			'Make' => [
+			),
+			'Make' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'Model' => [
+			),
+			'Model' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
+			),
 			/**** Do not extract this property
 			 * It interferes with auto exif rotation.
 			 * 'Orientation'       => array(
@@ -585,70 +585,70 @@ class XMPInfo {
 			 *            '6' => true, '7' => true, '8' => true ),
 			 *),
 			 ******/
-			'PhotometricInterpretation' => [
+			'PhotometricInterpretation' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '2' => true, '6' => true ],
-			],
-			'PlanerConfiguration' => [
+				'choices' => array( '2' => true, '6' => true ),
+			),
+			'PlanerConfiguration' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '1' => true, '2' => true ],
-			],
-			'PrimaryChromaticities' => [
+				'choices' => array( '1' => true, '2' => true ),
+			),
+			'PrimaryChromaticities' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateRational',
-			],
-			'ReferenceBlackWhite' => [
+			),
+			'ReferenceBlackWhite' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateRational',
-			],
-			'ResolutionUnit' => [
+			),
+			'ResolutionUnit' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '2' => true, '3' => true ],
-			],
-			'SamplesPerPixel' => [
+				'choices' => array( '2' => true, '3' => true ),
+			),
+			'SamplesPerPixel' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateInteger',
-			],
-			'Software' => [ /* see xmp:CreatorTool */
+			),
+			'Software' => array( /* see xmp:CreatorTool */
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
+			),
 			/* ignore TransferFunction */
-			'WhitePoint' => [
+			'WhitePoint' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateRational',
-			],
-			'XResolution' => [
+			),
+			'XResolution' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational',
-			],
-			'YResolution' => [
+			),
+			'YResolution' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRational',
-			],
-			'YCbCrCoefficients' => [
+			),
+			'YCbCrCoefficients' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateRational',
-			],
-			'YCbCrPositioning' => [
+			),
+			'YCbCrPositioning' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateClosed',
-				'choices' => [ '1' => true, '2' => true ],
-			],
+				'choices' => array( '1' => true, '2' => true ),
+			),
 			/********
 			 * Disable extracting this property (bug 31944)
 			 * Several files have a string instead of a Seq
@@ -666,49 +666,49 @@ class XMPInfo {
 			 *    'choices'   => array( '1' => true, '2' => true ),
 			 * ),
 			 */
-		],
-		'http://ns.adobe.com/exif/1.0/aux/' => [
-			'Lens' => [
+		),
+		'http://ns.adobe.com/exif/1.0/aux/' => array(
+			'Lens' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'SerialNumber' => [
+			),
+			'SerialNumber' => array(
 				'map_group' => 'exif',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'OwnerName' => [
+			),
+			'OwnerName' => array(
 				'map_group' => 'exif',
 				'map_name' => 'CameraOwnerName',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-		],
-		'http://purl.org/dc/elements/1.1/' => [
-			'title' => [
+			),
+		),
+		'http://purl.org/dc/elements/1.1/' => array(
+			'title' => array(
 				'map_group' => 'general',
 				'map_name' => 'ObjectName',
 				'mode' => XMPReader::MODE_LANG
-			],
-			'description' => [
+			),
+			'description' => array(
 				'map_group' => 'general',
 				'map_name' => 'ImageDescription',
 				'mode' => XMPReader::MODE_LANG
-			],
-			'contributor' => [
+			),
+			'contributor' => array(
 				'map_group' => 'general',
 				'map_name' => 'dc-contributor',
 				'mode' => XMPReader::MODE_BAG
-			],
-			'coverage' => [
+			),
+			'coverage' => array(
 				'map_group' => 'general',
 				'map_name' => 'dc-coverage',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'creator' => [
+			),
+			'creator' => array(
 				'map_group' => 'general',
-				'map_name' => 'Artist', // map with exif Artist, iptc byline (2:80)
+				'map_name' => 'Artist', //map with exif Artist, iptc byline (2:80)
 				'mode' => XMPReader::MODE_SEQ,
-			],
-			'date' => [
+			),
+			'date' => array(
 				'map_group' => 'general',
 				// Note, not mapped with other date properties, as this type of date is
 				// non-specific: "A point or period of time associated with an event in
@@ -716,287 +716,287 @@ class XMPInfo {
 				'map_name' => 'dc-date',
 				'mode' => XMPReader::MODE_SEQ,
 				'validate' => 'validateDate',
-			],
+			),
 			/* Do not extract dc:format, as we've got better ways to determine MIME type */
-			'identifier' => [
+			'identifier' => array(
 				'map_group' => 'deprecated',
 				'map_name' => 'Identifier',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'language' => [
+			),
+			'language' => array(
 				'map_group' => 'general',
 				'map_name' => 'LanguageCode', /* mapped with iptc 2:135 */
 				'mode' => XMPReader::MODE_BAG,
 				'validate' => 'validateLangCode',
-			],
-			'publisher' => [
+			),
+			'publisher' => array(
 				'map_group' => 'general',
 				'map_name' => 'dc-publisher',
 				'mode' => XMPReader::MODE_BAG,
-			],
+			),
 			// for related images/resources
-			'relation' => [
+			'relation' => array(
 				'map_group' => 'general',
 				'map_name' => 'dc-relation',
 				'mode' => XMPReader::MODE_BAG,
-			],
-			'rights' => [
+			),
+			'rights' => array(
 				'map_group' => 'general',
 				'map_name' => 'Copyright',
 				'mode' => XMPReader::MODE_LANG,
-			],
+			),
 			// Note: source is not mapped with iptc source, since iptc
 			// source describes the source of the image in terms of a person
 			// who provided the image, where this is to describe an image that the
 			// current one is based on.
-			'source' => [
+			'source' => array(
 				'map_group' => 'general',
 				'map_name' => 'dc-source',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'subject' => [
+			),
+			'subject' => array(
 				'map_group' => 'general',
 				'map_name' => 'Keywords', /* maps to iptc 2:25 */
 				'mode' => XMPReader::MODE_BAG,
-			],
-			'type' => [
+			),
+			'type' => array(
 				'map_group' => 'general',
 				'map_name' => 'dc-type',
 				'mode' => XMPReader::MODE_BAG,
-			],
-		],
-		'http://ns.adobe.com/xap/1.0/' => [
-			'CreateDate' => [
+			),
+		),
+		'http://ns.adobe.com/xap/1.0/' => array(
+			'CreateDate' => array(
 				'map_group' => 'general',
 				'map_name' => 'DateTimeDigitized',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateDate',
-			],
-			'CreatorTool' => [
+			),
+			'CreatorTool' => array(
 				'map_group' => 'general',
 				'map_name' => 'Software',
 				'mode' => XMPReader::MODE_SIMPLE
-			],
-			'Identifier' => [
+			),
+			'Identifier' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_BAG,
-			],
-			'Label' => [
+			),
+			'Label' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'ModifyDate' => [
+			),
+			'ModifyDate' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'DateTime',
 				'validate' => 'validateDate',
-			],
-			'MetadataDate' => [
+			),
+			'MetadataDate' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				// map_name to be consistent with other date names.
 				'map_name' => 'DateTimeMetadata',
 				'validate' => 'validateDate',
-			],
-			'Nickname' => [
+			),
+			'Nickname' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'Rating' => [
+			),
+			'Rating' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateRating',
-			],
-		],
-		'http://ns.adobe.com/xap/1.0/rights/' => [
-			'Certificate' => [
+			),
+		),
+		'http://ns.adobe.com/xap/1.0/rights/' => array(
+			'Certificate' => array(
 				'map_group' => 'general',
 				'map_name' => 'RightsCertificate',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'Marked' => [
+			),
+			'Marked' => array(
 				'map_group' => 'general',
 				'map_name' => 'Copyrighted',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateBoolean',
-			],
-			'Owner' => [
+			),
+			'Owner' => array(
 				'map_group' => 'general',
 				'map_name' => 'CopyrightOwner',
 				'mode' => XMPReader::MODE_BAG,
-			],
+			),
 			// this seems similar to dc:rights.
-			'UsageTerms' => [
+			'UsageTerms' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_LANG,
-			],
-			'WebStatement' => [
+			),
+			'WebStatement' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-		],
+			),
+		),
 		// XMP media management.
-		'http://ns.adobe.com/xap/1.0/mm/' => [
+		'http://ns.adobe.com/xap/1.0/mm/' => array(
 			// if we extract the exif UniqueImageID, might
 			// as well do this too.
-			'OriginalDocumentID' => [
+			'OriginalDocumentID' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
+			),
 			// It might also be useful to do xmpMM:LastURL
 			// and xmpMM:DerivedFrom as you can potentially,
 			// get the url of this document/source for this
 			// document. However whats more likely is you'd
 			// get a file:// url for the path of the doc,
 			// which is somewhat of a privacy issue.
-		],
-		'http://creativecommons.org/ns#' => [
-			'license' => [
+		),
+		'http://creativecommons.org/ns#' => array(
+			'license' => array(
 				'map_name' => 'LicenseUrl',
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'morePermissions' => [
+			),
+			'morePermissions' => array(
 				'map_name' => 'MorePermissionsUrl',
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'attributionURL' => [
+			),
+			'attributionURL' => array(
 				'map_group' => 'general',
 				'map_name' => 'AttributionUrl',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'attributionName' => [
+			),
+			'attributionName' => array(
 				'map_group' => 'general',
 				'map_name' => 'PreferredAttributionName',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-		],
-		// Note, this property affects how jpeg metadata is extracted.
-		'http://ns.adobe.com/xmp/note/' => [
-			'HasExtendedXMP' => [
+			),
+		),
+		//Note, this property affects how jpeg metadata is extracted.
+		'http://ns.adobe.com/xmp/note/' => array(
+			'HasExtendedXMP' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-		],
+			),
+		),
 		/* Note, in iptc schemas, the legacy properties are denoted
 		 * as deprecated, since other properties should used instead,
 		 * and properties marked as deprecated in the standard are
 		 * are marked as general here as they don't have replacements
 		 */
-		'http://ns.adobe.com/photoshop/1.0/' => [
-			'City' => [
+		'http://ns.adobe.com/photoshop/1.0/' => array(
+			'City' => array(
 				'map_group' => 'deprecated',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'CityDest',
-			],
-			'Country' => [
+			),
+			'Country' => array(
 				'map_group' => 'deprecated',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'CountryDest',
-			],
-			'State' => [
+			),
+			'State' => array(
 				'map_group' => 'deprecated',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'ProvinceOrStateDest',
-			],
-			'DateCreated' => [
+			),
+			'DateCreated' => array(
 				'map_group' => 'deprecated',
 				// marking as deprecated as the xmp prop preferred
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'DateTimeOriginal',
 				'validate' => 'validateDate',
 				// note this prop is an XMP, not IPTC date
-			],
-			'CaptionWriter' => [
+			),
+			'CaptionWriter' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'Writer',
-			],
-			'Instructions' => [
+			),
+			'Instructions' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'SpecialInstructions',
-			],
-			'TransmissionReference' => [
+			),
+			'TransmissionReference' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'OriginalTransmissionRef',
-			],
-			'AuthorsPosition' => [
+			),
+			'AuthorsPosition' => array(
 				/* This corresponds with 2:85
 				 * By-line Title, which needs to be
 				 * handled weirdly to correspond
 				 * with iptc/exif. */
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_SIMPLE
-			],
-			'Credit' => [
+			),
+			'Credit' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'Source' => [
+			),
+			'Source' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'Urgency' => [
+			),
+			'Urgency' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'Category' => [
+			),
+			'Category' => array(
 				// Note, this prop is deprecated, but in general
 				// group since it doesn't have a replacement.
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'iimCategory',
-			],
-			'SupplementalCategories' => [
+			),
+			'SupplementalCategories' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_BAG,
 				'map_name' => 'iimSupplementalCategory',
-			],
-			'Headline' => [
+			),
+			'Headline' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE
-			],
-		],
-		'http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/' => [
-			'CountryCode' => [
+			),
+		),
+		'http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/' => array(
+			'CountryCode' => array(
 				'map_group' => 'deprecated',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'CountryCodeDest',
-			],
-			'IntellectualGenre' => [
+			),
+			'IntellectualGenre' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
+			),
 			// Note, this is a six digit code.
 			// See: http://cv.iptc.org/newscodes/scene/
 			// Since these aren't really all that common,
 			// we just show the number.
-			'Scene' => [
+			'Scene' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_BAG,
 				'validate' => 'validateInteger',
 				'map_name' => 'SceneCode',
-			],
+			),
 			/* Note: SubjectCode should be an 8 ascii digits.
 			 * it is not really an integer (has leading 0's,
 			 * cannot have a +/- sign), but validateInteger
 			 * will let it through.
 			 */
-			'SubjectCode' => [
+			'SubjectCode' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_BAG,
 				'map_name' => 'SubjectNewsCode',
 				'validate' => 'validateInteger'
-			],
-			'Location' => [
+			),
+			'Location' => array(
 				'map_group' => 'deprecated',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'map_name' => 'SublocationDest',
-			],
-			'CreatorContactInfo' => [
+			),
+			'CreatorContactInfo' => array(
 				/* Note this maps to 2:118 in iim
 				 * (Contact) field. However those field
 				 * types are slightly different - 2:118
@@ -1006,7 +1006,7 @@ class XMPInfo {
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_STRUCT,
 				'map_name' => 'Contact',
-				'children' => [
+				'children' => array(
 					'CiAdrExtadr' => true,
 					'CiAdrCity' => true,
 					'CiAdrCtry' => true,
@@ -1015,135 +1015,135 @@ class XMPInfo {
 					'CiAdrPcode' => true,
 					'CiAdrRegion' => true,
 					'CiUrlWork' => true,
-				],
-			],
-			'CiAdrExtadr' => [ /* address */
+				),
+			),
+			'CiAdrExtadr' => array( /* address */
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CiAdrCity' => [ /* city */
+			),
+			'CiAdrCity' => array( /* city */
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CiAdrCtry' => [ /* country */
+			),
+			'CiAdrCtry' => array( /* country */
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CiEmailWork' => [ /* email (possibly separated by ',') */
+			),
+			'CiEmailWork' => array( /* email (possibly separated by ',') */
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CiTelWork' => [ /* telephone */
+			),
+			'CiTelWork' => array( /* telephone */
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CiAdrPcode' => [ /* postal code */
+			),
+			'CiAdrPcode' => array( /* postal code */
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CiAdrRegion' => [ /* province/state */
+			),
+			'CiAdrRegion' => array( /* province/state */
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CiUrlWork' => [ /* url. Multiple may be separated by comma. */
+			),
+			'CiUrlWork' => array( /* url. Multiple may be separated by comma. */
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
+			),
 			/* End contact info struct properties */
-		],
-		'http://iptc.org/std/Iptc4xmpExt/2008-02-29/' => [
-			'Event' => [
+		),
+		'http://iptc.org/std/Iptc4xmpExt/2008-02-29/' => array(
+			'Event' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
-			],
-			'OrganisationInImageName' => [
+			),
+			'OrganisationInImageName' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_BAG,
 				'map_name' => 'OrganisationInImage'
-			],
-			'PersonInImage' => [
+			),
+			'PersonInImage' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_BAG,
-			],
-			'MaxAvailHeight' => [
+			),
+			'MaxAvailHeight' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateInteger',
 				'map_name' => 'OriginalImageHeight',
-			],
-			'MaxAvailWidth' => [
+			),
+			'MaxAvailWidth' => array(
 				'map_group' => 'general',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'validate' => 'validateInteger',
 				'map_name' => 'OriginalImageWidth',
-			],
+			),
 			// LocationShown and LocationCreated are handled
 			// specially because they are hierarchical, but we
 			// also want to merge with the old non-hierarchical.
-			'LocationShown' => [
+			'LocationShown' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_BAGSTRUCT,
-				'children' => [
+				'children' => array(
 					'WorldRegion' => true,
 					'CountryCode' => true, /* iso code */
 					'CountryName' => true,
 					'ProvinceState' => true,
 					'City' => true,
 					'Sublocation' => true,
-				],
-			],
-			'LocationCreated' => [
+				),
+			),
+			'LocationCreated' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_BAGSTRUCT,
-				'children' => [
+				'children' => array(
 					'WorldRegion' => true,
 					'CountryCode' => true, /* iso code */
 					'CountryName' => true,
 					'ProvinceState' => true,
 					'City' => true,
 					'Sublocation' => true,
-				],
-			],
-			'WorldRegion' => [
+				),
+			),
+			'WorldRegion' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CountryCode' => [
+			),
+			'CountryCode' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'CountryName' => [
+			),
+			'CountryName' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
 				'map_name' => 'Country',
-			],
-			'ProvinceState' => [
+			),
+			'ProvinceState' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
 				'map_name' => 'ProvinceOrState',
-			],
-			'City' => [
+			),
+			'City' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
-			'Sublocation' => [
+			),
+			'Sublocation' => array(
 				'map_group' => 'special',
 				'mode' => XMPReader::MODE_SIMPLE,
 				'structPart' => true,
-			],
+			),
 
 			/* Other props that might be interesting but
 			 * Not currently extracted:
@@ -1151,7 +1151,7 @@ class XMPInfo {
 			 * DigitalSourceType
 			 * RegistryId
 			 */
-		],
+		),
 
 		/* Plus props we might want to consider:
 		 * (Note: some of these have unclear/incomplete definitions
@@ -1164,5 +1164,5 @@ class XMPInfo {
 		 * Various model release fields
 		 * Property release fields.
 		 */
-	];
+	);
 }

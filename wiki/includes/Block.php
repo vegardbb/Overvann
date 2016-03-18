@@ -100,8 +100,8 @@ class Block {
 	 * @since 1.26 accepts $options array instead of individual parameters; order
 	 * of parameters above reflects the original order
 	 */
-	function __construct( $options = [] ) {
-		$defaults = [
+	function __construct( $options = array() ) {
+		$defaults = array(
 			'address'         => '',
 			'user'            => null,
 			'by'              => null,
@@ -116,7 +116,7 @@ class Block {
 			'blockEmail'      => false,
 			'allowUsertalk'   => false,
 			'byText'          => '',
-		];
+		);
 
 		if ( func_num_args() > 1 || !is_array( $options ) ) {
 			$options = array_combine(
@@ -172,7 +172,7 @@ class Block {
 		$res = $dbr->selectRow(
 			'ipblocks',
 			self::selectFields(),
-			[ 'ipb_id' => $id ],
+			array( 'ipb_id' => $id ),
 			__METHOD__
 		);
 		if ( $res ) {
@@ -188,7 +188,7 @@ class Block {
 	 * @return array
 	 */
 	public static function selectFields() {
-		return [
+		return array(
 			'ipb_id',
 			'ipb_address',
 			'ipb_by',
@@ -204,7 +204,7 @@ class Block {
 			'ipb_block_email',
 			'ipb_allow_usertalk',
 			'ipb_parent_block_id',
-		];
+		);
 	}
 
 	/**
@@ -245,11 +245,11 @@ class Block {
 		$db = wfGetDB( $this->mFromMaster ? DB_MASTER : DB_SLAVE );
 
 		if ( $this->type !== null ) {
-			$conds = [
-				'ipb_address' => [ (string)$this->target ],
-			];
+			$conds = array(
+				'ipb_address' => array( (string)$this->target ),
+			);
 		} else {
-			$conds = [ 'ipb_address' => [] ];
+			$conds = array( 'ipb_address' => array() );
 		}
 
 		# Be aware that the != '' check is explicit, since empty values will be
@@ -296,7 +296,7 @@ class Block {
 			$block = self::newFromRow( $row );
 
 			# Don't use expired blocks
-			if ( $block->isExpired() ) {
+			if ( $block->deleteIfExpired() ) {
 				continue;
 			}
 
@@ -308,8 +308,8 @@ class Block {
 			if ( $block->getType() == self::TYPE_RANGE ) {
 				# This is the number of bits that are allowed to vary in the block, give
 				# or take some floating point errors
-				$end = Wikimedia\base_convert( $block->getRangeEnd(), 16, 10 );
-				$start = Wikimedia\base_convert( $block->getRangeStart(), 16, 10 );
+				$end = wfBaseconvert( $block->getRangeEnd(), 16, 10 );
+				$start = wfBaseconvert( $block->getRangeStart(), 16, 10 );
 				$size = log( $end - $start + 1, 2 );
 
 				# This has the nice property that a /32 block is ranked equally with a
@@ -360,11 +360,11 @@ class Block {
 		$safeEnd = $dbr->addQuotes( $end );
 
 		return $dbr->makeList(
-			[
+			array(
 				"ipb_range_start $like",
 				"ipb_range_start <= $safeStart",
 				"ipb_range_end >= $safeEnd",
-			],
+			),
 			LIST_AND
 		);
 	}
@@ -442,8 +442,8 @@ class Block {
 		}
 
 		$dbw = wfGetDB( DB_MASTER );
-		$dbw->delete( 'ipblocks', [ 'ipb_parent_block_id' => $this->getId() ], __METHOD__ );
-		$dbw->delete( 'ipblocks', [ 'ipb_id' => $this->getId() ], __METHOD__ );
+		$dbw->delete( 'ipblocks', array( 'ipb_parent_block_id' => $this->getId() ), __METHOD__ );
+		$dbw->delete( 'ipblocks', array( 'ipb_id' => $this->getId() ), __METHOD__ );
 
 		return $dbw->affectedRows() > 0;
 	}
@@ -452,7 +452,7 @@ class Block {
 	 * Insert a block into the block table. Will fail if there is a conflicting
 	 * block (same name and options) already in the database.
 	 *
-	 * @param IDatabase $dbw If you have one available
+	 * @param DatabaseBase $dbw If you have one available
 	 * @return bool|array False on failure, assoc array on success:
 	 *	('id' => block ID, 'autoIds' => array of autoblock IDs)
 	 */
@@ -471,7 +471,7 @@ class Block {
 		$row = $this->getDatabaseArray();
 		$row['ipb_id'] = $dbw->nextSequenceValue( "ipblocks_ipb_id_seq" );
 
-		$dbw->insert( 'ipblocks', $row, __METHOD__, [ 'IGNORE' ] );
+		$dbw->insert( 'ipblocks', $row, __METHOD__, array( 'IGNORE' ) );
 		$affected = $dbw->affectedRows();
 		$this->mId = $dbw->insertId();
 
@@ -482,16 +482,16 @@ class Block {
 			# use a standard SELECT + DELETE to avoid annoying gap locks.
 			$ids = $dbw->selectFieldValues( 'ipblocks',
 				'ipb_id',
-				[
+				array(
 					'ipb_address' => $row['ipb_address'],
 					'ipb_user' => $row['ipb_user'],
 					'ipb_expiry < ' . $dbw->addQuotes( $dbw->timestamp() )
-				],
+				),
 				__METHOD__
 			);
 			if ( $ids ) {
-				$dbw->delete( 'ipblocks', [ 'ipb_id' => $ids ], __METHOD__ );
-				$dbw->insert( 'ipblocks', $row, __METHOD__, [ 'IGNORE' ] );
+				$dbw->delete( 'ipblocks', array( 'ipb_id' => $ids ), __METHOD__ );
+				$dbw->insert( 'ipblocks', $row, __METHOD__, array( 'IGNORE' ) );
 				$affected = $dbw->affectedRows();
 				$this->mId = $dbw->insertId();
 			}
@@ -499,7 +499,7 @@ class Block {
 
 		if ( $affected ) {
 			$auto_ipd_ids = $this->doRetroactiveAutoblock();
-			return [ 'id' => $this->mId, 'autoIds' => $auto_ipd_ids ];
+			return array( 'id' => $this->mId, 'autoIds' => $auto_ipd_ids );
 		}
 
 		return false;
@@ -521,7 +521,7 @@ class Block {
 		$dbw->update(
 			'ipblocks',
 			$this->getDatabaseArray( $dbw ),
-			[ 'ipb_id' => $this->getId() ],
+			array( 'ipb_id' => $this->getId() ),
 			__METHOD__
 		);
 
@@ -532,14 +532,14 @@ class Block {
 			$dbw->update(
 				'ipblocks',
 				$this->getAutoblockUpdateArray(),
-				[ 'ipb_parent_block_id' => $this->getId() ],
+				array( 'ipb_parent_block_id' => $this->getId() ),
 				__METHOD__
 			);
 		} else {
 			// autoblock no longer required, delete corresponding autoblock(s)
 			$dbw->delete(
 				'ipblocks',
-				[ 'ipb_parent_block_id' => $this->getId() ],
+				array( 'ipb_parent_block_id' => $this->getId() ),
 				__METHOD__
 			);
 		}
@@ -548,7 +548,7 @@ class Block {
 
 		if ( $affected ) {
 			$auto_ipd_ids = $this->doRetroactiveAutoblock();
-			return [ 'id' => $this->mId, 'autoIds' => $auto_ipd_ids ];
+			return array( 'id' => $this->mId, 'autoIds' => $auto_ipd_ids );
 		}
 
 		return false;
@@ -556,7 +556,7 @@ class Block {
 
 	/**
 	 * Get an array suitable for passing to $dbw->insert() or $dbw->update()
-	 * @param IDatabase $db
+	 * @param DatabaseBase $db
 	 * @return array
 	 */
 	protected function getDatabaseArray( $db = null ) {
@@ -571,7 +571,7 @@ class Block {
 			$uid = $this->target instanceof User ? $this->target->getID() : 0;
 		}
 
-		$a = [
+		$a = array(
 			'ipb_address'          => (string)$this->target,
 			'ipb_user'             => $uid,
 			'ipb_by'               => $this->getBy(),
@@ -589,7 +589,7 @@ class Block {
 			'ipb_block_email'      => $this->prevents( 'sendemail' ),
 			'ipb_allow_usertalk'   => !$this->prevents( 'editownusertalk' ),
 			'ipb_parent_block_id'  => $this->mParentBlockId
-		];
+		);
 
 		return $a;
 	}
@@ -598,14 +598,14 @@ class Block {
 	 * @return array
 	 */
 	protected function getAutoblockUpdateArray() {
-		return [
+		return array(
 			'ipb_by'               => $this->getBy(),
 			'ipb_by_text'          => $this->getByName(),
 			'ipb_reason'           => $this->mReason,
 			'ipb_create_account'   => $this->prevents( 'createaccount' ),
 			'ipb_deleted'          => (int)$this->mHideName, // typecast required for SQLite
 			'ipb_allow_usertalk'   => !$this->prevents( 'editownusertalk' ),
-		];
+		);
 	}
 
 	/**
@@ -615,13 +615,13 @@ class Block {
 	 * @return array Block IDs of retroactive autoblocks made
 	 */
 	protected function doRetroactiveAutoblock() {
-		$blockIds = [];
+		$blockIds = array();
 		# If autoblock is enabled, autoblock the LAST IP(s) used
 		if ( $this->isAutoblocking() && $this->getType() == self::TYPE_USER ) {
 			wfDebug( "Doing retroactive autoblocks for " . $this->getTarget() . "\n" );
 
 			$continue = Hooks::run(
-				'PerformRetroactiveAutoblock', [ $this, &$blockIds ] );
+				'PerformRetroactiveAutoblock', array( $this, &$blockIds ) );
 
 			if ( $continue ) {
 				self::defaultRetroactiveAutoblock( $this, $blockIds );
@@ -647,13 +647,13 @@ class Block {
 
 		$dbr = wfGetDB( DB_SLAVE );
 
-		$options = [ 'ORDER BY' => 'rc_timestamp DESC' ];
-		$conds = [ 'rc_user_text' => (string)$block->getTarget() ];
+		$options = array( 'ORDER BY' => 'rc_timestamp DESC' );
+		$conds = array( 'rc_user_text' => (string)$block->getTarget() );
 
 		// Just the last IP used.
 		$options['LIMIT'] = 1;
 
-		$res = $dbr->select( 'recentchanges', [ 'rc_ip' ], $conds,
+		$res = $dbr->select( 'recentchanges', array( 'rc_ip' ), $conds,
 			__METHOD__, $options );
 
 		if ( !$res->numRows() ) {
@@ -679,17 +679,16 @@ class Block {
 	 * @return bool
 	 */
 	public static function isWhitelistedFromAutoblocks( $ip ) {
+		global $wgMemc;
+
 		// Try to get the autoblock_whitelist from the cache, as it's faster
 		// than getting the msg raw and explode()'ing it.
-		$cache = ObjectCache::getMainWANInstance();
-		$lines = $cache->getWithSetCallback(
-			wfMemcKey( 'ipb', 'autoblock', 'whitelist' ),
-			$cache::TTL_DAY,
-			function () {
-				return explode( "\n",
-					wfMessage( 'autoblock_whitelist' )->inContentLanguage()->plain() );
-			}
-		);
+		$key = wfMemcKey( 'ipb', 'autoblock', 'whitelist' );
+		$lines = $wgMemc->get( $key );
+		if ( !$lines ) {
+			$lines = explode( "\n", wfMessage( 'autoblock_whitelist' )->inContentLanguage()->plain() );
+			$wgMemc->set( $key, $lines, 3600 * 24 );
+		}
 
 		wfDebug( "Checking the autoblock whitelist..\n" );
 
@@ -734,7 +733,7 @@ class Block {
 		}
 
 		# Allow hooks to cancel the autoblock.
-		if ( !Hooks::run( 'AbortAutoblock', [ $autoblockIP, &$this ] ) ) {
+		if ( !Hooks::run( 'AbortAutoblock', array( $autoblockIP, &$this ) ) ) {
 			wfDebug( "Autoblock aborted by hook.\n" );
 			return false;
 		}
@@ -839,13 +838,13 @@ class Block {
 
 			$dbw = wfGetDB( DB_MASTER );
 			$dbw->update( 'ipblocks',
-				[ /* SET */
+				array( /* SET */
 					'ipb_timestamp' => $dbw->timestamp( $this->mTimestamp ),
 					'ipb_expiry' => $dbw->timestamp( $this->mExpiry ),
-				],
-				[ /* WHERE */
+				),
+				array( /* WHERE */
 					'ipb_address' => (string)$this->getTarget()
-				],
+				),
 				__METHOD__
 			);
 		}
@@ -993,7 +992,7 @@ class Block {
 		if ( $this->mAuto ) {
 			return Html::rawElement(
 				'span',
-				[ 'class' => 'mw-autoblockid' ],
+				array( 'class' => 'mw-autoblockid' ),
 				wfMessage( 'autoblockid', $this->mId )
 			);
 		} else {
@@ -1021,17 +1020,12 @@ class Block {
 			return;
 		}
 
-		DeferredUpdates::addUpdate( new AtomicSectionUpdate(
-			wfGetDB( DB_MASTER ),
-			__METHOD__,
-			function ( IDatabase $dbw, $fname ) {
-				$dbw->delete(
-					'ipblocks',
-					[ 'ipb_expiry < ' . $dbw->addQuotes( $dbw->timestamp() ) ],
-					$fname
-				);
-			}
-		) );
+		$method = __METHOD__;
+		$dbw = wfGetDB( DB_MASTER );
+		$dbw->onTransactionIdle( function () use ( $dbw, $method ) {
+			$dbw->delete( 'ipblocks',
+				array( 'ipb_expiry < ' . $dbw->addQuotes( $dbw->timestamp() ) ), $method );
+		} );
 	}
 
 	/**
@@ -1068,7 +1062,7 @@ class Block {
 
 		} elseif ( in_array(
 			$type,
-			[ Block::TYPE_USER, Block::TYPE_IP, Block::TYPE_RANGE, null ] )
+			array( Block::TYPE_USER, Block::TYPE_IP, Block::TYPE_RANGE, null ) )
 		) {
 			$block = new Block();
 			$block->fromMaster( $fromMaster );
@@ -1096,10 +1090,10 @@ class Block {
 	 */
 	public static function getBlocksForIPList( array $ipChain, $isAnon, $fromMaster = false ) {
 		if ( !count( $ipChain ) ) {
-			return [];
+			return array();
 		}
 
-		$conds = [];
+		$conds = array();
 		foreach ( array_unique( $ipChain ) as $ipaddr ) {
 			# Discard invalid IP addresses. Since XFF can be spoofed and we do not
 			# necessarily trust the header given to us, make sure that we are only
@@ -1120,7 +1114,7 @@ class Block {
 		}
 
 		if ( !count( $conds ) ) {
-			return [];
+			return array();
 		}
 
 		if ( $fromMaster ) {
@@ -1130,10 +1124,10 @@ class Block {
 		}
 		$conds = $db->makeList( $conds, LIST_OR );
 		if ( !$isAnon ) {
-			$conds = [ $conds, 'ipb_anon_only' => 0 ];
+			$conds = array( $conds, 'ipb_anon_only' => 0 );
 		}
 		$selectFields = array_merge(
-			[ 'ipb_range_start', 'ipb_range_end' ],
+			array( 'ipb_range_start', 'ipb_range_end' ),
 			Block::selectFields()
 		);
 		$rows = $db->select( 'ipblocks',
@@ -1142,10 +1136,10 @@ class Block {
 			__METHOD__
 		);
 
-		$blocks = [];
+		$blocks = array();
 		foreach ( $rows as $row ) {
 			$block = self::newFromRow( $row );
-			if ( !$block->isExpired() ) {
+			if ( !$block->deleteIfExpired() ) {
 				$blocks[] = $block;
 			}
 		}
@@ -1189,18 +1183,18 @@ class Block {
 			return strcmp( $bWeight, $aWeight ); // highest weight first
 		} );
 
-		$blocksListExact = [
+		$blocksListExact = array(
 			'hard' => false,
 			'disable_create' => false,
 			'other' => false,
 			'auto' => false
-		];
-		$blocksListRange = [
+		);
+		$blocksListRange = array(
 			'hard' => false,
 			'disable_create' => false,
 			'other' => false,
 			'auto' => false
-		];
+		);
 		$ipChain = array_reverse( $ipChain );
 
 		/** @var Block $block */
@@ -1227,7 +1221,7 @@ class Block {
 					}
 					// We found closest exact match in the ip list, so go to the next Block
 					break;
-				} elseif ( array_filter( $blocksListExact ) == []
+				} elseif ( array_filter( $blocksListExact ) == array()
 					&& $block->getRangeStart() <= $checkipHex
 					&& $block->getRangeEnd() >= $checkipHex
 				) {
@@ -1245,7 +1239,7 @@ class Block {
 			}
 		}
 
-		if ( array_filter( $blocksListExact ) == [] ) {
+		if ( array_filter( $blocksListExact ) == array() ) {
 			$blocksList = &$blocksListRange;
 		} else {
 			$blocksList = &$blocksListExact;
@@ -1280,12 +1274,12 @@ class Block {
 		# We may have been through this before
 		if ( $target instanceof User ) {
 			if ( IP::isValid( $target->getName() ) ) {
-				return [ $target, self::TYPE_IP ];
+				return array( $target, self::TYPE_IP );
 			} else {
-				return [ $target, self::TYPE_USER ];
+				return array( $target, self::TYPE_USER );
 			}
 		} elseif ( $target === null ) {
-			return [ null, null ];
+			return array( null, null );
 		}
 
 		$target = trim( $target );
@@ -1293,21 +1287,22 @@ class Block {
 		if ( IP::isValid( $target ) ) {
 			# We can still create a User if it's an IP address, but we need to turn
 			# off validation checking (which would exclude IP addresses)
-			return [
+			return array(
 				User::newFromName( IP::sanitizeIP( $target ), false ),
 				Block::TYPE_IP
-			];
+			);
 
 		} elseif ( IP::isValidBlock( $target ) ) {
 			# Can't create a User from an IP range
-			return [ IP::sanitizeRange( $target ), Block::TYPE_RANGE ];
+			return array( IP::sanitizeRange( $target ), Block::TYPE_RANGE );
 		}
 
 		# Consider the possibility that this is not a username at all
 		# but actually an old subpage (bug #29797)
 		if ( strpos( $target, '/' ) !== false ) {
 			# An old subpage, drill down to the user behind it
-			$target = explode( '/', $target )[0];
+			$parts = explode( '/', $target );
+			$target = $parts[0];
 		}
 
 		$userObj = User::newFromName( $target );
@@ -1315,15 +1310,15 @@ class Block {
 			# Note that since numbers are valid usernames, a $target of "12345" will be
 			# considered a User.  If you want to pass a block ID, prepend a hash "#12345",
 			# since hash characters are not valid in usernames or titles generally.
-			return [ $userObj, Block::TYPE_USER ];
+			return array( $userObj, Block::TYPE_USER );
 
 		} elseif ( preg_match( '/^#\d+$/', $target ) ) {
 			# Autoblock reference in the form "#12345"
-			return [ substr( $target, 1 ), Block::TYPE_AUTO ];
+			return array( substr( $target, 1 ), Block::TYPE_AUTO );
 
 		} else {
 			# WTF?
-			return [ null, null ];
+			return array( null, null );
 		}
 	}
 
@@ -1345,7 +1340,7 @@ class Block {
 	 * @todo FIXME: This should be an integral part of the Block member variables
 	 */
 	public function getTargetAndType() {
-		return [ $this->getTarget(), $this->getType() ];
+		return array( $this->getTarget(), $this->getType() );
 	}
 
 	/**
@@ -1417,7 +1412,7 @@ class Block {
 		$intended = $this->getTarget();
 
 		$lang = $context->getLanguage();
-		return [
+		return array(
 			$this->mAuto ? 'autoblockedtext' : 'blockedtext',
 			$link,
 			$reason,
@@ -1427,6 +1422,6 @@ class Block {
 			$lang->formatExpiry( $this->mExpiry ),
 			(string)$intended,
 			$lang->userTimeAndDate( $this->mTimestamp, $context->getUser() ),
-		];
+		);
 	}
 }

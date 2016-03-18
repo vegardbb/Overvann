@@ -74,15 +74,6 @@ CREATE TABLE user_newtalk (
 CREATE INDEX user_newtalk_id_idx ON user_newtalk (user_id);
 CREATE INDEX user_newtalk_ip_idx ON user_newtalk (user_ip);
 
-CREATE TABLE bot_passwords (
-  bp_user INTEGER NOT NULL,
-  bp_app_id TEXT NOT NULL,
-  bp_password TEXT NOT NULL,
-  bp_token TEXT NOT NULL,
-  bp_restrictions TEXT NOT NULL,
-  bp_grants TEXT NOT NULL,
-  PRIMARY KEY ( bp_user, bp_app_id )
-);
 
 CREATE SEQUENCE page_page_id_seq;
 CREATE TABLE page (
@@ -698,6 +689,20 @@ CREATE TABLE iwlinks (
 CREATE UNIQUE INDEX iwl_from ON iwlinks (iwl_from, iwl_prefix, iwl_title);
 CREATE UNIQUE INDEX iwl_prefix_title_from ON iwlinks (iwl_prefix, iwl_title, iwl_from);
 CREATE UNIQUE INDEX iwl_prefix_from_title ON iwlinks (iwl_prefix, iwl_from, iwl_title);
+
+CREATE TABLE msg_resource (
+  mr_resource   TEXT         NOT NULL,
+  mr_lang       TEXT         NOT NULL,
+  mr_blob       TEXT         NOT NULL,
+  mr_timestamp  TIMESTAMPTZ  NOT NULL
+);
+CREATE UNIQUE INDEX mr_resource_lang ON msg_resource (mr_resource, mr_lang);
+
+CREATE TABLE msg_resource_links (
+  mrl_resource  TEXT  NOT NULL,
+  mrl_message   TEXT  NOT NULL
+);
+CREATE UNIQUE INDEX mrl_message_resource ON msg_resource_links (mrl_message, mrl_resource);
 
 CREATE TABLE module_deps (
   md_module  TEXT  NOT NULL,

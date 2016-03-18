@@ -16,7 +16,7 @@
 
 $fallback = 'de';
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Medium',
 	NS_SPECIAL          => 'Schbezial',
 	NS_TALK             => 'Babble',
@@ -33,9 +33,9 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Hilf_Dischbediere',
 	NS_CATEGORY         => 'Sachgrubb',
 	NS_CATEGORY_TALK    => 'Sachgrubb_Dischbediere',
-];
+);
 
-$namespaceAliases = [
+$namespaceAliases = array(
 	# German namespaces
 	'Medium'                 => NS_MEDIA,
 	'Spezial'                => NS_SPECIAL,
@@ -56,8 +56,8 @@ $namespaceAliases = [
 	'Kategorie_Diskussion'   => NS_CATEGORY_TALK,
 	'Kadegorie'              => NS_CATEGORY,
 	'Kadegorie_Dischbediere' => NS_CATEGORY_TALK,
-];
+);
 
 // Remove German aliases
-$namespaceGenderAliases = [];
+$namespaceGenderAliases = array();
 

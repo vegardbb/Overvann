@@ -16,7 +16,7 @@
  * @author The Evil IP address
  */
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Media',
 	NS_SPECIAL          => 'Ýörite',
 	NS_TALK             => 'Çekişme',
@@ -32,7 +32,7 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Ýardam_çekişme',
 	NS_CATEGORY         => 'Kategoriýa',
 	NS_CATEGORY_TALK    => 'Kategoriýa_çekişme',
-];
+);
 
 $linkTrail = '/^([a-zÄäÇçĞğŇňÖöŞşÜüÝýŽž]+)(.*)$/sDu';
 

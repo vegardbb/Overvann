@@ -1,4 +1,4 @@
-@chrome @firefox @vagrant
+@chrome @clean @firefox @phantomjs
 Feature: Create account
 
   Scenario Outline: Go to Create account page

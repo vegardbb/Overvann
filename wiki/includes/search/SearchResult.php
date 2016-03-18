@@ -71,7 +71,7 @@ class SearchResult {
 		$this->mTitle = $title;
 		if ( !is_null( $this->mTitle ) ) {
 			$id = false;
-			Hooks::run( 'SearchResultInitFromTitle', [ $title, &$id ] );
+			Hooks::run( 'SearchResultInitFromTitle', array( $title, &$id ) );
 			$this->mRevision = Revision::newFromTitle(
 				$this->mTitle, $id, Revision::READ_NORMAL );
 			if ( $this->mTitle->getNamespace() === NS_FILE ) {
@@ -165,7 +165,7 @@ class SearchResult {
 	}
 
 	/**
-	 * @return Title|null Title object for the redirect to this page, null if none or not supported
+	 * @return Title Title object for the redirect to this page, null if none or not supported
 	 */
 	function getRedirectTitle() {
 		return null;
@@ -179,8 +179,7 @@ class SearchResult {
 	}
 
 	/**
-	 * @return Title|null Title object (pagename+fragment) for the section,
-	 *  null if none or not supported
+	 * @return Title Title object (pagename+fragment) for the section, null if none or not supported
 	 */
 	function getSectionTitle() {
 		return null;

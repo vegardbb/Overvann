@@ -12,15 +12,15 @@ class ResourceLoaderWikiModuleTest extends ResourceLoaderTestCase {
 	}
 
 	public static function provideConstructor() {
-		return [
+		return array(
 			// Nothing
-			[ null ],
-			[ [] ],
+			array( null ),
+			array( array() ),
 			// Unrecognized settings
-			[ [ 'foo' => 'baz' ] ],
+			array( array( 'foo' => 'baz' ) ),
 			// Real settings
-			[ [ 'scripts' => [ 'MediaWiki:Common.js' ] ] ],
-		];
+			array( array( 'scripts' => array( 'MediaWiki:Common.js' ) ) ),
+		);
 	}
 
 	/**
@@ -39,35 +39,30 @@ class ResourceLoaderWikiModuleTest extends ResourceLoaderTestCase {
 	}
 
 	public static function provideGetPages() {
-		$settings = self::getSettings() + [
+		$settings = self::getSettings() + array(
 			'UseSiteJs' => true,
 			'UseSiteCss' => true,
-		];
+		);
 
-		$params = [
-			'styles' => [ 'MediaWiki:Common.css' ],
-			'scripts' => [ 'MediaWiki:Common.js' ],
-		];
+		$params = array(
+			'styles' => array( 'MediaWiki:Common.css' ),
+			'scripts' => array( 'MediaWiki:Common.js' ),
+		);
 
-		return [
-			[ [], new HashConfig( $settings ), [] ],
-			[ $params, new HashConfig( $settings ), [
-				'MediaWiki:Common.js' => [ 'type' => 'script' ],
-				'MediaWiki:Common.css' => [ 'type' => 'style' ]
-			] ],
-			[ $params, new HashConfig( [ 'UseSiteCss' => false ] + $settings ), [
-				'MediaWiki:Common.js' => [ 'type' => 'script' ],
-			] ],
-			[ $params, new HashConfig( [ 'UseSiteJs' => false ] + $settings ), [
-				'MediaWiki:Common.css' => [ 'type' => 'style' ],
-			] ],
-			[ $params,
-				new HashConfig(
-					[ 'UseSiteJs' => false, 'UseSiteCss' => false ]
-				),
-				[]
-			],
-		];
+		return array(
+			array( array(), new HashConfig( $settings ), array() ),
+			array( $params, new HashConfig( $settings ), array(
+				'MediaWiki:Common.js' => array( 'type' => 'script' ),
+				'MediaWiki:Common.css' => array( 'type' => 'style' )
+			) ),
+			array( $params, new HashConfig( array( 'UseSiteCss' => false ) + $settings ), array(
+				'MediaWiki:Common.js' => array( 'type' => 'script' ),
+			) ),
+			array( $params, new HashConfig( array( 'UseSiteJs' => false ) + $settings ), array(
+				'MediaWiki:Common.css' => array( 'type' => 'style' ),
+			) ),
+			array( $params, new HashConfig( array( 'UseSiteJs' => false, 'UseSiteCss' => false ) ), array() ),
+		);
 	}
 
 	/**
@@ -80,12 +75,12 @@ class ResourceLoaderWikiModuleTest extends ResourceLoaderTestCase {
 	}
 
 	public static function provideGetGroup() {
-		return [
+		return array(
 			// No group specified
-			[ [], null ],
+			array( array(), null ),
 			// A random group
-			[ [ 'group' => 'foobar' ], 'foobar' ],
-		];
+			array( array( 'group' => 'foobar' ), 'foobar' ),
+		);
 	}
 
 	/**
@@ -94,7 +89,7 @@ class ResourceLoaderWikiModuleTest extends ResourceLoaderTestCase {
 	 */
 	public function testIsKnownEmpty( $titleInfo, $group, $expected ) {
 		$module = $this->getMockBuilder( 'ResourceLoaderWikiModule' )
-			->setMethods( [ 'getTitleInfo', 'getGroup' ] )
+			->setMethods( array( 'getTitleInfo', 'getGroup' ) )
 			->getMock();
 		$module->expects( $this->any() )
 			->method( 'getTitleInfo' )
@@ -109,33 +104,33 @@ class ResourceLoaderWikiModuleTest extends ResourceLoaderTestCase {
 	}
 
 	public static function provideIsKnownEmpty() {
-		return [
+		return array(
 			// No valid pages
-			[ [], 'test1', true ],
+			array( array(), 'test1', true ),
 			// 'site' module with a non-empty page
-			[
-				[ 'MediaWiki:Common.js' => [ 'rev_sha1' => 'dmh6qn', 'rev_len' => 1234 ] ],
+			array(
+				array( 'MediaWiki:Common.js' => array( 'rev_sha1' => 'dmh6qn', 'rev_len' => 1234 ) ),
 				'site',
 				false,
-			],
+			),
 			// 'site' module with an empty page
-			[
-				[ 'MediaWiki:Foo.js' => [ 'rev_sha1' => 'phoi', 'rev_len' => 0 ] ],
+			array(
+				array( 'MediaWiki:Foo.js' => array( 'rev_sha1' => 'phoi', 'rev_len' => 0 ) ),
 				'site',
 				false,
-			],
+			),
 			// 'user' module with a non-empty page
-			[
-				[ 'User:Example/common.js' => [ 'rev_sha1' => 'j7ssba', 'rev_len' => 25 ] ],
+			array(
+				array( 'User:Example/common.js' => array( 'rev_sha1' => 'j7ssba', 'rev_len' => 25 ) ),
 				'user',
 				false,
-			],
+			),
 			// 'user' module with an empty page
-			[
-				[ 'User:Example/foo.js' => [ 'rev_sha1' => 'phoi', 'rev_len' => 0 ] ],
+			array(
+				array( 'User:Example/foo.js' => array( 'rev_sha1' => 'phoi', 'rev_len' => 0 ) ),
 				'user',
 				true,
-			],
-		];
+			),
+		);
 	}
 }

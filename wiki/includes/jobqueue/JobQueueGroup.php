@@ -29,7 +29,7 @@
  */
 class JobQueueGroup {
 	/** @var JobQueueGroup[] */
-	protected static $instances = [];
+	protected static $instances = array();
 
 	/** @var ProcessCacheLRU */
 	protected $cache;
@@ -41,7 +41,7 @@ class JobQueueGroup {
 	protected $coalescedQueues;
 
 	/** @var Job[] */
-	protected $bufferedJobs = [];
+	protected $bufferedJobs = array();
 
 	const TYPE_DEFAULT = 1; // integer; jobs popped by default
 	const TYPE_ANY = 2; // integer; any job
@@ -79,7 +79,7 @@ class JobQueueGroup {
 	 * @return void
 	 */
 	public static function destroySingletons() {
-		self::$instances = [];
+		self::$instances = array();
 	}
 
 	/**
@@ -91,7 +91,7 @@ class JobQueueGroup {
 	public function get( $type ) {
 		global $wgJobTypeConf;
 
-		$conf = [ 'wiki' => $this->wiki, 'type' => $type ];
+		$conf = array( 'wiki' => $this->wiki, 'type' => $type );
 		if ( isset( $wgJobTypeConf[$type] ) ) {
 			$conf = $conf + $wgJobTypeConf[$type];
 		} else {
@@ -113,14 +113,14 @@ class JobQueueGroup {
 	 * @return void
 	 */
 	public function push( $jobs ) {
-		$jobs = is_array( $jobs ) ? $jobs : [ $jobs ];
+		$jobs = is_array( $jobs ) ? $jobs : array( $jobs );
 		if ( !count( $jobs ) ) {
 			return;
 		}
 
 		$this->assertValidJobs( $jobs );
 
-		$jobsByType = []; // (job type => list of jobs)
+		$jobsByType = array(); // (job type => list of jobs)
 		foreach ( $jobs as $job ) {
 			$jobsByType[$job->getType()][] = $job;
 		}
@@ -152,7 +152,7 @@ class JobQueueGroup {
 			return;
 		}
 
-		$jobs = is_array( $jobs ) ? $jobs : [ $jobs ];
+		$jobs = is_array( $jobs ) ? $jobs : array( $jobs );
 
 		// Throw errors now instead of on push(), when other jobs may be buffered
 		$this->assertValidJobs( $jobs );
@@ -169,7 +169,7 @@ class JobQueueGroup {
 	public static function pushLazyJobs() {
 		foreach ( self::$instances as $group ) {
 			$group->push( $group->bufferedJobs );
-			$group->bufferedJobs = [];
+			$group->bufferedJobs = array();
 		}
 	}
 
@@ -184,7 +184,7 @@ class JobQueueGroup {
 	 * @param array $blacklist List of job types to ignore
 	 * @return Job|bool Returns false on failure
 	 */
-	public function pop( $qtype = self::TYPE_DEFAULT, $flags = 0, array $blacklist = [] ) {
+	public function pop( $qtype = self::TYPE_DEFAULT, $flags = 0, array $blacklist = array() ) {
 		$job = false;
 
 		if ( is_string( $qtype ) ) { // specific job type
@@ -286,17 +286,18 @@ class JobQueueGroup {
 	 * @since 1.23
 	 */
 	public function queuesHaveJobs( $type = self::TYPE_ANY ) {
-		$key = wfMemcKey( 'jobqueue', 'queueshavejobs', $type );
-		$cache = ObjectCache::getLocalClusterInstance();
+		global $wgMemc;
 
-		$value = $cache->get( $key );
+		$key = wfMemcKey( 'jobqueue', 'queueshavejobs', $type );
+
+		$value = $wgMemc->get( $key );
 		if ( $value === false ) {
 			$queues = $this->getQueuesWithJobs();
 			if ( $type == self::TYPE_DEFAULT ) {
 				$queues = array_intersect( $queues, $this->getDefaultQueueTypes() );
 			}
 			$value = count( $queues ) ? 'true' : 'false';
-			$cache->add( $key, $value, 15 );
+			$wgMemc->add( $key, $value, 15 );
 		}
 
 		return ( $value === 'true' );
@@ -308,7 +309,7 @@ class JobQueueGroup {
 	 * @return array List of job types that have non-empty queues
 	 */
 	public function getQueuesWithJobs() {
-		$types = [];
+		$types = array();
 		foreach ( $this->getCoalescedQueues() as $info ) {
 			$nonEmpty = $info['queue']->getSiblingQueuesWithJobs( $this->getQueueTypes() );
 			if ( is_array( $nonEmpty ) ) { // batching features supported
@@ -331,7 +332,7 @@ class JobQueueGroup {
 	 * @return array Map of (job type => size)
 	 */
 	public function getQueueSizes() {
-		$sizeMap = [];
+		$sizeMap = array();
 		foreach ( $this->getCoalescedQueues() as $info ) {
 			$sizes = $info['queue']->getSiblingQueueSizes( $this->getQueueTypes() );
 			if ( is_array( $sizes ) ) { // batching features supported
@@ -353,14 +354,14 @@ class JobQueueGroup {
 		global $wgJobTypeConf;
 
 		if ( $this->coalescedQueues === null ) {
-			$this->coalescedQueues = [];
+			$this->coalescedQueues = array();
 			foreach ( $wgJobTypeConf as $type => $conf ) {
 				$queue = JobQueue::factory(
-					[ 'wiki' => $this->wiki, 'type' => 'null' ] + $conf );
+					array( 'wiki' => $this->wiki, 'type' => 'null' ) + $conf );
 				$loc = $queue->getCoalesceLocationInternal();
 				if ( !isset( $this->coalescedQueues[$loc] ) ) {
 					$this->coalescedQueues[$loc]['queue'] = $queue;
-					$this->coalescedQueues[$loc]['types'] = [];
+					$this->coalescedQueues[$loc]['types'] = array();
 				}
 				if ( $type === 'default' ) {
 					$this->coalescedQueues[$loc]['types'] = array_merge(
@@ -381,24 +382,22 @@ class JobQueueGroup {
 	 * @return mixed
 	 */
 	private function getCachedConfigVar( $name ) {
-		// @TODO: cleanup this whole method with a proper config system
+		global $wgConf, $wgMemc;
+
 		if ( $this->wiki === wfWikiID() ) {
 			return $GLOBALS[$name]; // common case
 		} else {
-			$wiki = $this->wiki;
-			$cache = ObjectCache::getMainWANInstance();
-			$value = $cache->getWithSetCallback(
-				$cache->makeGlobalKey( 'jobqueue', 'configvalue', $wiki, $name ),
-				$cache::TTL_DAY + mt_rand( 0, $cache::TTL_DAY ),
-				function () use ( $wiki, $name ) {
-					global $wgConf;
+			list( $db, $prefix ) = wfSplitWikiID( $this->wiki );
+			$key = wfForeignMemcKey( $db, $prefix, 'configvalue', $name );
+			$value = $wgMemc->get( $key ); // ('v' => ...) or false
+			if ( is_array( $value ) ) {
+				return $value['v'];
+			} else {
+				$value = $wgConf->getConfig( $this->wiki, $name );
+				$wgMemc->set( $key, array( 'v' => $value ), 86400 + mt_rand( 0, 86400 ) );
 
-					return [ 'v' => $wgConf->getConfig( $wiki, $name ) ];
-				},
-				[ 'pcTTL' => 30 ]
-			);
-
-			return $value['v'];
+				return $value;
+			}
 		}
 	}
 

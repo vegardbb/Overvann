@@ -51,44 +51,44 @@ class BrokenRedirectsPage extends QueryPage {
 	public function getQueryInfo() {
 		$dbr = wfGetDB( DB_SLAVE );
 
-		return [
-			'tables' => [
+		return array(
+			'tables' => array(
 				'redirect',
 				'p1' => 'page',
 				'p2' => 'page',
-			],
-			'fields' => [
+			),
+			'fields' => array(
 				'namespace' => 'p1.page_namespace',
 				'title' => 'p1.page_title',
 				'value' => 'p1.page_title',
 				'rd_namespace',
 				'rd_title',
-			],
-			'conds' => [
+			),
+			'conds' => array(
 				// Exclude pages that don't exist locally as wiki pages,
 				// but aren't "broken" either.
 				// Special pages and interwiki links
 				'rd_namespace >= 0',
 				'rd_interwiki IS NULL OR rd_interwiki = ' . $dbr->addQuotes( '' ),
 				'p2.page_namespace IS NULL',
-			],
-			'join_conds' => [
-				'p1' => [ 'JOIN', [
+			),
+			'join_conds' => array(
+				'p1' => array( 'JOIN', array(
 					'rd_from=p1.page_id',
-				] ],
-				'p2' => [ 'LEFT JOIN', [
+				) ),
+				'p2' => array( 'LEFT JOIN', array(
 					'rd_namespace=p2.page_namespace',
 					'rd_title=p2.page_title'
-				] ],
-			],
-		];
+				) ),
+			),
+		);
 	}
 
 	/**
 	 * @return array
 	 */
 	function getOrderFields() {
-		return [ 'rd_namespace', 'rd_title', 'rd_from' ];
+		return array( 'rd_namespace', 'rd_title', 'rd_from' );
 	}
 
 	/**
@@ -117,30 +117,22 @@ class BrokenRedirectsPage extends QueryPage {
 		$from = Linker::linkKnown(
 			$fromObj,
 			null,
-			[],
-			[ 'redirect' => 'no' ]
+			array(),
+			array( 'redirect' => 'no' )
 		);
-		$links = [];
-		// if the page is editable, add an edit link
-		if (
-			// check user permissions
-			$this->getUser()->isAllowed( 'edit' ) &&
-			// check, if the content model is editable through action=edit
-			ContentHandler::getForTitle( $fromObj )->supportsDirectEditing()
-		) {
-			$links[] = Linker::linkKnown(
-				$fromObj,
-				$this->msg( 'brokenredirects-edit' )->escaped(),
-				[],
-				[ 'action' => 'edit' ]
-			);
-		}
+		$links = array();
+		$links[] = Linker::linkKnown(
+			$fromObj,
+			$this->msg( 'brokenredirects-edit' )->escaped(),
+			array(),
+			array( 'action' => 'edit' )
+		);
 		$to = Linker::link(
 			$toObj,
 			null,
-			[],
-			[],
-			[ 'broken' ]
+			array(),
+			array(),
+			array( 'broken' )
 		);
 		$arr = $this->getLanguage()->getArrow();
 
@@ -150,39 +142,16 @@ class BrokenRedirectsPage extends QueryPage {
 			$links[] = Linker::linkKnown(
 				$fromObj,
 				$this->msg( 'brokenredirects-delete' )->escaped(),
-				[],
-				[ 'action' => 'delete' ]
+				array(),
+				array( 'action' => 'delete' )
 			);
 		}
 
-		if ( $links ) {
-			$out .= $this->msg( 'parentheses' )->rawParams( $this->getLanguage()
-				->pipeList( $links ) )->escaped();
-		}
+		$out .= $this->msg( 'parentheses' )->rawParams( $this->getLanguage()
+			->pipeList( $links ) )->escaped();
 		$out .= " {$arr} {$to}";
 
 		return $out;
-	}
-
-	/**
-	 * Cache page content model for performance
-	 *
-	 * @param IDatabase $db
-	 * @param ResultWrapper $res
-	 */
-	function preprocessResults( $db, $res ) {
-		if ( !$res->numRows() ) {
-			return;
-		}
-
-		$batch = new LinkBatch;
-		foreach ( $res as $row ) {
-			$batch->add( $row->namespace, $row->title );
-		}
-		$batch->execute();
-
-		// Back to start for display
-		$res->seek( 0 );
 	}
 
 	protected function getGroupName() {

@@ -30,7 +30,7 @@
 class RandomPage extends SpecialPage {
 	private $namespaces; // namespaces to select pages from
 	protected $isRedir = false; // should the result be a redirect?
-	protected $extra = []; // Extra SQL statements
+	protected $extra = array(); // Extra SQL statements
 
 	public function __construct( $name = 'Randompage' ) {
 		$this->namespaces = MWNamespace::getContentNamespaces();
@@ -45,7 +45,7 @@ class RandomPage extends SpecialPage {
 		if ( !$ns || $ns < NS_MAIN ) {
 			$ns = NS_MAIN;
 		}
-		$this->namespaces = [ $ns ];
+		$this->namespaces = array( $ns );
 	}
 
 	// select redirects instead of normal pages?
@@ -73,7 +73,7 @@ class RandomPage extends SpecialPage {
 			return;
 		}
 
-		$redirectParam = $this->isRedirect() ? [ 'redirect' => 'no' ] : [];
+		$redirectParam = $this->isRedirect() ? array( 'redirect' => 'no' ) : array();
 		$query = array_merge( $this->getRequest()->getValues(), $redirectParam );
 		unset( $query['title'] );
 		$this->getOutput()->redirect( $title->getFullURL( $query ) );
@@ -86,7 +86,7 @@ class RandomPage extends SpecialPage {
 	 */
 	private function getNsList() {
 		global $wgContLang;
-		$nsNames = [];
+		$nsNames = array();
 		foreach ( $this->namespaces as $n ) {
 			if ( $n === NS_MAIN ) {
 				$nsNames[] = $this->msg( 'blanknamespace' )->plain();
@@ -108,7 +108,7 @@ class RandomPage extends SpecialPage {
 
 		if ( !Hooks::run(
 			'SpecialRandomGetRandomTitle',
-			[ &$randstr, &$this->isRedir, &$this->namespaces, &$this->extra, &$title ]
+			array( &$randstr, &$this->isRedir, &$this->namespaces, &$this->extra, &$title )
 		) ) {
 			return $title;
 		}
@@ -135,27 +135,27 @@ class RandomPage extends SpecialPage {
 
 	protected function getQueryInfo( $randstr ) {
 		$redirect = $this->isRedirect() ? 1 : 0;
-		$tables = [ 'page' ];
-		$conds = array_merge( [
+		$tables = array( 'page' );
+		$conds = array_merge( array(
 			'page_namespace' => $this->namespaces,
 			'page_is_redirect' => $redirect,
 			'page_random >= ' . $randstr
-		], $this->extra );
-		$joinConds = [];
+		), $this->extra );
+		$joinConds = array();
 
 		// Allow extensions to modify the query
-		Hooks::run( 'RandomPageQuery', [ &$tables, &$conds, &$joinConds ] );
+		Hooks::run( 'RandomPageQuery', array( &$tables, &$conds, &$joinConds ) );
 
-		return [
+		return array(
 			'tables' => $tables,
-			'fields' => [ 'page_title', 'page_namespace' ],
+			'fields' => array( 'page_title', 'page_namespace' ),
 			'conds' => $conds,
-			'options' => [
+			'options' => array(
 				'ORDER BY' => 'page_random',
 				'LIMIT' => 1,
-			],
+			),
 			'join_conds' => $joinConds
-		];
+		);
 	}
 
 	private function selectRandomPageFromDB( $randstr, $fname = __METHOD__ ) {

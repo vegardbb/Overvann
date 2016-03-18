@@ -86,7 +86,7 @@ abstract class TransformationalImageHandler extends ImageHandler {
 			$height = $params['physicalHeight'];
 		}
 
-		return [ $width, $height ];
+		return array( $width, $height );
 	}
 
 	/**
@@ -108,7 +108,7 @@ abstract class TransformationalImageHandler extends ImageHandler {
 		}
 
 		# Create a parameter array to pass to the scaler
-		$scalerParams = [
+		$scalerParams = array(
 			# The size to which the image will be resized
 			'physicalWidth' => $params['physicalWidth'],
 			'physicalHeight' => $params['physicalHeight'],
@@ -126,8 +126,7 @@ abstract class TransformationalImageHandler extends ImageHandler {
 			'mimeType' => $image->getMimeType(),
 			'dstPath' => $dstPath,
 			'dstUrl' => $dstUrl,
-			'interlace' => isset( $params['interlace'] ) ? $params['interlace'] : false,
-		];
+		);
 
 		if ( isset( $params['quality'] ) && $params['quality'] === 'low' ) {
 			$scalerParams['quality'] = 30;
@@ -175,10 +174,10 @@ abstract class TransformationalImageHandler extends ImageHandler {
 
 		if ( $flags & self::TRANSFORM_LATER ) {
 			wfDebug( __METHOD__ . ": Transforming later per flags.\n" );
-			$newParams = [
+			$newParams = array(
 				'width' => $scalerParams['clientWidth'],
 				'height' => $scalerParams['clientHeight']
-			];
+			);
 			if ( isset( $params['quality'] ) ) {
 				$newParams['quality'] = $params['quality'];
 			}
@@ -223,7 +222,7 @@ abstract class TransformationalImageHandler extends ImageHandler {
 		# Try a hook. Called "Bitmap" for historical reasons.
 		/** @var $mto MediaTransformOutput */
 		$mto = null;
-		Hooks::run( 'BitmapHandlerTransform', [ $this, $image, &$scalerParams, &$mto ] );
+		Hooks::run( 'BitmapHandlerTransform', array( $this, $image, &$scalerParams, &$mto ) );
 		if ( !is_null( $mto ) ) {
 			wfDebug( __METHOD__ . ": Hook to BitmapHandlerTransform created an mto\n" );
 			$scaler = 'hookaborted';
@@ -271,10 +270,10 @@ abstract class TransformationalImageHandler extends ImageHandler {
 		} elseif ( $mto ) {
 			return $mto;
 		} else {
-			$newParams = [
+			$newParams = array(
 				'width' => $scalerParams['clientWidth'],
 				'height' => $scalerParams['clientHeight']
-			];
+			);
 			if ( isset( $params['quality'] ) ) {
 				$newParams['quality'] = $params['quality'];
 			}
@@ -330,10 +329,10 @@ abstract class TransformationalImageHandler extends ImageHandler {
 	 * @todo FIXME: No rotation support
 	 */
 	protected function getClientScalingThumbnailImage( $image, $scalerParams ) {
-		$params = [
+		$params = array(
 			'width' => $scalerParams['clientWidth'],
 			'height' => $scalerParams['clientHeight']
-		];
+		);
 
 		return new ThumbnailImage( $image, $image->getURL(), null, $params );
 	}
@@ -506,31 +505,30 @@ abstract class TransformationalImageHandler extends ImageHandler {
 	 * Retrieve the version of the installed ImageMagick
 	 * You can use PHPs version_compare() to use this value
 	 * Value is cached for one hour.
-	 * @return string|bool Representing the IM version; false on error
+	 * @return string Representing the IM version.
 	 */
 	protected function getMagickVersion() {
-		$cache = ObjectCache::getLocalServerInstance( CACHE_NONE );
-		return $cache->getWithSetCallback(
-			'imagemagick-version',
-			$cache::TTL_HOUR,
-			function () {
-				global $wgImageMagickConvertCommand;
+		global $wgMemc;
 
-				$cmd = wfEscapeShellArg( $wgImageMagickConvertCommand ) . ' -version';
-				wfDebug( __METHOD__ . ": Running convert -version\n" );
-				$retval = '';
-				$return = wfShellExec( $cmd, $retval );
-				$x = preg_match(
-					'/Version: ImageMagick ([0-9]*\.[0-9]*\.[0-9]*)/', $return, $matches
-				);
-				if ( $x != 1 ) {
-					wfDebug( __METHOD__ . ": ImageMagick version check failed\n" );
-					return false;
-				}
+		$cache = $wgMemc->get( "imagemagick-version" );
+		if ( !$cache ) {
+			global $wgImageMagickConvertCommand;
+			$cmd = wfEscapeShellArg( $wgImageMagickConvertCommand ) . ' -version';
+			wfDebug( __METHOD__ . ": Running convert -version\n" );
+			$retval = '';
+			$return = wfShellExec( $cmd, $retval );
+			$x = preg_match( '/Version: ImageMagick ([0-9]*\.[0-9]*\.[0-9]*)/', $return, $matches );
+			if ( $x != 1 ) {
+				wfDebug( __METHOD__ . ": ImageMagick version check failed\n" );
 
-				return $matches[1];
+				return null;
 			}
-		);
+			$wgMemc->set( "imagemagick-version", $matches[1], 3600 );
+
+			return $matches[1];
+		}
+
+		return $cache;
 	}
 
 	/**
@@ -598,7 +596,7 @@ abstract class TransformationalImageHandler extends ImageHandler {
 		$checkImageAreaHookResult = null;
 		Hooks::run(
 			'BitmapHandlerCheckImageArea',
-			[ $file, &$params, &$checkImageAreaHookResult ]
+			array( $file, &$params, &$checkImageAreaHookResult )
 		);
 
 		if ( !is_null( $checkImageAreaHookResult ) ) {

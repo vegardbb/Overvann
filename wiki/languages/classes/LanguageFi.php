@@ -42,8 +42,8 @@ class LanguageFi extends Language {
 			return $wgGrammarForms['fi'][$case][$word];
 		}
 
-		# These rules don't cover the whole language.
-		# They are used only for site names.
+		# These rules are not perfect, but they are currently only used for site names so it doesn't
+		# matter if they are wrong sometimes. Just add a special case for your site name if necessary.
 
 		# wovel harmony flag
 		$aou = preg_match( '/[aou][^äöy]*$/i', $word );
@@ -102,7 +102,7 @@ class LanguageFi extends Language {
 				'jul:heinäkuu,aug:elokuu,sep:syyskuu,oct:lokakuu,nov:marraskuu,' .
 				dec:joulukuu,sept:syyskuu';
 		*/
-		$weekds = [
+		$weekds = array(
 			'monday' => 'maanantai',
 			'tuesday' => 'tiistai',
 			'wednesday' => 'keskiviikko',
@@ -146,7 +146,7 @@ class LanguageFi extends Language {
 			'year' => 'vuosi',
 			'infinite' => 'ikuisesti',
 			'indefinite' => 'ikuisesti'
-		];
+		);
 
 		$final = '';
 		$tokens = explode( ' ', $str );

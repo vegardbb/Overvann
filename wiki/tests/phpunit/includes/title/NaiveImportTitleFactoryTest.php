@@ -29,52 +29,52 @@ class NaiveImportTitleFactoryTest extends MediaWikiTestCase {
 	protected function setUp() {
 		parent::setUp();
 
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgLanguageCode' => 'en',
 			'wgContLang' => Language::factory( 'en' ),
-			'wgExtraNamespaces' => [ 100 => 'Portal' ],
-		] );
+			'wgExtraNamespaces' => array( 100 => 'Portal' ),
+		) );
 	}
 
 	public function basicProvider() {
-		return [
-			[
+		return array(
+			array(
 				new ForeignTitle( 0, '', 'MainNamespaceArticle' ),
 				Title::newFromText( 'MainNamespaceArticle' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( null, '', 'MainNamespaceArticle' ),
 				Title::newFromText( 'MainNamespaceArticle' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 1, 'Discussion', 'Nice_talk' ),
 				Title::newFromText( 'Talk:Nice_talk' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 0, '', 'Bogus:Nice_talk' ),
 				Title::newFromText( 'Bogus:Nice_talk' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 100, 'Bogus', 'Nice_talk' ),
 				Title::newFromText( 'Bogus:Nice_talk' ) // not Portal:Nice_talk
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 1, 'Bogus', 'Nice_talk' ),
 				Title::newFromText( 'Talk:Nice_talk' ) // not Bogus:Nice_talk
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 100, 'Portal', 'Nice_talk' ),
 				Title::newFromText( 'Portal:Nice_talk' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 724, 'Portal', 'Nice_talk' ),
 				Title::newFromText( 'Portal:Nice_talk' )
-			],
-			[
+			),
+			array(
 				new ForeignTitle( 2, 'Portal', 'Nice_talk' ),
 				Title::newFromText( 'User:Nice_talk' )
-			],
-		];
+			),
+		);
 	}
 
 	/**

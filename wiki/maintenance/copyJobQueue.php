@@ -34,7 +34,7 @@ require_once __DIR__ . '/Maintenance.php';
 class CopyJobQueue extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Copy jobs from one queue system to another.' );
+		$this->mDescription = "Copy jobs from one queue system to another.";
 		$this->addOption( 'src', 'Key to $wgJobQueueMigrationConfig for source', true, true );
 		$this->addOption( 'dst', 'Key to $wgJobQueueMigrationConfig for destination', true, true );
 		$this->addOption( 'type', 'Types of jobs to copy (use "all" for all)', true, true );
@@ -55,10 +55,10 @@ class CopyJobQueue extends Maintenance {
 
 		$types = ( $this->getOption( 'type' ) === 'all' )
 			? JobQueueGroup::singleton()->getQueueTypes()
-			: [ $this->getOption( 'type' ) ];
+			: array( $this->getOption( 'type' ) );
 
 		foreach ( $types as $type ) {
-			$baseConfig = [ 'type' => $type, 'wiki' => wfWikiID() ];
+			$baseConfig = array( 'type' => $type, 'wiki' => wfWikiID() );
 			$src = JobQueue::factory( $baseConfig + $wgJobQueueMigrationConfig[$srcKey] );
 			$dst = JobQueue::factory( $baseConfig + $wgJobQueueMigrationConfig[$dstKey] );
 
@@ -73,14 +73,14 @@ class CopyJobQueue extends Maintenance {
 	protected function copyJobs( JobQueue $src, JobQueue $dst, $jobs ) {
 		$total = 0;
 		$totalOK = 0;
-		$batch = [];
+		$batch = array();
 		foreach ( $jobs as $job ) {
 			++$total;
 			$batch[] = $job;
 			if ( count( $batch ) >= $this->mBatchSize ) {
 				$dst->push( $batch );
 				$totalOK += count( $batch );
-				$batch = [];
+				$batch = array();
 				$dst->waitForBackups();
 			}
 		}
@@ -90,7 +90,7 @@ class CopyJobQueue extends Maintenance {
 			$dst->waitForBackups();
 		}
 
-		return [ $total, $totalOK ];
+		return array( $total, $totalOK );
 	}
 }
 

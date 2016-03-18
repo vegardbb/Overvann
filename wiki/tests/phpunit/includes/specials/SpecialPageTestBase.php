@@ -8,7 +8,7 @@
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  * @author Daniel Kinzler
- * @author Addshore
+ * @author Adam Shorland
  * @author Thiemo Mättig
  */
 abstract class SpecialPageTestBase extends MediaWikiTestCase {
@@ -80,7 +80,7 @@ abstract class SpecialPageTestBase extends MediaWikiTestCase {
 			}
 		}
 
-		return [ $html, $response ];
+		return array( $html, $response );
 	}
 
 	/**

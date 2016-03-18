@@ -46,6 +46,7 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 			);
 		}
 
+		$result = $this->getResult();
 		$pageSet = $this->getPageSet();
 		$pageMap = $pageSet->getGoodAndMissingTitlesByNamespace();
 		$pageCount = count( $pageSet->getGoodAndMissingTitles() );
@@ -71,16 +72,16 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 		if ( $resultPageSet === null ) {
 			$this->parseParameters( $params );
 			$this->addFields( Revision::selectArchiveFields() );
-			$this->addFields( [ 'ar_title', 'ar_namespace' ] );
+			$this->addFields( array( 'ar_title', 'ar_namespace' ) );
 		} else {
 			$this->limit = $this->getParameter( 'limit' ) ?: 10;
-			$this->addFields( [ 'ar_title', 'ar_namespace', 'ar_timestamp', 'ar_rev_id', 'ar_id' ] );
+			$this->addFields( array( 'ar_title', 'ar_namespace', 'ar_timestamp', 'ar_rev_id', 'ar_id' ) );
 		}
 
 		if ( $this->fld_tags ) {
 			$this->addTables( 'tag_summary' );
 			$this->addJoinConds(
-				[ 'tag_summary' => [ 'LEFT JOIN', [ 'ar_rev_id=ts_rev_id' ] ] ]
+				array( 'tag_summary' => array( 'LEFT JOIN', array( 'ar_rev_id=ts_rev_id' ) ) )
 			);
 			$this->addFields( 'ts_tags' );
 		}
@@ -88,7 +89,7 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 		if ( !is_null( $params['tag'] ) ) {
 			$this->addTables( 'change_tag' );
 			$this->addJoinConds(
-				[ 'change_tag' => [ 'INNER JOIN', [ 'ar_rev_id=ct_rev_id' ] ] ]
+				array( 'change_tag' => array( 'INNER JOIN', array( 'ar_rev_id=ct_rev_id' ) ) )
 			);
 			$this->addWhereFld( 'ct_tag', $params['tag'] );
 		}
@@ -101,9 +102,9 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 			// we have to LEFT JOIN and fetch all four fields.
 			$this->addTables( 'text' );
 			$this->addJoinConds(
-				[ 'text' => [ 'LEFT JOIN', [ 'ar_text_id=old_id' ] ] ]
+				array( 'text' => array( 'LEFT JOIN', array( 'ar_text_id=old_id' ) ) )
 			);
-			$this->addFields( [ 'ar_text', 'ar_flags', 'old_text', 'old_flags' ] );
+			$this->addFields( array( 'ar_text', 'ar_flags', 'old_text', 'old_flags' ) );
 
 			// This also means stricter restrictions
 			if ( !$user->isAllowedAny( 'undelete', 'deletedtext' ) ) {
@@ -117,9 +118,9 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 		$dir = $params['dir'];
 
 		if ( $revCount !== 0 ) {
-			$this->addWhere( [
+			$this->addWhere( array(
 				'ar_rev_id' => array_keys( $pageSet->getDeletedRevisionIDs() )
-			] );
+			) );
 		} else {
 			// We need a custom WHERE clause that matches all titles.
 			$lb = new LinkBatch( $pageSet->getGoodAndMissingTitles() );
@@ -205,7 +206,7 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 
 		$res = $this->select( __METHOD__ );
 		$count = 0;
-		$generated = [];
+		$generated = array();
 		foreach ( $res as $row ) {
 			if ( ++$count > $this->limit ) {
 				// We've had enough
@@ -261,42 +262,42 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 	}
 
 	public function getAllowedParams() {
-		return parent::getAllowedParams() + [
-			'start' => [
+		return parent::getAllowedParams() + array(
+			'start' => array(
 				ApiBase::PARAM_TYPE => 'timestamp',
-			],
-			'end' => [
+			),
+			'end' => array(
 				ApiBase::PARAM_TYPE => 'timestamp',
-			],
-			'dir' => [
-				ApiBase::PARAM_TYPE => [
+			),
+			'dir' => array(
+				ApiBase::PARAM_TYPE => array(
 					'newer',
 					'older'
-				],
+				),
 				ApiBase::PARAM_DFLT => 'older',
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-direction',
-			],
+			),
 			'tag' => null,
-			'user' => [
+			'user' => array(
 				ApiBase::PARAM_TYPE => 'user'
-			],
-			'excludeuser' => [
+			),
+			'excludeuser' => array(
 				ApiBase::PARAM_TYPE => 'user'
-			],
-			'continue' => [
+			),
+			'continue' => array(
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			],
-		];
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=query&prop=deletedrevisions&titles=Main%20Page|Talk:Main%20Page&' .
 				'drvprop=user|comment|content'
 				=> 'apihelp-query+deletedrevisions-example-titles',
 			'action=query&prop=deletedrevisions&revids=123456'
 				=> 'apihelp-query+deletedrevisions-example-revids',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

@@ -94,7 +94,6 @@ def parse_file filename
 				kind = :method
 			when 'class'
 				kind = :class
-				data[:name] = cleanup_class_name(content.strip) if content && !content.strip.empty?
 			when 'method'
 				kind = :method
 			when 'property', 'var'
@@ -167,7 +166,7 @@ def parse_file filename
 				ignore = true
 			when 'inheritable', 'deprecated', 'singleton', 'throws',
 				 'chainable', 'fires', 'localdoc', 'inheritdoc', 'member',
-				 'see', 'uses'
+				 'see'
 				# skip
 			else
 				bad_input filename, comment_line
@@ -188,7 +187,7 @@ def parse_file filename
 				kind_, name = m.captures
 				data[:static] = true if kind_ == 'static'
 				kind = {'static' => :property, 'prototype' => :method}[ kind_.strip ] if kind_ && !kind
-				data[:name] ||= cleanup_class_name(name)
+				data[:name] = cleanup_class_name(name)
 			when :php
 				m = code_line.match(/
 					\s*
@@ -206,7 +205,7 @@ def parse_file filename
 				data[:visibility] = {'private' => :private, 'protected' => :protected, 'public' => :public}[ visibility ] || :public
 				data[:static] = true if static
 				data[:parent] = cleanup_class_name(parent) if parent
-				data[:name] ||= cleanup_class_name(name)
+				data[:name] = cleanup_class_name(name)
 			end
 		end
 

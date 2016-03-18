@@ -42,9 +42,7 @@ class VFormHTMLForm extends HTMLForm {
 		return true;
 	}
 
-	public static function loadInputFromParameters( $fieldname, $descriptor,
-		HTMLForm $parent = null
-	) {
+	public static function loadInputFromParameters( $fieldname, $descriptor, HTMLForm $parent = null ) {
 		$field = parent::loadInputFromParameters( $fieldname, $descriptor, $parent );
 		$field->setShowEmptyLabel( false );
 		return $field;
@@ -55,19 +53,19 @@ class VFormHTMLForm extends HTMLForm {
 		// of wgUseMediaWikiUIEverywhere (since they pre-date it).
 		// When wgUseMediaWikiUIEverywhere is removed, this should be consolidated
 		// with the addModuleStyles in SpecialPage->setHeaders.
-		$this->getOutput()->addModuleStyles( [
+		$this->getOutput()->addModuleStyles( array(
 			'mediawiki.ui',
 			'mediawiki.ui.button',
 			'mediawiki.ui.input',
 			'mediawiki.ui.checkbox',
-		] );
+		) );
 
 		return parent::getHTML( $submitResult );
 	}
 
 	protected function getFormAttributes() {
 		$attribs = parent::getFormAttributes();
-		$attribs['class'] = [ 'mw-ui-vform', 'mw-ui-container', 'visualClear' ];
+		$attribs['class'] = array( 'mw-ui-vform', 'mw-ui-container', 'visualClear' );
 		return $attribs;
 	}
 
@@ -80,7 +78,7 @@ class VFormHTMLForm extends HTMLForm {
 		$buttons = '';
 
 		if ( $this->mShowSubmit ) {
-			$attribs = [];
+			$attribs = array();
 
 			if ( isset( $this->mSubmitID ) ) {
 				$attribs['id'] = $this->mSubmitID;
@@ -94,10 +92,10 @@ class VFormHTMLForm extends HTMLForm {
 				$attribs += Linker::tooltipAndAccesskeyAttribs( $this->mSubmitTooltip );
 			}
 
-			$attribs['class'] = [
+			$attribs['class'] = array(
 				'mw-htmlform-submit',
 				'mw-ui-button mw-ui-big mw-ui-block',
-			];
+			);
 			foreach ( $this->mSubmitFlags as $flag ) {
 				$attribs['class'][] = 'mw-ui-' . $flag;
 			}
@@ -108,20 +106,20 @@ class VFormHTMLForm extends HTMLForm {
 		if ( $this->mShowReset ) {
 			$buttons .= Html::element(
 				'input',
-				[
+				array(
 					'type' => 'reset',
 					'value' => $this->msg( 'htmlform-reset' )->text(),
 					'class' => 'mw-ui-button mw-ui-big mw-ui-block',
-				]
+				)
 			) . "\n";
 		}
 
 		foreach ( $this->mButtons as $button ) {
-			$attrs = [
+			$attrs = array(
 				'type' => 'submit',
 				'name' => $button['name'],
 				'value' => $button['value']
-			];
+			);
 
 			if ( $button['attribs'] ) {
 				$attrs += $button['attribs'];
@@ -131,14 +129,14 @@ class VFormHTMLForm extends HTMLForm {
 				$attrs['id'] = $button['id'];
 			}
 
-			$attrs['class'] = isset( $attrs['class'] ) ? (array)$attrs['class'] : [];
+			$attrs['class'] = isset( $attrs['class'] ) ? (array)$attrs['class'] : array();
 			$attrs['class'][] = 'mw-ui-button mw-ui-big mw-ui-block';
 
 			$buttons .= Html::element( 'input', $attrs ) . "\n";
 		}
 
 		$html = Html::rawElement( 'div',
-			[ 'class' => 'mw-htmlform-submit-buttons' ], "\n$buttons" ) . "\n";
+			array( 'class' => 'mw-htmlform-submit-buttons' ), "\n$buttons" ) . "\n";
 
 		return $html;
 	}

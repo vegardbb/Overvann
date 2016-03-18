@@ -5,22 +5,22 @@ class ResourceLoaderTest extends ResourceLoaderTestCase {
 	protected function setUp() {
 		parent::setUp();
 
-		$this->setMwGlobals( [
-			'wgResourceLoaderLESSImportPaths' => [
+		$this->setMwGlobals( array(
+			'wgResourceLoaderLESSImportPaths' => array(
 				dirname( dirname( __DIR__ ) ) . '/data/less/common',
-			],
-			'wgResourceLoaderLESSVars' => [
+			),
+			'wgResourceLoaderLESSVars' => array(
 				'foo'  => '2px',
 				'Foo' => '#eeeeee',
 				'bar' => 5,
-			],
-		] );
+			),
+		) );
 	}
 
 	public static function provideValidModules() {
-		return [
-			[ 'TEST.validModule1', new ResourceLoaderTestModule() ],
-		];
+		return array(
+			array( 'TEST.validModule1', new ResourceLoaderTestModule() ),
+		);
 	}
 
 	/**
@@ -31,13 +31,13 @@ class ResourceLoaderTest extends ResourceLoaderTestCase {
 	public function testCreatingNewResourceLoaderCallsRegistrationHook() {
 		$resourceLoaderRegisterModulesHook = false;
 
-		$this->setMwGlobals( 'wgHooks', [
-			'ResourceLoaderRegisterModules' => [
+		$this->setMwGlobals( 'wgHooks', array(
+			'ResourceLoaderRegisterModules' => array(
 				function ( &$resourceLoader ) use ( &$resourceLoaderRegisterModulesHook ) {
 					$resourceLoaderRegisterModulesHook = true;
 				}
-			]
-		] );
+			)
+		) );
 
 		$resourceLoader = new ResourceLoader();
 		$this->assertTrue(
@@ -67,10 +67,10 @@ class ResourceLoaderTest extends ResourceLoaderTestCase {
 	public function testLessFileCompilation() {
 		$context = $this->getResourceLoaderContext();
 		$basePath = __DIR__ . '/../../data/less/module';
-		$module = new ResourceLoaderFileModule( [
+		$module = new ResourceLoaderFileModule( array(
 			'localBasePath' => $basePath,
-			'styles' => [ 'styles.less' ],
-		] );
+			'styles' => array( 'styles.less' ),
+		) );
 		$module->setName( 'test.less' );
 		$styles = $module->getStyles( $context );
 		$this->assertStringEqualsFile( $basePath . '/styles.css', $styles['all'] );
@@ -102,45 +102,45 @@ class ResourceLoaderTest extends ResourceLoaderTestCase {
 	}
 
 	public static function providePackedModules() {
-		return [
-			[
+		return array(
+			array(
 				'Example from makePackedModulesString doc comment',
-				[ 'foo.bar', 'foo.baz', 'bar.baz', 'bar.quux' ],
+				array( 'foo.bar', 'foo.baz', 'bar.baz', 'bar.quux' ),
 				'foo.bar,baz|bar.baz,quux',
-			],
-			[
+			),
+			array(
 				'Example from expandModuleNames doc comment',
-				[ 'jquery.foo', 'jquery.bar', 'jquery.ui.baz', 'jquery.ui.quux' ],
+				array( 'jquery.foo', 'jquery.bar', 'jquery.ui.baz', 'jquery.ui.quux' ),
 				'jquery.foo,bar|jquery.ui.baz,quux',
-			],
-			[
+			),
+			array(
 				'Regression fixed in r88706 with dotless names',
-				[ 'foo', 'bar', 'baz' ],
+				array( 'foo', 'bar', 'baz' ),
 				'foo,bar,baz',
-			],
-			[
+			),
+			array(
 				'Prefixless modules after a prefixed module',
-				[ 'single.module', 'foobar', 'foobaz' ],
+				array( 'single.module', 'foobar', 'foobaz' ),
 				'single.module|foobar,foobaz',
-			],
-		];
+			),
+		);
 	}
 
 	public static function provideAddSource() {
-		return [
-			[ 'examplewiki', '//example.org/w/load.php', 'examplewiki' ],
-			[ 'example2wiki', [ 'loadScript' => '//example.com/w/load.php' ], 'example2wiki' ],
-			[
-				[ 'foowiki' => '//foo.org/w/load.php', 'bazwiki' => '//baz.org/w/load.php' ],
+		return array(
+			array( 'examplewiki', '//example.org/w/load.php', 'examplewiki' ),
+			array( 'example2wiki', array( 'loadScript' => '//example.com/w/load.php' ), 'example2wiki' ),
+			array(
+				array( 'foowiki' => '//foo.org/w/load.php', 'bazwiki' => '//baz.org/w/load.php' ),
 				null,
-				[ 'foowiki', 'bazwiki' ]
-			],
-			[
-				[ 'foowiki' => '//foo.org/w/load.php' ],
+				array( 'foowiki', 'bazwiki' )
+			),
+			array(
+				array( 'foowiki' => '//foo.org/w/load.php' ),
 				null,
 				false,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -165,28 +165,28 @@ class ResourceLoaderTest extends ResourceLoaderTestCase {
 	}
 
 	public static function fakeSources() {
-		return [
-			'examplewiki' => [
+		return array(
+			'examplewiki' => array(
 				'loadScript' => '//example.org/w/load.php',
 				'apiScript' => '//example.org/w/api.php',
-			],
-			'example2wiki' => [
+			),
+			'example2wiki' => array(
 				'loadScript' => '//example.com/w/load.php',
 				'apiScript' => '//example.com/w/api.php',
-			],
-		];
+			),
+		);
 	}
 
 	public static function provideLoaderImplement() {
-		return [
-			[ [
+		return array(
+			array( array(
 				'title' => 'Implement scripts, styles and messages',
 
 				'name' => 'test.example',
 				'scripts' => 'mw.example();',
-				'styles' => [ 'css' => [ '.mw-example {}' ] ],
-				'messages' => [ 'example' => '' ],
-				'templates' => [],
+				'styles' => array( 'css' => array( '.mw-example {}' ) ),
+				'messages' => array( 'example' => '' ),
+				'templates' => array(),
 
 				'expected' => 'mw.loader.implement( "test.example", function ( $, jQuery ) {
 mw.example();
@@ -197,66 +197,67 @@ mw.example();
 }, {
     "example": ""
 } );',
-			] ],
-			[ [
+			) ),
+			array( array(
 				'title' => 'Implement scripts',
 
 				'name' => 'test.example',
 				'scripts' => 'mw.example();',
-				'styles' => [],
+				'styles' => array(),
 				'messages' => new XmlJsCode( '{}' ),
-				'templates' => [],
+				'templates' => array(),
+				'title' => 'scripts, styles and messags',
 
 				'expected' => 'mw.loader.implement( "test.example", function ( $, jQuery ) {
 mw.example();
 } );',
-			] ],
-			[ [
+			) ),
+			array( array(
 				'title' => 'Implement styles',
 
 				'name' => 'test.example',
-				'scripts' => [],
-				'styles' => [ 'css' => [ '.mw-example {}' ] ],
+				'scripts' => array(),
+				'styles' => array( 'css' => array( '.mw-example {}' ) ),
 				'messages' => new XmlJsCode( '{}' ),
-				'templates' => [],
+				'templates' => array(),
 
 				'expected' => 'mw.loader.implement( "test.example", [], {
     "css": [
         ".mw-example {}"
     ]
 } );',
-			] ],
-			[ [
+			) ),
+			array( array(
 				'title' => 'Implement scripts and messages',
 
 				'name' => 'test.example',
 				'scripts' => 'mw.example();',
-				'styles' => [],
-				'messages' => [ 'example' => '' ],
-				'templates' => [],
+				'styles' => array(),
+				'messages' => array( 'example' => '' ),
+				'templates' => array(),
 
 				'expected' => 'mw.loader.implement( "test.example", function ( $, jQuery ) {
 mw.example();
 }, {}, {
     "example": ""
 } );',
-			] ],
-			[ [
+			) ),
+			array( array(
 				'title' => 'Implement scripts and templates',
 
 				'name' => 'test.example',
 				'scripts' => 'mw.example();',
-				'styles' => [],
+				'styles' => array(),
 				'messages' => new XmlJsCode( '{}' ),
-				'templates' => [ 'example.html' => '' ],
+				'templates' => array( 'example.html' => '' ),
 
 				'expected' => 'mw.loader.implement( "test.example", function ( $, jQuery ) {
 mw.example();
 }, {}, {}, {
     "example.html": ""
 } );',
-			] ],
-		];
+			) ),
+		);
 	}
 
 	/**
@@ -280,11 +281,11 @@ mw.example();
 	 * @covers ResourceLoader::getLoadScript
 	 */
 	public function testGetLoadScript() {
-		$this->setMwGlobals( 'wgResourceLoaderSources', [] );
+		$this->setMwGlobals( 'wgResourceLoaderSources', array() );
 		$rl = new ResourceLoader();
 		$sources = self::fakeSources();
 		$rl->addSource( $sources );
-		foreach ( [ 'examplewiki', 'example2wiki' ] as $name ) {
+		foreach ( array( 'examplewiki', 'example2wiki' ) as $name ) {
 			$this->assertEquals( $rl->getLoadScript( $name ), $sources[$name]['loadScript'] );
 		}
 

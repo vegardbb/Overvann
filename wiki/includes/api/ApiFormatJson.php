@@ -71,30 +71,29 @@ class ApiFormatJson extends ApiFormatBase {
 		$opt = 0;
 		if ( $this->isRaw ) {
 			$opt |= FormatJson::ALL_OK;
-			$transform = [];
+			$transform = array();
 		} else {
 			switch ( $params['formatversion'] ) {
 				case 1:
 					$opt |= $params['utf8'] ? FormatJson::ALL_OK : FormatJson::XMLMETA_OK;
-					$transform = [
-						'BC' => [],
-						'Types' => [ 'AssocAsObject' => true ],
+					$transform = array(
+						'BC' => array(),
+						'Types' => array( 'AssocAsObject' => true ),
 						'Strip' => 'all',
-					];
+					);
 					break;
 
 				case 2:
 				case 'latest':
 					$opt |= $params['ascii'] ? FormatJson::XMLMETA_OK : FormatJson::ALL_OK;
-					$transform = [
-						'Types' => [ 'AssocAsObject' => true ],
+					$transform = array(
+						'Types' => array( 'AssocAsObject' => true ),
 						'Strip' => 'all',
-					];
+					);
 					break;
 
 				default:
-					$this->dieUsage( __METHOD__ .
-						': Unknown value for \'formatversion\'', 'unknownformatversion' );
+					$this->dieUsage( __METHOD__ . ': Unknown value for \'formatversion\'', 'unknownformatversion' );
 			}
 		}
 		$data = $this->getResult()->getResultData( null, $transform );
@@ -121,27 +120,27 @@ class ApiFormatJson extends ApiFormatBase {
 
 	public function getAllowedParams() {
 		if ( $this->isRaw ) {
-			return parent::getAllowedParams();
+			return array();
 		}
 
-		$ret = parent::getAllowedParams() + [
-			'callback' => [
+		$ret = array(
+			'callback' => array(
 				ApiBase::PARAM_HELP_MSG => 'apihelp-json-param-callback',
-			],
-			'utf8' => [
+			),
+			'utf8' => array(
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-json-param-utf8',
-			],
-			'ascii' => [
+			),
+			'ascii' => array(
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-json-param-ascii',
-			],
-			'formatversion' => [
-				ApiBase::PARAM_TYPE => [ 1, 2, 'latest' ],
+			),
+			'formatversion' => array(
+				ApiBase::PARAM_TYPE => array( 1, 2, 'latest' ),
 				ApiBase::PARAM_DFLT => 1,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-json-param-formatversion',
-			],
-		];
+			),
+		);
 		return $ret;
 	}
 }

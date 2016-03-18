@@ -1,6 +1,6 @@
 <?php
 /**
- * Derivative context for ResourceLoader modules.
+ * Derivative context for resource loader modules.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

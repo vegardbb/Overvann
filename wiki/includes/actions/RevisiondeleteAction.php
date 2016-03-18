@@ -58,8 +58,4 @@ class RevisiondeleteAction extends FormlessAction {
 		$special->getContext()->setTitle( $special->getPageTitle() );
 		$special->run( '' );
 	}
-
-	public function doesWrites() {
-		return true;
-	}
 }

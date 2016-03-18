@@ -51,14 +51,14 @@ class DoubleRedirectsPage extends QueryPage {
 	function reallyGetQueryInfo( $namespace = null, $title = null ) {
 		$limitToTitle = !( $namespace === null && $title === null );
 		$dbr = wfGetDB( DB_SLAVE );
-		$retval = [
-			'tables' => [
+		$retval = array(
+			'tables' => array(
 				'ra' => 'redirect',
 				'rb' => 'redirect',
 				'pa' => 'page',
 				'pb' => 'page'
-			],
-			'fields' => [
+			),
+			'fields' => array(
 				'namespace' => 'pa.page_namespace',
 				'title' => 'pa.page_title',
 				'value' => 'pa.page_title',
@@ -71,8 +71,8 @@ class DoubleRedirectsPage extends QueryPage {
 				'nsc' => 'rb.rd_namespace',
 				'tc' => 'rb.rd_title',
 				'iwc' => 'rb.rd_interwiki',
-			],
-			'conds' => [
+			),
+			'conds' => array(
 				'ra.rd_from = pa.page_id',
 
 				// Filter out redirects where the target goes interwiki (bug 40353).
@@ -88,8 +88,8 @@ class DoubleRedirectsPage extends QueryPage {
 				'pb.page_title = ra.rd_title',
 
 				'rb.rd_from = pb.page_id',
-			]
-		];
+			)
+		);
 
 		if ( $limitToTitle ) {
 			$retval['conds']['pa.page_namespace'] = $namespace;
@@ -104,7 +104,7 @@ class DoubleRedirectsPage extends QueryPage {
 	}
 
 	function getOrderFields() {
-		return [ 'ra.rd_namespace', 'ra.rd_title' ];
+		return array( 'ra.rd_namespace', 'ra.rd_title' );
 	}
 
 	/**
@@ -138,7 +138,7 @@ class DoubleRedirectsPage extends QueryPage {
 			}
 		}
 		if ( !$result ) {
-			return '<del>' . Linker::link( $titleA, null, [], [ 'redirect' => 'no' ] ) . '</del>';
+			return '<del>' . Linker::link( $titleA, null, array(), array( 'redirect' => 'no' ) ) . '</del>';
 		}
 
 		$titleB = Title::makeTitle( $result->nsb, $result->tb );
@@ -147,34 +147,24 @@ class DoubleRedirectsPage extends QueryPage {
 		$linkA = Linker::linkKnown(
 			$titleA,
 			null,
-			[],
-			[ 'redirect' => 'no' ]
+			array(),
+			array( 'redirect' => 'no' )
 		);
 
-		// if the page is editable, add an edit link
-		if (
-			// check user permissions
-			$this->getUser()->isAllowed( 'edit' ) &&
-			// check, if the content model is editable through action=edit
-			ContentHandler::getForTitle( $titleA )->supportsDirectEditing()
-		) {
-			$edit = Linker::linkKnown(
-				$titleA,
-				$this->msg( 'parentheses', $this->msg( 'editlink' )->text() )->escaped(),
-				[],
-				[
-					'action' => 'edit'
-				]
-			);
-		} else {
-			$edit = '';
-		}
+		$edit = Linker::linkKnown(
+			$titleA,
+			$this->msg( 'parentheses', $this->msg( 'editlink' )->text() )->escaped(),
+			array(),
+			array(
+				'action' => 'edit'
+			)
+		);
 
 		$linkB = Linker::linkKnown(
 			$titleB,
 			null,
-			[],
-			[ 'redirect' => 'no' ]
+			array(),
+			array( 'redirect' => 'no' )
 		);
 
 		$linkC = Linker::linkKnown( $titleC );
@@ -183,35 +173,6 @@ class DoubleRedirectsPage extends QueryPage {
 		$arr = $lang->getArrow() . $lang->getDirMark();
 
 		return ( "{$linkA} {$edit} {$arr} {$linkB} {$arr} {$linkC}" );
-	}
-
-	/**
-	 * Cache page content model and gender distinction for performance
-	 *
-	 * @param IDatabase $db
-	 * @param ResultWrapper $res
-	 */
-	function preprocessResults( $db, $res ) {
-		if ( !$res->numRows() ) {
-			return;
-		}
-
-		$batch = new LinkBatch;
-		foreach ( $res as $row ) {
-			$batch->add( $row->namespace, $row->title );
-			if ( isset( $row->nsb ) ) {
-				// lazy loaded when using cached results
-				$batch->add( $row->nsb, $row->tb );
-			}
-			if ( isset( $row->iwc ) && !$row->iwc ) {
-				// lazy loaded when using cached result, not added when interwiki link
-				$batch->add( $row->nsc, $row->tc );
-			}
-		}
-		$batch->execute();
-
-		// Back to start for display
-		$res->seek( 0 );
 	}
 
 	protected function getGroupName() {

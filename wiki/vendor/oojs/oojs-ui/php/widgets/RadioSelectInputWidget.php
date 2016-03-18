@@ -19,18 +19,16 @@ class RadioSelectInputWidget extends InputWidget {
 	protected $name = null;
 
 	/**
-	 * Layouts for this input, as FieldLayouts.
-	 *
-	 * @var array
+	 * @var FieldLayout[]
 	 */
-	protected $fields = [];
+	protected $fields = array();
 
 	/**
 	 * @param array $config Configuration options
 	 * @param array[] $config['options'] Array of menu options in the format
 	 *   `array( 'data' => …, 'label' => … )`
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Parent constructor
 		parent::__construct( $config );
 
@@ -39,8 +37,8 @@ class RadioSelectInputWidget extends InputWidget {
 		}
 
 		// Initialization
-		$this->setOptions( isset( $config['options'] ) ? $config['options'] : [] );
-		$this->addClasses( [ 'oo-ui-radioSelectInputWidget' ] );
+		$this->setOptions( isset( $config['options'] ) ? $config['options'] : array() );
+		$this->addClasses( array( 'oo-ui-radioSelectInputWidget' ) );
 	}
 
 	protected function getInputElement( $config ) {
@@ -61,12 +59,12 @@ class RadioSelectInputWidget extends InputWidget {
 	 *
 	 * @param array[] $options Array of menu options in the format
 	 *   `array( 'data' => …, 'label' => … )`
-	 * @return $this
+	 * @chainable
 	 */
 	public function setOptions( $options ) {
 		$value = $this->getValue();
 		$isValueAvailable = false;
-		$this->fields = [];
+		$this->fields = array();
 
 		// Rebuild the radio buttons
 		$this->clearContent();
@@ -75,15 +73,15 @@ class RadioSelectInputWidget extends InputWidget {
 		foreach ( $options as $opt ) {
 			$optValue = $this->cleanUpValue( $opt['data'] );
 			$field = new FieldLayout(
-				new RadioInputWidget( [
+				new RadioInputWidget( array(
 					'name' => $name,
 					'value' => $optValue,
 					'disabled' => $this->isDisabled(),
-				] ),
-				[
+				) ),
+				array(
 					'label' => isset( $opt['label'] ) ? $opt['label'] : $optValue,
 					'align' => 'inline',
-				]
+				)
 			);
 
 			if ( $value === $optValue ) {
@@ -117,11 +115,11 @@ class RadioSelectInputWidget extends InputWidget {
 	}
 
 	public function getConfig( &$config ) {
-		$o = [];
+		$o = array();
 		foreach ( $this->fields as $field ) {
 			$label = $field->getLabel();
 			$data = $field->getField()->getValue();
-			$o[] = [ 'data' => $data, 'label' => $label ];
+			$o[] = array( 'data' => $data, 'label' => $label );
 		}
 		$config['options'] = $o;
 		return parent::getConfig( $config );

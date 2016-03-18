@@ -39,7 +39,7 @@ require_once __DIR__ . '/Maintenance.php';
 class RebuildLocalisationCache extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Rebuild the localisation cache' );
+		$this->mDescription = "Rebuild the localisation cache";
 		$this->addOption( 'force', 'Rebuild all files, even ones not out of date' );
 		$this->addOption( 'threads', 'Fork more than one thread', false, true );
 		$this->addOption( 'outdir', 'Override the output directory (normally $wgCacheDirectory)',
@@ -104,7 +104,7 @@ class RebuildLocalisationCache extends Maintenance {
 		$numRebuilt = 0;
 		$total = count( $codes );
 		$chunks = array_chunk( $codes, ceil( count( $codes ) / $threads ) );
-		$pids = [];
+		$pids = array();
 		$parentStatus = 0;
 		foreach ( $chunks as $codes ) {
 			// Do not fork for only one thread

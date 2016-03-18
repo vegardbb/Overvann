@@ -31,16 +31,16 @@ require_once __DIR__ . '/Maintenance.php';
  * @ingroup Maintenance
  */
 class PopulateLogSearch extends LoggedUpdateMaintenance {
-	private static $tableMap = [
+	private static $tableMap = array(
 		'rev' => 'revision',
 		'fa' => 'filearchive',
 		'oi' => 'oldimage',
 		'ar' => 'archive'
-	];
+	);
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Migrate log params to new table and index for searching' );
+		$this->mDescription = "Migrate log params to new table and index for searching";
 		$this->setBatchSize( 100 );
 	}
 
@@ -72,7 +72,7 @@ class PopulateLogSearch extends LoggedUpdateMaintenance {
 		$blockStart = $start;
 		$blockEnd = $start + $this->mBatchSize - 1;
 
-		$delTypes = [ 'delete', 'suppress' ]; // revisiondelete types
+		$delTypes = array( 'delete', 'suppress' ); // revisiondelete types
 		while ( $blockEnd <= $end ) {
 			$this->output( "...doing log_id from $blockStart to $blockEnd\n" );
 			$cond = "log_id BETWEEN $blockStart AND $blockEnd";
@@ -96,8 +96,8 @@ class PopulateLogSearch extends LoggedUpdateMaintenance {
 						} else {
 							// Clean up the row...
 							$db->update( 'logging',
-								[ 'log_params' => implode( ',', $params ) ],
-								[ 'log_id' => $row->log_id ] );
+								array( 'log_params' => implode( ',', $params ) ),
+								array( 'log_id' => $row->log_id ) );
 						}
 					}
 					$items = explode( ',', $params[1] );
@@ -113,10 +113,10 @@ class PopulateLogSearch extends LoggedUpdateMaintenance {
 					$userField = $prefix . '_user';
 					$userTextField = $prefix . '_user_text';
 					// Add item author relations...
-					$userIds = $userIPs = [];
+					$userIds = $userIPs = array();
 					$sres = $db->select( $table,
-						[ $userField, $userTextField ],
-						[ $field => $items ]
+						array( $userField, $userTextField ),
+						array( $field => $items )
 					);
 					foreach ( $sres as $srow ) {
 						if ( $srow->$userField > 0 ) {
@@ -140,10 +140,10 @@ class PopulateLogSearch extends LoggedUpdateMaintenance {
 					// Add item relations...
 					$log->addRelations( 'log_id', $items, $row->log_id );
 					// Add item author relations...
-					$userIds = $userIPs = [];
+					$userIds = $userIPs = array();
 					$sres = $db->select( 'logging',
-						[ 'log_user', 'log_user_text' ],
-						[ 'log_id' => $items ]
+						array( 'log_user', 'log_user_text' ),
+						array( 'log_id' => $items )
 					);
 					foreach ( $sres as $srow ) {
 						if ( $srow->log_user > 0 ) {

@@ -73,7 +73,7 @@ abstract class JobQueue {
 		$this->dupCache = wfGetCache( CACHE_ANYTHING );
 		$this->aggr = isset( $params['aggregator'] )
 			? $params['aggregator']
-			: new JobQueueAggregatorNull( [] );
+			: new JobQueueAggregatorNull( array() );
 	}
 
 	/**
@@ -286,13 +286,13 @@ abstract class JobQueue {
 	 * This does not require $wgJobClasses to be set for the given job type.
 	 * Outside callers should use JobQueueGroup::push() instead of this function.
 	 *
-	 * @param IJobSpecification|IJobSpecification[] $jobs
+	 * @param JobSpecification|JobSpecification[] $jobs
 	 * @param int $flags Bitfield (supports JobQueue::QOS_ATOMIC)
 	 * @return void
 	 * @throws JobQueueError
 	 */
 	final public function push( $jobs, $flags = 0 ) {
-		$jobs = is_array( $jobs ) ? $jobs : [ $jobs ];
+		$jobs = is_array( $jobs ) ? $jobs : array( $jobs );
 		$this->batchPush( $jobs, $flags );
 	}
 
@@ -301,7 +301,7 @@ abstract class JobQueue {
 	 * This does not require $wgJobClasses to be set for the given job type.
 	 * Outside callers should use JobQueueGroup::push() instead of this function.
 	 *
-	 * @param IJobSpecification[] $jobs
+	 * @param JobSpecification[] $jobs
 	 * @param int $flags Bitfield (supports JobQueue::QOS_ATOMIC)
 	 * @return void
 	 * @throws MWException
@@ -333,7 +333,7 @@ abstract class JobQueue {
 
 	/**
 	 * @see JobQueue::batchPush()
-	 * @param IJobSpecification[] $jobs
+	 * @param JobSpecification[] $jobs
 	 * @param int $flags
 	 */
 	abstract protected function doBatchPush( array $jobs, $flags );
@@ -377,7 +377,7 @@ abstract class JobQueue {
 
 	/**
 	 * @see JobQueue::pop()
-	 * @return Job|bool
+	 * @return Job
 	 */
 	abstract protected function doPop();
 
@@ -589,7 +589,7 @@ abstract class JobQueue {
 	 * @since 1.22
 	 */
 	public function getAllDelayedJobs() {
-		return new ArrayIterator( [] ); // not implemented
+		return new ArrayIterator( array() ); // not implemented
 	}
 
 	/**
@@ -603,7 +603,7 @@ abstract class JobQueue {
 	 * @since 1.26
 	 */
 	public function getAllAcquiredJobs() {
-		return new ArrayIterator( [] ); // not implemented
+		return new ArrayIterator( array() ); // not implemented
 	}
 
 	/**
@@ -614,7 +614,7 @@ abstract class JobQueue {
 	 * @since 1.25
 	 */
 	public function getAllAbandonedJobs() {
-		return new ArrayIterator( [] ); // not implemented
+		return new ArrayIterator( array() ); // not implemented
 	}
 
 	/**
@@ -687,6 +687,17 @@ abstract class JobQueue {
 		}
 		$stats->updateCount( "jobqueue.{$key}.all", $delta );
 		$stats->updateCount( "jobqueue.{$key}.{$type}", $delta );
+	}
+
+	/**
+	 * Namespace the queue with a key to isolate it for testing
+	 *
+	 * @param string $key
+	 * @return void
+	 * @throws MWException
+	 */
+	public function setTestingPrefix( $key ) {
+		throw new MWException( "Queue namespacing not supported for this queue type." );
 	}
 }
 

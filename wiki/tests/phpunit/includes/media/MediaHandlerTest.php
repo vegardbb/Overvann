@@ -21,25 +21,25 @@ class MediaHandlerTest extends MediaWikiTestCase {
 
 	public static function provideTestFitBoxWidth() {
 		return array_merge(
-			static::generateTestFitBoxWidthData( 50, 50, [
+			static::generateTestFitBoxWidthData( 50, 50, array(
 					50 => 50,
 					17 => 17,
-					18 => 18 ]
+					18 => 18 )
 			),
-			static::generateTestFitBoxWidthData( 366, 300, [
+			static::generateTestFitBoxWidthData( 366, 300, array(
 					50 => 61,
 					17 => 21,
-					18 => 22 ]
+					18 => 22 )
 			),
-			static::generateTestFitBoxWidthData( 300, 366, [
+			static::generateTestFitBoxWidthData( 300, 366, array(
 					50 => 41,
 					17 => 14,
-					18 => 15 ]
+					18 => 15 )
 			),
-			static::generateTestFitBoxWidthData( 100, 400, [
+			static::generateTestFitBoxWidthData( 100, 400, array(
 					50 => 12,
 					17 => 4,
-					18 => 4 ]
+					18 => 4 )
 			)
 		);
 	}
@@ -59,9 +59,9 @@ class MediaHandlerTest extends MediaWikiTestCase {
 	 * @return array
 	 */
 	private static function generateTestFitBoxWidthData( $width, $height, $tests ) {
-		$result = [];
+		$result = array();
 		foreach ( $tests as $max => $expected ) {
-			$result[] = [ $width, $height, $max, $expected ];
+			$result[] = array( $width, $height, $max, $expected );
 		}
 		return $result;
 	}

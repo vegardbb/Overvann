@@ -1,6 +1,6 @@
 <?php
 /**
- * Per-process memory cache for storing items.
+ * Object caching using PHP arrays.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,38 +20,26 @@
  * @file
  * @ingroup Cache
  */
-use Wikimedia\Assert\Assert;
 
 /**
- * Simple store for keeping values in an associative array for the current process.
- *
- * Data will not persist and is not shared with other processes.
+ * This is a test of the interface, mainly. It stores things in an associative
+ * array, which is not going to persist between program runs.
  *
  * @ingroup Cache
  */
 class HashBagOStuff extends BagOStuff {
-	/** @var mixed[] */
-	protected $bag = [];
-	/** @var integer Max entries allowed */
-	protected $maxCacheKeys;
+	/** @var array */
+	protected $bag;
 
-	const KEY_VAL = 0;
-	const KEY_EXP = 1;
-
-	/**
-	 * @param array $params Additional parameters include:
-	 *   - maxKeys : only allow this many keys (using oldest-first eviction)
-	 */
-	function __construct( $params = [] ) {
+	function __construct( $params = array() ) {
 		parent::__construct( $params );
-
-		$this->maxCacheKeys = isset( $params['maxKeys'] ) ? $params['maxKeys'] : INF;
-		Assert::parameter( $this->maxCacheKeys > 0, 'maxKeys', 'must be above zero' );
+		$this->bag = array();
 	}
 
 	protected function expire( $key ) {
-		$et = $this->bag[$key][self::KEY_EXP];
-		if ( $et == self::TTL_INDEFINITE || $et > time() ) {
+		$et = $this->bag[$key][1];
+
+		if ( ( $et == 0 ) || ( $et > time() ) ) {
 			return false;
 		}
 
@@ -60,19 +48,8 @@ class HashBagOStuff extends BagOStuff {
 		return true;
 	}
 
-	/**
-	 * Does this bag have a non-null value for the given key?
-	 *
-	 * @param string $key
-	 * @return bool
-	 * @since 1.27
-	 */
-	protected function hasKey( $key ) {
-		return isset( $this->bag[$key] );
-	}
-
-	protected function doGet( $key, $flags = 0 ) {
-		if ( !$this->hasKey( $key ) ) {
+	public function get( $key, &$casToken = null, $flags = 0 ) {
+		if ( !isset( $this->bag[$key] ) ) {
 			return false;
 		}
 
@@ -80,38 +57,19 @@ class HashBagOStuff extends BagOStuff {
 			return false;
 		}
 
-		// Refresh key position for maxCacheKeys eviction
-		$temp = $this->bag[$key];
-		unset( $this->bag[$key] );
-		$this->bag[$key] = $temp;
+		$casToken = $this->bag[$key][0];
 
-		return $this->bag[$key][self::KEY_VAL];
+		return $this->bag[$key][0];
 	}
 
-	public function set( $key, $value, $exptime = 0, $flags = 0 ) {
-		// Refresh key position for maxCacheKeys eviction
-		unset( $this->bag[$key] );
-		$this->bag[$key] = [
-			self::KEY_VAL => $value,
-			self::KEY_EXP => $this->convertExpiry( $exptime )
-		];
-
-		if ( count( $this->bag ) > $this->maxCacheKeys ) {
-			reset( $this->bag );
-			$evictKey = key( $this->bag );
-			unset( $this->bag[$evictKey] );
-		}
-
+	public function set( $key, $value, $exptime = 0 ) {
+		$this->bag[$key] = array( $value, $this->convertExpiry( $exptime ) );
 		return true;
 	}
 
-	public function delete( $key ) {
+	function delete( $key ) {
 		unset( $this->bag[$key] );
 
 		return true;
-	}
-
-	public function clear() {
-		$this->bag = [];
 	}
 }

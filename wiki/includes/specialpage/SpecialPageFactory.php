@@ -47,7 +47,7 @@ class SpecialPageFactory {
 	/**
 	 * List of special page names to the subclass of SpecialPage which handles them.
 	 */
-	private static $coreList = [
+	private static $coreList = array(
 		// Maintenance Reports
 		'BrokenRedirects' => 'BrokenRedirectsPage',
 		'Deadendpages' => 'DeadendPagesPage',
@@ -90,14 +90,12 @@ class SpecialPageFactory {
 		'Unblock' => 'SpecialUnblock',
 		'BlockList' => 'SpecialBlockList',
 		'ChangePassword' => 'SpecialChangePassword',
-		'BotPasswords' => 'SpecialBotPasswords',
 		'PasswordReset' => 'SpecialPasswordReset',
 		'DeletedContributions' => 'DeletedContributionsPage',
 		'Preferences' => 'SpecialPreferences',
 		'ResetTokens' => 'SpecialResetTokens',
 		'Contributions' => 'SpecialContributions',
 		'Listgrouprights' => 'SpecialListGroupRights',
-		'Listgrants' => 'SpecialListGrants',
 		'Listusers' => 'SpecialListUsers',
 		'Listadmins' => 'SpecialListAdmins',
 		'Listbots' => 'SpecialListBots',
@@ -124,7 +122,6 @@ class SpecialPageFactory {
 		'ListDuplicatedFiles' => 'ListDuplicatedFilesPage',
 
 		// Data and tools
-		'ApiSandbox' => 'SpecialApiSandbox',
 		'Statistics' => 'SpecialStatistics',
 		'Allmessages' => 'SpecialAllMessages',
 		'Version' => 'SpecialVersion',
@@ -136,7 +133,6 @@ class SpecialPageFactory {
 		'Randompage' => 'RandomPage',
 		'RandomInCategory' => 'SpecialRandomInCategory',
 		'Randomredirect' => 'SpecialRandomredirect',
-		'Randomrootpage' => 'SpecialRandomrootpage',
 
 		// High use pages
 		'Mostlinkedcategories' => 'MostlinkedCategoriesPage',
@@ -178,7 +174,7 @@ class SpecialPageFactory {
 		'RunJobs' => 'SpecialRunJobs',
 		'Specialpages' => 'SpecialSpecialpages',
 		'Userlogout' => 'SpecialUserlogout',
-	];
+	);
 
 	private static $list;
 	private static $aliases;
@@ -259,7 +255,7 @@ class SpecialPageFactory {
 
 			// This hook can be used to disable unwanted core special pages
 			// or conditionally register special pages.
-			Hooks::run( 'SpecialPage_initList', [ &self::$list ] );
+			Hooks::run( 'SpecialPage_initList', array( &self::$list ) );
 
 		}
 
@@ -278,8 +274,8 @@ class SpecialPageFactory {
 			$aliases = $wgContLang->getSpecialPageAliases();
 			$pageList = self::getPageList();
 
-			self::$aliases = [];
-			$keepAlias = [];
+			self::$aliases = array();
+			$keepAlias = array();
 
 			// Force every canonical name to be an alias for itself.
 			foreach ( $pageList as $name => $stuff ) {
@@ -339,7 +335,7 @@ class SpecialPageFactory {
 		if ( isset( $aliases[$caseFoldedAlias] ) ) {
 			$name = $aliases[$caseFoldedAlias];
 		} else {
-			return [ null, null ];
+			return array( null, null );
 		}
 
 		if ( !isset( $bits[1] ) ) { // bug 2087
@@ -348,7 +344,7 @@ class SpecialPageFactory {
 			$par = $bits[1];
 		}
 
-		return [ $name, $par ];
+		return array( $name, $par );
 	}
 
 	/**
@@ -389,13 +385,13 @@ class SpecialPageFactory {
 				// @deprecated, officially since 1.18, unofficially since forever
 				wfDeprecated( "Array syntax for \$wgSpecialPages is deprecated ($className), " .
 					"define a subclass of SpecialPage instead.", '1.18' );
-				$page = ObjectFactory::getObjectFromSpec( [
+				$page = ObjectFactory::getObjectFromSpec( array(
 					'class' => $className,
 					'args' => $rec,
 					'closure_expansion' => false,
-				] );
+				) );
 			} elseif ( $rec instanceof SpecialPage ) {
-				$page = $rec; // XXX: we should deep clone here
+				$page = $rec; //XXX: we should deep clone here
 			} else {
 				$page = null;
 			}
@@ -423,7 +419,7 @@ class SpecialPageFactory {
 	 * @return array ( string => Specialpage )
 	 */
 	public static function getUsablePages( User $user = null ) {
-		$pages = [];
+		$pages = array();
 		if ( $user === null ) {
 			global $wgUser;
 			$user = $wgUser;
@@ -449,7 +445,7 @@ class SpecialPageFactory {
 	 * @return array ( string => Specialpage )
 	 */
 	public static function getRegularPages() {
-		$pages = [];
+		$pages = array();
 		foreach ( self::getPageList() as $name => $rec ) {
 			$page = self::getPage( $name );
 			if ( $page->isListed() && !$page->isRestricted() ) {
@@ -468,7 +464,7 @@ class SpecialPageFactory {
 	 * @return array ( string => Specialpage )
 	 */
 	public static function getRestrictedPages( User $user = null ) {
-		$pages = [];
+		$pages = array();
 		if ( $user === null ) {
 			global $wgUser;
 			$user = $wgUser;
@@ -502,6 +498,7 @@ class SpecialPageFactory {
 	 * @return bool
 	 */
 	public static function executePath( Title &$title, IContextSource &$context, $including = false ) {
+
 		// @todo FIXME: Redirects broken due to this call
 		$bits = explode( '/', $title->getDBkey(), 2 );
 		$name = $bits[0];
@@ -510,8 +507,8 @@ class SpecialPageFactory {
 		} else {
 			$par = $bits[1];
 		}
-
 		$page = self::getPage( $name );
+		// Nonexistent?
 		if ( !$page ) {
 			$context->getOutput()->setArticleRelated( false );
 			$context->getOutput()->setRobotPolicy( 'noindex,nofollow' );
@@ -524,15 +521,6 @@ class SpecialPageFactory {
 			$context->getOutput()->showErrorPage( 'nosuchspecialpage', 'nospecialpagetext' );
 
 			return false;
-		}
-
-		if ( !$including ) {
-			// Narrow DB query expectations for this HTTP request
-			$trxLimits = $context->getConfig()->get( 'TrxProfilerLimits' );
-			$trxProfiler = Profiler::instance()->getTransactionProfiler();
-			if ( $context->getRequest()->wasPosted() && !$page->doesWrites() ) {
-				$trxProfiler->setExpectations( $trxLimits['POST-nonwrite'], __METHOD__ );
-			}
 		}
 
 		// Page exists, set the context
@@ -582,51 +570,31 @@ class SpecialPageFactory {
 	 * @return string HTML fragment
 	 */
 	public static function capturePath( Title $title, IContextSource $context ) {
-		global $wgTitle, $wgOut, $wgRequest, $wgUser, $wgLang;
-		$main = RequestContext::getMain();
+		global $wgOut, $wgTitle, $wgRequest, $wgUser, $wgLang;
 
-		// Save current globals and main context
-		$glob = [
-			'title' => $wgTitle,
-			'output' => $wgOut,
-			'request' => $wgRequest,
-			'user' => $wgUser,
-			'language' => $wgLang,
-		];
-		$ctx = [
-			'title' => $main->getTitle(),
-			'output' => $main->getOutput(),
-			'request' => $main->getRequest(),
-			'user' => $main->getUser(),
-			'language' => $main->getLanguage(),
-		];
+		// Save current globals
+		$oldTitle = $wgTitle;
+		$oldOut = $wgOut;
+		$oldRequest = $wgRequest;
+		$oldUser = $wgUser;
+		$oldLang = $wgLang;
 
-		// Override
+		// Set the globals to the current context
 		$wgTitle = $title;
 		$wgOut = $context->getOutput();
 		$wgRequest = $context->getRequest();
 		$wgUser = $context->getUser();
 		$wgLang = $context->getLanguage();
-		$main->setTitle( $title );
-		$main->setOutput( $context->getOutput() );
-		$main->setRequest( $context->getRequest() );
-		$main->setUser( $context->getUser() );
-		$main->setLanguage( $context->getLanguage() );
 
 		// The useful part
 		$ret = self::executePath( $title, $context, true );
 
-		// Restore old globals and context
-		$wgTitle = $glob['title'];
-		$wgOut = $glob['output'];
-		$wgRequest = $glob['request'];
-		$wgUser = $glob['user'];
-		$wgLang = $glob['language'];
-		$main->setTitle( $ctx['title'] );
-		$main->setOutput( $ctx['output'] );
-		$main->setRequest( $ctx['request'] );
-		$main->setUser( $ctx['user'] );
-		$main->setLanguage( $ctx['language'] );
+		// And restore the old globals
+		$wgTitle = $oldTitle;
+		$wgOut = $oldOut;
+		$wgRequest = $oldRequest;
+		$wgUser = $oldUser;
+		$wgLang = $oldLang;
 
 		return $ret;
 	}

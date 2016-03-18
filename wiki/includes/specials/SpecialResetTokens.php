@@ -34,10 +34,6 @@ class SpecialResetTokens extends FormSpecialPage {
 		parent::__construct( 'ResetTokens' );
 	}
 
-	public function doesWrites() {
-		return true;
-	}
-
 	/**
 	 * Returns the token information list for this page after running
 	 * the hook and filtering out disabled preferences.
@@ -46,10 +42,10 @@ class SpecialResetTokens extends FormSpecialPage {
 	 */
 	protected function getTokensList() {
 		if ( !isset( $this->tokensList ) ) {
-			$tokens = [
-				[ 'preference' => 'watchlisttoken', 'label-message' => 'resettokens-watchlist-token' ],
-			];
-			Hooks::run( 'SpecialResetTokensTokens', [ &$tokens ] );
+			$tokens = array(
+				array( 'preference' => 'watchlisttoken', 'label-message' => 'resettokens-watchlist-token' ),
+			);
+			Hooks::run( 'SpecialResetTokensTokens', array( &$tokens ) );
 
 			$hiddenPrefs = $this->getConfig()->get( 'HiddenPrefs' );
 			$tokens = array_filter( $tokens, function ( $tok ) use ( $hiddenPrefs ) {
@@ -89,7 +85,7 @@ class SpecialResetTokens extends FormSpecialPage {
 		$tokens = $this->getTokensList();
 
 		if ( $tokens ) {
-			$tokensForForm = [];
+			$tokensForForm = array();
 			foreach ( $tokens as $tok ) {
 				$label = $this->msg( 'resettokens-token-label' )
 					->rawParams( $this->msg( $tok['label-message'] )->parse() )
@@ -98,21 +94,21 @@ class SpecialResetTokens extends FormSpecialPage {
 				$tokensForForm[$label] = $tok['preference'];
 			}
 
-			$desc = [
+			$desc = array(
 				'label-message' => 'resettokens-tokens',
 				'type' => 'multiselect',
 				'options' => $tokensForForm,
-			];
+			);
 		} else {
-			$desc = [
+			$desc = array(
 				'label-message' => 'resettokens-no-tokens',
 				'type' => 'info',
-			];
+			);
 		}
 
-		return [
+		return array(
 			'tokens' => $desc,
-		];
+		);
 	}
 
 	/**

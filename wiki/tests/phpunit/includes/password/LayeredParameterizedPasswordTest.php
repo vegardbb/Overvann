@@ -2,36 +2,36 @@
 
 class LayeredParameterizedPasswordTest extends PasswordTestCase {
 	protected function getTypeConfigs() {
-		return [
-			'testLargeLayeredTop' => [
+		return array(
+			'testLargeLayeredTop' => array(
 				'class' => 'LayeredParameterizedPassword',
-				'types' => [
+				'types' => array(
 					'testLargeLayeredBottom',
 					'testLargeLayeredBottom',
 					'testLargeLayeredBottom',
 					'testLargeLayeredBottom',
 					'testLargeLayeredFinal',
-				],
-			],
-			'testLargeLayeredBottom' => [
+				),
+			),
+			'testLargeLayeredBottom' => array(
 				'class' => 'Pbkdf2Password',
 				'algo' => 'sha512',
 				'cost' => 1024,
 				'length' => 512,
-			],
-			'testLargeLayeredFinal' => [
+			),
+			'testLargeLayeredFinal' => array(
 				'class' => 'BcryptPassword',
 				'cost' => 5,
-			]
-		];
+			)
+		);
 	}
 
 	public static function providePasswordTests() {
-		// @codingStandardsIgnoreStart Generic.Files.LineLength.TooLong
+		/** @codingStandardsIgnoreStart Generic.Files.LineLength.TooLong */
 		return array(
 			array( true, ':testLargeLayeredTop:sha512:1024:512!sha512:1024:512!sha512:1024:512!sha512:1024:512!5!vnRy+2SrSA0fHt3dwhTP5g==!AVnwfZsAQjn+gULv7FSGjA==!xvHUX3WcpkeSn1lvjWcvBg==!It+OC/N9tu+d3ByHhuB0BQ==!Tb.gqUOiD.aWktVwHM.Q/O!7CcyMfXUPky5ptyATJsR2nq3vUqtnBC', 'testPassword123' ),
 		);
-		// @codingStandardsIgnoreEnd
+		/** @codingStandardsIgnoreEnd */
 	}
 
 	/**

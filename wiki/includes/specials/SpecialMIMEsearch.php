@@ -47,18 +47,18 @@ class MIMEsearchPage extends QueryPage {
 	}
 
 	function linkParameters() {
-		return [ 'mime' => "{$this->major}/{$this->minor}" ];
+		return array( 'mime' => "{$this->major}/{$this->minor}" );
 	}
 
 	public function getQueryInfo() {
-		$minorType = [];
+		$minorType = array();
 		if ( $this->minor !== '*' ) {
 			// Allow wildcard searching
 			$minorType['img_minor_mime'] = $this->minor;
 		}
-		$qi = [
-			'tables' => [ 'image' ],
-			'fields' => [
+		$qi = array(
+			'tables' => array( 'image' ),
+			'fields' => array(
 				'namespace' => NS_FILE,
 				'title' => 'img_name',
 				// Still have a value field just in case,
@@ -69,12 +69,12 @@ class MIMEsearchPage extends QueryPage {
 				'img_height',
 				'img_user_text',
 				'img_timestamp'
-			],
-			'conds' => [
+			),
+			'conds' => array(
 				'img_major_mime' => $this->major,
 				// This is in order to trigger using
 				// the img_media_mime index in "range" mode.
-				'img_media_type' => [
+				'img_media_type' => array(
 					MEDIATYPE_BITMAP,
 					MEDIATYPE_DRAWING,
 					MEDIATYPE_AUDIO,
@@ -85,9 +85,9 @@ class MIMEsearchPage extends QueryPage {
 					MEDIATYPE_TEXT,
 					MEDIATYPE_EXECUTABLE,
 					MEDIATYPE_ARCHIVE,
-				],
-			] + $minorType,
-		];
+				),
+			) + $minorType,
+		);
 
 		return $qi;
 	}
@@ -102,7 +102,7 @@ class MIMEsearchPage extends QueryPage {
 	 * @return array
 	 */
 	function getOrderFields() {
-		return [];
+		return array();
 	}
 
 	/**
@@ -111,7 +111,7 @@ class MIMEsearchPage extends QueryPage {
 	function getPageHeader() {
 		return Xml::openElement(
 				'form',
-				[ 'id' => 'specialmimesearch', 'method' => 'get', 'action' => wfScript() ]
+				array( 'id' => 'specialmimesearch', 'method' => 'get', 'action' => wfScript() )
 			) .
 			Xml::openElement( 'fieldset' ) .
 			Html::hidden( 'title', $this->getPageTitle()->getPrefixedText() ) .
@@ -178,7 +178,7 @@ class MIMEsearchPage extends QueryPage {
 	 */
 	protected static function isValidType( $type ) {
 		// From maintenance/tables.sql => img_major_mime
-		$types = [
+		$types = array(
 			'unknown',
 			'application',
 			'audio',
@@ -189,7 +189,7 @@ class MIMEsearchPage extends QueryPage {
 			'model',
 			'multipart',
 			'chemical'
-		];
+		);
 
 		return in_array( $type, $types );
 	}

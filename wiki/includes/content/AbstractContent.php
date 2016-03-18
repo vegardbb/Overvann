@@ -230,11 +230,11 @@ abstract class AbstractContent implements Content {
 			$parserOutput = $this->getParserOutput( $title, null, null, false );
 		}
 
-		$updates = [
+		$updates = array(
 			new LinksUpdate( $title, $parserOutput, $recursive )
-		];
+		);
 
-		Hooks::run( 'SecondaryDataUpdates', [ $title, $old, $recursive, $parserOutput, &$updates ] );
+		Hooks::run( 'SecondaryDataUpdates', array( $title, $old, $recursive, $parserOutput, &$updates ) );
 
 		return $updates;
 	}
@@ -254,7 +254,7 @@ abstract class AbstractContent implements Content {
 		}
 		// recursive check to follow double redirects
 		$recurse = $wgMaxRedirects;
-		$titles = [ $title ];
+		$titles = array( $title );
 		while ( --$recurse > 0 ) {
 			if ( $title->isRedirect() ) {
 				$page = WikiPage::factory( $title );
@@ -382,7 +382,7 @@ abstract class AbstractContent implements Content {
 	 *
 	 * @see Content::preloadTransform
 	 */
-	public function preloadTransform( Title $title, ParserOptions $popts, $params = [] ) {
+	public function preloadTransform( Title $title, ParserOptions $popts, $params = array() ) {
 		return $this;
 	}
 
@@ -412,9 +412,9 @@ abstract class AbstractContent implements Content {
 	 * @see Content::getDeletionUpdates
 	 */
 	public function getDeletionUpdates( WikiPage $page, ParserOutput $parserOutput = null ) {
-		return [
+		return array(
 			new LinksDeletionUpdate( $page ),
-		];
+		);
 	}
 
 	/**
@@ -446,14 +446,14 @@ abstract class AbstractContent implements Content {
 	 */
 	public function convert( $toModel, $lossy = '' ) {
 		if ( $this->getModel() === $toModel ) {
-			// nothing to do, shorten out.
+			//nothing to do, shorten out.
 			return $this;
 		}
 
 		$lossy = ( $lossy === 'lossy' ); // string flag, convert to boolean for convenience
 		$result = false;
 
-		Hooks::run( 'ConvertContent', [ $this, $toModel, $lossy, &$result ] );
+		Hooks::run( 'ConvertContent', array( $this, $toModel, $lossy, &$result ) );
 
 		return $result;
 	}
@@ -488,7 +488,7 @@ abstract class AbstractContent implements Content {
 		$po = new ParserOutput();
 
 		if ( Hooks::run( 'ContentGetParserOutput',
-			[ $this, $title, $revId, $options, $generateHtml, &$po ] ) ) {
+			array( $this, $title, $revId, $options, $generateHtml, &$po ) ) ) {
 
 			// Save and restore the old value, just in case something is reusing
 			// the ParserOptions object in some weird way.
@@ -498,7 +498,7 @@ abstract class AbstractContent implements Content {
 			$options->setRedirectTarget( $oldRedir );
 		}
 
-		Hooks::run( 'ContentAlterParserOutput', [ $this, $title, $po ] );
+		Hooks::run( 'ContentAlterParserOutput', array( $this, $title, $po ) );
 
 		return $po;
 	}

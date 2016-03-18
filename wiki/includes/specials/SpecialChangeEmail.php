@@ -36,10 +36,6 @@ class SpecialChangeEmail extends FormSpecialPage {
 		parent::__construct( 'ChangeEmail', 'editmyprivateinfo' );
 	}
 
-	public function doesWrites() {
-		return true;
-	}
-
 	/**
 	 * @return bool
 	 */
@@ -56,6 +52,7 @@ class SpecialChangeEmail extends FormSpecialPage {
 	function execute( $par ) {
 		$out = $this->getOutput();
 		$out->disallowUserJs();
+		$out->addModules( 'mediawiki.special.changeemail' );
 
 		parent::execute( $par );
 	}
@@ -81,30 +78,29 @@ class SpecialChangeEmail extends FormSpecialPage {
 	protected function getFormFields() {
 		$user = $this->getUser();
 
-		$fields = [
-			'Name' => [
+		$fields = array(
+			'Name' => array(
 				'type' => 'info',
 				'label-message' => 'username',
 				'default' => $user->getName(),
-			],
-			'OldEmail' => [
+			),
+			'OldEmail' => array(
 				'type' => 'info',
 				'label-message' => 'changeemail-oldemail',
 				'default' => $user->getEmail() ?: $this->msg( 'changeemail-none' )->text(),
-			],
-			'NewEmail' => [
+			),
+			'NewEmail' => array(
 				'type' => 'email',
 				'label-message' => 'changeemail-newemail',
-				'autofocus' => true,
-				'help-message' => 'changeemail-newemail-help',
-			],
-		];
+				'autofocus' => true
+			),
+		);
 
 		if ( $this->getConfig()->get( 'RequirePasswordforEmailChange' ) ) {
-			$fields['Password'] = [
+			$fields['Password'] = array(
 				'type' => 'password',
 				'label-message' => 'changeemail-password'
-			];
+			);
 		}
 
 		return $fields;
@@ -119,11 +115,6 @@ class SpecialChangeEmail extends FormSpecialPage {
 		$form->setTableId( 'mw-changeemail-table' );
 		$form->setSubmitTextMsg( 'changeemail-submit' );
 		$form->addHiddenFields( $this->getRequest()->getValues( 'returnto', 'returntoquery' ) );
-
-		$form->addHeaderText( $this->msg( 'changeemail-header' )->parseAsBlock() );
-		if ( $this->getConfig()->get( 'RequirePasswordforEmailChange' ) ) {
-			$form->addHeaderText( $this->msg( 'changeemail-passwordrequired' )->parseAsBlock() );
-		}
 	}
 
 	public function onSubmit( array $data ) {
@@ -173,12 +164,13 @@ class SpecialChangeEmail extends FormSpecialPage {
 			return Status::newFatal( 'changeemail-nochange' );
 		}
 
-		$throttleInfo = LoginForm::incrementLoginThrottle( $user->getName() );
-		if ( $throttleInfo ) {
+		$throttleCount = LoginForm::incLoginThrottle( $user->getName() );
+		if ( $throttleCount === true ) {
 			$lang = $this->getLanguage();
+			$throttleInfo = $this->getConfig()->get( 'PasswordAttemptThrottle' );
 			return Status::newFatal(
 				'changeemail-throttled',
-				$lang->formatDuration( $throttleInfo['wait'] )
+				$lang->formatDuration( $throttleInfo['seconds'] )
 			);
 		}
 
@@ -189,7 +181,9 @@ class SpecialChangeEmail extends FormSpecialPage {
 			return Status::newFatal( 'wrongpassword' );
 		}
 
-		LoginForm::clearLoginThrottle( $user->getName() );
+		if ( $throttleCount ) {
+			LoginForm::clearLoginThrottle( $user->getName() );
+		}
 
 		$oldaddr = $user->getEmail();
 		$status = $user->setEmailWithConfirmation( $newaddr );
@@ -197,7 +191,7 @@ class SpecialChangeEmail extends FormSpecialPage {
 			return $status;
 		}
 
-		Hooks::run( 'PrefsEmailAudit', [ $user, $oldaddr, $newaddr ] );
+		Hooks::run( 'PrefsEmailAudit', array( $user, $oldaddr, $newaddr ) );
 
 		$user->saveSettings();
 

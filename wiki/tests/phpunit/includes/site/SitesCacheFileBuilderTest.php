@@ -46,48 +46,48 @@ class SitesCacheFileBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 	private function getExpectedData() {
-		return [
-			'sites' => [
-				'foobar' => [
+		return array(
+			'sites' => array(
+				'foobar' => array(
 					'globalid' => 'foobar',
 					'type' => 'unknown',
 					'group' => 'none',
 					'source' => 'local',
 					'language' => null,
-					'localids' => [],
-					'config' => [],
-					'data' => [],
+					'localids' => array(),
+					'config' => array(),
+					'data' => array(),
 					'forward' => false,
 					'internalid' => null,
-					'identifiers' => []
-				],
-				'enwiktionary' => [
+					'identifiers' => array()
+				),
+				'enwiktionary' => array(
 					'globalid' => 'enwiktionary',
 					'type' => 'mediawiki',
 					'group' => 'wiktionary',
 					'source' => 'local',
 					'language' => 'en',
-					'localids' => [
-						'equivalent' => [ 'enwiktionary' ]
-					],
-					'config' => [],
-					'data' => [
-						'paths' => [
+					'localids' => array(
+						'equivalent' => array( 'enwiktionary' )
+					),
+					'config' => array(),
+					'data' => array(
+						'paths' => array(
 							'page_path' => 'https://en.wiktionary.org/wiki/$1',
 							'file_path' => 'https://en.wiktionary.org/w/$1'
-						]
-					],
+						)
+					),
 					'forward' => false,
 					'internalid' => null,
-					'identifiers' => [
-						[
+					'identifiers' => array(
+						array(
 							'type' => 'equivalent',
 							'key' => 'enwiktionary'
-						]
-					]
-				]
-			]
-		];
+						)
+					)
+				)
+			)
+		);
 	}
 
 	private function newSitesCacheFileBuilder( SiteList $sites ) {
@@ -110,7 +110,7 @@ class SitesCacheFileBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 	private function getSites() {
-		$sites = [];
+		$sites = array();
 
 		$site = new Site();
 		$site->setGlobalId( 'foobar' );

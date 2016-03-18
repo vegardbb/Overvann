@@ -11,7 +11,7 @@
  * @author לערי ריינהארט
  */
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Media',
 	NS_SPECIAL          => 'Special',
 	NS_TALK             => 'Naaltsoos_baa_yáshtiʼ',
@@ -28,7 +28,7 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Anáʼálwoʼ_baa_yáshtiʼ',
 	NS_CATEGORY         => 'Tʼááłáhági_átʼéego',
 	NS_CATEGORY_TALK    => 'Tʼááłáhági_átʼéego_baa_yáshtiʼ',
-];
+);
 
 $datePreferences = false;
 

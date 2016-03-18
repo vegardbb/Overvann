@@ -109,6 +109,7 @@
             }
         },
 
+
         fixTitle: function() {
             var $e = this.$element;
             if ($e.attr('title') || typeof($e.attr('original-title')) != 'string') {

@@ -9,23 +9,18 @@ class GitInfoTest extends MediaWikiTestCase {
 		$this->setMwGlobals( 'wgGitInfoCacheDirectory', __DIR__ . '/../data/gitinfo' );
 	}
 
-	protected function assertValidGitInfo( GitInfo $gitInfo ) {
-		$this->assertTrue( $gitInfo->cacheIsComplete() );
-		$this->assertEquals( 'refs/heads/master', $gitInfo->getHead() );
-		$this->assertEquals( '0123456789abcdef0123456789abcdef01234567',
-			$gitInfo->getHeadSHA1() );
-		$this->assertEquals( '1070884800', $gitInfo->getHeadCommitDate() );
-		$this->assertEquals( 'master', $gitInfo->getCurrentBranch() );
-		$this->assertContains( '0123456789abcdef0123456789abcdef01234567',
-			$gitInfo->getHeadViewUrl() );
-
-	}
-
 	public function testValidJsonData() {
-		global $IP;
+		$dir = $GLOBALS['IP'] . DIRECTORY_SEPARATOR . 'testValidJsonData';
+		$fixture = new GitInfo( $dir );
 
-		$this->assertValidGitInfo( new GitInfo( "$IP/testValidJsonData") );
-		$this->assertValidGitInfo( new GitInfo( __DIR__ . "/../data/gitinfo/extension" ) );
+		$this->assertTrue( $fixture->cacheIsComplete() );
+		$this->assertEquals( 'refs/heads/master', $fixture->getHead() );
+		$this->assertEquals( '0123456789abcdef0123456789abcdef01234567',
+			$fixture->getHeadSHA1() );
+		$this->assertEquals( '1070884800', $fixture->getHeadCommitDate() );
+		$this->assertEquals( 'master', $fixture->getCurrentBranch() );
+		$this->assertContains( '0123456789abcdef0123456789abcdef01234567',
+			$fixture->getHeadViewUrl() );
 	}
 
 	public function testMissingJsonData() {

@@ -26,11 +26,7 @@
  */
 
 /**
- * The base class for all other DiffOp classes.
- *
- * The classes that extend DiffOp are: DiffOpCopy, DiffOpDelete, DiffOpAdd and
- * DiffOpChange. FakeDiffOp also extends DiffOp, but it is not located in this file.
- *
+ * @todo document
  * @private
  * @ingroup DifferenceEngine
  */
@@ -97,9 +93,7 @@ abstract class DiffOp {
 }
 
 /**
- * Extends DiffOp. Used to mark strings that have been
- * copied from one string array to the other.
- *
+ * @todo document
  * @private
  * @ingroup DifferenceEngine
  */
@@ -123,9 +117,7 @@ class DiffOpCopy extends DiffOp {
 }
 
 /**
- * Extends DiffOp. Used to mark strings that have been
- * deleted from the first string array.
- *
+ * @todo document
  * @private
  * @ingroup DifferenceEngine
  */
@@ -146,9 +138,7 @@ class DiffOpDelete extends DiffOp {
 }
 
 /**
- * Extends DiffOp. Used to mark strings that have been
- * added from the first string array.
- *
+ * @todo document
  * @private
  * @ingroup DifferenceEngine
  */
@@ -169,9 +159,7 @@ class DiffOpAdd extends DiffOp {
 }
 
 /**
- * Extends DiffOp. Used to mark strings that have been
- * changed from the first string array (both added and subtracted).
- *
+ * @todo document
  * @private
  * @ingroup DifferenceEngine
  */
@@ -220,10 +208,10 @@ class DiffEngine {
 
 	protected $xchanged, $ychanged;
 
-	protected $xv = [], $yv = [];
-	protected $xind = [], $yind = [];
+	protected $xv = array(), $yv = array();
+	protected $xind = array(), $yind = array();
 
-	protected $seq = [], $in_seq = [];
+	protected $seq = array(), $in_seq = array();
 
 	protected $lcs = 0;
 
@@ -246,14 +234,14 @@ class DiffEngine {
 		$n_from = count( $from_lines );
 		$n_to = count( $to_lines );
 
-		$edits = [];
+		$edits = array();
 		$xi = $yi = 0;
 		while ( $xi < $n_from || $yi < $n_to ) {
-			assert( $yi < $n_to || $this->xchanged[$xi] );
-			assert( $xi < $n_from || $this->ychanged[$yi] );
+			assert( '$yi < $n_to || $this->xchanged[$xi]' );
+			assert( '$xi < $n_from || $this->ychanged[$yi]' );
 
 			// Skip matching "snake".
-			$copy = [];
+			$copy = array();
 			while ( $xi < $n_from && $yi < $n_to
 				&& !$this->xchanged[$xi] && !$this->ychanged[$yi]
 			) {
@@ -265,12 +253,12 @@ class DiffEngine {
 			}
 
 			// Find deletes & adds.
-			$delete = [];
+			$delete = array();
 			while ( $xi < $n_from && $this->xchanged[$xi] ) {
 				$delete[] = $from_lines[$xi++];
 			}
 
-			$add = [];
+			$add = array();
 			while ( $yi < $n_to && $this->ychanged[$yi] ) {
 				$add[] = $to_lines[$yi++];
 			}
@@ -305,12 +293,12 @@ class DiffEngine {
 			// old diff
 			$n_from = count( $from_lines );
 			$n_to = count( $to_lines );
-			$this->xchanged = $this->ychanged = [];
-			$this->xv = $this->yv = [];
-			$this->xind = $this->yind = [];
-			$this->seq = [];
-			$this->in_seq = [];
-			$this->lcs = 0;
+			$this->xchanged = $this->ychanged = array();
+			$this->xv = $this->yv = array();
+			$this->xind = $this->yind = array();
+			unset( $this->seq );
+			unset( $this->in_seq );
+			unset( $this->lcs );
 
 			// Skip leading common lines.
 			for ( $skip = 0; $skip < $n_from && $skip < $n_to; $skip++ ) {
@@ -336,8 +324,7 @@ class DiffEngine {
 
 			for ( $yi = $skip; $yi < $n_to - $endskip; $yi++ ) {
 				$line = $to_lines[$yi];
-				$this->ychanged[$yi] = empty( $xhash[$this->lineHash( $line )] );
-				if ( $this->ychanged[$yi] ) {
+				if ( ( $this->ychanged[$yi] = empty( $xhash[$this->lineHash( $line )] ) ) ) {
 					continue;
 				}
 				$yhash[$this->lineHash( $line )] = 1;
@@ -346,8 +333,7 @@ class DiffEngine {
 			}
 			for ( $xi = $skip; $xi < $n_from - $endskip; $xi++ ) {
 				$line = $from_lines[$xi];
-				$this->xchanged[$xi] = empty( $yhash[$this->lineHash( $line )] );
-				if ( $this->xchanged[$xi] ) {
+				if ( ( $this->xchanged[$xi] = empty( $yhash[$this->lineHash( $line )] ) ) ) {
 					continue;
 				}
 				$this->xv[] = $line;
@@ -406,7 +392,7 @@ class DiffEngine {
 			// Things seems faster (I'm not sure I understand why)
 			// when the shortest sequence in X.
 			$flip = true;
-			list( $xoff, $xlim, $yoff, $ylim ) = [ $yoff, $ylim, $xoff, $xlim ];
+			list( $xoff, $xlim, $yoff, $ylim ) = array( $yoff, $ylim, $xoff, $xlim );
 		}
 
 		if ( $flip ) {
@@ -421,8 +407,8 @@ class DiffEngine {
 
 		$this->lcs = 0;
 		$this->seq[0] = $yoff - 1;
-		$this->in_seq = [];
-		$ymids[0] = [];
+		$this->in_seq = array();
+		$ymids[0] = array();
 
 		$numer = $xlim - $xoff + $nchunks - 1;
 		$x = $xoff;
@@ -434,7 +420,7 @@ class DiffEngine {
 			}
 
 			$x1 = $xoff + (int)( ( $numer + ( $xlim - $xoff ) * $chunk ) / $nchunks );
-			// @codingStandardsIgnoreStart Ignore Squiz.WhiteSpace.SemicolonSpacing.Incorrect
+			// @codingStandardsIgnoreFile Ignore Squiz.WhiteSpace.SemicolonSpacing.Incorrect
 			for ( ; $x < $x1; $x++ ) {
 				// @codingStandardsIgnoreEnd
 				$line = $flip ? $this->yv[$x] : $this->xv[$x];
@@ -448,7 +434,7 @@ class DiffEngine {
 				while ( list( , $y ) = each( $matches ) ) {
 					if ( empty( $this->in_seq[$y] ) ) {
 						$k = $this->lcsPos( $y );
-						assert( $k > 0 );
+						assert( '$k > 0' );
 						$ymids[$k] = $ymids[$k - 1];
 						break;
 					}
@@ -456,31 +442,31 @@ class DiffEngine {
 
 				while ( list( , $y ) = each( $matches ) ) {
 					if ( $y > $this->seq[$k - 1] ) {
-						assert( $y < $this->seq[$k] );
+						assert( '$y < $this->seq[$k]' );
 						// Optimization: this is a common case:
-						// next match is just replacing previous match.
+						//	next match is just replacing previous match.
 						$this->in_seq[$this->seq[$k]] = false;
 						$this->seq[$k] = $y;
 						$this->in_seq[$y] = 1;
 					} elseif ( empty( $this->in_seq[$y] ) ) {
 						$k = $this->lcsPos( $y );
-						assert( $k > 0 );
+						assert( '$k > 0' );
 						$ymids[$k] = $ymids[$k - 1];
 					}
 				}
 			}
 		}
 
-		$seps[] = $flip ? [ $yoff, $xoff ] : [ $xoff, $yoff ];
+		$seps[] = $flip ? array( $yoff, $xoff ) : array( $xoff, $yoff );
 		$ymid = $ymids[$this->lcs];
 		for ( $n = 0; $n < $nchunks - 1; $n++ ) {
 			$x1 = $xoff + (int)( ( $numer + ( $xlim - $xoff ) * $n ) / $nchunks );
 			$y1 = $ymid[$n] + 1;
-			$seps[] = $flip ? [ $y1, $x1 ] : [ $x1, $y1 ];
+			$seps[] = $flip ? array( $y1, $x1 ) : array( $x1, $y1 );
 		}
-		$seps[] = $flip ? [ $ylim, $xlim ] : [ $xlim, $ylim ];
+		$seps[] = $flip ? array( $ylim, $xlim ) : array( $xlim, $ylim );
 
-		return [ $this->lcs, $seps ];
+		return array( $this->lcs, $seps );
 	}
 
 	/**
@@ -507,7 +493,7 @@ class DiffEngine {
 			}
 		}
 
-		assert( $ypos != $this->seq[$end] );
+		assert( '$ypos != $this->seq[$end]' );
 
 		$this->in_seq[$this->seq[$end]] = false;
 		$this->seq[$end] = $ypos;
@@ -595,7 +581,7 @@ class DiffEngine {
 		$i = 0;
 		$j = 0;
 
-		assert( count( $lines ) == count( $changed ) );
+		assert( 'count($lines) == count($changed)' );
 		$len = count( $lines );
 		$other_len = count( $other_changed );
 
@@ -616,7 +602,7 @@ class DiffEngine {
 			}
 
 			while ( $i < $len && !$changed[$i] ) {
-				assert( $j < $other_len && ! $other_changed[$j] );
+				assert( '$j < $other_len && ! $other_changed[$j]' );
 				$i++;
 				$j++;
 				while ( $j < $other_len && $other_changed[$j] ) {
@@ -653,11 +639,11 @@ class DiffEngine {
 					while ( $start > 0 && $changed[$start - 1] ) {
 						$start--;
 					}
-					assert( $j > 0 );
+					assert( '$j > 0' );
 					while ( $other_changed[--$j] ) {
 						continue;
 					}
-					assert( $j >= 0 && !$other_changed[$j] );
+					assert( '$j >= 0 && !$other_changed[$j]' );
 				}
 
 				/*
@@ -681,7 +667,7 @@ class DiffEngine {
 						$i++;
 					}
 
-					assert( $j < $other_len && ! $other_changed[$j] );
+					assert( '$j < $other_len && ! $other_changed[$j]' );
 					$j++;
 					if ( $j < $other_len && $other_changed[$j] ) {
 						$corresponding = $i;
@@ -699,11 +685,11 @@ class DiffEngine {
 			while ( $corresponding < $i ) {
 				$changed[--$start] = 1;
 				$changed[--$i] = 0;
-				assert( $j > 0 );
+				assert( '$j > 0' );
 				while ( $other_changed[--$j] ) {
 					continue;
 				}
-				assert( $j >= 0 && !$other_changed[$j] );
+				assert( '$j >= 0 && !$other_changed[$j]' );
 			}
 		}
 	}
@@ -755,7 +741,7 @@ class Diff {
 	 */
 	public function reverse() {
 		$rev = $this;
-		$rev->edits = [];
+		$rev->edits = array();
 		/** @var DiffOp $edit */
 		foreach ( $this->edits as $edit ) {
 			$rev->edits[] = $edit->reverse();
@@ -806,7 +792,7 @@ class Diff {
 	 * @return string[] The original sequence of strings.
 	 */
 	public function orig() {
-		$lines = [];
+		$lines = array();
 
 		foreach ( $this->edits as $edit ) {
 			if ( $edit->orig ) {
@@ -826,7 +812,7 @@ class Diff {
 	 * @return string[] The sequence of strings.
 	 */
 	public function closing() {
-		$lines = [];
+		$lines = array();
 
 		foreach ( $this->edits as $edit ) {
 			if ( $edit->closing ) {
@@ -867,8 +853,8 @@ class MappedDiff extends Diff {
 	public function __construct( $from_lines, $to_lines,
 		$mapped_from_lines, $mapped_to_lines ) {
 
-		assert( count( $from_lines ) == count( $mapped_from_lines ) );
-		assert( count( $to_lines ) == count( $mapped_to_lines ) );
+		assert( 'count( $from_lines ) == count( $mapped_from_lines )' );
+		assert( 'count( $to_lines ) == count( $mapped_to_lines )' );
 
 		parent::__construct( $mapped_from_lines, $mapped_to_lines );
 
@@ -903,7 +889,7 @@ class HWLDFWordAccumulator {
 	public $insClass = ' class="diffchange diffchange-inline"';
 	public $delClass = ' class="diffchange diffchange-inline"';
 
-	private $lines = [];
+	private $lines = array();
 	private $line = '';
 	private $group = '';
 	private $tag = '';
@@ -959,7 +945,7 @@ class HWLDFWordAccumulator {
 				$this->flushLine( $tag );
 				$word = substr( $word, 1 );
 			}
-			assert( !strstr( $word, "\n" ) );
+			assert( '!strstr( $word, "\n" )' );
 			$this->group .= $word;
 		}
 	}
@@ -1002,8 +988,8 @@ class WordLevelDiff extends MappedDiff {
 	 */
 	private function split( $lines ) {
 
-		$words = [];
-		$stripped = [];
+		$words = array();
+		$stripped = array();
 		$first = true;
 		foreach ( $lines as $line ) {
 			# If the line is too long, just pretend the entire line is one big word
@@ -1018,7 +1004,7 @@ class WordLevelDiff extends MappedDiff {
 				$words[] = $line;
 				$stripped[] = $line;
 			} else {
-				$m = [];
+				$m = array();
 				if ( preg_match_all( '/ ( [^\S\n]+ | [0-9_A-Za-z\x80-\xff]+ | . ) (?: (?!< \n) [^\S\n])? /xs',
 					$line, $m )
 				) {
@@ -1032,7 +1018,7 @@ class WordLevelDiff extends MappedDiff {
 			}
 		}
 
-		return [ $words, $stripped ];
+		return array( $words, $stripped );
 	}
 
 	/**

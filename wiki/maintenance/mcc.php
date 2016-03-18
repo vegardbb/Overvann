@@ -25,7 +25,7 @@
 /** */
 require_once __DIR__ . '/commandLine.inc';
 
-$options = getopt( '', [ 'debug', 'help', 'cache:' ] );
+$options = getopt( '', array( 'debug', 'help', 'cache:' ) );
 
 $debug = isset( $options['debug'] );
 $help = isset( $options['help'] );
@@ -35,10 +35,10 @@ if ( $help ) {
 	mccShowUsage();
 	exit( 0 );
 }
-$mcc = new MemcachedClient( [
+$mcc = new MWMemcached( array(
 	'persistent' => true,
 	'debug' => $debug,
-] );
+) );
 
 if ( $cache ) {
 	if ( !isset( $wgObjectCaches[$cache] ) ) {
@@ -81,7 +81,7 @@ EOF;
 
 function mccGetHelp( $command ) {
 	$output = '';
-	$commandList = [
+	$commandList = array(
 		'get' => 'grabs something',
 		'getsock' => 'lists sockets',
 		'set' => 'changes something',
@@ -92,7 +92,7 @@ function mccGetHelp( $command ) {
 		'exit' => 'exit mcc',
 		'quit' => 'exit mcc',
 		'help' => 'help about a command',
-	];
+	);
 	if ( !$command ) {
 		$command = 'fullhelp';
 	}

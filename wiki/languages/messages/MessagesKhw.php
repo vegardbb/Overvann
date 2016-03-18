@@ -12,7 +12,7 @@
 $fallback = 'ur';
 $rtl = true;
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'میڈیا',
 	NS_SPECIAL          => 'خاص',
 	NS_TALK             => 'تبادلۂ_خیال',
@@ -29,5 +29,5 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'تبادلۂ_خیال_مدد',
 	NS_CATEGORY         => 'زمرہ',
 	NS_CATEGORY_TALK    => 'تبادلۂ_خیال_زمرہ',
-];
+);
 

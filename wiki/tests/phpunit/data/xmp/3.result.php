@@ -1,8 +1,8 @@
 <?php
 
-$result = [ 'xmp-exif' =>
-	[
+$result = array( 'xmp-exif' =>
+	array(
 		'DigitalZoomRatio' => '0/10',
 		'Flash' => '9'
-	]
-];
+	)
+);

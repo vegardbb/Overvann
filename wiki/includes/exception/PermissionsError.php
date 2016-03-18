@@ -28,21 +28,21 @@
 class PermissionsError extends ErrorPageError {
 	public $permission, $errors;
 
-	public function __construct( $permission, $errors = [] ) {
+	public function __construct( $permission, $errors = array() ) {
 		global $wgLang;
 
 		$this->permission = $permission;
 
 		if ( !count( $errors ) ) {
 			$groups = array_map(
-				[ 'User', 'makeGroupLinkWiki' ],
+				array( 'User', 'makeGroupLinkWiki' ),
 				User::getGroupsWithPermission( $this->permission )
 			);
 
 			if ( $groups ) {
-				$errors[] = [ 'badaccess-groups', $wgLang->commaList( $groups ), count( $groups ) ];
+				$errors[] = array( 'badaccess-groups', $wgLang->commaList( $groups ), count( $groups ) );
 			} else {
-				$errors[] = [ 'badaccess-group0' ];
+				$errors[] = array( 'badaccess-group0' );
 			}
 		}
 

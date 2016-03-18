@@ -43,24 +43,19 @@ class EditAction extends FormlessAction {
 	public function show() {
 		$this->useTransactionalTimeLimit();
 
-		$out = $this->getOutput();
-		$out->setRobotPolicy( 'noindex,nofollow' );
 		if ( $this->getContext()->getConfig()->get( 'UseMediaWikiUIEverywhere' ) ) {
-			$out->addModuleStyles( [
+			$out = $this->getOutput();
+			$out->addModuleStyles( array(
 				'mediawiki.ui.input',
 				'mediawiki.ui.checkbox',
-			] );
+			) );
 		}
 		$page = $this->page;
 		$user = $this->getUser();
 
-		if ( Hooks::run( 'CustomEditor', [ $page, $user ] ) ) {
+		if ( Hooks::run( 'CustomEditor', array( $page, $user ) ) ) {
 			$editor = new EditPage( $page );
 			$editor->edit();
 		}
-	}
-
-	public function doesWrites() {
-		return true;
 	}
 }

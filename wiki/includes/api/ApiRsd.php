@@ -37,14 +37,14 @@ class ApiRsd extends ApiBase {
 		$result->addValue( null, 'version', '1.0' );
 		$result->addValue( null, 'xmlns', 'http://archipelago.phrasewise.com/rsd' );
 
-		$service = [
+		$service = array(
 			'apis' => $this->formatRsdApiList(),
 			'engineName' => 'MediaWiki',
 			'engineLink' => 'https://www.mediawiki.org/',
 			'homePageLink' => Title::newMainPage()->getCanonicalURL(),
-		];
+		);
 
-		ApiResult::setSubelementsList( $service, [ 'engineName', 'engineLink', 'homePageLink' ] );
+		ApiResult::setSubelementsList( $service, array( 'engineName', 'engineLink', 'homePageLink' ) );
 		ApiResult::setIndexedTagName( $service['apis'], 'api' );
 
 		$result->addValue( null, 'service', $service );
@@ -55,10 +55,10 @@ class ApiRsd extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=rsd'
 				=> 'apihelp-rsd-example-simple',
-		];
+		);
 	}
 
 	public function isReadMode() {
@@ -83,8 +83,8 @@ class ApiRsd extends ApiBase {
 	 * @return array
 	 */
 	protected function getRsdApiList() {
-		$apis = [
-			'MediaWiki' => [
+		$apis = array(
+			'MediaWiki' => array(
 				// The API link is required for all RSD API entries.
 				'apiLink' => wfExpandUrl( wfScript( 'api' ), PROTO_CURRENT ),
 
@@ -95,14 +95,14 @@ class ApiRsd extends ApiBase {
 				'blogID' => '',
 
 				// Additional settings are optional.
-				'settings' => [
+				'settings' => array(
 					// Change this to true in the future as an aid to
 					// machine discovery of OAuth for API access.
 					'OAuth' => false,
-				]
-			],
-		];
-		Hooks::run( 'ApiRsdServiceApis', [ &$apis ] );
+				)
+			),
+		);
+		Hooks::run( 'ApiRsdServiceApis', array( &$apis ) );
 
 		return $apis;
 	}
@@ -116,15 +116,15 @@ class ApiRsd extends ApiBase {
 	protected function formatRsdApiList() {
 		$apis = $this->getRsdApiList();
 
-		$outputData = [];
+		$outputData = array();
 		foreach ( $apis as $name => $info ) {
-			$data = [
+			$data = array(
 				'name' => $name,
 				'preferred' => wfBoolToStr( $name == 'MediaWiki' ),
 				'apiLink' => $info['apiLink'],
 				'blogID' => isset( $info['blogID'] ) ? $info['blogID'] : '',
-			];
-			$settings = [];
+			);
+			$settings = array();
 			if ( isset( $info['docs'] ) ) {
 				$settings['docs'] = $info['docs'];
 				ApiResult::setSubelementsList( $settings, 'docs' );
@@ -136,7 +136,7 @@ class ApiRsd extends ApiBase {
 					} else {
 						$xmlVal = $val;
 					}
-					$setting = [ 'name' => $setting ];
+					$setting = array( 'name' => $setting );
 					ApiResult::setContentValue( $setting, 'value', $xmlVal );
 					$settings[] = $setting;
 				}
@@ -162,7 +162,7 @@ class ApiFormatXmlRsd extends ApiFormatXml {
 		return 'application/rsd+xml';
 	}
 
-	public static function recXmlPrint( $name, $value, $indent, $attributes = [] ) {
+	public static function recXmlPrint( $name, $value, $indent, $attributes = array() ) {
 		unset( $attributes['_idx'] );
 		return parent::recXmlPrint( $name, $value, $indent, $attributes );
 	}

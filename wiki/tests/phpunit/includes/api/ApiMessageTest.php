@@ -25,80 +25,78 @@ class ApiMessageTest extends MediaWikiTestCase {
 
 	/**
 	 * @covers ApiMessage
-	 * @covers ApiMessageTrait
 	 */
 	public function testApiMessage() {
-		$msg = new Message( [ 'foo', 'bar' ], [ 'baz' ] );
+		$msg = new Message( array( 'foo', 'bar' ), array( 'baz' ) );
 		$msg->inLanguage( 'de' )->title( Title::newMainPage() );
-		$msg2 = new ApiMessage( $msg, 'code', [ 'data' ] );
+		$msg2 = new ApiMessage( $msg, 'code', array( 'data' ) );
 		$this->compareMessages( $msg, $msg2 );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 
 		$msg2 = unserialize( serialize( $msg2 ) );
 		$this->compareMessages( $msg, $msg2 );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 
-		$msg = new Message( [ 'foo', 'bar' ], [ 'baz' ] );
-		$msg2 = new ApiMessage( [ [ 'foo', 'bar' ], 'baz' ], 'code', [ 'data' ] );
+		$msg = new Message( array( 'foo', 'bar' ), array( 'baz' ) );
+		$msg2 = new ApiMessage( array( array( 'foo', 'bar' ), 'baz' ), 'code', array( 'data' ) );
 		$this->compareMessages( $msg, $msg2 );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 
 		$msg = new Message( 'foo' );
 		$msg2 = new ApiMessage( 'foo' );
 		$this->compareMessages( $msg, $msg2 );
 		$this->assertEquals( 'foo', $msg2->getApiCode() );
-		$this->assertEquals( [], $msg2->getApiData() );
+		$this->assertEquals( array(), $msg2->getApiData() );
 
-		$msg2->setApiCode( 'code', [ 'data' ] );
+		$msg2->setApiCode( 'code', array( 'data' ) );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 		$msg2->setApiCode( null );
 		$this->assertEquals( 'foo', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
-		$msg2->setApiData( [ 'data2' ] );
-		$this->assertEquals( [ 'data2' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
+		$msg2->setApiData( array( 'data2' ) );
+		$this->assertEquals( array( 'data2' ), $msg2->getApiData() );
 	}
 
 	/**
 	 * @covers ApiRawMessage
-	 * @covers ApiMessageTrait
 	 */
 	public function testApiRawMessage() {
-		$msg = new RawMessage( 'foo', [ 'baz' ] );
+		$msg = new RawMessage( 'foo', array( 'baz' ) );
 		$msg->inLanguage( 'de' )->title( Title::newMainPage() );
-		$msg2 = new ApiRawMessage( $msg, 'code', [ 'data' ] );
+		$msg2 = new ApiRawMessage( $msg, 'code', array( 'data' ) );
 		$this->compareMessages( $msg, $msg2 );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 
 		$msg2 = unserialize( serialize( $msg2 ) );
 		$this->compareMessages( $msg, $msg2 );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 
-		$msg = new RawMessage( 'foo', [ 'baz' ] );
-		$msg2 = new ApiRawMessage( [ 'foo', 'baz' ], 'code', [ 'data' ] );
+		$msg = new RawMessage( 'foo', array( 'baz' ) );
+		$msg2 = new ApiRawMessage( array( 'foo', 'baz' ), 'code', array( 'data' ) );
 		$this->compareMessages( $msg, $msg2 );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 
 		$msg = new RawMessage( 'foo' );
-		$msg2 = new ApiRawMessage( 'foo', 'code', [ 'data' ] );
+		$msg2 = new ApiRawMessage( 'foo', 'code', array( 'data' ) );
 		$this->compareMessages( $msg, $msg2 );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 
-		$msg2->setApiCode( 'code', [ 'data' ] );
+		$msg2->setApiCode( 'code', array( 'data' ) );
 		$this->assertEquals( 'code', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
 		$msg2->setApiCode( null );
 		$this->assertEquals( 'foo', $msg2->getApiCode() );
-		$this->assertEquals( [ 'data' ], $msg2->getApiData() );
-		$msg2->setApiData( [ 'data2' ] );
-		$this->assertEquals( [ 'data2' ], $msg2->getApiData() );
+		$this->assertEquals( array( 'data' ), $msg2->getApiData() );
+		$msg2->setApiData( array( 'data2' ) );
+		$this->assertEquals( array( 'data2' ), $msg2->getApiData() );
 	}
 
 	/**

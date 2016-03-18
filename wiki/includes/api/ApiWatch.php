@@ -44,7 +44,7 @@ class ApiWatch extends ApiBase {
 
 		$params = $this->extractRequestParams();
 
-		$continuationManager = new ApiContinuationManager( $this, [], [] );
+		$continuationManager = new ApiContinuationManager( $this, array(), array() );
 		$this->setContinuationManager( $continuationManager );
 
 		$pageSet = $this->getPageSet();
@@ -52,13 +52,13 @@ class ApiWatch extends ApiBase {
 		// title is still supported for backward compatibility
 		if ( !isset( $params['title'] ) ) {
 			$pageSet->execute();
-			$res = $pageSet->getInvalidTitlesAndRevisions( [
+			$res = $pageSet->getInvalidTitlesAndRevisions( array(
 				'invalidTitles',
 				'special',
 				'missingIds',
 				'missingRevIds',
 				'interwikiTitles'
-			] );
+			) );
 
 			foreach ( $pageSet->getMissingTitles() as $title ) {
 				$r = $this->watchTitle( $title, $user, $params );
@@ -80,14 +80,15 @@ class ApiWatch extends ApiBase {
 			if ( $extraParams ) {
 				$p = $this->getModulePrefix();
 				$this->dieUsage(
-					"The parameter {$p}title can not be used with " . implode( ', ', $extraParams ),
+					"The parameter {$p}title can not be used with " . implode( ", ", $extraParams ),
 					'invalidparammix'
 				);
 			}
 
+			$this->logFeatureUsage( 'action=watch&title' );
 			$title = Title::newFromText( $params['title'] );
 			if ( !$title || !$title->isWatchable() ) {
-				$this->dieUsageMsg( [ 'invalidtitle', $params['title'] ] );
+				$this->dieUsageMsg( array( 'invalidtitle', $params['title'] ) );
 			}
 			$res = $this->watchTitle( $title, $user, $params, true );
 		}
@@ -101,10 +102,10 @@ class ApiWatch extends ApiBase {
 		$compatibilityMode = false
 	) {
 		if ( !$title->isWatchable() ) {
-			return [ 'title' => $title->getPrefixedText(), 'watchable' => 0 ];
+			return array( 'title' => $title->getPrefixedText(), 'watchable' => 0 );
 		}
 
-		$res = [ 'title' => $title->getPrefixedText() ];
+		$res = array( 'title' => $title->getPrefixedText() );
 
 		if ( $params['unwatch'] ) {
 			$status = UnwatchAction::doUnwatch( $title, $user );
@@ -157,16 +158,16 @@ class ApiWatch extends ApiBase {
 	}
 
 	public function getAllowedParams( $flags = 0 ) {
-		$result = [
-			'title' => [
+		$result = array(
+			'title' => array(
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DEPRECATED => true
-			],
+			),
 			'unwatch' => false,
-			'continue' => [
+			'continue' => array(
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			],
-		];
+			),
+		);
 		if ( $flags ) {
 			$result += $this->getPageSet()->getFinalParams( $flags );
 		}
@@ -175,14 +176,14 @@ class ApiWatch extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=watch&titles=Main_Page&token=123ABC'
 				=> 'apihelp-watch-example-watch',
 			'action=watch&titles=Main_Page&unwatch=&token=123ABC'
 				=> 'apihelp-watch-example-unwatch',
 			'action=watch&generator=allpages&gapnamespace=0&token=123ABC'
 				=> 'apihelp-watch-example-generator',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

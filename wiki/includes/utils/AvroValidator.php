@@ -36,25 +36,25 @@ class AvroValidator {
 	 *  returned.
 	 */
 	public static function getErrors( AvroSchema $schema, $datum ) {
-		switch ( $schema->type ) {
+		switch ( $schema->type) {
 		case AvroSchema::NULL_TYPE:
-			if ( !is_null( $datum ) ) {
+			if ( !is_null($datum) ) {
 				return self::wrongType( 'null', $datum );
 			}
-			return [];
+			return array();
 		case AvroSchema::BOOLEAN_TYPE:
-			if ( !is_bool( $datum ) ) {
+			if ( !is_bool($datum) ) {
 				return self::wrongType( 'boolean', $datum );
 			}
-			return [];
+			return array();
 		case AvroSchema::STRING_TYPE:
 		case AvroSchema::BYTES_TYPE:
-			if ( !is_string( $datum ) ) {
+			if ( !is_string($datum) ) {
 				return self::wrongType( 'string', $datum );
 			}
-			return [];
+			return array();
 		case AvroSchema::INT_TYPE:
-			if ( !is_int( $datum ) ) {
+			if ( !is_int($datum) ) {
 				return self::wrongType( 'integer', $datum );
 			}
 			if ( AvroSchema::INT_MIN_VALUE > $datum
@@ -66,9 +66,9 @@ class AvroValidator {
 					$datum
 				);
 			}
-			return [];
+			return array();
 		case AvroSchema::LONG_TYPE:
-			if ( !is_int( $datum ) ) {
+			if ( !is_int($datum) ) {
 				return self::wrongType( 'integer', $datum );
 			}
 			if ( AvroSchema::LONG_MIN_VALUE > $datum
@@ -80,32 +80,35 @@ class AvroValidator {
 					$datum
 				);
 			}
-			return [];
+			return array();
 		case AvroSchema::FLOAT_TYPE:
 		case AvroSchema::DOUBLE_TYPE:
-			if ( !is_float( $datum ) && !is_int( $datum ) ) {
+			if ( !is_float($datum) && !is_int($datum) ) {
 				return self::wrongType( 'float or integer', $datum );
 			}
-			return [];
+			return array();
 		case AvroSchema::ARRAY_SCHEMA:
-			if ( !is_array( $datum ) ) {
+			if (!is_array($datum)) {
 				return self::wrongType( 'array', $datum );
 			}
-			$errors = [];
-			foreach ( $datum as $d ) {
-				$result = self::getErrors( $schema->items(), $d );
+			$errors = array();
+			foreach ($datum as $d) {
+				$result = $this->validate( $schema->items(), $d );
 				if ( $result ) {
 					$errors[] = $result;
 				}
 			}
-			return $errors;
+			if ( $errors ) {
+				return $errors;
+			}
+			return array();
 		case AvroSchema::MAP_SCHEMA:
-			if ( !is_array( $datum ) ) {
+			if (!is_array($datum)) {
 				return self::wrongType( 'array', $datum );
 			}
-			$errors = [];
-			foreach ( $datum as $k => $v ) {
-				if ( !is_string( $k ) ) {
+			$errors = array();
+			foreach ($datum as $k => $v) {
+			if ( !is_string($k) ) {
 					$errors[] = self::wrongType( 'string key', $k );
 				}
 				$result = self::getErrors( $schema->values(), $v );
@@ -115,16 +118,16 @@ class AvroValidator {
 			}
 			return $errors;
 		case AvroSchema::UNION_SCHEMA:
-			$errors = [];
-			foreach ( $schema->schemas() as $schema ) {
+			$errors = array();
+			foreach ($schema->schemas() as $schema) {
 				$result = self::getErrors( $schema, $datum );
 				if ( !$result ) {
-					return [];
+					return array();
 				}
 				$errors[] = $result;
 			}
 			if ( $errors ) {
-				return [ "Expected any one of these to be true", $errors ];
+				return array( "Expected any one of these to be true", $errors );
 			}
 			return "No schemas provided to union";
 		case AvroSchema::ENUM_SCHEMA:
@@ -132,7 +135,7 @@ class AvroValidator {
 				$symbols = implode( ', ', $schema->symbols );
 				return "Expected one of $symbols but recieved $datum";
 			}
-			return [];
+			return array();
 		case AvroSchema::FIXED_SCHEMA:
 			if ( !is_string( $datum ) ) {
 				return self::wrongType( 'string', $datum );
@@ -142,14 +145,14 @@ class AvroValidator {
 				return "Expected string of length {$schema->size()}, "
 					. "but recieved one of length $len";
 			}
-			return [];
+			return array();
 		case AvroSchema::RECORD_SCHEMA:
 		case AvroSchema::ERROR_SCHEMA:
 		case AvroSchema::REQUEST_SCHEMA:
 			if ( !is_array( $datum ) ) {
 				return self::wrongType( 'array', $datum );
 			}
-			$errors = [];
+			$errors = array();
 			foreach ( $schema->fields() as $field ) {
 				$name = $field->name();
 				if ( !array_key_exists( $name, $datum ) ) {

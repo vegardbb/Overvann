@@ -30,12 +30,12 @@
  */
 class LockManagerGroup {
 	/** @var array (domain => LockManager) */
-	protected static $instances = [];
+	protected static $instances = array();
 
 	protected $domain; // string; domain (usually wiki ID)
 
 	/** @var array Array of (name => ('class' => ..., 'config' => ..., 'instance' => ...)) */
-	protected $managers = [];
+	protected $managers = array();
 
 	/**
 	 * @param string $domain Domain (usually wiki ID)
@@ -62,7 +62,7 @@ class LockManagerGroup {
 	 * Destroy the singleton instances
 	 */
 	public static function destroySingletons() {
-		self::$instances = [];
+		self::$instances = array();
 	}
 
 	/**
@@ -92,11 +92,11 @@ class LockManagerGroup {
 			}
 			$class = $config['class'];
 			unset( $config['class'] ); // lock manager won't need this
-			$this->managers[$name] = [
+			$this->managers[$name] = array(
 				'class' => $class,
 				'config' => $config,
 				'instance' => null
-			];
+			);
 		}
 	}
 
@@ -134,7 +134,7 @@ class LockManagerGroup {
 		}
 		$class = $this->managers[$name]['class'];
 
-		return [ 'class' => $class ] + $this->managers[$name]['config'];
+		return array( 'class' => $class ) + $this->managers[$name]['config'];
 	}
 
 	/**
@@ -146,7 +146,7 @@ class LockManagerGroup {
 	public function getDefault() {
 		return isset( $this->managers['default'] )
 			? $this->get( 'default' )
-			: new NullLockManager( [] );
+			: new NullLockManager( array() );
 	}
 
 	/**

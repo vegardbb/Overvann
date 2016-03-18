@@ -32,10 +32,6 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		parent::__construct( $page, $restriction );
 	}
 
-	public function doesWrites() {
-		return true;
-	}
-
 	/**
 	 * Main execution point
 	 *
@@ -48,9 +44,6 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		$output = $this->getOutput();
 		$request = $this->getRequest();
 		$this->addHelpLink( 'Help:Watching pages' );
-		$output->addModules( [
-			'mediawiki.special.changeslist.visitedstatus',
-		] );
 
 		$mode = SpecialEditWatchlist::getMode( $request, $subpage );
 		if ( $mode !== false ) {
@@ -93,11 +86,11 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	 * @return string[] subpages
 	 */
 	public function getSubpagesForPrefixSearch() {
-		return [
+		return array(
 			'clear',
 			'edit',
 			'raw',
-		];
+		);
 	}
 
 	/**
@@ -110,11 +103,6 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		$user = $this->getUser();
 
 		$opts->add( 'days', $user->getOption( 'watchlistdays' ), FormOptions::FLOAT );
-		$opts->add( 'extended', $user->getBoolOption( 'extendwatchlist' ) );
-		if ( $this->getRequest()->getVal( 'action' ) == 'submit' ) {
-			// The user has submitted the form, so we dont need the default values
-			return $opts;
-		}
 
 		$opts->add( 'hideminor', $user->getBoolOption( 'watchlisthideminor' ) );
 		$opts->add( 'hidebots', $user->getBoolOption( 'watchlisthidebots' ) );
@@ -122,7 +110,8 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		$opts->add( 'hideliu', $user->getBoolOption( 'watchlisthideliu' ) );
 		$opts->add( 'hidepatrolled', $user->getBoolOption( 'watchlisthidepatrolled' ) );
 		$opts->add( 'hidemyself', $user->getBoolOption( 'watchlisthideown' ) );
-		$opts->add( 'hidecategorization', $user->getBoolOption( 'watchlisthidecategorization' ) );
+
+		$opts->add( 'extended', $user->getBoolOption( 'extendwatchlist' ) );
 
 		return $opts;
 	}
@@ -135,7 +124,7 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	protected function getCustomFilters() {
 		if ( $this->customFilters === null ) {
 			$this->customFilters = parent::getCustomFilters();
-			Hooks::run( 'SpecialWatchlistFilters', [ $this, &$this->customFilters ], '1.23' );
+			Hooks::run( 'SpecialWatchlistFilters', array( $this, &$this->customFilters ), '1.23' );
 		}
 
 		return $this->customFilters;
@@ -151,14 +140,14 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	 * @return FormOptions
 	 */
 	protected function fetchOptionsFromRequest( $opts ) {
-		static $compatibilityMap = [
+		static $compatibilityMap = array(
 			'hideMinor' => 'hideminor',
 			'hideBots' => 'hidebots',
 			'hideAnons' => 'hideanons',
 			'hideLiu' => 'hideliu',
 			'hidePatrolled' => 'hidepatrolled',
 			'hideOwn' => 'hidemyself',
-		];
+		);
 
 		$params = $this->getRequest()->getValues();
 		foreach ( $compatibilityMap as $from => $to ) {
@@ -212,14 +201,14 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			$usePage = false;
 		} else {
 			# Top log Ids for a page are not stored
-			$nonRevisionTypes = [ RC_LOG ];
-			Hooks::run( 'SpecialWatchlistGetNonRevisionTypes', [ &$nonRevisionTypes ] );
+			$nonRevisionTypes = array( RC_LOG );
+			Hooks::run( 'SpecialWatchlistGetNonRevisionTypes', array( &$nonRevisionTypes ) );
 			if ( $nonRevisionTypes ) {
 				$conds[] = $dbr->makeList(
-					[
+					array(
 						'rc_this_oldid=page_latest',
 						'rc_type' => $nonRevisionTypes,
-					],
+					),
 					LIST_OR
 				);
 			}
@@ -227,19 +216,19 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			$usePage = true;
 		}
 
-		$tables = [ 'recentchanges', 'watchlist' ];
+		$tables = array( 'recentchanges', 'watchlist' );
 		$fields = RecentChange::selectFields();
-		$query_options = [ 'ORDER BY' => 'rc_timestamp DESC' ];
-		$join_conds = [
-			'watchlist' => [
+		$query_options = array( 'ORDER BY' => 'rc_timestamp DESC' );
+		$join_conds = array(
+			'watchlist' => array(
 				'INNER JOIN',
-				[
+				array(
 					'wl_user' => $user->getId(),
 					'wl_namespace=rc_namespace',
 					'wl_title=rc_title'
-				],
-			],
-		];
+				),
+			),
+		);
 
 		if ( $this->getConfig()->get( 'ShowUpdatedMarker' ) ) {
 			$fields[] = 'wl_notificationtimestamp';
@@ -251,7 +240,7 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		$rollbacker = $user->isAllowed( 'rollback' );
 		if ( $usePage || $rollbacker ) {
 			$tables[] = 'page';
-			$join_conds['page'] = [ 'LEFT JOIN', 'rc_cur_id=page_id' ];
+			$join_conds['page'] = array( 'LEFT JOIN', 'rc_cur_id=page_id' );
 			if ( $rollbacker ) {
 				$fields[] = 'page_latest';
 			}
@@ -267,10 +256,10 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			$bitmask = 0;
 		}
 		if ( $bitmask ) {
-			$conds[] = $dbr->makeList( [
+			$conds[] = $dbr->makeList( array(
 				'rc_type != ' . RC_LOG,
 				$dbr->bitAnd( 'rc_deleted', $bitmask ) . " != $bitmask",
-			], LIST_OR );
+			), LIST_OR );
 		}
 
 		ChangeTags::modifyDisplayQuery(
@@ -300,7 +289,7 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		return parent::runMainQueryHook( $tables, $fields, $conds, $query_options, $join_conds, $opts )
 			&& Hooks::run(
 				'SpecialWatchlistQuery',
-				[ &$conds, &$tables, &$join_conds, &$fields, $opts ],
+				array( &$conds, &$tables, &$join_conds, &$fields, $opts ),
 				'1.23'
 			);
 	}
@@ -321,12 +310,12 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		$user = $this->getUser();
 		$wlToken = $user->getTokenFromOption( 'watchlisttoken' );
 		if ( $wlToken ) {
-			$this->addFeedLinks( [
+			$this->addFeedLinks( array(
 				'action' => 'feedwatchlist',
 				'allrev' => 1,
 				'wlowner' => $user->getName(),
 				'wltoken' => $wlToken,
-			] );
+			) );
 		}
 	}
 
@@ -380,10 +369,10 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			) {
 				$rc->numberofWatchingusers = $dbr->selectField( 'watchlist',
 					'COUNT(*)',
-					[
+					array(
 						'wl_namespace' => $obj->rc_namespace,
 						'wl_title' => $obj->rc_title,
-					],
+					),
 					__METHOD__ );
 			} else {
 				$rc->numberofWatchingusers = 0;
@@ -407,15 +396,8 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	 */
 	public function doHeader( $opts, $numRows ) {
 		$user = $this->getUser();
-		$out = $this->getOutput();
 
-		// if the user wishes, that the watchlist is reloaded, whenever a filter changes,
-		// add the module for that
-		if ( $user->getBoolOption( 'watchlistreloadautomatically' ) ) {
-			$out->addModules( [ 'mediawiki.special.watchlist' ] );
-		}
-
-		$out->addSubtitle(
+		$this->getOutput()->addSubtitle(
 			$this->msg( 'watchlistfor2', $user->getName() )
 				->rawParams( SpecialEditWatchlist::buildTools( null ) )
 		);
@@ -423,33 +405,26 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		$this->setTopText( $opts );
 
 		$lang = $this->getLanguage();
+		$wlInfo = '';
 		if ( $opts['days'] > 0 ) {
-			$days = $opts['days'];
-		} else {
-			$days = $this->getConfig()->get( 'RCMaxAge' ) / ( 3600 * 24 );
+			$timestamp = wfTimestampNow();
+			$wlInfo = $this->msg( 'wlnote' )->numParams( $numRows, round( $opts['days'] * 24 ) )->params(
+				$lang->userDate( $timestamp, $user ), $lang->userTime( $timestamp, $user )
+			)->parse() . "<br />\n";
 		}
-		$timestamp = wfTimestampNow();
-		$wlInfo = $this->msg( 'wlnote' )->numParams( $numRows, round( $days * 24 ) )->params(
-			$lang->userDate( $timestamp, $user ), $lang->userTime( $timestamp, $user )
-		)->parse() . "<br />\n";
 
 		$nondefaults = $opts->getChangedValues();
-		$cutofflinks = $this->msg( 'wlshowtime' ) . ' ' . $this->cutoffselector( $opts );
+		$cutofflinks = $this->cutoffLinks( $opts['days'], $nondefaults ) . "<br />\n";
 
 		# Spit out some control panel links
-		$filters = [
-			'hideminor' => 'wlshowhideminor',
-			'hidebots' => 'wlshowhidebots',
-			'hideanons' => 'wlshowhideanons',
-			'hideliu' => 'wlshowhideliu',
-			'hidemyself' => 'wlshowhidemine',
-			'hidepatrolled' => 'wlshowhidepatr'
-		];
-
-		if ( $this->getConfig()->get( 'RCWatchCategoryMembership' ) ) {
-			$filters['hidecategorization'] = 'wlshowhidecategorization';
-		}
-
+		$filters = array(
+			'hideminor' => 'rcshowhideminor',
+			'hidebots' => 'rcshowhidebots',
+			'hideanons' => 'rcshowhideanons',
+			'hideliu' => 'rcshowhideliu',
+			'hidemyself' => 'rcshowhidemine',
+			'hidepatrolled' => 'rcshowhidepatr'
+		);
 		foreach ( $this->getCustomFilters() as $key => $params ) {
 			$filters[$key] = $params['msg'];
 		}
@@ -458,20 +433,15 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			unset( $filters['hidepatrolled'] );
 		}
 
-		$links = [];
+		$links = array();
 		foreach ( $filters as $name => $msg ) {
-			$links[] = $this->showHideCheck( $nondefaults, $msg, $name, $opts[$name] );
+			$links[] = $this->showHideLink( $nondefaults, $msg, $name, $opts[$name] );
 		}
 
 		$hiddenFields = $nondefaults;
-		$hiddenFields['action'] = 'submit';
 		unset( $hiddenFields['namespace'] );
 		unset( $hiddenFields['invert'] );
 		unset( $hiddenFields['associated'] );
-		unset( $hiddenFields['days'] );
-		foreach ( $filters as $key => $value ) {
-			unset( $hiddenFields[$key] );
-		}
 
 		# Create output
 		$form = '';
@@ -479,36 +449,34 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		# Namespace filter and put the whole form together.
 		$form .= $wlInfo;
 		$form .= $cutofflinks;
-		$form .= $this->msg( 'watchlist-hide' ) .
-			$this->msg( 'colon-separator' )->escaped() .
-			implode( ' ', $links );
-		$form .= "\n<br />\n";
+		$form .= $lang->pipeList( $links ) . "\n";
+		$form .= "<hr />\n<p>";
 		$form .= Html::namespaceSelector(
-			[
+			array(
 				'selected' => $opts['namespace'],
 				'all' => '',
 				'label' => $this->msg( 'namespace' )->text()
-			], [
+			), array(
 				'name' => 'namespace',
 				'id' => 'namespace',
 				'class' => 'namespaceselector',
-			]
-		) . "\n";
-		$form .= '<span class="mw-input-with-label">' . Xml::checkLabel(
+			)
+		) . '&#160;';
+		$form .= Xml::checkLabel(
 			$this->msg( 'invert' )->text(),
 			'invert',
 			'nsinvert',
 			$opts['invert'],
-			[ 'title' => $this->msg( 'tooltip-invert' )->text() ]
-		) . "</span>\n";
-		$form .= '<span class="mw-input-with-label">' . Xml::checkLabel(
+			array( 'title' => $this->msg( 'tooltip-invert' )->text() )
+		) . '&#160;';
+		$form .= Xml::checkLabel(
 			$this->msg( 'namespace_association' )->text(),
 			'associated',
 			'nsassociated',
 			$opts['associated'],
-			[ 'title' => $this->msg( 'tooltip-namespace_association' )->text() ]
-		) . "</span>\n";
-		$form .= Xml::submitButton( $this->msg( 'watchlist-submit' )->text() ) . "\n";
+			array( 'title' => $this->msg( 'tooltip-namespace_association' )->text() )
+		) . '&#160;';
+		$form .= Xml::submitButton( $this->msg( 'allpagessubmit' )->text() ) . "</p>\n";
 		foreach ( $hiddenFields as $key => $value ) {
 			$form .= Html::hidden( $key, $value ) . "\n";
 		}
@@ -517,51 +485,6 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		$this->getOutput()->addHTML( $form );
 
 		$this->setBottomText( $opts );
-	}
-
-	function cutoffselector( $options ) {
-		// Cast everything to strings immediately, so that we know all of the values have the same
-		// precision, and can be compared with '==='. 2/24 has a few more decimal places than its
-		// default string representation, for example, and would confuse comparisons.
-
-		// Misleadingly, the 'days' option supports hours too.
-		$days = array_map( 'strval', [ 1/24, 2/24, 6/24, 12/24, 1, 3, 7 ] );
-
-		$userWatchlistOption = (string)$this->getUser()->getOption( 'watchlistdays' );
-		// add the user preference, if it isn't available already
-		if ( !in_array( $userWatchlistOption, $days ) && $userWatchlistOption !== '0' ) {
-			$days[] = $userWatchlistOption;
-		}
-
-		$maxDays = (string)( $this->getConfig()->get( 'RCMaxAge' ) / ( 3600 * 24 ) );
-		// add the maximum possible value, if it isn't available already
-		if ( !in_array( $maxDays, $days ) ) {
-			$days[] = $maxDays;
-		}
-
-		$selected = (string)$options['days'];
-		if ( $selected <= 0 ) {
-			$selected = $maxDays;
-		}
-
-		// add the currently selected value, if it isn't available already
-		if ( !in_array( $selected, $days ) ) {
-			$days[] = $selected;
-		}
-
-		$select = new XmlSelect( 'days', 'days', $selected );
-
-		asort( $days );
-		foreach ( $days as $value ) {
-			if ( $value < 1 ) {
-				$name = $this->msg( 'hours' )->numParams( $value * 24 )->text();
-			} else {
-				$name = $this->msg( 'days' )->numParams( $value )->text();
-			}
-			$select->addOption( $name, $value );
-		}
-
-		return $select->getHTML() . "\n<br />\n";
 	}
 
 	function setTopText( FormOptions $opts ) {
@@ -591,10 +514,10 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		$form .= "</p>";
 
 		if ( $numItems > 0 && $showUpdatedMarker ) {
-			$form .= Xml::openElement( 'form', [ 'method' => 'post',
+			$form .= Xml::openElement( 'form', array( 'method' => 'post',
 				'action' => $this->getPageTitle()->getLocalURL(),
-				'id' => 'mw-watchlist-resetbutton' ] ) . "\n" .
-			Xml::submitButton( $this->msg( 'enotif_reset' )->text(), [ 'name' => 'dummy' ] ) . "\n" .
+				'id' => 'mw-watchlist-resetbutton' ) ) . "\n" .
+			Xml::submitButton( $this->msg( 'enotif_reset' )->text(), array( 'name' => 'dummy' ) ) . "\n" .
 			Html::hidden( 'reset', 'all' ) . "\n";
 			foreach ( $nondefaults as $key => $value ) {
 				$form .= Html::hidden( $key, $value ) . "\n";
@@ -602,31 +525,78 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			$form .= Xml::closeElement( 'form' ) . "\n";
 		}
 
-		$form .= Xml::openElement( 'form', [
-			'method' => 'get',
+		$form .= Xml::openElement( 'form', array(
+			'method' => 'post',
 			'action' => $this->getPageTitle()->getLocalURL(),
 			'id' => 'mw-watchlist-form'
-		] );
+		) );
 		$form .= Xml::fieldset(
 			$this->msg( 'watchlist-options' )->text(),
 			false,
-			[ 'id' => 'mw-watchlist-options' ]
+			array( 'id' => 'mw-watchlist-options' )
 		);
 
-		$form .= $this->makeLegend();
+		$form .= SpecialRecentChanges::makeLegend( $this->getContext() );
 
 		$this->getOutput()->addHTML( $form );
 	}
 
-	protected function showHideCheck( $options, $message, $name, $value ) {
+	protected function showHideLink( $options, $message, $name, $value ) {
+		$label = $this->msg( $value ? 'show' : 'hide' )->escaped();
 		$options[$name] = 1 - (int)$value;
 
-		return '<span class="mw-input-with-label">' . Xml::checkLabel(
-			$this->msg( $message, '' )->text(),
-			$name,
-			$name,
-			(int)$value
-		) . '</span>';
+		return $this->msg( $message )
+			->rawParams( Linker::linkKnown( $this->getPageTitle(), $label, array(), $options ) )
+			->escaped();
+	}
+
+	protected function hoursLink( $h, $options = array() ) {
+		$options['days'] = ( $h / 24.0 );
+
+		return Linker::linkKnown(
+			$this->getPageTitle(),
+			$this->getLanguage()->formatNum( $h ),
+			array(),
+			$options
+		);
+	}
+
+	protected function daysLink( $d, $options = array() ) {
+		$options['days'] = $d;
+
+		return Linker::linkKnown(
+			$this->getPageTitle(),
+			$this->getLanguage()->formatNum( $d ),
+			array(),
+			$options
+		);
+	}
+
+	/**
+	 * Returns html
+	 *
+	 * @param int $days This gets overwritten, so is not used
+	 * @param array $options Query parameters for URL
+	 * @return string
+	 */
+	protected function cutoffLinks( $days, $options = array() ) {
+		global $wgRCMaxAge;
+		$watchlistMaxDays = ceil( $wgRCMaxAge / ( 3600 * 24 ) );
+
+		$hours = array( 1, 2, 6, 12 );
+		$days = array( 1, 3, 7, $watchlistMaxDays );
+		$i = 0;
+		foreach ( $hours as $h ) {
+			$hours[$i++] = $this->hoursLink( $h, $options );
+		}
+		$i = 0;
+		foreach ( $days as $d ) {
+			$days[$i++] = $this->daysLink( $d, $options );
+		}
+
+		return $this->msg( 'wlshowlast' )->rawParams(
+			$this->getLanguage()->pipeList( $hours ),
+			$this->getLanguage()->pipeList( $days ) )->parse();
 	}
 
 	/**
@@ -637,8 +607,8 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	 */
 	protected function countItems( $dbr ) {
 		# Fetch the raw count
-		$rows = $dbr->select( 'watchlist', [ 'count' => 'COUNT(*)' ],
-			[ 'wl_user' => $this->getUser()->getId() ], __METHOD__ );
+		$rows = $dbr->select( 'watchlist', array( 'count' => 'COUNT(*)' ),
+			array( 'wl_user' => $this->getUser()->getId() ), __METHOD__ );
 		$row = $dbr->fetchObject( $rows );
 		$count = $row->count;
 

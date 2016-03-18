@@ -9,86 +9,86 @@ class WfThumbIsStandardTest extends MediaWikiTestCase {
 	protected function setUp() {
 		parent::setUp();
 
-		$this->setMwGlobals( [
-			'wgThumbLimits' => [
+		$this->setMwGlobals( array(
+			'wgThumbLimits' => array(
 				100,
 				401
-			],
-			'wgImageLimits' => [
-				[ 300, 225 ],
-				[ 800, 600 ],
-			],
-			'wgMediaHandlers' => [
+			),
+			'wgImageLimits' => array(
+				array( 300, 225 ),
+				array( 800, 600 ),
+			),
+			'wgMediaHandlers' => array(
 				'unknown/unknown' => 'MockBitmapHandler',
-			],
-		] );
+			),
+		) );
 	}
 
 	public static function provideThumbParams() {
-		return [
+		return array(
 			// Thumb limits
-			[
+			array(
 				'Standard thumb width',
 				true,
-				[ 'width' => 100 ],
-			],
-			[
+				array( 'width' => 100 ),
+			),
+			array(
 				'Standard thumb width',
 				true,
-				[ 'width' => 401 ],
-			],
+				array( 'width' => 401 ),
+			),
 			// wfThumbIsStandard should match Linker::processResponsiveImages
 			// in its rounding behaviour.
-			[
+			array(
 				'Standard thumb width (HiDPI 1.5x) - incorrect rounding',
 				false,
-				[ 'width' => 601 ],
-			],
-			[
+				array( 'width' => 601 ),
+			),
+			array(
 				'Standard thumb width (HiDPI 1.5x)',
 				true,
-				[ 'width' => 602 ],
-			],
-			[
+				array( 'width' => 602 ),
+			),
+			array(
 				'Standard thumb width (HiDPI 2x)',
 				true,
-				[ 'width' => 802 ],
-			],
-			[
+				array( 'width' => 802 ),
+			),
+			array(
 				'Non-standard thumb width',
 				false,
-				[ 'width' => 300 ],
-			],
+				array( 'width' => 300 ),
+			),
 			// Image limits
 			// Note: Image limits are measured as pairs. Individual values
 			// may be non-standard based on the aspect ratio.
-			[
+			array(
 				'Standard image width/height pair',
 				true,
-				[ 'width' => 250, 'height' => 225 ],
-			],
-			[
+				array( 'width' => 250, 'height' => 225 ),
+			),
+			array(
 				'Standard image width/height pair',
 				true,
-				[ 'width' => 667, 'height' => 600 ],
-			],
-			[
+				array( 'width' => 667, 'height' => 600 ),
+			),
+			array(
 				'Standard image width where image does not fit aspect ratio',
 				false,
-				[ 'width' => 300 ],
-			],
-			[
+				array( 'width' => 300 ),
+			),
+			array(
 				'Implicit width from image width/height pair aspect ratio fit',
 				true,
 				// 2000x1800 fit inside 300x225 makes w=250
-				[ 'width' => 250 ],
-			],
-			[
+				array( 'width' => 250 ),
+			),
+			array(
 				'Height-only is always non-standard',
 				false,
-				[ 'height' => 225 ],
-			],
-		];
+				array( 'height' => 225 ),
+			),
+		);
 	}
 
 	/**
@@ -97,7 +97,7 @@ class WfThumbIsStandardTest extends MediaWikiTestCase {
 	public function testIsStandard( $message, $expected, $params ) {
 		$this->assertSame(
 			$expected,
-			wfThumbIsStandard( new FakeDimensionFile( [ 2000, 1800 ] ), $params ),
+			wfThumbIsStandard( new FakeDimensionFile( array( 2000, 1800 ) ), $params ),
 			$message
 		);
 	}

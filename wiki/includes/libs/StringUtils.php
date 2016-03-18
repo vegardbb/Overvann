@@ -36,15 +36,16 @@ class StringUtils {
 	 * true will skip the use of mb_check_encoding, this is mostly intended for
 	 * unit testing our internal implementation.
 	 *
+	 * @since 1.21
 	 * @note In MediaWiki 1.21, this function did not provide proper UTF-8 validation.
 	 * In particular, the pure PHP code path did not in fact check for overlong forms.
 	 * Beware of this when backporting code to that version of MediaWiki.
 	 *
-	 * @since 1.21
 	 * @param string $value String to check
 	 * @param bool $disableMbstring Whether to use the pure PHP
-	 *  implementation instead of trying mb_check_encoding. Intended for unit
-	 *  testing. Default: false
+	 * implementation instead of trying mb_check_encoding. Intended for unit
+	 * testing. Default: false
+	 *
 	 * @return bool Whether the given $value is a valid UTF-8 encoded string
 	 */
 	static function isUtf8( $value, $disableMbstring = false ) {
@@ -75,7 +76,7 @@ class StringUtils {
 		if ( $regexes === null ) {
 			$cont = "[\x80-\xbf]";
 			$after = "(?!$cont)"; // "(?:[^\x80-\xbf]|$)" would work here
-			$regexes = [
+			$regexes = array(
 				// Continuation byte at the start
 				"/^$cont/",
 
@@ -97,7 +98,7 @@ class StringUtils {
 				"/\xf0(?![\x90-\xbf]$cont{2}$after)/",
 				"/[\xf1-\xf3](?!$cont{3}$after)/S",
 				"/\xf4(?![\x80-\x8f]$cont{2}$after)/",
-			];
+			);
 		}
 
 		foreach ( $regexes as $regex ) {
@@ -110,20 +111,21 @@ class StringUtils {
 	}
 
 	/**
-	 * Perform an operation equivalent to `preg_replace()`
-	 *
-	 * Matches this code:
+	 * Perform an operation equivalent to
 	 *
 	 *     preg_replace( "!$startDelim(.*?)$endDelim!", $replace, $subject );
 	 *
-	 * ..except that it's worst-case O(N) instead of O(N^2). Compared to delimiterReplace(), this
-	 * implementation is fast but memory-hungry and inflexible. The memory requirements are such
-	 * that I don't recommend using it on anything but guaranteed small chunks of text.
+	 * except that it's worst-case O(N) instead of O(N^2)
+	 *
+	 * Compared to delimiterReplace(), this implementation is fast but memory-
+	 * hungry and inflexible. The memory requirements are such that I don't
+	 * recommend using it on anything but guaranteed small chunks of text.
 	 *
 	 * @param string $startDelim
 	 * @param string $endDelim
 	 * @param string $replace
 	 * @param string $subject
+	 *
 	 * @return string
 	 */
 	static function hungryDelimiterReplace( $startDelim, $endDelim, $replace, $subject ) {
@@ -142,20 +144,18 @@ class StringUtils {
 	}
 
 	/**
-	 * Perform an operation equivalent to `preg_replace_callback()`
+	 * Perform an operation equivalent to
 	 *
-	 * Matches this code:
+	 *   preg_replace_callback( "!$startDelim(.*)$endDelim!s$flags", $callback, $subject )
 	 *
-	 *     preg_replace_callback( "!$startDelim(.*)$endDelim!s$flags", $callback, $subject );
+	 * This implementation is slower than hungryDelimiterReplace but uses far less
+	 * memory. The delimiters are literal strings, not regular expressions.
 	 *
 	 * If the start delimiter ends with an initial substring of the end delimiter,
 	 * e.g. in the case of C-style comments, the behavior differs from the model
 	 * regex. In this implementation, the end must share no characters with the
-	 * start, so e.g. `/*\/` is not considered to be both the start and end of a
-	 * comment. `/*\/xy/*\/` is considered to be a single comment with contents `/xy/`.
-	 *
-	 * The implementation of delimiterReplaceCallback() is slower than hungryDelimiterReplace()
-	 * but uses far less memory. The delimiters are literal strings, not regular expressions.
+	 * start, so e.g. /*\/ is not considered to be both the start and end of a
+	 * comment. /*\/xy/*\/ is considered to be a single comment with contents /xy/.
 	 *
 	 * @param string $startDelim Start delimiter
 	 * @param string $endDelim End delimiter
@@ -176,7 +176,7 @@ class StringUtils {
 		$encEnd = preg_quote( $endDelim, '!' );
 		$strcmp = strpos( $flags, 'i' ) === false ? 'strcmp' : 'strcasecmp';
 		$endLength = strlen( $endDelim );
-		$m = [];
+		$m = array();
 
 		while ( $inputPos < strlen( $subject ) &&
 			preg_match( "!($encStart)|($encEnd)!S$flags", $subject, $m, PREG_OFFSET_CAPTURE, $inputPos )
@@ -219,10 +219,10 @@ class StringUtils {
 			} elseif ( $tokenType == 'end' ) {
 				if ( $foundStart ) {
 					# Found match
-					$output .= call_user_func( $callback, [
+					$output .= call_user_func( $callback, array(
 						substr( $subject, $outputPos, $tokenOffset + $tokenLength - $outputPos ),
 						substr( $subject, $contentPos, $tokenOffset - $contentPos )
-					] );
+					) );
 					$foundStart = false;
 				} else {
 					# Non-matching end, write it out
@@ -241,16 +241,14 @@ class StringUtils {
 	}
 
 	/**
-	 * Perform an operation equivalent to `preg_replace()` with flags.
+	 * Perform an operation equivalent to
 	 *
-	 * Matches this code:
-	 *
-	 *     preg_replace( "!$startDelim(.*)$endDelim!$flags", $replace, $subject );
+	 *   preg_replace( "!$startDelim(.*)$endDelim!$flags", $replace, $subject )
 	 *
 	 * @param string $startDelim Start delimiter regular expression
 	 * @param string $endDelim End delimiter regular expression
 	 * @param string $replace Replacement string. May contain $1, which will be
-	 *  replaced by the text between the delimiters
+	 *                 replaced by the text between the delimiters
 	 * @param string $subject String to search
 	 * @param string $flags Regular expression flags
 	 * @return string The string with the matches replaced
@@ -264,7 +262,7 @@ class StringUtils {
 
 	/**
 	 * More or less "markup-safe" explode()
-	 * Ignores any instances of the separator inside `<...>`
+	 * Ignores any instances of the separator inside <...>
 	 * @param string $separator
 	 * @param string $text
 	 * @return array
@@ -298,12 +296,13 @@ class StringUtils {
 	static function escapeRegexReplacement( $string ) {
 		$string = str_replace( '\\', '\\\\', $string );
 		$string = str_replace( '$', '\\$', $string );
+
 		return $string;
 	}
 
 	/**
 	 * Workalike for explode() with limited memory usage.
-	 *
+	 * Returns an Iterator
 	 * @param string $separator
 	 * @param string $subject
 	 * @return ArrayIterator|ExplodeIterator

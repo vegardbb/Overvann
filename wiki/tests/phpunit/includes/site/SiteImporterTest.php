@@ -34,10 +34,11 @@ class SiteImporterTest extends PHPUnit_Framework_TestCase {
 	private function newSiteImporter( array $expectedSites, $errorCount ) {
 		$store = $this->getMock( 'SiteStore' );
 
+		$that = $this;
 		$store->expects( $this->once() )
 			->method( 'saveSites' )
-			->will( $this->returnCallback( function ( $sites ) use ( $expectedSites ) {
-				$this->assertSitesEqual( $expectedSites, $sites );
+			->will( $this->returnCallback( function ( $sites ) use ( $expectedSites, $that ) {
+				$that->assertSitesEqual( $expectedSites, $sites );
 			} ) );
 
 		$store->expects( $this->any() )
@@ -49,7 +50,7 @@ class SiteImporterTest extends PHPUnit_Framework_TestCase {
 			->method( 'error' );
 
 		$importer = new SiteImporter( $store );
-		$importer->setExceptionCallback( [ $errorHandler, 'error' ] );
+		$importer->setExceptionCallback( array( $errorHandler, 'error' ) );
 
 		return $importer;
 	}
@@ -82,22 +83,22 @@ class SiteImporterTest extends PHPUnit_Framework_TestCase {
 		$dewiki->setPath( MediaWikiSite::PATH_PAGE, 'http://de.wikipedia.org/wiki/' );
 		$dewiki->setSource( 'meta.wikimedia.org' );
 
-		return [
-			'empty' => [
+		return array(
+			'empty' => array(
 				'<sites></sites>',
-				[],
-			],
-			'no sites' => [
+				array(),
+			),
+			'no sites' => array(
 				'<sites><Foo><globalid>Foo</globalid></Foo><Bar><quux>Bla</quux></Bar></sites>',
-				[],
-			],
-			'minimal' => [
+				array(),
+			),
+			'minimal' => array(
 				'<sites>' .
 					'<site><globalid>Foo</globalid></site>' .
 				'</sites>',
-				[ $foo ],
-			],
-			'full' => [
+				array( $foo ),
+			),
+			'full' => array(
 				'<sites>' .
 					'<site><globalid>Foo</globalid></site>' .
 					'<site>' .
@@ -117,9 +118,9 @@ class SiteImporterTest extends PHPUnit_Framework_TestCase {
 						'<path type="page_path">http://de.wikipedia.org/wiki/</path>' .
 					'</site>' .
 				'</sites>',
-				[ $foo, $acme, $dewiki ],
-			],
-			'skip' => [
+				array( $foo, $acme, $dewiki ),
+			),
+			'skip' => array(
 				'<sites>' .
 					'<site><globalid>Foo</globalid></site>' .
 					'<site><barf>Foo</barf></site>' .
@@ -131,10 +132,10 @@ class SiteImporterTest extends PHPUnit_Framework_TestCase {
 						'<path type="link">http://acme.com/</path>' .
 					'</site>' .
 				'</sites>',
-				[ $foo, $acme ],
+				array( $foo, $acme ),
 				1
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -173,7 +174,7 @@ class SiteImporterTest extends PHPUnit_Framework_TestCase {
 		$dewiki->setPath( MediaWikiSite::PATH_PAGE, 'http://de.wikipedia.org/wiki/' );
 		$dewiki->setSource( 'meta.wikimedia.org' );
 
-		$importer = $this->newSiteImporter( [ $foo, $acme, $dewiki ], 0 );
+		$importer = $this->newSiteImporter( array( $foo, $acme, $dewiki ), 0 );
 
 		$file = __DIR__ . '/SiteImporterTest.xml';
 		$importer->importFromFile( $file );
@@ -185,7 +186,7 @@ class SiteImporterTest extends PHPUnit_Framework_TestCase {
 	 * @return array[]
 	 */
 	private function getSerializedSiteList( $sites ) {
-		$serialized = [];
+		$serialized = array();
 
 		foreach ( $sites as $site ) {
 			$key = $site->getGlobalId();

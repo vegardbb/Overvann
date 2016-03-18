@@ -15,10 +15,10 @@ class BlockTest extends MediaWikiLangTestCase {
 
 	protected function setUp() {
 		parent::setUp();
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgLanguageCode' => 'en',
 			'wgContLang' => Language::factory( 'en' )
-		] );
+		) );
 	}
 
 	function addDBData() {
@@ -26,7 +26,7 @@ class BlockTest extends MediaWikiLangTestCase {
 		$user = User::newFromName( 'UTBlockee' );
 		if ( $user->getID() == 0 ) {
 			$user->addToDatabase();
-			TestUser::setPasswordForUser( $user, 'UTBlockeePassword' );
+			$user->setPassword( 'UTBlockeePassword' );
 
 			$user->saveSettings();
 		}
@@ -38,12 +38,12 @@ class BlockTest extends MediaWikiLangTestCase {
 			$oldBlock->delete();
 		}
 
-		$blockOptions = [
+		$blockOptions = array(
 			'address' => 'UTBlockee',
 			'user' => $user->getID(),
 			'reason' => 'Parce que',
 			'expiry' => time() + 100500,
-		];
+		);
 		$this->block = new Block( $blockOptions );
 		$this->madeAt = wfTimestamp( TS_MW );
 
@@ -123,11 +123,11 @@ class BlockTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideBug29116Data() {
-		return [
-			[ null ],
-			[ '' ],
-			[ false ]
-		];
+		return array(
+			array( null ),
+			array( '' ),
+			array( false )
+		);
 	}
 
 	/**
@@ -136,10 +136,9 @@ class BlockTest extends MediaWikiLangTestCase {
 	public function testBlockedUserCanNotCreateAccount() {
 		$username = 'BlockedUserToCreateAccountWith';
 		$u = User::newFromName( $username );
+		$u->setPassword( 'NotRandomPass' );
+		$u->setId( 14146 );
 		$u->addToDatabase();
-		$userId = $u->getId();
-		$this->assertNotEquals( 0, $userId, 'sanity' );
-		TestUser::setPasswordForUser( $u, 'NotRandomPass' );
 		unset( $u );
 
 		// Sanity check
@@ -156,9 +155,9 @@ class BlockTest extends MediaWikiLangTestCase {
 		);
 
 		// Foreign perspective (blockee not on current wiki)...
-		$blockOptions = [
+		$blockOptions = array(
 			'address' => $username,
-			'user' => $userId,
+			'user' => 14146,
 			'reason' => 'crosswiki block...',
 			'timestamp' => wfTimestampNow(),
 			'expiry' => $this->db->getInfinity(),
@@ -167,7 +166,7 @@ class BlockTest extends MediaWikiLangTestCase {
 			'hideName' => true,
 			'blockEmail' => true,
 			'byText' => 'MetaWikiUser',
-		];
+		);
 		$block = new Block( $blockOptions );
 		$block->insert();
 
@@ -206,13 +205,13 @@ class BlockTest extends MediaWikiLangTestCase {
 		// Local perspective (blockee on current wiki)...
 		$user = User::newFromName( 'UserOnForeignWiki' );
 		$user->addToDatabase();
-		$userId = $user->getId();
-		$this->assertNotEquals( 0, $userId, 'sanity' );
+		// Set user ID to match the test value
+		$this->db->update( 'user', array( 'user_id' => 14146 ), array( 'user_id' => $user->getId() ) );
 
 		// Foreign perspective (blockee not on current wiki)...
-		$blockOptions = [
+		$blockOptions = array(
 			'address' => 'UserOnForeignWiki',
-			'user' => $user->getId(),
+			'user' => 14146,
 			'reason' => 'crosswiki block...',
 			'timestamp' => wfTimestampNow(),
 			'expiry' => $this->db->getInfinity(),
@@ -221,7 +220,7 @@ class BlockTest extends MediaWikiLangTestCase {
 			'hideName' => true,
 			'blockEmail' => true,
 			'byText' => 'MetaWikiUser',
-		];
+		);
 		$block = new Block( $blockOptions );
 
 		$res = $block->insert( $this->db );
@@ -235,7 +234,7 @@ class BlockTest extends MediaWikiLangTestCase {
 			$block->getTarget()->getName(),
 			'Correct blockee name'
 		);
-		$this->assertEquals( $userId, $block->getTarget()->getId(), 'Correct blockee id' );
+		$this->assertEquals( '14146', $block->getTarget()->getId(), 'Correct blockee id' );
 		$this->assertEquals( 'MetaWikiUser', $block->getBlocker(), 'Correct blocker name' );
 		$this->assertEquals( 'MetaWikiUser', $block->getByName(), 'Correct blocker name' );
 		$this->assertEquals( 0, $block->getBy(), 'Correct blocker id' );
@@ -250,43 +249,43 @@ class BlockTest extends MediaWikiLangTestCase {
 
 		$inited = true;
 
-		$blockList = [
-			[ 'target' => '70.2.0.0/16',
+		$blockList = array(
+			array( 'target' => '70.2.0.0/16',
 				'type' => Block::TYPE_RANGE,
 				'desc' => 'Range Hardblock',
 				'ACDisable' => false,
 				'isHardblock' => true,
 				'isAutoBlocking' => false,
-			],
-			[ 'target' => '2001:4860:4001::/48',
+			),
+			array( 'target' => '2001:4860:4001::/48',
 				'type' => Block::TYPE_RANGE,
 				'desc' => 'Range6 Hardblock',
 				'ACDisable' => false,
 				'isHardblock' => true,
 				'isAutoBlocking' => false,
-			],
-			[ 'target' => '60.2.0.0/16',
+			),
+			array( 'target' => '60.2.0.0/16',
 				'type' => Block::TYPE_RANGE,
 				'desc' => 'Range Softblock with AC Disabled',
 				'ACDisable' => true,
 				'isHardblock' => false,
 				'isAutoBlocking' => false,
-			],
-			[ 'target' => '50.2.0.0/16',
+			),
+			array( 'target' => '50.2.0.0/16',
 				'type' => Block::TYPE_RANGE,
 				'desc' => 'Range Softblock',
 				'ACDisable' => false,
 				'isHardblock' => false,
 				'isAutoBlocking' => false,
-			],
-			[ 'target' => '50.1.1.1',
+			),
+			array( 'target' => '50.1.1.1',
 				'type' => Block::TYPE_IP,
 				'desc' => 'Exact Softblock',
 				'ACDisable' => false,
 				'isHardblock' => false,
 				'isAutoBlocking' => false,
-			],
-		];
+			),
+		);
 
 		foreach ( $blockList as $insBlock ) {
 			$target = $insBlock['target'];
@@ -310,48 +309,48 @@ class BlockTest extends MediaWikiLangTestCase {
 	}
 
 	public static function providerXff() {
-		return [
-			[ 'xff' => '1.2.3.4, 70.2.1.1, 60.2.1.1, 2.3.4.5',
+		return array(
+			array( 'xff' => '1.2.3.4, 70.2.1.1, 60.2.1.1, 2.3.4.5',
 				'count' => 2,
 				'result' => 'Range Hardblock'
-			],
-			[ 'xff' => '1.2.3.4, 50.2.1.1, 60.2.1.1, 2.3.4.5',
+			),
+			array( 'xff' => '1.2.3.4, 50.2.1.1, 60.2.1.1, 2.3.4.5',
 				'count' => 2,
 				'result' => 'Range Softblock with AC Disabled'
-			],
-			[ 'xff' => '1.2.3.4, 70.2.1.1, 50.1.1.1, 2.3.4.5',
+			),
+			array( 'xff' => '1.2.3.4, 70.2.1.1, 50.1.1.1, 2.3.4.5',
 				'count' => 2,
 				'result' => 'Exact Softblock'
-			],
-			[ 'xff' => '1.2.3.4, 70.2.1.1, 50.2.1.1, 50.1.1.1, 2.3.4.5',
+			),
+			array( 'xff' => '1.2.3.4, 70.2.1.1, 50.2.1.1, 50.1.1.1, 2.3.4.5',
 				'count' => 3,
 				'result' => 'Exact Softblock'
-			],
-			[ 'xff' => '1.2.3.4, 70.2.1.1, 50.2.1.1, 2.3.4.5',
+			),
+			array( 'xff' => '1.2.3.4, 70.2.1.1, 50.2.1.1, 2.3.4.5',
 				'count' => 2,
 				'result' => 'Range Hardblock'
-			],
-			[ 'xff' => '1.2.3.4, 70.2.1.1, 60.2.1.1, 2.3.4.5',
+			),
+			array( 'xff' => '1.2.3.4, 70.2.1.1, 60.2.1.1, 2.3.4.5',
 				'count' => 2,
 				'result' => 'Range Hardblock'
-			],
-			[ 'xff' => '50.2.1.1, 60.2.1.1, 2.3.4.5',
+			),
+			array( 'xff' => '50.2.1.1, 60.2.1.1, 2.3.4.5',
 				'count' => 2,
 				'result' => 'Range Softblock with AC Disabled'
-			],
-			[ 'xff' => '1.2.3.4, 50.1.1.1, 60.2.1.1, 2.3.4.5',
+			),
+			array( 'xff' => '1.2.3.4, 50.1.1.1, 60.2.1.1, 2.3.4.5',
 				'count' => 2,
 				'result' => 'Exact Softblock'
-			],
-			[ 'xff' => '1.2.3.4, <$A_BUNCH-OF{INVALID}TEXT\>, 60.2.1.1, 2.3.4.5',
+			),
+			array( 'xff' => '1.2.3.4, <$A_BUNCH-OF{INVALID}TEXT\>, 60.2.1.1, 2.3.4.5',
 				'count' => 1,
 				'result' => 'Range Softblock with AC Disabled'
-			],
-			[ 'xff' => '1.2.3.4, 50.2.1.1, 2001:4860:4001:802::1003, 2.3.4.5',
+			),
+			array( 'xff' => '1.2.3.4, 50.2.1.1, 2001:4860:4001:802::1003, 2.3.4.5',
 				'count' => 2,
 				'result' => 'Range6 Hardblock'
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -375,8 +374,8 @@ class BlockTest extends MediaWikiLangTestCase {
 		# Set up the target
 		$u = User::newFromName( $username );
 		if ( $u->getID() == 0 ) {
+			$u->setPassword( 'TotallyObvious' );
 			$u->addToDatabase();
-			TestUser::setPasswordForUser( $u, 'TotallyObvious' );
 		}
 		unset( $u );
 

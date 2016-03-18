@@ -4,116 +4,116 @@ class MediaWikiTest extends MediaWikiTestCase {
 	protected function setUp() {
 		parent::setUp();
 
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgServer' => 'http://example.org',
 			'wgScriptPath' => '/w',
 			'wgScript' => '/w/index.php',
 			'wgArticlePath' => '/wiki/$1',
-			'wgActionPaths' => [],
-		] );
+			'wgActionPaths' => array(),
+		) );
 	}
 
 	public static function provideTryNormaliseRedirect() {
-		return [
-			[
+		return array(
+			array(
 				// View: Canonical
 				'url' => 'http://example.org/wiki/Foo_Bar',
-				'query' => [],
+				'query' => array(),
 				'title' => 'Foo_Bar',
 				'redirect' => false,
-			],
-			[
+			),
+			array(
 				// View: Escaped title
 				'url' => 'http://example.org/wiki/Foo%20Bar',
-				'query' => [],
+				'query' => array(),
 				'title' => 'Foo_Bar',
 				'redirect' => 'http://example.org/wiki/Foo_Bar',
-			],
-			[
+			),
+			array(
 				// View: Script path
 				'url' => 'http://example.org/w/index.php?title=Foo_Bar',
-				'query' => [ 'title' => 'Foo_Bar' ],
+				'query' => array( 'title' => 'Foo_Bar' ),
 				'title' => 'Foo_Bar',
 				'redirect' => 'http://example.org/wiki/Foo_Bar',
-			],
-			[
+			),
+			array(
 				// View: Script path with implicit title from page id
 				'url' => 'http://example.org/w/index.php?curid=123',
-				'query' => [ 'curid' => '123' ],
+				'query' => array( 'curid' => '123' ),
 				'title' => 'Foo_Bar',
 				'redirect' => false,
-			],
-			[
+			),
+			array(
 				// View: Script path with implicit title from revision id
 				'url' => 'http://example.org/w/index.php?oldid=123',
-				'query' => [ 'oldid' => '123' ],
+				'query' => array( 'oldid' => '123' ),
 				'title' => 'Foo_Bar',
 				'redirect' => false,
-			],
-			[
+			),
+			array(
 				// View: Script path without title
 				'url' => 'http://example.org/w/index.php',
-				'query' => [],
+				'query' => array(),
 				'title' => 'Main_Page',
 				'redirect' => 'http://example.org/wiki/Main_Page',
-			],
-			[
+			),
+			array(
 				// View: Script path with empty title
 				'url' => 'http://example.org/w/index.php?title=',
-				'query' => [ 'title' => '' ],
+				'query' => array( 'title' => '' ),
 				'title' => 'Main_Page',
 				'redirect' => 'http://example.org/wiki/Main_Page',
-			],
-			[
+			),
+			array(
 				// View: Index with escaped title
 				'url' => 'http://example.org/w/index.php?title=Foo%20Bar',
-				'query' => [ 'title' => 'Foo Bar' ],
+				'query' => array( 'title' => 'Foo Bar' ),
 				'title' => 'Foo_Bar',
 				'redirect' => 'http://example.org/wiki/Foo_Bar',
-			],
-			[
+			),
+			array(
 				// View: Script path with escaped title
 				'url' => 'http://example.org/w/?title=Foo_Bar',
-				'query' => [ 'title' => 'Foo_Bar' ],
+				'query' => array( 'title' => 'Foo_Bar' ),
 				'title' => 'Foo_Bar',
 				'redirect' => 'http://example.org/wiki/Foo_Bar',
-			],
-			[
+			),
+			array(
 				// View: Root path with escaped title
 				'url' => 'http://example.org/?title=Foo_Bar',
-				'query' => [ 'title' => 'Foo_Bar' ],
+				'query' => array( 'title' => 'Foo_Bar' ),
 				'title' => 'Foo_Bar',
 				'redirect' => 'http://example.org/wiki/Foo_Bar',
-			],
-			[
+			),
+			array(
 				// View: Canonical with redundant query
 				'url' => 'http://example.org/wiki/Foo_Bar?action=view',
-				'query' => [ 'action' => 'view' ],
+				'query' => array( 'action' => 'view' ),
 				'title' => 'Foo_Bar',
 				'redirect' => 'http://example.org/wiki/Foo_Bar',
-			],
-			[
+			),
+			array(
 				// Edit: Canonical view url with action query
 				'url' => 'http://example.org/wiki/Foo_Bar?action=edit',
-				'query' => [ 'action' => 'edit' ],
+				'query' => array( 'action' => 'edit' ),
 				'title' => 'Foo_Bar',
 				'redirect' => false,
-			],
-			[
+			),
+			array(
 				// View: Index with action query
 				'url' => 'http://example.org/w/index.php?title=Foo_Bar&action=view',
-				'query' => [ 'title' => 'Foo_Bar', 'action' => 'view' ],
+				'query' => array( 'title' => 'Foo_Bar', 'action' => 'view' ),
 				'title' => 'Foo_Bar',
 				'redirect' => 'http://example.org/wiki/Foo_Bar',
-			],
-			[
+			),
+			array(
 				// Edit: Index with action query
 				'url' => 'http://example.org/w/index.php?title=Foo_Bar&action=edit',
-				'query' => [ 'title' => 'Foo_Bar', 'action' => 'edit' ],
+				'query' => array( 'title' => 'Foo_Bar', 'action' => 'edit' ),
 				'title' => 'Foo_Bar',
 				'redirect' => false,
-			],
-		];
+			),
+		);
 	}
 
 	/**

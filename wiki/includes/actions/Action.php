@@ -101,7 +101,7 @@ abstract class Action {
 		}
 
 		if ( is_callable( $classOrCallable ) ) {
-			return call_user_func_array( $classOrCallable, [ $page, $context ] );
+			return call_user_func_array( $classOrCallable, array( $page, $context ) );
 		}
 
 		return $classOrCallable;
@@ -164,7 +164,7 @@ abstract class Action {
 	 * @return bool
 	 */
 	final public static function exists( $name ) {
-		return self::getClass( $name, [] ) !== null;
+		return self::getClass( $name, array() ) !== null;
 	}
 
 	/**
@@ -252,7 +252,7 @@ abstract class Action {
 	 */
 	final public function msg() {
 		$params = func_get_args();
-		return call_user_func_array( [ $this->getContext(), 'msg' ], $params );
+		return call_user_func_array( array( $this->getContext(), 'msg' ), $params );
 	}
 
 	/**
@@ -370,7 +370,7 @@ abstract class Action {
 	 * Returns the description that goes below the \<h1\> tag
 	 * @since 1.17
 	 *
-	 * @return string HTML
+	 * @return string
 	 */
 	protected function getDescription() {
 		return $this->msg( strtolower( $this->getName() ) )->escaped();
@@ -416,14 +416,5 @@ abstract class Action {
 		if ( $this->getRequest()->wasPosted() ) {
 			wfTransactionalTimeLimit();
 		}
-	}
-
-	/**
-	 * Indicates whether this action may perform database writes
-	 * @return bool
-	 * @since 1.27
-	 */
-	public function doesWrites() {
-		return false;
 	}
 }

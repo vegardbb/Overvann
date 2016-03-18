@@ -47,7 +47,7 @@ abstract class DBLockManager extends QuorumLockManager {
 
 	protected $session = 0; // random integer
 	/** @var array Map Database connections (DB name => Database) */
-	protected $conns = [];
+	protected $conns = array();
 
 	/**
 	 * Construct a new instance from configuration.
@@ -76,7 +76,7 @@ abstract class DBLockManager extends QuorumLockManager {
 
 		$this->dbServers = isset( $config['dbServers'] )
 			? $config['dbServers']
-			: []; // likely just using 'localDBMaster'
+			: array(); // likely just using 'localDBMaster'
 		// Sanitize srvsByBucket config to prevent PHP errors
 		$this->srvsByBucket = array_filter( $config['dbsByBucket'], 'is_array' );
 		$this->srvsByBucket = array_values( $this->srvsByBucket ); // consecutive
@@ -95,7 +95,12 @@ abstract class DBLockManager extends QuorumLockManager {
 			if ( count( $bucket ) > 1 ) { // multiple peers
 				// Tracks peers that couldn't be queried recently to avoid lengthy
 				// connection timeouts. This is useless if each bucket has one peer.
-				$this->statusCache = ObjectCache::getLocalServerInstance();
+				try {
+					$this->statusCache = ObjectCache::newAccelerator();
+				} catch ( Exception $e ) {
+					trigger_error( __CLASS__ .
+						" using multiple DB peers without apc, xcache, or wincache." );
+				}
 				break;
 			}
 		}
@@ -141,7 +146,7 @@ abstract class DBLockManager extends QuorumLockManager {
 	 * Get (or reuse) a connection to a lock DB
 	 *
 	 * @param string $lockDb
-	 * @return IDatabase
+	 * @return DatabaseBase
 	 * @throws DBError
 	 */
 	protected function getConnection( $lockDb ) {
@@ -149,7 +154,7 @@ abstract class DBLockManager extends QuorumLockManager {
 			$db = null;
 			if ( $lockDb === 'localDBMaster' ) {
 				$lb = wfGetLBFactory()->getMainLB( $this->domain );
-				$db = $lb->getConnection( DB_MASTER, [], $this->domain );
+				$db = $lb->getConnection( DB_MASTER, array(), $this->domain );
 			} elseif ( isset( $this->dbServers[$lockDb] ) ) {
 				$config = $this->dbServers[$lockDb];
 				$db = DatabaseBase::factory( $config['type'], $config );
@@ -162,7 +167,7 @@ abstract class DBLockManager extends QuorumLockManager {
 			# If the connection drops, try to avoid letting the DB rollback
 			# and release the locks before the file operations are finished.
 			# This won't handle the case of DB server restarts however.
-			$options = [];
+			$options = array();
 			if ( $this->lockExpiry > 0 ) {
 				$options['connTimeout'] = $this->lockExpiry;
 			}
@@ -180,10 +185,10 @@ abstract class DBLockManager extends QuorumLockManager {
 	 * Do additional initialization for new lock DB connection
 	 *
 	 * @param string $lockDb
-	 * @param IDatabase $db
+	 * @param DatabaseBase $db
 	 * @throws DBError
 	 */
-	protected function initConnection( $lockDb, IDatabase $db ) {
+	protected function initConnection( $lockDb, DatabaseBase $db ) {
 	}
 
 	/**
@@ -241,17 +246,17 @@ abstract class DBLockManager extends QuorumLockManager {
  */
 class MySqlLockManager extends DBLockManager {
 	/** @var array Mapping of lock types to the type actually used */
-	protected $lockTypeMap = [
+	protected $lockTypeMap = array(
 		self::LOCK_SH => self::LOCK_SH,
 		self::LOCK_UW => self::LOCK_SH,
 		self::LOCK_EX => self::LOCK_EX
-	];
+	);
 
 	/**
 	 * @param string $lockDb
-	 * @param IDatabase $db
+	 * @param DatabaseBase $db
 	 */
-	protected function initConnection( $lockDb, IDatabase $db ) {
+	protected function initConnection( $lockDb, DatabaseBase $db ) {
 		# Let this transaction see lock rows from other transactions
 		$db->query( "SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;" );
 	}
@@ -271,28 +276,28 @@ class MySqlLockManager extends DBLockManager {
 
 		$db = $this->getConnection( $lockSrv ); // checked in isServerUp()
 
-		$keys = []; // list of hash keys for the paths
-		$data = []; // list of rows to insert
-		$checkEXKeys = []; // list of hash keys that this has no EX lock on
+		$keys = array(); // list of hash keys for the paths
+		$data = array(); // list of rows to insert
+		$checkEXKeys = array(); // list of hash keys that this has no EX lock on
 		# Build up values for INSERT clause
 		foreach ( $paths as $path ) {
 			$key = $this->sha1Base36Absolute( $path );
 			$keys[] = $key;
-			$data[] = [ 'fls_key' => $key, 'fls_session' => $this->session ];
+			$data[] = array( 'fls_key' => $key, 'fls_session' => $this->session );
 			if ( !isset( $this->locksHeld[$path][self::LOCK_EX] ) ) {
 				$checkEXKeys[] = $key;
 			}
 		}
 
 		# Block new writers (both EX and SH locks leave entries here)...
-		$db->insert( 'filelocks_shared', $data, __METHOD__, [ 'IGNORE' ] );
+		$db->insert( 'filelocks_shared', $data, __METHOD__, array( 'IGNORE' ) );
 		# Actually do the locking queries...
 		if ( $type == self::LOCK_SH ) { // reader locks
 			$blocked = false;
 			# Bail if there are any existing writers...
 			if ( count( $checkEXKeys ) ) {
 				$blocked = $db->selectField( 'filelocks_exclusive', '1',
-					[ 'fle_key' => $checkEXKeys ],
+					array( 'fle_key' => $checkEXKeys ),
 					__METHOD__
 				);
 			}
@@ -304,20 +309,20 @@ class MySqlLockManager extends DBLockManager {
 			# This may detect readers, but the safe check for them is below.
 			# Note: if two writers come at the same time, both bail :)
 			$blocked = $db->selectField( 'filelocks_shared', '1',
-				[ 'fls_key' => $keys, "fls_session != $encSession" ],
+				array( 'fls_key' => $keys, "fls_session != $encSession" ),
 				__METHOD__
 			);
 			if ( !$blocked ) {
 				# Build up values for INSERT clause
-				$data = [];
+				$data = array();
 				foreach ( $keys as $key ) {
-					$data[] = [ 'fle_key' => $key ];
+					$data[] = array( 'fle_key' => $key );
 				}
 				# Block new readers/writers...
 				$db->insert( 'filelocks_exclusive', $data, __METHOD__ );
 				# Bail if there are any existing readers...
 				$blocked = $db->selectField( 'filelocks_shared', '1',
-					[ 'fls_key' => $keys, "fls_session != $encSession" ],
+					array( 'fls_key' => $keys, "fls_session != $encSession" ),
 					__METHOD__
 				);
 			}
@@ -361,11 +366,11 @@ class MySqlLockManager extends DBLockManager {
  */
 class PostgreSqlLockManager extends DBLockManager {
 	/** @var array Mapping of lock types to the type actually used */
-	protected $lockTypeMap = [
+	protected $lockTypeMap = array(
 		self::LOCK_SH => self::LOCK_SH,
 		self::LOCK_UW => self::LOCK_SH,
 		self::LOCK_EX => self::LOCK_EX
-	];
+	);
 
 	protected function doGetLocksOnServer( $lockSrv, array $paths, $type ) {
 		$status = Status::newGood();
@@ -376,24 +381,24 @@ class PostgreSqlLockManager extends DBLockManager {
 		$db = $this->getConnection( $lockSrv ); // checked in isServerUp()
 		$bigints = array_unique( array_map(
 			function ( $key ) {
-				return Wikimedia\base_convert( substr( $key, 0, 15 ), 16, 10 );
+				return wfBaseConvert( substr( $key, 0, 15 ), 16, 10 );
 			},
-			array_map( [ $this, 'sha1Base16Absolute' ], $paths )
+			array_map( array( $this, 'sha1Base16Absolute' ), $paths )
 		) );
 
 		// Try to acquire all the locks...
-		$fields = [];
+		$fields = array();
 		foreach ( $bigints as $bigint ) {
 			$fields[] = ( $type == self::LOCK_SH )
 				? "pg_try_advisory_lock_shared({$db->addQuotes( $bigint )}) AS K$bigint"
 				: "pg_try_advisory_lock({$db->addQuotes( $bigint )}) AS K$bigint";
 		}
 		$res = $db->query( 'SELECT ' . implode( ', ', $fields ), __METHOD__ );
-		$row = $res->fetchRow();
+		$row = (array)$res->fetchObject();
 
 		if ( in_array( 'f', $row ) ) {
 			// Release any acquired locks if some could not be acquired...
-			$fields = [];
+			$fields = array();
 			foreach ( $row as $kbigint => $ok ) {
 				if ( $ok === 't' ) { // locked
 					$bigint = substr( $kbigint, 1 ); // strip off the "K"

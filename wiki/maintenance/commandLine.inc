@@ -27,7 +27,7 @@ require_once __DIR__ . '/Maintenance.php';
 global $optionsWithArgs;
 // @codingStandardsIgnoreEnd
 if ( !isset( $optionsWithArgs ) ) {
-	$optionsWithArgs = [];
+	$optionsWithArgs = array();
 }
 
 class CommandLineInc extends Maintenance {
@@ -63,3 +63,4 @@ class CommandLineInc extends Maintenance {
 
 $maintClass = 'CommandLineInc';
 require RUN_MAINTENANCE_IF_MAIN;
+

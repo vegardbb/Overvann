@@ -12,6 +12,7 @@
 	"descriptionmsg": "wikieditor-desc",
 	"license-name": "GPL-2.0+",
 	"type": "other",
+	"callback": "WikiEditorHooks::onRegistration",
 	"MessagesDirs": {
 		"WikiEditor": [
 			"i18n"
@@ -84,8 +85,6 @@
 				"jquery.wikiEditor.dialogs",
 				"jquery.wikiEditor.toolbar.i18n",
 				"jquery.suggestions",
-				"mediawiki.Upload.Dialog",
-				"mediawiki.ForeignStructuredUpload.BookletLayout",
 				"mediawiki.api",
 				"mediawiki.RegExp",
 				"mediawiki.Title",
@@ -101,8 +100,7 @@
 				"wikieditor-toolbar-file-format-none",
 				"wikieditor-toolbar-file-format",
 				"wikieditor-toolbar-tool-file-insert",
-				"wikieditor-toolbar-tool-file-cancel",
-				"wikieditor-toolbar-tool-file-upload"
+				"wikieditor-toolbar-tool-file-cancel"
 			],
 			"templates": {
 				"dialogInsertFile.html": "templates/dialogInsertFile.html",
@@ -187,6 +185,7 @@
 				"wikieditor-toolbar-tool-link-empty",
 				"wikieditor-toolbar-tool-file",
 				"wikieditor-toolbar-tool-file-example",
+				"wikieditor-toolbar-tool-file-pre",
 				"wikieditor-toolbar-tool-reference",
 				"wikieditor-toolbar-tool-reference-title",
 				"wikieditor-toolbar-tool-reference-cancel",
@@ -255,6 +254,28 @@
 				"wikieditor-toolbar-tool-replace-emptysearch",
 				"wikieditor-toolbar-tool-replace-invalidregex",
 				"wikieditor-toolbar-section-characters",
+				"wikieditor-toolbar-characters-page-latin",
+				"wikieditor-toolbar-characters-page-latinextended",
+				"wikieditor-toolbar-characters-page-ipa",
+				"wikieditor-toolbar-characters-page-symbols",
+				"wikieditor-toolbar-characters-page-greek",
+				"wikieditor-toolbar-characters-page-cyrillic",
+				"wikieditor-toolbar-characters-page-arabic",
+				"wikieditor-toolbar-characters-page-arabicextended",
+				"wikieditor-toolbar-characters-page-persian",
+				"wikieditor-toolbar-characters-page-hebrew",
+				"wikieditor-toolbar-characters-page-bangla",
+				"wikieditor-toolbar-characters-page-tamil",
+				"wikieditor-toolbar-characters-page-telugu",
+				"wikieditor-toolbar-characters-page-sinhala",
+				"wikieditor-toolbar-characters-page-devanagari",
+				"wikieditor-toolbar-characters-page-gujarati",
+				"wikieditor-toolbar-characters-page-thai",
+				"wikieditor-toolbar-characters-page-lao",
+				"wikieditor-toolbar-characters-page-khmer",
+				"wikieditor-toolbar-characters-endash",
+				"wikieditor-toolbar-characters-emdash",
+				"wikieditor-toolbar-characters-minus",
 				"wikieditor-toolbar-section-help",
 				"wikieditor-toolbar-help-heading-description",
 				"wikieditor-toolbar-help-heading-syntax",
@@ -281,6 +302,9 @@
 				"wikieditor-toolbar-help-content-xlink-description",
 				"wikieditor-toolbar-help-content-xlink-syntax",
 				"wikieditor-toolbar-help-content-xlink-result",
+				"wikieditor-toolbar-help-content-heading1-description",
+				"wikieditor-toolbar-help-content-heading1-syntax",
+				"wikieditor-toolbar-help-content-heading1-result",
 				"wikieditor-toolbar-help-content-heading2-description",
 				"wikieditor-toolbar-help-content-heading2-syntax",
 				"wikieditor-toolbar-help-content-heading2-result",
@@ -396,25 +420,7 @@
 		"remoteExtPath": "WikiEditor/modules"
 	},
 	"config": {
-		"WikiEditorFeatures": {
-			"toolbar": {
-				"global": false,
-				"user": true
-			},
-			"dialogs": {
-				"global": false,
-				"user": true
-			},
-			"preview": {
-				"global": false,
-				"user": true
-			},
-			"publish": {
-				"global": false,
-				"user": true
-			},
-			"_merge_strategy": "array_plus_2d"
-		}
+		"@doc": "WikiEditorFeatures is set in WikiEditor.hooks.php"
 	},
 	"AutoloadClasses": {
 		"WikiEditorHooks": "WikiEditor.hooks.php"

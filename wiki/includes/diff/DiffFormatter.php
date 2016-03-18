@@ -49,9 +49,6 @@ abstract class DiffFormatter {
 	 */
 	protected $trailingContextLines = 0;
 
-	/** @var string The output buffer; holds the output while it is built. */
-	private $result = '';
-
 	/**
 	 * Format a diff.
 	 *
@@ -63,7 +60,7 @@ abstract class DiffFormatter {
 
 		$xi = $yi = 1;
 		$block = false;
-		$context = [];
+		$context = array();
 
 		$nlead = $this->leadingContextLines;
 		$ntrail = $this->trailingContextLines;
@@ -94,7 +91,7 @@ abstract class DiffFormatter {
 					$context = array_slice( $context, count( $context ) - $nlead );
 					$x0 = $xi - count( $context );
 					$y0 = $yi - count( $context );
-					$block = [];
+					$block = array();
 					if ( $context ) {
 						$block[] = new DiffOpCopy( $context );
 					}
@@ -149,24 +146,15 @@ abstract class DiffFormatter {
 	}
 
 	protected function startDiff() {
-		$this->result = '';
-	}
-
-	/**
-	 * Writes a string to the output buffer.
-	 *
-	 * @param string $text
-	 */
-	protected function writeOutput( $text ) {
-		$this->result .= $text;
+		ob_start();
 	}
 
 	/**
 	 * @return string
 	 */
 	protected function endDiff() {
-		$val = $this->result;
-		$this->result = '';
+		$val = ob_get_contents();
+		ob_end_clean();
 
 		return $val;
 	}
@@ -197,7 +185,7 @@ abstract class DiffFormatter {
 	 * @param string $header
 	 */
 	protected function startBlock( $header ) {
-		$this->writeOutput( $header . "\n" );
+		echo $header . "\n";
 	}
 
 	/**
@@ -215,7 +203,7 @@ abstract class DiffFormatter {
 	 */
 	protected function lines( $lines, $prefix = ' ' ) {
 		foreach ( $lines as $line ) {
-			$this->writeOutput( "$prefix $line\n" );
+			echo "$prefix $line\n";
 		}
 	}
 
@@ -248,7 +236,7 @@ abstract class DiffFormatter {
 	 */
 	protected function changed( $orig, $closing ) {
 		$this->deleted( $orig );
-		$this->writeOutput( "---\n" );
+		echo "---\n";
 		$this->added( $closing );
 	}
 

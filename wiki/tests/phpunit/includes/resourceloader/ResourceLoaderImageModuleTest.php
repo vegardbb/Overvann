@@ -5,63 +5,63 @@
  */
 class ResourceLoaderImageModuleTest extends ResourceLoaderTestCase {
 
-	public static $commonImageData = [
+	public static $commonImageData = array(
 		'add' => 'add.gif',
-		'remove' => [
+		'remove' => array(
 			'file' => 'remove.svg',
-			'variants' => [ 'destructive' ],
-		],
-		'next' => [
-			'file' => [
+			'variants' => array( 'destructive' ),
+		),
+		'next' => array(
+			'file' => array(
 				'ltr' => 'next.svg',
 				'rtl' => 'prev.svg'
-			],
-		],
-		'help' => [
-			'file' => [
+			),
+		),
+		'help' => array(
+			'file' => array(
 				'ltr' => 'help-ltr.svg',
 				'rtl' => 'help-rtl.svg',
-				'lang' => [
+				'lang' => array(
 					'he' => 'help-ltr.svg',
-				]
-			],
-		],
-		'bold' => [
-			'file' => [
+				)
+			),
+		),
+		'bold' => array(
+			'file' => array(
 				'default' => 'bold-a.svg',
-				'lang' => [
+				'lang' => array(
 					'en' => 'bold-b.svg',
 					'ar,de' => 'bold-f.svg',
-				]
-			],
-		]
-	];
+				)
+			),
+		)
+	);
 
-	public static $commonImageVariants = [
-		'invert' => [
+	public static $commonImageVariants = array(
+		'invert' => array(
 			'color' => '#FFFFFF',
 			'global' => true,
-		],
-		'primary' => [
+		),
+		'primary' => array(
 			'color' => '#598AD1',
-		],
-		'constructive' => [
+		),
+		'constructive' => array(
 			'color' => '#00C697',
-		],
-		'destructive' => [
+		),
+		'destructive' => array(
 			'color' => '#E81915',
-		],
-	];
+		),
+	);
 
 	public static function providerGetModules() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'class' => 'ResourceLoaderImageModule',
 					'prefix' => 'oo-ui-icon',
 					'variants' => self::$commonImageVariants,
 					'images' => self::$commonImageData,
-				],
+				),
 				'.oo-ui-icon-add {
 	...
 }
@@ -95,16 +95,15 @@ class ResourceLoaderImageModuleTest extends ResourceLoaderTestCase {
 .oo-ui-icon-bold-invert {
 	...
 }',
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'class' => 'ResourceLoaderImageModule',
 					'selectorWithoutVariant' => '.mw-ui-icon-{name}:after, .mw-ui-icon-{name}:before',
-					'selectorWithVariant' =>
-						'.mw-ui-icon-{name}-{variant}:after, .mw-ui-icon-{name}-{variant}:before',
+					'selectorWithVariant' => '.mw-ui-icon-{name}-{variant}:after, .mw-ui-icon-{name}-{variant}:before',
 					'variants' => self::$commonImageVariants,
 					'images' => self::$commonImageData,
-				],
+				),
 				'.mw-ui-icon-add:after, .mw-ui-icon-add:before {
 	...
 }
@@ -138,8 +137,8 @@ class ResourceLoaderImageModuleTest extends ResourceLoaderTestCase {
 .mw-ui-icon-bold-invert:after, .mw-ui-icon-bold-invert:before {
 	...
 }',
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -147,10 +146,7 @@ class ResourceLoaderImageModuleTest extends ResourceLoaderTestCase {
 	 * @covers ResourceLoaderImageModule::getStyles
 	 */
 	public function testGetStyles( $module, $expected ) {
-		$module = new ResourceLoaderImageModuleTestable(
-			$module,
-			__DIR__ . '/../../data/resourceloader'
-		);
+		$module = new ResourceLoaderImageModuleTestable( $module, __DIR__ . '/../../data/resourceloader' );
 		$styles = $module->getStyles( $this->getResourceLoaderContext() );
 		$this->assertEquals( $expected, $styles['all'] );
 	}
@@ -161,6 +157,6 @@ class ResourceLoaderImageModuleTestable extends ResourceLoaderImageModule {
 	 * Replace with a stub to make test cases easier to write.
 	 */
 	protected function getCssDeclarations( $primary, $fallback ) {
-		return [ '...' ];
+		return array( '...' );
 	}
 }

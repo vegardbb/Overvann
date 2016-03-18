@@ -13,7 +13,7 @@
 
 $rtl = true;
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'میڈیا',
 	NS_SPECIAL          => 'خاص',
 	NS_TALK             => 'بَحَژ',
@@ -30,9 +30,9 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'پَلزُن_بَحَژ',
 	NS_CATEGORY         => 'زٲژ',
 	NS_CATEGORY_TALK    => 'زٲژ_بَحَژ',
-];
+);
 
-$digitTransformTable = [
+$digitTransformTable = array(
 	'0' => '٠', # &#x0660;
 	'1' => '١', # &#x0661;
 	'2' => '٢', # &#x0662;
@@ -43,10 +43,10 @@ $digitTransformTable = [
 	'7' => '٧', # &#x0667;
 	'8' => '٨', # &#x0668;
 	'9' => '٩', # &#x0669;
-];
+);
 
-$separatorTransformTable = [
+$separatorTransformTable = array(
 	'.' => '٫', # &#x066b;
 	',' => '٬', # &#x066c;
-];
+);
 

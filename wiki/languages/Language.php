@@ -34,8 +34,6 @@ if ( function_exists( 'mb_strtoupper' ) ) {
 	mb_internal_encoding( 'UTF-8' );
 }
 
-use CLDRPluralRuleParser\Evaluator;
-
 /**
  * Internationalisation code
  * @ingroup Language
@@ -47,10 +45,10 @@ class Language {
 	public $mConverter;
 
 	public $mVariants, $mCode, $mLoaded = false;
-	public $mMagicExtensions = [], $mMagicHookDone = false;
+	public $mMagicExtensions = array(), $mMagicHookDone = false;
 	private $mHtmlCode = null, $mParentLanguage = false;
 
-	public $dateFormatStrings = [];
+	public $dateFormatStrings = array();
 	public $mExtendedSpecialPageAliases;
 
 	protected $namespaceNames, $mNamespaceIds, $namespaceAliases;
@@ -58,74 +56,74 @@ class Language {
 	/**
 	 * ReplacementArray object caches
 	 */
-	public $transformData = [];
+	public $transformData = array();
 
 	/**
 	 * @var LocalisationCache
 	 */
 	static public $dataCache;
 
-	static public $mLangObjCache = [];
+	static public $mLangObjCache = array();
 
-	static public $mWeekdayMsgs = [
+	static public $mWeekdayMsgs = array(
 		'sunday', 'monday', 'tuesday', 'wednesday', 'thursday',
 		'friday', 'saturday'
-	];
+	);
 
-	static public $mWeekdayAbbrevMsgs = [
+	static public $mWeekdayAbbrevMsgs = array(
 		'sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'
-	];
+	);
 
-	static public $mMonthMsgs = [
+	static public $mMonthMsgs = array(
 		'january', 'february', 'march', 'april', 'may_long', 'june',
 		'july', 'august', 'september', 'october', 'november',
 		'december'
-	];
-	static public $mMonthGenMsgs = [
+	);
+	static public $mMonthGenMsgs = array(
 		'january-gen', 'february-gen', 'march-gen', 'april-gen', 'may-gen', 'june-gen',
 		'july-gen', 'august-gen', 'september-gen', 'october-gen', 'november-gen',
 		'december-gen'
-	];
-	static public $mMonthAbbrevMsgs = [
+	);
+	static public $mMonthAbbrevMsgs = array(
 		'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug',
 		'sep', 'oct', 'nov', 'dec'
-	];
+	);
 
-	static public $mIranianCalendarMonthMsgs = [
+	static public $mIranianCalendarMonthMsgs = array(
 		'iranian-calendar-m1', 'iranian-calendar-m2', 'iranian-calendar-m3',
 		'iranian-calendar-m4', 'iranian-calendar-m5', 'iranian-calendar-m6',
 		'iranian-calendar-m7', 'iranian-calendar-m8', 'iranian-calendar-m9',
 		'iranian-calendar-m10', 'iranian-calendar-m11', 'iranian-calendar-m12'
-	];
+	);
 
-	static public $mHebrewCalendarMonthMsgs = [
+	static public $mHebrewCalendarMonthMsgs = array(
 		'hebrew-calendar-m1', 'hebrew-calendar-m2', 'hebrew-calendar-m3',
 		'hebrew-calendar-m4', 'hebrew-calendar-m5', 'hebrew-calendar-m6',
 		'hebrew-calendar-m7', 'hebrew-calendar-m8', 'hebrew-calendar-m9',
 		'hebrew-calendar-m10', 'hebrew-calendar-m11', 'hebrew-calendar-m12',
 		'hebrew-calendar-m6a', 'hebrew-calendar-m6b'
-	];
+	);
 
-	static public $mHebrewCalendarMonthGenMsgs = [
+	static public $mHebrewCalendarMonthGenMsgs = array(
 		'hebrew-calendar-m1-gen', 'hebrew-calendar-m2-gen', 'hebrew-calendar-m3-gen',
 		'hebrew-calendar-m4-gen', 'hebrew-calendar-m5-gen', 'hebrew-calendar-m6-gen',
 		'hebrew-calendar-m7-gen', 'hebrew-calendar-m8-gen', 'hebrew-calendar-m9-gen',
 		'hebrew-calendar-m10-gen', 'hebrew-calendar-m11-gen', 'hebrew-calendar-m12-gen',
 		'hebrew-calendar-m6a-gen', 'hebrew-calendar-m6b-gen'
-	];
+	);
 
-	static public $mHijriCalendarMonthMsgs = [
+	static public $mHijriCalendarMonthMsgs = array(
 		'hijri-calendar-m1', 'hijri-calendar-m2', 'hijri-calendar-m3',
 		'hijri-calendar-m4', 'hijri-calendar-m5', 'hijri-calendar-m6',
 		'hijri-calendar-m7', 'hijri-calendar-m8', 'hijri-calendar-m9',
 		'hijri-calendar-m10', 'hijri-calendar-m11', 'hijri-calendar-m12'
-	];
+	);
 
 	/**
 	 * @since 1.20
 	 * @var array
 	 */
-	static public $durationIntervals = [
+	static public $durationIntervals = array(
 		'millennia' => 31556952000,
 		'centuries' => 3155695200,
 		'decades' => 315569520,
@@ -135,7 +133,7 @@ class Language {
 		'hours' => 3600,
 		'minutes' => 60,
 		'seconds' => 1,
-	];
+	);
 
 	/**
 	 * Cache for language fallbacks.
@@ -143,11 +141,11 @@ class Language {
 	 * @since 1.21
 	 * @var array
 	 */
-	static private $fallbackLanguageCache = [];
+	static private $fallbackLanguageCache = array();
 
 	/**
 	 * Cache for language names
-	 * @var HashBagOStuff|null
+	 * @var MapCacheLRU|null
 	 */
 	static private $languageNameCache;
 
@@ -193,7 +191,7 @@ class Language {
 			: self::newFromCode( $code );
 
 		// merge the language object in to get it up front in the cache
-		self::$mLangObjCache = array_merge( [ $code => $langObj ], self::$mLangObjCache );
+		self::$mLangObjCache = array_merge( array( $code => $langObj ), self::$mLangObjCache );
 		// get rid of the oldest ones in case we have an overflow
 		self::$mLangObjCache = array_slice( self::$mLangObjCache, 0, $wgLangObjCacheSize, true );
 
@@ -207,7 +205,10 @@ class Language {
 	 * @return Language
 	 */
 	protected static function newFromCode( $code ) {
-		if ( !Language::isValidCode( $code ) ) {
+		// Protect against path traversal below
+		if ( !Language::isValidCode( $code )
+			|| strcspn( $code, ":/\\\000" ) !== strlen( $code )
+		) {
 			throw new MWException( "Invalid language code \"$code\"" );
 		}
 
@@ -221,6 +222,7 @@ class Language {
 
 		// Check if there is a language class for the code
 		$class = self::classFromCode( $code );
+		self::preloadLanguageClass( $class );
 		if ( class_exists( $class ) ) {
 			$lang = new $class;
 			return $lang;
@@ -234,8 +236,9 @@ class Language {
 			}
 
 			$class = self::classFromCode( $fallbackCode );
+			self::preloadLanguageClass( $class );
 			if ( class_exists( $class ) ) {
-				$lang = new $class;
+				$lang = Language::newFromCode( $fallbackCode );
 				$lang->setCode( $code );
 				return $lang;
 			}
@@ -335,17 +338,18 @@ class Language {
 	 * @return bool
 	 */
 	public static function isValidCode( $code ) {
-		static $cache = [];
-		if ( !isset( $cache[$code] ) ) {
-			// People think language codes are html safe, so enforce it.
-			// Ideally we should only allow a-zA-Z0-9-
-			// but, .+ and other chars are often used for {{int:}} hacks
-			// see bugs 37564, 37587, 36938
-			$cache[$code] =
-				// Protect against path traversal
-				strcspn( $code, ":/\\\000&<>'\"" ) === strlen( $code )
-				&& !preg_match( MediaWikiTitleCodec::getTitleInvalidRegex(), $code );
+		static $cache = array();
+		if ( isset( $cache[$code] ) ) {
+			return $cache[$code];
 		}
+		// People think language codes are html safe, so enforce it.
+		// Ideally we should only allow a-zA-Z0-9-
+		// but, .+ and other chars are often used for {{int:}} hacks
+		// see bugs 37564, 37587, 36938
+		$cache[$code] =
+			strcspn( $code, ":/\\\000&<>'\"" ) === strlen( $code )
+			&& !preg_match( MediaWikiTitleCodec::getTitleInvalidRegex(), $code );
+
 		return $cache[$code];
 	}
 
@@ -383,19 +387,55 @@ class Language {
 	 * @return bool
 	 */
 	public static function isKnownLanguageTag( $tag ) {
+		static $coreLanguageNames;
+
 		// Quick escape for invalid input to avoid exceptions down the line
 		// when code tries to process tags which are not valid at all.
 		if ( !self::isValidBuiltInCode( $tag ) ) {
 			return false;
 		}
 
-		if ( isset( MediaWiki\Languages\Data\Names::$names[$tag] )
+		if ( $coreLanguageNames === null ) {
+			global $IP;
+			include "$IP/languages/Names.php";
+		}
+
+		if ( isset( $coreLanguageNames[$tag] )
 			|| self::fetchLanguageName( $tag, $tag ) !== ''
 		) {
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * @param string $code
+	 * @return string Name of the language class
+	 */
+	public static function classFromCode( $code ) {
+		if ( $code == 'en' ) {
+			return 'Language';
+		} else {
+			return 'Language' . str_replace( '-', '_', ucfirst( $code ) );
+		}
+	}
+
+	/**
+	 * Includes language class files
+	 *
+	 * @param string $class Name of the language class
+	 */
+	public static function preloadLanguageClass( $class ) {
+		global $IP;
+
+		if ( $class === 'Language' ) {
+			return;
+		}
+
+		if ( file_exists( "$IP/languages/classes/$class.php" ) ) {
+			include_once "$IP/languages/classes/$class.php";
+		}
 	}
 
 	/**
@@ -490,7 +530,7 @@ class Language {
 			# Re-order by namespace ID number...
 			ksort( $this->namespaceNames );
 
-			Hooks::run( 'LanguageGetNamespaces', [ &$this->namespaceNames ] );
+			Hooks::run( 'LanguageGetNamespaces', array( &$this->namespaceNames ) );
 		}
 
 		return $this->namespaceNames;
@@ -622,7 +662,7 @@ class Language {
 		if ( is_null( $this->namespaceAliases ) ) {
 			$aliases = self::$dataCache->getItem( $this->mCode, 'namespaceAliases' );
 			if ( !$aliases ) {
-				$aliases = [];
+				$aliases = array();
 			} else {
 				foreach ( $aliases as $name => $index ) {
 					if ( $index === NS_PROJECT_TALK ) {
@@ -643,7 +683,7 @@ class Language {
 			}
 
 			# Also add converted namespace names as aliases, to avoid confusion.
-			$convertedNames = [];
+			$convertedNames = array();
 			foreach ( $this->getVariants() as $variant ) {
 				if ( $variant === $this->mCode ) {
 					continue;
@@ -669,7 +709,7 @@ class Language {
 			# If this is too slow, then we should arrange it so that it is done
 			# before caching. The catch is that at pre-cache time, the above
 			# class-specific fixup hasn't been done.
-			$this->mNamespaceIds = [];
+			$this->mNamespaceIds = array();
 			foreach ( $this->getNamespaces() as $index => $name ) {
 				$this->mNamespaceIds[$this->lc( $name )] = $index;
 			}
@@ -721,6 +761,20 @@ class Language {
 			# otherwise, output the language code
 			return $code;
 		}
+	}
+
+	/**
+	 * @deprecated since 1.24, doesn't handle conflicting aliases. Use
+	 *   SpecialPageFactory::getLocalNameFor instead.
+	 * @param string $name
+	 * @return string
+	 */
+	function specialPage( $name ) {
+		$aliases = $this->getSpecialPageAliases();
+		if ( isset( $aliases[$name][0] ) ) {
+			$name = $aliases[$name][0];
+		}
+		return $this->getNsText( NS_SPECIAL ) . ':' . $name;
 	}
 
 	/**
@@ -789,6 +843,33 @@ class Language {
 	}
 
 	/**
+	 * Get native language names, indexed by code.
+	 * Only those defined in MediaWiki, no other data like CLDR.
+	 * If $customisedOnly is true, only returns codes with a messages file
+	 *
+	 * @param bool $customisedOnly
+	 *
+	 * @return array
+	 * @deprecated since 1.20, use fetchLanguageNames()
+	 */
+	public static function getLanguageNames( $customisedOnly = false ) {
+		return self::fetchLanguageNames( null, $customisedOnly ? 'mwfile' : 'mw' );
+	}
+
+	/**
+	 * Get translated language names. This is done on best effort and
+	 * by default this is exactly the same as Language::getLanguageNames.
+	 * The CLDR extension provides translated names.
+	 * @param string $code Language code.
+	 * @return array Language code => language name
+	 * @since 1.18.0
+	 * @deprecated since 1.20, use fetchLanguageNames()
+	 */
+	public static function getTranslatedLanguageNames( $code ) {
+		return self::fetchLanguageNames( $code, 'all' );
+	}
+
+	/**
 	 * Get an array of language names, indexed by code.
 	 * @param null|string $inLanguage Code of language in which to return the names
 	 *		Use null for autonyms (native names)
@@ -803,11 +884,11 @@ class Language {
 		$cacheKey = $inLanguage === null ? 'null' : $inLanguage;
 		$cacheKey .= ":$include";
 		if ( self::$languageNameCache === null ) {
-			self::$languageNameCache = new HashBagOStuff( [ 'maxKeys' => 20 ] );
+			self::$languageNameCache = new MapCacheLRU( 20 );
 		}
-
-		$ret = self::$languageNameCache->get( $cacheKey );
-		if ( !$ret ) {
+		if ( self::$languageNameCache->has( $cacheKey ) ) {
+			$ret = self::$languageNameCache->get( $cacheKey );
+		} else {
 			$ret = self::fetchLanguageNamesUncached( $inLanguage, $include );
 			self::$languageNameCache->set( $cacheKey, $ret );
 		}
@@ -826,20 +907,26 @@ class Language {
 	 */
 	private static function fetchLanguageNamesUncached( $inLanguage = null, $include = 'mw' ) {
 		global $wgExtraLanguageNames;
+		static $coreLanguageNames;
+
+		if ( $coreLanguageNames === null ) {
+			global $IP;
+			include "$IP/languages/Names.php";
+		}
 
 		// If passed an invalid language code to use, fallback to en
 		if ( $inLanguage !== null && !Language::isValidCode( $inLanguage ) ) {
 			$inLanguage = 'en';
 		}
 
-		$names = [];
+		$names = array();
 
 		if ( $inLanguage ) {
 			# TODO: also include when $inLanguage is null, when this code is more efficient
-			Hooks::run( 'LanguageGetTranslatedLanguageNames', [ &$names, $inLanguage ] );
+			Hooks::run( 'LanguageGetTranslatedLanguageNames', array( &$names, $inLanguage ) );
 		}
 
-		$mwNames = $wgExtraLanguageNames + MediaWiki\Languages\Data\Names::$names;
+		$mwNames = $wgExtraLanguageNames + $coreLanguageNames;
 		foreach ( $mwNames as $mwCode => $mwName ) {
 			# - Prefer own MediaWiki native name when not using the hook
 			# - For other names just add if not added through the hook
@@ -853,14 +940,14 @@ class Language {
 			return $names;
 		}
 
-		$returnMw = [];
+		$returnMw = array();
 		$coreCodes = array_keys( $mwNames );
 		foreach ( $coreCodes as $coreCode ) {
 			$returnMw[$coreCode] = $names[$coreCode];
 		}
 
 		if ( $include === 'mwfile' ) {
-			$namesMwFile = [];
+			$namesMwFile = array();
 			# We do this using a foreach over the codes instead of a directory
 			# loop so that messages files in extensions will work correctly.
 			foreach ( $returnMw as $code => $value ) {
@@ -914,6 +1001,17 @@ class Language {
 	}
 
 	/**
+	 * Get the native language name of $code.
+	 * Only if defined in MediaWiki, no other data like CLDR.
+	 * @param string $code
+	 * @return string
+	 * @deprecated since 1.20, use fetchLanguageName()
+	 */
+	function getLanguageName( $code ) {
+		return self::fetchLanguageName( $code );
+	}
+
+	/**
 	 * @param string $key
 	 * @return string
 	 */
@@ -925,7 +1023,7 @@ class Language {
 	 * @return array
 	 */
 	function getMonthNamesArray() {
-		$monthNames = [ '' ];
+		$monthNames = array( '' );
 		for ( $i = 1; $i < 13; $i++ ) {
 			$monthNames[] = $this->getMonthName( $i );
 		}
@@ -952,7 +1050,7 @@ class Language {
 	 * @return array
 	 */
 	function getMonthAbbreviationsArray() {
-		$monthNames = [ '' ];
+		$monthNames = array( '' );
 		for ( $i = 1; $i < 13; $i++ ) {
 			$monthNames[] = $this->getMonthAbbreviation( $i );
 		}
@@ -1480,7 +1578,7 @@ class Language {
 			$ttl = 86400 - substr( $ts, 8, 2 ) * 3600 -
 				substr( $ts, 10, 2 ) * 60 - substr( $ts, 12, 2 );
 		} else {
-			$possibleTtls = [];
+			$possibleTtls = array();
 			$timeRemainingInDay = 86400 - substr( $ts, 8, 2 ) * 3600 -
 				substr( $ts, 10, 2 ) * 60 - substr( $ts, 12, 2 );
 			if ( $usedWeek ) {
@@ -1544,8 +1642,8 @@ class Language {
 		return $s;
 	}
 
-	private static $GREG_DAYS = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
-	private static $IRANIAN_DAYS = [ 31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29 ];
+	private static $GREG_DAYS = array( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
+	private static $IRANIAN_DAYS = array( 31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29 );
 
 	/**
 	 * Algorithm by Roozbeh Pournader and Mohammad Toossi to convert
@@ -1603,7 +1701,7 @@ class Language {
 		$jm = $i + 1;
 		$jd = $jDayNo + 1;
 
-		return [ $jy, $jm, $jd ];
+		return array( $jy, $jm, $jd );
 	}
 
 	/**
@@ -1651,7 +1749,7 @@ class Language {
 		$zd = $zl - (int)( ( 709 * $zm ) / 24 );
 		$zy = 30 * $zn + $zj - 30;
 
-		return [ $zy, $zm, $zd ];
+		return array( $zy, $zm, $zd );
 	}
 
 	/**
@@ -1798,7 +1896,7 @@ class Language {
 			}
 		}
 
-		return [ $hebrewYear, $hebrewMonth, $hebrewDay, $days ];
+		return array( $hebrewYear, $hebrewMonth, $hebrewDay, $days );
 	}
 
 	/**
@@ -1918,7 +2016,7 @@ class Language {
 			$gy_offset = $gy;
 		}
 
-		return [ $gy_offset, $gm, $gd ];
+		return array( $gy_offset, $gm, $gd );
 	}
 
 	/**
@@ -1952,13 +2050,13 @@ class Language {
 	 * @return string
 	 */
 	static function romanNumeral( $num ) {
-		static $table = [
-			[ '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X' ],
-			[ '', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LXX', 'LXXX', 'XC', 'C' ],
-			[ '', 'C', 'CC', 'CCC', 'CD', 'D', 'DC', 'DCC', 'DCCC', 'CM', 'M' ],
-			[ '', 'M', 'MM', 'MMM', 'MMMM', 'MMMMM', 'MMMMMM', 'MMMMMMM',
-				'MMMMMMMM', 'MMMMMMMMM', 'MMMMMMMMMM' ]
-		];
+		static $table = array(
+			array( '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X' ),
+			array( '', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LXX', 'LXXX', 'XC', 'C' ),
+			array( '', 'C', 'CC', 'CCC', 'CD', 'D', 'DC', 'DCC', 'DCCC', 'CM', 'M' ),
+			array( '', 'M', 'MM', 'MMM', 'MMMM', 'MMMMM', 'MMMMMM', 'MMMMMMM',
+				'MMMMMMMM', 'MMMMMMMMM', 'MMMMMMMMMM' )
+		);
 
 		$num = intval( $num );
 		if ( $num > 10000 || $num <= 0 ) {
@@ -1983,23 +2081,23 @@ class Language {
 	 * @return string
 	 */
 	static function hebrewNumeral( $num ) {
-		static $table = [
-			[ '', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י' ],
-			[ '', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק' ],
-			[ '',
-				[ 'ק' ],
-				[ 'ר' ],
-				[ 'ש' ],
-				[ 'ת' ],
-				[ 'ת', 'ק' ],
-				[ 'ת', 'ר' ],
-				[ 'ת', 'ש' ],
-				[ 'ת', 'ת' ],
-				[ 'ת', 'ת', 'ק' ],
-				[ 'ת', 'ת', 'ר' ],
-			],
-			[ '', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י' ]
-		];
+		static $table = array(
+			array( '', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י' ),
+			array( '', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק' ),
+			array( '',
+				array( 'ק' ),
+				array( 'ר' ),
+				array( 'ש' ),
+				array( 'ת' ),
+				array( 'ת', 'ק' ),
+				array( 'ת', 'ר' ),
+				array( 'ת', 'ש' ),
+				array( 'ת', 'ת' ),
+				array( 'ת', 'ת', 'ק' ),
+				array( 'ת', 'ת', 'ר' ),
+			),
+			array( '', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י' )
+		);
 
 		$num = intval( $num );
 		if ( $num > 9999 || $num <= 0 ) {
@@ -2013,7 +2111,7 @@ class Language {
 			return $table[0][$num / 1000] . "' אלפים";
 		}
 
-		$letters = [];
+		$letters = array();
 
 		for ( $pow10 = 1000, $i = 3; $i >= 0; $pow10 /= 10, $i-- ) {
 			if ( $num >= $pow10 ) {
@@ -2043,8 +2141,8 @@ class Language {
 		} else {
 			$lastIndex = $preTransformLength - 1;
 			$letters[$lastIndex] = str_replace(
-				[ 'כ', 'מ', 'נ', 'פ', 'צ' ],
-				[ 'ך', 'ם', 'ן', 'ף', 'ץ' ],
+				array( 'כ', 'מ', 'נ', 'פ', 'צ' ),
+				array( 'ך', 'ם', 'ן', 'ף', 'ץ' ),
 				$letters[$lastIndex]
 			);
 
@@ -2274,10 +2372,10 @@ class Language {
 	 *
 	 * @return string
 	 */
-	public function formatDuration( $seconds, array $chosenIntervals = [] ) {
+	public function formatDuration( $seconds, array $chosenIntervals = array() ) {
 		$intervals = $this->getDurationIntervals( $seconds, $chosenIntervals );
 
-		$segments = [];
+		$segments = array();
 
 		foreach ( $intervals as $intervalName => $intervalValue ) {
 			// Messages: duration-seconds, duration-minutes, duration-hours, duration-days, duration-weeks,
@@ -2300,9 +2398,9 @@ class Language {
 	 *
 	 * @return array
 	 */
-	public function getDurationIntervals( $seconds, array $chosenIntervals = [] ) {
+	public function getDurationIntervals( $seconds, array $chosenIntervals = array() ) {
 		if ( empty( $chosenIntervals ) ) {
-			$chosenIntervals = [
+			$chosenIntervals = array(
 				'millennia',
 				'centuries',
 				'decades',
@@ -2311,14 +2409,14 @@ class Language {
 				'hours',
 				'minutes',
 				'seconds'
-			];
+			);
 		}
 
 		$intervals = array_intersect_key( self::$durationIntervals, array_flip( $chosenIntervals ) );
 		$sortedNames = array_keys( $intervals );
 		$smallestInterval = array_pop( $sortedNames );
 
-		$segments = [];
+		$segments = array();
 
 		foreach ( $intervals as $name => $length ) {
 			$value = floor( $seconds / $length );
@@ -2353,7 +2451,7 @@ class Language {
 	 */
 	private function internalUserTimeAndDate( $type, $ts, User $user, array $options ) {
 		$ts = wfTimestamp( TS_MW, $ts );
-		$options += [ 'timecorrection' => true, 'format' => true ];
+		$options += array( 'timecorrection' => true, 'format' => true );
 		if ( $options['timecorrection'] !== false ) {
 			if ( $options['timecorrection'] === true ) {
 				$offset = $user->getOption( 'timecorrection' );
@@ -2390,7 +2488,7 @@ class Language {
 	 * @since 1.19
 	 * @return string
 	 */
-	public function userDate( $ts, User $user, array $options = [] ) {
+	public function userDate( $ts, User $user, array $options = array() ) {
 		return $this->internalUserTimeAndDate( 'date', $ts, $user, $options );
 	}
 
@@ -2413,7 +2511,7 @@ class Language {
 	 * @since 1.19
 	 * @return string
 	 */
-	public function userTime( $ts, User $user, array $options = [] ) {
+	public function userTime( $ts, User $user, array $options = array() ) {
 		return $this->internalUserTimeAndDate( 'time', $ts, $user, $options );
 	}
 
@@ -2436,7 +2534,7 @@ class Language {
 	 * @since 1.19
 	 * @return string
 	 */
-	public function userTimeAndDate( $ts, User $user, array $options = [] ) {
+	public function userTimeAndDate( $ts, User $user, array $options = array() ) {
 		return $this->internalUserTimeAndDate( 'both', $ts, $user, $options );
 	}
 
@@ -2451,13 +2549,10 @@ class Language {
 	 *
 	 * @param MWTimestamp $time
 	 * @param MWTimestamp|null $relativeTo The base timestamp to compare to (defaults to now)
-	 * @param User|null $user User the timestamp is being generated for
-	 *  (or null to use main context's user)
+	 * @param User|null $user User the timestamp is being generated for (or null to use main context's user)
 	 * @return string Formatted timestamp
 	 */
-	public function getHumanTimestamp(
-		MWTimestamp $time, MWTimestamp $relativeTo = null, User $user = null
-	) {
+	public function getHumanTimestamp( MWTimestamp $time, MWTimestamp $relativeTo = null, User $user = null ) {
 		if ( $relativeTo === null ) {
 			$relativeTo = new MWTimestamp();
 		}
@@ -2470,7 +2565,7 @@ class Language {
 		$offsetRel = $relativeTo->offsetForUser( $user );
 
 		$ts = '';
-		if ( Hooks::run( 'GetHumanTimestamp', [ &$ts, $time, $relativeTo, $user, $this ] ) ) {
+		if ( Hooks::run( 'GetHumanTimestamp', array( &$ts, $time, $relativeTo, $user, $this ) ) ) {
 			$ts = $this->getHumanTimestampInternal( $time, $relativeTo, $user );
 		}
 
@@ -2492,9 +2587,7 @@ class Language {
 	 * @return string Human timestamp
 	 * @since 1.26
 	 */
-	private function getHumanTimestampInternal(
-		MWTimestamp $ts, MWTimestamp $relativeTo, User $user
-	) {
+	private function getHumanTimestampInternal( MWTimestamp $ts, MWTimestamp $relativeTo, User $user ) {
 		$diff = $ts->diff( $relativeTo );
 		$diffDay = (bool)( (int)$ts->timestamp->format( 'w' ) -
 			(int)$relativeTo->timestamp->format( 'w' ) );
@@ -2585,7 +2678,7 @@ class Language {
 		# Even with //IGNORE iconv can whine about illegal characters in
 		# *input* string. We just ignore those too.
 		# REF: http://bugs.php.net/bug.php?id=37166
-		# REF: https://phabricator.wikimedia.org/T18885
+		# REF: https://bugzilla.wikimedia.org/show_bug.cgi?id=16885
 		MediaWiki\suppressWarnings();
 		$text = iconv( $in, $out . '//IGNORE', $string );
 		MediaWiki\restoreWarnings();
@@ -2688,7 +2781,7 @@ class Language {
 				$x = $first ? '^' : '';
 				return preg_replace_callback(
 					"/$x([a-z]|[\\xc0-\\xff][\\x80-\\xbf]*)/",
-					[ $this, 'ucCallback' ],
+					array( $this, 'ucCallback' ),
 					$str
 				);
 			} else {
@@ -2736,7 +2829,7 @@ class Language {
 				$x = $first ? '^' : '';
 				return preg_replace_callback(
 					"/$x([A-Z]|[\\xc0-\\xff][\\x80-\\xbf]*)/",
-					[ $this, 'lcCallback' ],
+					array( $this, 'lcCallback' ),
 					$str
 				);
 			} else {
@@ -2768,13 +2861,13 @@ class Language {
 			if ( function_exists( 'mb_strtoupper' ) ) {
 				return preg_replace_callback(
 					$replaceRegexp,
-					[ $this, 'ucwordsCallbackMB' ],
+					array( $this, 'ucwordsCallbackMB' ),
 					$str
 				);
 			} else {
 				return preg_replace_callback(
 					$replaceRegexp,
-					[ $this, 'ucwordsCallbackWiki' ],
+					array( $this, 'ucwordsCallbackWiki' ),
 					$str
 				);
 			}
@@ -2803,20 +2896,20 @@ class Language {
 			if ( function_exists( 'mb_strtoupper' ) ) {
 				return preg_replace_callback(
 					$replaceRegexp,
-					[ $this, 'ucwordbreaksCallbackMB' ],
+					array( $this, 'ucwordbreaksCallbackMB' ),
 					$str
 				);
 			} else {
 				return preg_replace_callback(
 					$replaceRegexp,
-					[ $this, 'ucwordsCallbackWiki' ],
+					array( $this, 'ucwordsCallbackWiki' ),
 					$str
 				);
 			}
 		} else {
 			return preg_replace_callback(
 				'/\b([\w\x80-\xff]+)\b/',
-				[ $this, 'ucwordbreaksCallbackAscii' ],
+				array( $this, 'ucwordbreaksCallbackAscii' ),
 				$str
 			);
 		}
@@ -2948,7 +3041,7 @@ class Language {
 	 * @return string
 	 */
 	function firstChar( $s ) {
-		$matches = [];
+		$matches = array();
 		preg_match(
 			'/^([\x00-\x7f]|[\xc0-\xdf][\x80-\xbf]|' .
 				'[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xf7][\x80-\xbf]{3})/',
@@ -3222,7 +3315,7 @@ class Language {
 			return;
 		}
 		$this->mMagicHookDone = true;
-		Hooks::run( 'LanguageGetMagic', [ &$this->mMagicExtensions, $this->getCode() ] );
+		Hooks::run( 'LanguageGetMagic', array( &$this->mMagicExtensions, $this->getCode() ) );
 	}
 
 	/**
@@ -3278,7 +3371,7 @@ class Language {
 			$this->mExtendedSpecialPageAliases =
 				self::$dataCache->getItem( $this->mCode, 'specialPageAliases' );
 			Hooks::run( 'LanguageGetSpecialPageAliases',
-				[ &$this->mExtendedSpecialPageAliases, $this->getCode() ] );
+				array( &$this->mExtendedSpecialPageAliases, $this->getCode() ) );
 		}
 
 		return $this->mExtendedSpecialPageAliases;
@@ -3367,7 +3460,7 @@ class Language {
 			$number = strtr( $number, array_flip( $s ) );
 		}
 
-		$number = strtr( $number, [ ',' => '' ] );
+		$number = strtr( $number, array( ',' => '' ) );
 		return $number;
 	}
 
@@ -3394,8 +3487,8 @@ class Language {
 				$sign = "-";
 				$number = substr( $number, 1 );
 			}
-			$integerPart = [];
-			$decimalPart = [];
+			$integerPart = array();
+			$decimalPart = array();
 			$numMatches = preg_match_all( "/(#+)/", $digitGroupingPattern, $matches );
 			preg_match( "/\d+/", $number, $integerPart );
 			preg_match( "/\.\d*/", $number, $decimalPart );
@@ -3586,14 +3679,13 @@ class Language {
 	protected function removeBadCharLast( $string ) {
 		if ( $string != '' ) {
 			$char = ord( $string[strlen( $string ) - 1] );
-			$m = [];
+			$m = array();
 			if ( $char >= 0xc0 ) {
 				# We got the first byte only of a multibyte char; remove it.
 				$string = substr( $string, 0, -1 );
 			} elseif ( $char >= 0x80 &&
-				// Use the /s modifier (PCRE_DOTALL) so (.*) also matches newlines
 				preg_match( '/^(.*)(?:[\xe0-\xef][\x80-\xbf]|' .
-					'[\xf0-\xf7][\x80-\xbf]{1,2})$/s', $string, $m )
+					'[\xf0-\xf7][\x80-\xbf]{1,2})$/', $string, $m )
 			) {
 				# We chopped in the middle of a character; remove it
 				$string = $m[1];
@@ -3653,7 +3745,7 @@ class Language {
 		$bracketState = 0; // 1-tag start, 2-tag name, 0-neither
 		$entityState = 0; // 0-not entity, 1-entity
 		$tag = $ret = ''; // accumulated tag name, accumulated result string
-		$openTags = []; // open tag stack
+		$openTags = array(); // open tag stack
 		$maybeState = null; // possible truncation state
 
 		$textLen = strlen( $text );
@@ -3668,7 +3760,7 @@ class Language {
 					# Save where we are; we will truncate here unless there turn out to
 					# be so few remaining characters that truncation is not necessary.
 					if ( !$maybeState ) { // already saved? ($neLength = 0 case)
-						$maybeState = [ $ret, $openTags ]; // save state
+						$maybeState = array( $ret, $openTags ); // save state
 					}
 				} elseif ( $dispLen > $length && $dispLen > strlen( $ellipsis ) ) {
 					# String in fact does need truncation, the truncation point was OK.
@@ -3719,7 +3811,7 @@ class Language {
 					if ( $neLength == 0 && !$maybeState ) {
 						// Save state without $ch. We want to *hit* the first
 						// display char (to get tags) but not *use* it if truncating.
-						$maybeState = [ substr( $ret, 0, -1 ), $openTags ];
+						$maybeState = array( substr( $ret, 0, -1 ), $openTags );
 					}
 					if ( $ch == '&' ) {
 						$entityState = 1; // entity found, (e.g. "&#160;")
@@ -3819,7 +3911,7 @@ class Language {
 			return $wgGrammarForms[$this->getCode()];
 		}
 
-		return [];
+		return array();
 	}
 	/**
 	 * Provides an alternative text depending on specified gender.
@@ -4093,6 +4185,17 @@ class Language {
 	}
 
 	/**
+	 * Put custom tags (e.g. -{ }-) around math to prevent conversion
+	 *
+	 * @param string $text
+	 * @return string
+	 * @deprecated since 1.22 is no longer used
+	 */
+	public function armourMath( $text ) {
+		return $this->mConverter->armourMath( $text );
+	}
+
+	/**
 	 * Perform output conversion on a string, and encode for safe HTML output.
 	 * @param string $text Text to be converted
 	 * @param bool $isTitle Whether this conversion is for the article title
@@ -4180,16 +4283,6 @@ class Language {
 	}
 
 	/**
-	 * Refresh the cache of conversion tables when
-	 * MediaWiki:Conversiontable* is updated.
-	 *
-	 * @param Title $titleobj The Title of the page being updated
-	 */
-	public function updateConversionTable( Title $title ) {
-		$this->mConverter->updateConversionTable( $title );
-	}
-
-	/**
 	 * Prepare external link text for conversion. When the text is
 	 * a URL, it shouldn't be converted, and it'll be wrapped in
 	 * the "raw" tag (-{R| }-) to prevent conversion.
@@ -4231,6 +4324,15 @@ class Language {
 	}
 
 	/**
+	 * @deprecated since 1.24, will be removed in 1.25
+	 * @return Language
+	 */
+	function getLangObj() {
+		wfDeprecated( __METHOD__, '1.24' );
+		return $this;
+	}
+
+	/**
 	 * Get the "parent" language which has a converter to convert a "compatible" language
 	 * (in another variant) to this language (eg. zh for zh-cn, but not en for en-gb).
 	 *
@@ -4242,7 +4344,8 @@ class Language {
 			return $this->mParentLanguage;
 		}
 
-		$code = explode( '-', $this->getCode() )[0];
+		$pieces = explode( '-', $this->getCode() );
+		$code = $pieces[0];
 		if ( !in_array( $code, LanguageConverter::$languagesWithVariants ) ) {
 			$this->mParentLanguage = null;
 			return null;
@@ -4258,7 +4361,7 @@ class Language {
 	}
 
 	/**
-	 * Get the internal language code for this language object
+	 * Get the RFC 3066 code for this language object
 	 *
 	 * NOTE: The return value of this function is NOT HTML-safe and must be escaped with
 	 * htmlspecialchars() or similar
@@ -4270,7 +4373,7 @@ class Language {
 	}
 
 	/**
-	 * Get the code in BCP 47 format which we can use
+	 * Get the code in Bcp47 format which we can use
 	 * inside of html lang="" tags.
 	 *
 	 * NOTE: The return value of this function is NOT HTML-safe and must be escaped with
@@ -4297,6 +4400,22 @@ class Language {
 	}
 
 	/**
+	 * Get the name of a file for a certain language code
+	 * @param string $prefix Prepend this to the filename
+	 * @param string $code Language code
+	 * @param string $suffix Append this to the filename
+	 * @throws MWException
+	 * @return string $prefix . $mangledCode . $suffix
+	 */
+	public static function getFileName( $prefix = 'Language', $code, $suffix = '.php' ) {
+		if ( !self::isValidBuiltInCode( $code ) ) {
+			throw new MWException( "Invalid language code \"$code\"" );
+		}
+
+		return $prefix . str_replace( '-', '_', ucfirst( $code ) ) . $suffix;
+	}
+
+	/**
 	 * Get the language code from a file name. Inverse of getFileName()
 	 * @param string $filename $prefix . $languageCode . $suffix
 	 * @param string $prefix Prefix before the language code
@@ -4315,40 +4434,12 @@ class Language {
 
 	/**
 	 * @param string $code
-	 * @return string Name of the language class
-	 */
-	public static function classFromCode( $code ) {
-		if ( $code == 'en' ) {
-			return 'Language';
-		} else {
-			return 'Language' . str_replace( '-', '_', ucfirst( $code ) );
-		}
-	}
-
-	/**
-	 * Get the name of a file for a certain language code
-	 * @param string $prefix Prepend this to the filename
-	 * @param string $code Language code
-	 * @param string $suffix Append this to the filename
-	 * @throws MWException
-	 * @return string $prefix . $mangledCode . $suffix
-	 */
-	public static function getFileName( $prefix = 'Language', $code, $suffix = '.php' ) {
-		if ( !self::isValidBuiltInCode( $code ) ) {
-			throw new MWException( "Invalid language code \"$code\"" );
-		}
-
-		return $prefix . str_replace( '-', '_', ucfirst( $code ) ) . $suffix;
-	}
-
-	/**
-	 * @param string $code
 	 * @return string
 	 */
 	public static function getMessagesFileName( $code ) {
 		global $IP;
 		$file = self::getFileName( "$IP/languages/messages/Messages", $code, '.php' );
-		Hooks::run( 'Language::getMessagesFileName', [ $code, &$file ] );
+		Hooks::run( 'Language::getMessagesFileName', array( $code, &$file ) );
 		return $file;
 	}
 
@@ -4368,6 +4459,15 @@ class Language {
 	}
 
 	/**
+	 * @param string $code
+	 * @return string
+	 */
+	public static function getClassFileName( $code ) {
+		global $IP;
+		return self::getFileName( "$IP/languages/classes/Language", $code, '.php' );
+	}
+
+	/**
 	 * Get the first fallback for a given language.
 	 *
 	 * @param string $code
@@ -4375,11 +4475,12 @@ class Language {
 	 * @return bool|string
 	 */
 	public static function getFallbackFor( $code ) {
-		$fallbacks = self::getFallbacksFor( $code );
-		if ( $fallbacks ) {
+		if ( $code === 'en' || !Language::isValidBuiltInCode( $code ) ) {
+			return false;
+		} else {
+			$fallbacks = self::getFallbacksFor( $code );
 			return $fallbacks[0];
 		}
-		return false;
 	}
 
 	/**
@@ -4391,11 +4492,11 @@ class Language {
 	 */
 	public static function getFallbacksFor( $code ) {
 		if ( $code === 'en' || !Language::isValidBuiltInCode( $code ) ) {
-			return [];
+			return array();
 		}
 		// For unknown languages, fallbackSequence returns an empty array,
 		// hardcode fallback to 'en' in that case.
-		return self::getLocalisationCache()->getItem( $code, 'fallbackSequence' ) ?: [ 'en' ];
+		return self::getLocalisationCache()->getItem( $code, 'fallbackSequence' ) ?: array( 'en' );
 	}
 
 	/**
@@ -4423,7 +4524,7 @@ class Language {
 			// Eliminate any languages already included in the chain
 			$siteFallbacks = array_diff( $siteFallbacks, $fallbacks );
 
-			self::$fallbackLanguageCache[$cacheKey] = [ $fallbacks, $siteFallbacks ];
+			self::$fallbackLanguageCache[$cacheKey] = array( $fallbacks, $siteFallbacks );
 		}
 		return self::$fallbackLanguageCache[$cacheKey];
 	}
@@ -4482,7 +4583,7 @@ class Language {
 		# such as action=raw much more expensive than they need to be.
 		# This will hopefully cover most cases.
 		$talk = preg_replace_callback( '/{{grammar:(.*?)\|(.*?)}}/i',
-			[ &$this, 'replaceGrammarInNamespace' ], $talk );
+			array( &$this, 'replaceGrammarInNamespace' ), $talk );
 		return str_replace( ' ', '_', $talk );
 	}
 
@@ -4501,7 +4602,7 @@ class Language {
 	static function getCaseMaps() {
 		static $wikiUpperChars, $wikiLowerChars;
 		if ( isset( $wikiUpperChars ) ) {
-			return [ $wikiUpperChars, $wikiLowerChars ];
+			return array( $wikiUpperChars, $wikiLowerChars );
 		}
 
 		$arr = wfGetPrecompiledData( 'Utf8Case.ser' );
@@ -4511,7 +4612,7 @@ class Language {
 		}
 		$wikiUpperChars = $arr['wikiUpperChars'];
 		$wikiLowerChars = $arr['wikiLowerChars'];
-		return [ $wikiUpperChars, $wikiLowerChars ];
+		return array( $wikiUpperChars, $wikiLowerChars );
 	}
 
 	/**
@@ -4553,9 +4654,9 @@ class Language {
 	 *     or 'avoidminutes'.
 	 * @return string
 	 */
-	function formatTimePeriod( $seconds, $format = [] ) {
+	function formatTimePeriod( $seconds, $format = array() ) {
 		if ( !is_array( $format ) ) {
-			$format = [ 'avoid' => $format ]; // For backwards compatibility
+			$format = array( 'avoid' => $format ); // For backwards compatibility
 		}
 		if ( !isset( $format['avoid'] ) ) {
 			$format['avoid'] = false;
@@ -4603,7 +4704,7 @@ class Language {
 			$s = $hoursMsg->params( $this->formatNum( $hours ) )->text();
 			$s .= ' ';
 			$s .= $minutesMsg->params( $this->formatNum( $minutes ) )->text();
-			if ( !in_array( $format['avoid'], [ 'avoidseconds', 'avoidminutes' ] ) ) {
+			if ( !in_array( $format['avoid'], array( 'avoidseconds', 'avoidminutes' ) ) ) {
 				$s .= ' ' . $secondsMsg->params( $this->formatNum( $secondsPart ) )->text();
 			}
 		} else {
@@ -4669,7 +4770,7 @@ class Language {
 				$this->getMessageFromDB( str_replace( '$1', '', $messageKey ) )
 			);
 		}
-		$sizes = [ '', 'kilo', 'mega', 'giga', 'tera', 'peta', 'exa', 'zeta', 'yotta' ];
+		$sizes = array( '', 'kilo', 'mega', 'giga', 'tera', 'peta', 'exa', 'zeta', 'yotta' );
 		$index = 0;
 
 		$maxIndex = count( $sizes ) - 1;
@@ -4738,7 +4839,7 @@ class Language {
 	 * @return string
 	 */
 	public function viewPrevNext( Title $title, $offset, $limit,
-		array $query = [], $atend = false
+		array $query = array(), $atend = false
 	) {
 		// @todo FIXME: Why on earth this needs one message for the text and another one for tooltip?
 
@@ -4761,8 +4862,8 @@ class Language {
 		}
 
 		# Make links to set number of items per page
-		$numLinks = [];
-		foreach ( [ 20, 50, 100, 250, 500 ] as $num ) {
+		$numLinks = array();
+		foreach ( array( 20, 50, 100, 250, 500 ) as $num ) {
 			$numLinks[] = $this->numLink( $title, $offset, $num,
 				$query, $this->formatNum( $num ), 'shown-title', 'mw-numlink' );
 		}
@@ -4786,12 +4887,12 @@ class Language {
 	private function numLink( Title $title, $offset, $limit, array $query, $link,
 		$tooltipMsg, $class
 	) {
-		$query = [ 'limit' => $limit, 'offset' => $offset ] + $query;
+		$query = array( 'limit' => $limit, 'offset' => $offset ) + $query;
 		$tooltip = wfMessage( $tooltipMsg )->inLanguage( $this )->title( $title )
 			->numParams( $limit )->text();
 
-		return Html::element( 'a', [ 'href' => $title->getLocalURL( $query ),
-			'title' => $tooltip, 'class' => $class ], $link );
+		return Html::element( 'a', array( 'href' => $title->getLocalURL( $query ),
+			'title' => $tooltip, 'class' => $class ), $link );
 	}
 
 	/**
@@ -4867,7 +4968,7 @@ class Language {
 	 */
 	public function getPluralRuleIndexNumber( $number ) {
 		$pluralRules = $this->getCompiledPluralRules();
-		$form = Evaluator::evaluateCompiled( $number, $pluralRules );
+		$form = CLDRPluralRuleEvaluator::evaluateCompiled( $number, $pluralRules );
 		return $form;
 	}
 

@@ -2,11 +2,6 @@
 /**
  * Tests for log dumps of BackupDumper
  *
- * Some of these tests use the old constuctor for TextPassDumper
- * and the dump() function, while others use the new loadWithArgv( $args )
- * function and execute(). This is to ensure both the old and new methods
- * work properly.
- *
  * @group Database
  * @group Dump
  * @covers BackupDumper
@@ -78,7 +73,7 @@ class BackupDumperLoggerTest extends DumpTestCase {
 
 			$this->logId3 = $this->addLogEntry( 'move', 'delete',
 				$user2, NS_MAIN, "PageA", "SomeOtherComment",
-				[ 'key1' => 1, 3 => 'value3' ] );
+				array( 'key1' => 1, 3 => 'value3' ) );
 			$this->assertGreaterThan( 0, $this->logId3 );
 		} catch ( Exception $e ) {
 			// We'd love to pass $e directly. However, ... see
@@ -102,7 +97,7 @@ class BackupDumperLoggerTest extends DumpTestCase {
 	 * @param array $parameters (optional) unserialized data accompanying the log entry
 	 */
 	private function assertLogItem( $id, $user_name, $user_id, $comment, $type,
-		$subtype, $title, $parameters = []
+		$subtype, $title, $parameters = array()
 	) {
 
 		$this->assertNodeStart( "logitem" );
@@ -141,8 +136,7 @@ class BackupDumperLoggerTest extends DumpTestCase {
 
 		// Preparing the dump
 		$fname = $this->getNewTempFile();
-
-		$dumper = new DumpBackup( [ '--output=file:' . $fname ] );
+		$dumper = new BackupDumper( array( "--output=file:" . $fname ) );
 		$dumper->startId = $this->logId1;
 		$dumper->endId = $this->logId3 + 1;
 		$dumper->reporting = false;
@@ -167,7 +161,7 @@ class BackupDumperLoggerTest extends DumpTestCase {
 
 		$this->assertLogItem( $this->logId3, "BackupDumperLogUserB",
 			$this->userId2, "SomeOtherComment", "move", "delete",
-			"PageA", [ 'key1' => 1, 3 => 'value3' ] );
+			"PageA", array( 'key1' => 1, 3 => 'value3' ) );
 
 		$this->assertDumpEnd();
 	}
@@ -179,10 +173,8 @@ class BackupDumperLoggerTest extends DumpTestCase {
 
 		// Preparing the dump
 		$fname = $this->getNewTempFile();
-
-		$dumper = new DumpBackup();
-		$dumper->loadWithArgv( [ '--logs', '--output=gzip:' . $fname,
-			'--reporting=2' ] );
+		$dumper = new BackupDumper( array( "--output=gzip:" . $fname,
+			"--reporting=2" ) );
 		$dumper->startId = $this->logId1;
 		$dumper->endId = $this->logId3 + 1;
 		$dumper->setDb( $this->db );
@@ -198,7 +190,7 @@ class BackupDumperLoggerTest extends DumpTestCase {
 		}
 
 		// Performing the dump
-		$dumper->execute();
+		$dumper->dump( WikiExporter::LOGS, WikiExporter::TEXT );
 
 		$this->assertTrue( fclose( $dumper->stderr ), "Closing stderr handle" );
 
@@ -220,7 +212,7 @@ class BackupDumperLoggerTest extends DumpTestCase {
 
 		$this->assertLogItem( $this->logId3, "BackupDumperLogUserB",
 			$this->userId2, "SomeOtherComment", "move", "delete",
-			"PageA", [ 'key1' => 1, 3 => 'value3' ] );
+			"PageA", array( 'key1' => 1, 3 => 'value3' ) );
 
 		$this->assertDumpEnd();
 

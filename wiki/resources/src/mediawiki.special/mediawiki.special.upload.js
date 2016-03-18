@@ -68,7 +68,7 @@
 				titles: ( new mw.Title( this.nameToCheck, mw.config.get( 'wgNamespaceIds' ).file ) ).getPrefixedText(),
 				prop: 'imageinfo',
 				iiprop: 'uploadwarning',
-				indexpageids: true
+				indexpageids: ''
 			} ).done( function ( result ) {
 				var resultOut = '';
 				if ( result.query ) {
@@ -85,9 +85,7 @@
 		},
 
 		setWarning: function ( warning ) {
-			var $warning = $( $.parseHTML( warning ) );
-			mw.hook( 'wikipage.content' ).fire( $warning );
-			$( '#wpDestFile-warning' ).empty().append( $warning );
+			$( '#wpDestFile-warning' ).html( warning );
 
 			// Set a value in the form indicating that the warning is acknowledged and
 			// doesn't need to be redisplayed post-upload
@@ -121,7 +119,7 @@
 				text: '{{' + license + '}}',
 				title: $( '#wpDestFile' ).val() || 'File:Sample.jpg',
 				prop: 'text',
-				pst: true
+				pst: ''
 			} ).done( function ( result ) {
 				$spinnerLicense.remove();
 				uploadLicense.processResult( result, license );
@@ -265,7 +263,7 @@
 		 *
 		 * TODO: Is there a way we can ask the browser what's supported in `<img>`s?
 		 *
-		 * TODO: Put SVG back after working around Firefox 7 bug <https://phabricator.wikimedia.org/T33643>
+		 * TODO: Put SVG back after working around Firefox 7 bug <https://bugzilla.wikimedia.org/show_bug.cgi?id=31643>
 		 *
 		 * @param {File} file
 		 * @return {boolean}
@@ -428,7 +426,7 @@
 			var reader = new FileReader();
 			if ( callbackBinary && 'readAsBinaryString' in reader ) {
 				// To fetch JPEG metadata we need a binary string; start there.
-				// TODO
+				// todo:
 				reader.onload = function () {
 					callbackBinary( reader.result );
 

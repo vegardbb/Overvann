@@ -22,25 +22,25 @@ class HTMLTextAreaField extends HTMLFormField {
 	}
 
 	function getInputHTML( $value ) {
-		$attribs = [
+		$attribs = array(
 				'id' => $this->mID,
 				'cols' => $this->getCols(),
 				'rows' => $this->getRows(),
 				'spellcheck' => $this->getSpellCheck(),
-			] + $this->getTooltipAndAccessKey();
+			) + $this->getTooltipAndAccessKey();
 
 		if ( $this->mClass !== '' ) {
 			$attribs['class'] = $this->mClass;
 		}
 
-		$allowedParams = [
+		$allowedParams = array(
 			'placeholder',
 			'tabindex',
 			'disabled',
 			'readonly',
 			'required',
 			'autofocus'
-		];
+		);
 
 		$attribs += $this->getAttributes( $allowedParams );
 		return Html::textarea( $this->mName, $value, $attribs );
@@ -54,29 +54,29 @@ class HTMLTextAreaField extends HTMLFormField {
 		$attribs = $this->getTooltipAndAccessKey();
 
 		if ( $this->mClass !== '' ) {
-			$attribs['classes'] = [ $this->mClass ];
+			$attribs['classes'] = array( $this->mClass );
 		}
 
-		$allowedParams = [
+		$allowedParams = array(
 			'placeholder',
 			'tabindex',
 			'disabled',
 			'readonly',
 			'required',
 			'autofocus',
-		];
+		);
 
-		$attribs += $this->getAttributes( $allowedParams, [
+		$attribs += $this->getAttributes( $allowedParams, array(
 			'tabindex' => 'tabIndex',
 			'readonly' => 'readOnly',
-		] );
+		) );
 
-		return new OOUI\TextInputWidget( [
+		return new OOUI\TextInputWidget( array(
 			'id' => $this->mID,
 			'name' => $this->mName,
 			'multiline' => true,
 			'value' => $value,
 			'rows' => $this->getRows(),
-		] + $attribs );
+		) + $attribs );
 	}
 }

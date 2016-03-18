@@ -33,12 +33,7 @@ class AssembleUploadChunksJob extends Job {
 	}
 
 	public function run() {
-		/** @noinspection PhpUnusedLocalVariableInspection */
 		$scope = RequestContext::importScopedSession( $this->params['session'] );
-		$this->addTeardownCallback( function () use ( &$scope ) {
-			ScopedCallback::consume( $scope ); // T126450
-		} );
-
 		$context = RequestContext::getMain();
 		$user = $context->getUser();
 		try {
@@ -51,14 +46,14 @@ class AssembleUploadChunksJob extends Job {
 			UploadBase::setSessionStatus(
 				$user,
 				$this->params['filekey'],
-				[ 'result' => 'Poll', 'stage' => 'assembling', 'status' => Status::newGood() ]
+				array( 'result' => 'Poll', 'stage' => 'assembling', 'status' => Status::newGood() )
 			);
 
 			$upload = new UploadFromChunks( $user );
 			$upload->continueChunks(
 				$this->params['filename'],
 				$this->params['filekey'],
-				new WebRequestUpload( $context->getRequest(), 'null' )
+				$context->getRequest()
 			);
 
 			// Combine all of the chunks into a local file and upload that to a new stash file
@@ -67,7 +62,7 @@ class AssembleUploadChunksJob extends Job {
 				UploadBase::setSessionStatus(
 					$user,
 					$this->params['filekey'],
-					[ 'result' => 'Failure', 'stage' => 'assembling', 'status' => $status ]
+					array( 'result' => 'Failure', 'stage' => 'assembling', 'status' => $status )
 				);
 				$this->setLastError( $status->getWikiText() );
 
@@ -91,25 +86,25 @@ class AssembleUploadChunksJob extends Job {
 			UploadBase::setSessionStatus(
 				$user,
 				$this->params['filekey'],
-				[
+				array(
 					'result' => 'Success',
 					'stage' => 'assembling',
 					'filekey' => $newFileKey,
 					'imageinfo' => $imageInfo,
 					'status' => Status::newGood()
-				]
+				)
 			);
 		} catch ( Exception $e ) {
 			UploadBase::setSessionStatus(
 				$user,
 				$this->params['filekey'],
-				[
+				array(
 					'result' => 'Failure',
 					'stage' => 'assembling',
 					'status' => Status::newFatal( 'api-error-stashfailed' )
-				]
+				)
 			);
-			$this->setLastError( get_class( $e ) . ": " . $e->getMessage() );
+			$this->setLastError( get_class( $e ) . ": " . $e->getText() );
 			// To be extra robust.
 			MWExceptionHandler::rollbackMasterChangesAndLog( $e );
 
@@ -122,7 +117,7 @@ class AssembleUploadChunksJob extends Job {
 	public function getDeduplicationInfo() {
 		$info = parent::getDeduplicationInfo();
 		if ( is_array( $info['params'] ) ) {
-			$info['params'] = [ 'filekey' => $info['params']['filekey'] ];
+			$info['params'] = array( 'filekey' => $info['params']['filekey'] );
 		}
 
 		return $info;

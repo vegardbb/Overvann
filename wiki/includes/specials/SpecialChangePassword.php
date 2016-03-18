@@ -41,10 +41,6 @@ class SpecialChangePassword extends FormSpecialPage {
 		$this->listed( false );
 	}
 
-	public function doesWrites() {
-		return true;
-	}
-
 	/**
 	 * Main execution point
 	 * @param string|null $par
@@ -90,55 +86,58 @@ class SpecialChangePassword extends FormSpecialPage {
 			$oldpassMsg = $user->isLoggedIn() ? 'oldpassword' : 'resetpass-temp-password';
 		}
 
-		$fields = [
-			'Name' => [
+		$fields = array(
+			'Name' => array(
 				'type' => 'info',
 				'label-message' => 'username',
 				'default' => $request->getVal( 'wpName', $user->getName() ),
-			],
-			'Password' => [
+			),
+			'Password' => array(
 				'type' => 'password',
 				'label-message' => $oldpassMsg,
-			],
-			'NewPassword' => [
+			),
+			'NewPassword' => array(
 				'type' => 'password',
 				'label-message' => 'newpassword',
-			],
-			'Retype' => [
+			),
+			'Retype' => array(
 				'type' => 'password',
 				'label-message' => 'retypenew',
-			],
-		];
+			),
+		);
 
 		if ( !$this->getUser()->isLoggedIn() ) {
-			$fields['LoginOnChangeToken'] = [
+			if ( !LoginForm::getLoginToken() ) {
+				LoginForm::setLoginToken();
+			}
+			$fields['LoginOnChangeToken'] = array(
 				'type' => 'hidden',
 				'label' => 'Change Password Token',
-				'default' => LoginForm::getLoginToken()->toString(),
-			];
+				'default' => LoginForm::getLoginToken(),
+			);
 		}
 
-		$extraFields = [];
-		Hooks::run( 'ChangePasswordForm', [ &$extraFields ] );
+		$extraFields = array();
+		Hooks::run( 'ChangePasswordForm', array( &$extraFields ) );
 		foreach ( $extraFields as $extra ) {
 			list( $name, $label, $type, $default ) = $extra;
-			$fields[$name] = [
+			$fields[$name] = array(
 				'type' => $type,
 				'name' => $name,
 				'label-message' => $label,
 				'default' => $default,
-			];
+			);
 		}
 
 		if ( !$user->isLoggedIn() ) {
-			$fields['Remember'] = [
+			$fields['Remember'] = array(
 				'type' => 'check',
 				'label' => $this->msg( 'remembermypassword' )
 						->numParams(
 							ceil( $this->getConfig()->get( 'CookieExpiration' ) / ( 3600 * 24 ) )
 						)->text(),
 				'default' => $request->getVal( 'wpRemember' ),
-			];
+			);
 		}
 
 		return $fields;
@@ -153,10 +152,7 @@ class SpecialChangePassword extends FormSpecialPage {
 				? 'resetpass-submit-loggedin'
 				: 'resetpass_submit'
 		);
-		$form->addButton( [
-			'name' => 'wpCancel',
-			'value' => $this->msg( 'resetpass-submit-cancel' )->text()
-		] );
+		$form->addButton( 'wpCancel', $this->msg( 'resetpass-submit-cancel' )->text() );
 		$form->setHeaderText( $this->msg( 'resetpass_text' )->parseAsBlock() );
 		if ( $this->mPreTextMessage instanceof Message ) {
 			$form->addPreText( $this->mPreTextMessage->parseAsBlock() );
@@ -176,7 +172,7 @@ class SpecialChangePassword extends FormSpecialPage {
 		}
 
 		if ( !$this->getUser()->isLoggedIn()
-			&& !LoginForm::getLoginToken()->match( $request->getVal( 'wpLoginOnChangeToken' ) )
+			&& $request->getVal( 'wpLoginOnChangeToken' ) !== LoginForm::getLoginToken()
 		) {
 			// Potential CSRF (bug 62497)
 			return false;
@@ -194,16 +190,20 @@ class SpecialChangePassword extends FormSpecialPage {
 			return true;
 		}
 
-		$this->mUserName = $request->getVal( 'wpName', $this->getUser()->getName() );
-		$this->mDomain = $wgAuth->getDomain();
+		try {
+			$this->mUserName = $request->getVal( 'wpName', $this->getUser()->getName() );
+			$this->mDomain = $wgAuth->getDomain();
 
-		if ( !$wgAuth->allowPasswordChange() ) {
-			throw new ErrorPageError( 'changepassword', 'resetpass_forbidden' );
+			if ( !$wgAuth->allowPasswordChange() ) {
+				throw new ErrorPageError( 'changepassword', 'resetpass_forbidden' );
+			}
+
+			$this->attemptReset( $data['Password'], $data['NewPassword'], $data['Retype'] );
+
+			return true;
+		} catch ( PasswordError $e ) {
+			return $e->getMessage();
 		}
-
-		$status = $this->attemptReset( $data['Password'], $data['NewPassword'], $data['Retype'] );
-
-		return $status;
 	}
 
 	public function onSuccess() {
@@ -215,15 +215,15 @@ class SpecialChangePassword extends FormSpecialPage {
 			$this->getOutput()->returnToMain();
 		} else {
 			$request = $this->getRequest();
-			LoginForm::clearLoginToken();
-			$token = LoginForm::getLoginToken()->toString();
-			$data = [
+			LoginForm::setLoginToken();
+			$token = LoginForm::getLoginToken();
+			$data = array(
 				'action' => 'submitlogin',
 				'wpName' => $this->mUserName,
 				'wpDomain' => $this->mDomain,
 				'wpLoginToken' => $token,
 				'wpPassword' => $request->getVal( 'wpNewPassword' ),
-			] + $request->getValues( 'wpRemember', 'returnto', 'returntoquery' );
+			) + $request->getValues( 'wpRemember', 'returnto', 'returntoquery' );
 			$login = new LoginForm( new DerivativeRequest( $request, $data, true ) );
 			$login->setContext( $this->getContext() );
 			$login->execute( null );
@@ -231,14 +231,10 @@ class SpecialChangePassword extends FormSpecialPage {
 	}
 
 	/**
-	 * Checks the new password if it meets the requirements for passwords and set
-	 * it as a current password, otherwise set the passed Status object to fatal
-	 * and doesn't change anything
-	 *
-	 * @param string $oldpass The current (temporary) password.
-	 * @param string $newpass The password to set.
-	 * @param string $retype The string of the retype password field to check with newpass
-	 * @return Status
+	 * @param string $oldpass
+	 * @param string $newpass
+	 * @param string $retype
+	 * @throws PasswordError When cannot set the new password because requirements not met.
 	 */
 	protected function attemptReset( $oldpass, $newpass, $retype ) {
 		$isSelf = ( $this->mUserName === $this->getUser()->getName() );
@@ -249,49 +245,54 @@ class SpecialChangePassword extends FormSpecialPage {
 		}
 
 		if ( !$user || $user->isAnon() ) {
-			return Status::newFatal( $this->msg( 'nosuchusershort', $this->mUserName ) );
+			throw new PasswordError( $this->msg( 'nosuchusershort', $this->mUserName )->text() );
 		}
 
 		if ( $newpass !== $retype ) {
-			Hooks::run( 'PrefsPasswordAudit', [ $user, $newpass, 'badretype' ] );
-			return Status::newFatal( $this->msg( 'badretype' ) );
+			Hooks::run( 'PrefsPasswordAudit', array( $user, $newpass, 'badretype' ) );
+			throw new PasswordError( $this->msg( 'badretype' )->text() );
 		}
 
-		$throttleInfo = LoginForm::incrementLoginThrottle( $this->mUserName );
-		if ( $throttleInfo ) {
-			return Status::newFatal( $this->msg( 'changepassword-throttled' )
-				->durationParams( $throttleInfo['wait'] )
+		$throttleCount = LoginForm::incLoginThrottle( $this->mUserName );
+		if ( $throttleCount === true ) {
+			$lang = $this->getLanguage();
+			$throttleInfo = $this->getConfig()->get( 'PasswordAttemptThrottle' );
+			throw new PasswordError( $this->msg( 'changepassword-throttled' )
+				->params( $lang->formatDuration( $throttleInfo['seconds'] ) )
+				->text()
 			);
 		}
 
 		// @todo Make these separate messages, since the message is written for both cases
 		if ( !$user->checkTemporaryPassword( $oldpass ) && !$user->checkPassword( $oldpass ) ) {
-			Hooks::run( 'PrefsPasswordAudit', [ $user, $newpass, 'wrongpassword' ] );
-			return Status::newFatal( $this->msg( 'resetpass-wrong-oldpass' ) );
+			Hooks::run( 'PrefsPasswordAudit', array( $user, $newpass, 'wrongpassword' ) );
+			throw new PasswordError( $this->msg( 'resetpass-wrong-oldpass' )->text() );
 		}
 
 		// User is resetting their password to their old password
 		if ( $oldpass === $newpass ) {
-			return Status::newFatal( $this->msg( 'resetpass-recycled' ) );
+			throw new PasswordError( $this->msg( 'resetpass-recycled' )->text() );
 		}
 
 		// Do AbortChangePassword after checking mOldpass, so we don't leak information
 		// by possibly aborting a new password before verifying the old password.
 		$abortMsg = 'resetpass-abort-generic';
-		if ( !Hooks::run( 'AbortChangePassword', [ $user, $oldpass, $newpass, &$abortMsg ] ) ) {
-			Hooks::run( 'PrefsPasswordAudit', [ $user, $newpass, 'abortreset' ] );
-			return Status::newFatal( $this->msg( $abortMsg ) );
+		if ( !Hooks::run( 'AbortChangePassword', array( $user, $oldpass, $newpass, &$abortMsg ) ) ) {
+			Hooks::run( 'PrefsPasswordAudit', array( $user, $newpass, 'abortreset' ) );
+			throw new PasswordError( $this->msg( $abortMsg )->text() );
 		}
 
 		// Please reset throttle for successful logins, thanks!
-		LoginForm::clearLoginThrottle( $this->mUserName );
+		if ( $throttleCount ) {
+			LoginForm::clearLoginThrottle( $this->mUserName );
+		}
 
 		try {
 			$user->setPassword( $newpass );
-			Hooks::run( 'PrefsPasswordAudit', [ $user, $newpass, 'success' ] );
+			Hooks::run( 'PrefsPasswordAudit', array( $user, $newpass, 'success' ) );
 		} catch ( PasswordError $e ) {
-			Hooks::run( 'PrefsPasswordAudit', [ $user, $newpass, 'error' ] );
-			return Status::newFatal( new RawMessage( $e->getMessage() ) );
+			Hooks::run( 'PrefsPasswordAudit', array( $user, $newpass, 'error' ) );
+			throw new PasswordError( $e->getMessage() );
 		}
 
 		if ( $isSelf ) {
@@ -300,9 +301,8 @@ class SpecialChangePassword extends FormSpecialPage {
 			$remember = $this->getRequest()->getCookie( 'Token' ) !== null;
 			$user->setCookies( null, null, $remember );
 		}
+		$user->resetPasswordExpiration();
 		$user->saveSettings();
-		$this->resetPasswordExpiration( $user );
-		return Status::newGood();
 	}
 
 	public function requiresUnblock() {
@@ -311,33 +311,5 @@ class SpecialChangePassword extends FormSpecialPage {
 
 	protected function getGroupName() {
 		return 'users';
-	}
-
-	/**
-	 * For resetting user password expiration, until AuthManager comes along
-	 * @param User $user
-	 */
-	private function resetPasswordExpiration( User $user ) {
-		global $wgPasswordExpirationDays;
-		$newExpire = null;
-		if ( $wgPasswordExpirationDays ) {
-			$newExpire = wfTimestamp(
-				TS_MW,
-				time() + ( $wgPasswordExpirationDays * 24 * 3600 )
-			);
-		}
-		// Give extensions a chance to force an expiration
-		Hooks::run( 'ResetPasswordExpiration', [ $this, &$newExpire ] );
-		$dbw = wfGetDB( DB_MASTER );
-		$dbw->update(
-			'user',
-			[ 'user_password_expires' => $dbw->timestampOrNull( $newExpire ) ],
-			[ 'user_id' => $user->getID() ],
-			__METHOD__
-		);
-	}
-
-	protected function getDisplayFormat() {
-		return 'ooui';
 	}
 }

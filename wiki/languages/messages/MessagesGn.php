@@ -10,7 +10,7 @@
 
 $fallback = 'es';
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_SPECIAL          => 'Mba\'echĩchĩ',
 	NS_TALK             => 'Myangekõi',
 	NS_USER             => 'Puruhára',
@@ -26,8 +26,8 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Pytyvõ_myangekõi',
 	NS_CATEGORY         => 'Ñemohenda',
 	NS_CATEGORY_TALK    => 'Ñemohenda_myangekõi',
-];
+);
 
 // Remove Spanish gender aliases (bug 37090)
-$namespaceGenderAliases = [];
+$namespaceGenderAliases = array();
 

@@ -157,11 +157,11 @@ class AuthPlugin {
 	 * @return bool
 	 */
 	public function allowPropChange( $prop = '' ) {
-		if ( $prop == 'realname' && is_callable( [ $this, 'allowRealNameChange' ] ) ) {
+		if ( $prop == 'realname' && is_callable( array( $this, 'allowRealNameChange' ) ) ) {
 			return $this->allowRealNameChange();
-		} elseif ( $prop == 'emailaddress' && is_callable( [ $this, 'allowEmailChange' ] ) ) {
+		} elseif ( $prop == 'emailaddress' && is_callable( array( $this, 'allowEmailChange' ) ) ) {
 			return $this->allowEmailChange();
-		} elseif ( $prop == 'nickname' && is_callable( [ $this, 'allowNickChange' ] ) ) {
+		} elseif ( $prop == 'nickname' && is_callable( array( $this, 'allowNickChange' ) ) ) {
 			return $this->allowNickChange();
 		} else {
 			return true;
@@ -224,7 +224,7 @@ class AuthPlugin {
 	 * @param array $delgroups Groups to remove.
 	 * @return bool
 	 */
-	public function updateExternalDBGroups( $user, $addgroups, $delgroups = [] ) {
+	public function updateExternalDBGroups( $user, $addgroups, $delgroups = array() ) {
 		return true;
 	}
 
@@ -318,7 +318,7 @@ class AuthPlugin {
 	 * @return array
 	 */
 	public function domainList() {
-		return [];
+		return array();
 	}
 }
 

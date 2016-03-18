@@ -26,9 +26,9 @@
  *   * attribute nodes are children
  *   * "<h>" nodes that aren't at the top are replaced with <possible-h>
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
-class Preprocessor_Hash extends Preprocessor {
+class Preprocessor_Hash implements Preprocessor {
 	// @codingStandardsIgnoreEnd
 
 	/**
@@ -36,7 +36,7 @@ class Preprocessor_Hash extends Preprocessor {
 	 */
 	public $parser;
 
-	const CACHE_PREFIX = 'preprocess-hash';
+	const CACHE_VERSION = 1;
 
 	public function __construct( $parser ) {
 		$this->parser = $parser;
@@ -62,7 +62,7 @@ class Preprocessor_Hash extends Preprocessor {
 	 * @return PPNode_Hash_Array
 	 */
 	public function newPartNodeArray( $values ) {
-		$list = [];
+		$list = array();
 
 		foreach ( $values as $k => $val ) {
 			$partNode = new PPNode_Hash_Tree( 'part' );
@@ -112,18 +112,52 @@ class Preprocessor_Hash extends Preprocessor {
 	 * @return PPNode_Hash_Tree
 	 */
 	public function preprocessToObj( $text, $flags = 0 ) {
-		$tree = $this->cacheGetTree( $text, $flags );
-		if ( $tree !== false ) {
-			return unserialize( $tree );
+		// Check cache.
+		global $wgMemc, $wgPreprocessorCacheThreshold;
+
+		$cacheable = $wgPreprocessorCacheThreshold !== false
+			&& strlen( $text ) > $wgPreprocessorCacheThreshold;
+
+		if ( $cacheable ) {
+			$cacheKey = wfMemcKey( 'preprocess-hash', md5( $text ), $flags );
+			$cacheValue = $wgMemc->get( $cacheKey );
+			if ( $cacheValue ) {
+				$version = substr( $cacheValue, 0, 8 );
+				if ( intval( $version ) == self::CACHE_VERSION ) {
+					$hash = unserialize( substr( $cacheValue, 8 ) );
+					// From the cache
+					wfDebugLog( "Preprocessor",
+						"Loaded preprocessor hash from memcached (key $cacheKey)" );
+					return $hash;
+				}
+			}
 		}
+
+		$rules = array(
+			'{' => array(
+				'end' => '}',
+				'names' => array(
+					2 => 'template',
+					3 => 'tplarg',
+				),
+				'min' => 2,
+				'max' => 3,
+			),
+			'[' => array(
+				'end' => ']',
+				'names' => array( 2 => null ),
+				'min' => 2,
+				'max' => 2,
+			)
+		);
 
 		$forInclusion = $flags & Parser::PTD_FOR_INCLUSION;
 
 		$xmlishElements = $this->parser->getStripList();
 		$enableOnlyinclude = false;
 		if ( $forInclusion ) {
-			$ignoredTags = [ 'includeonly', '/includeonly' ];
-			$ignoredElements = [ 'noinclude' ];
+			$ignoredTags = array( 'includeonly', '/includeonly' );
+			$ignoredElements = array( 'noinclude' );
 			$xmlishElements[] = 'noinclude';
 			if ( strpos( $text, '<onlyinclude>' ) !== false
 				&& strpos( $text, '</onlyinclude>' ) !== false
@@ -131,8 +165,8 @@ class Preprocessor_Hash extends Preprocessor {
 				$enableOnlyinclude = true;
 			}
 		} else {
-			$ignoredTags = [ 'noinclude', '/noinclude', 'onlyinclude', '/onlyinclude' ];
-			$ignoredElements = [ 'includeonly' ];
+			$ignoredTags = array( 'noinclude', '/noinclude', 'onlyinclude', '/onlyinclude' );
+			$ignoredElements = array( 'includeonly' );
 			$xmlishElements[] = 'includeonly';
 		}
 		$xmlishRegex = implode( '|', array_merge( $xmlishElements, $ignoredTags ) );
@@ -166,7 +200,7 @@ class Preprocessor_Hash extends Preprocessor {
 		$fakeLineStart = true;
 
 		while ( true ) {
-			// $this->memCheck();
+			//$this->memCheck();
 
 			if ( $findOnlyinclude ) {
 				// Ignore all input up to the next <onlyinclude>
@@ -233,9 +267,9 @@ class Preprocessor_Hash extends Preprocessor {
 						}
 					} elseif ( $curChar == $currentClosing ) {
 						$found = 'close';
-					} elseif ( isset( $this->rules[$curChar] ) ) {
+					} elseif ( isset( $rules[$curChar] ) ) {
 						$found = 'open';
-						$rule = $this->rules[$curChar];
+						$rule = $rules[$curChar];
 					} else {
 						# Some versions of PHP have a strcspn which stops on null characters
 						# Ignore and continue
@@ -287,14 +321,14 @@ class Preprocessor_Hash extends Preprocessor {
 
 						// Keep looking forward as long as we're finding more
 						// comments.
-						$comments = [ [ $wsStart, $wsEnd ] ];
+						$comments = array( array( $wsStart, $wsEnd ) );
 						while ( substr( $text, $wsEnd + 1, 4 ) == '<!--' ) {
 							$c = strpos( $text, '-->', $wsEnd + 4 );
 							if ( $c === false ) {
 								break;
 							}
 							$c = $c + 2 + strspn( $text, " \t", $c + 3 );
-							$comments[] = [ $wsEnd + 1, $c ];
+							$comments[] = array( $wsEnd + 1, $c );
 							$wsEnd = $c;
 						}
 
@@ -434,12 +468,12 @@ class Preprocessor_Hash extends Preprocessor {
 					// heading. This is heuristic, but AFAICT the methods for
 					// completely correct disambiguation are very complex.
 				} elseif ( $count > 0 ) {
-					$piece = [
+					$piece = array(
 						'open' => "\n",
 						'close' => "\n",
-						'parts' => [ new PPDPart_Hash( str_repeat( '=', $count ) ) ],
+						'parts' => array( new PPDPart_Hash( str_repeat( '=', $count ) ) ),
 						'startPos' => $i,
-						'count' => $count ];
+						'count' => $count );
 					$stack->push( $piece );
 					$accum =& $stack->getAccum();
 					extract( $stack->getFlags() );
@@ -515,12 +549,12 @@ class Preprocessor_Hash extends Preprocessor {
 				# we need to add to stack only if opening brace count is enough for one of the rules
 				if ( $count >= $rule['min'] ) {
 					# Add it to the stack
-					$piece = [
+					$piece = array(
 						'open' => $curChar,
 						'close' => $rule['end'],
 						'count' => $count,
 						'lineStart' => ( $i > 0 && $text[$i - 1] == "\n" ),
-					];
+					);
 
 					$stack->push( $piece );
 					$accum =& $stack->getAccum();
@@ -538,7 +572,7 @@ class Preprocessor_Hash extends Preprocessor {
 
 				# check for maximum matching characters (if there are 5 closing
 				# characters, we will probably need only 3 - depending on the rules)
-				$rule = $this->rules[$piece->open];
+				$rule = $rules[$piece->open];
 				if ( $count > $rule['max'] ) {
 					# The specified maximum exists in the callback array, unless the caller
 					# has made an error
@@ -595,11 +629,13 @@ class Preprocessor_Hash extends Preprocessor {
 								$lastNode = $node;
 							}
 							if ( !$node ) {
-								// if ( $cacheable ) { ... }
+								if ( $cacheable ) {
+								}
 								throw new MWException( __METHOD__ . ': eqpos not found' );
 							}
 							if ( $node->name !== 'equals' ) {
-								// if ( $cacheable ) { ... }
+								if ( $cacheable ) {
+								}
 								throw new MWException( __METHOD__ . ': eqpos is not equals' );
 							}
 							$equalsNode = $node;
@@ -646,10 +682,10 @@ class Preprocessor_Hash extends Preprocessor {
 
 				# Re-add the old stack element if it still has unmatched opening characters remaining
 				if ( $matchingCount < $piece->count ) {
-					$piece->parts = [ new PPDPart_Hash ];
+					$piece->parts = array( new PPDPart_Hash );
 					$piece->count -= $matchingCount;
 					# do we still qualify for any callback with remaining count?
-					$min = $this->rules[$piece->open]['min'];
+					$min = $rules[$piece->open]['min'];
 					if ( $piece->count >= $min ) {
 						$stack->push( $piece );
 						$accum =& $stack->getAccum();
@@ -696,7 +732,15 @@ class Preprocessor_Hash extends Preprocessor {
 		$rootNode->lastChild = $stack->rootAccum->lastNode;
 
 		// Cache
-		$this->cacheSetTree( $text, $flags, serialize( $rootNode ) );
+		if ( $cacheable ) {
+			$cacheValue = sprintf( "%08d", self::CACHE_VERSION ) . serialize( $rootNode );
+
+			// T111289: Cache values should not exceed 1 Mb, but they do.
+			if ( strlen( $cacheValue ) <= 1e6 ) {
+				$wgMemc->set( $cacheKey, $cacheValue, 86400 );
+				wfDebugLog( "Preprocessor", "Saved preprocessor Hash to memcached (key $cacheKey)" );
+			}
+		}
 
 		return $rootNode;
 	}
@@ -705,8 +749,8 @@ class Preprocessor_Hash extends Preprocessor {
 /**
  * Stack class to help Preprocessor::preprocessToObj()
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPDStack_Hash extends PPDStack {
 	// @codingStandardsIgnoreEnd
 
@@ -719,12 +763,12 @@ class PPDStack_Hash extends PPDStack {
 
 /**
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPDStackElement_Hash extends PPDStackElement {
-	// @codingStandardsIgnoreEnd
+	// @codingStandardsIgnoreENd
 
-	public function __construct( $data = [] ) {
+	public function __construct( $data = array() ) {
 		$this->partClass = 'PPDPart_Hash';
 		parent::__construct( $data );
 	}
@@ -760,8 +804,8 @@ class PPDStackElement_Hash extends PPDStackElement {
 
 /**
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPDPart_Hash extends PPDPart {
 	// @codingStandardsIgnoreEnd
 
@@ -776,8 +820,8 @@ class PPDPart_Hash extends PPDPart {
 
 /**
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPDAccum_Hash {
 	// @codingStandardsIgnoreEnd
 
@@ -847,8 +891,8 @@ class PPDAccum_Hash {
 /**
  * An expansion frame, used as a context to expand the result of preprocessToObj()
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPFrame_Hash implements PPFrame {
 	// @codingStandardsIgnoreEnd
 
@@ -896,10 +940,10 @@ class PPFrame_Hash implements PPFrame {
 		$this->preprocessor = $preprocessor;
 		$this->parser = $preprocessor->parser;
 		$this->title = $this->parser->mTitle;
-		$this->titleCache = [ $this->title ? $this->title->getPrefixedDBkey() : false ];
-		$this->loopCheckHash = [];
+		$this->titleCache = array( $this->title ? $this->title->getPrefixedDBkey() : false );
+		$this->loopCheckHash = array();
 		$this->depth = 0;
-		$this->childExpansionCache = [];
+		$this->childExpansionCache = array();
 	}
 
 	/**
@@ -913,8 +957,8 @@ class PPFrame_Hash implements PPFrame {
 	 * @return PPTemplateFrame_Hash
 	 */
 	public function newChild( $args = false, $title = false, $indexOffset = 0 ) {
-		$namedArgs = [];
-		$numberedArgs = [];
+		$namedArgs = array();
+		$numberedArgs = array();
 		if ( $title === false ) {
 			$title = $this->title;
 		}
@@ -999,9 +1043,9 @@ class PPFrame_Hash implements PPFrame {
 			$this->parser->mHighestExpansionDepth = $expansionDepth;
 		}
 
-		$outStack = [ '', '' ];
-		$iteratorStack = [ false, $root ];
-		$indexStack = [ 0, 0 ];
+		$outStack = array( '', '' );
+		$iteratorStack = array( false, $root );
+		$indexStack = array( 0, 0 );
 
 		while ( count( $iteratorStack ) > 1 ) {
 			$level = count( $outStack ) - 1;
@@ -1110,11 +1154,11 @@ class PPFrame_Hash implements PPFrame {
 					) {
 						$out .= $contextNode->firstChild->value;
 					} else {
-						// $out .= '';
+						//$out .= '';
 					}
 				} elseif ( $contextNode->name == 'ext' ) {
 					# Extension tag
-					$bits = $contextNode->splitExt() + [ 'attr' => null, 'inner' => null, 'close' => null ];
+					$bits = $contextNode->splitExt() + array( 'attr' => null, 'inner' => null, 'close' => null );
 					if ( $flags & PPFrame::NO_TAGS ) {
 						$s = '<' . $bits['name']->firstChild->value;
 						if ( $bits['attr'] ) {
@@ -1143,7 +1187,7 @@ class PPFrame_Hash implements PPFrame {
 
 						$bits = $contextNode->splitHeading();
 						$titleText = $this->title->getPrefixedDBkey();
-						$this->parser->mHeadings[] = [ $titleText, $bits['i'] ];
+						$this->parser->mHeadings[] = array( $titleText, $bits['i'] );
 						$serial = count( $this->parser->mHeadings ) - 1;
 						$marker = Parser::MARKER_PREFIX . "-h-$serial-" . Parser::MARKER_SUFFIX;
 						$s = substr( $s, 0, $bits['level'] ) . $marker . substr( $s, $bits['level'] );
@@ -1197,7 +1241,7 @@ class PPFrame_Hash implements PPFrame {
 				$root = $root->value;
 			}
 			if ( !is_array( $root ) ) {
-				$root = [ $root ];
+				$root = array( $root );
 			}
 			foreach ( $root as $node ) {
 				if ( $first ) {
@@ -1228,7 +1272,7 @@ class PPFrame_Hash implements PPFrame {
 				$root = $root->value;
 			}
 			if ( !is_array( $root ) ) {
-				$root = [ $root ];
+				$root = array( $root );
 			}
 			foreach ( $root as $node ) {
 				if ( $first ) {
@@ -1252,7 +1296,7 @@ class PPFrame_Hash implements PPFrame {
 	 */
 	public function virtualImplode( $sep /*, ... */ ) {
 		$args = array_slice( func_get_args(), 1 );
-		$out = [];
+		$out = array();
 		$first = true;
 
 		foreach ( $args as $root ) {
@@ -1260,7 +1304,7 @@ class PPFrame_Hash implements PPFrame {
 				$root = $root->value;
 			}
 			if ( !is_array( $root ) ) {
-				$root = [ $root ];
+				$root = array( $root );
 			}
 			foreach ( $root as $node ) {
 				if ( $first ) {
@@ -1285,7 +1329,7 @@ class PPFrame_Hash implements PPFrame {
 	 */
 	public function virtualBracketedImplode( $start, $sep, $end /*, ... */ ) {
 		$args = array_slice( func_get_args(), 3 );
-		$out = [ $start ];
+		$out = array( $start );
 		$first = true;
 
 		foreach ( $args as $root ) {
@@ -1293,7 +1337,7 @@ class PPFrame_Hash implements PPFrame {
 				$root = $root->value;
 			}
 			if ( !is_array( $root ) ) {
-				$root = [ $root ];
+				$root = array( $root );
 			}
 			foreach ( $root as $node ) {
 				if ( $first ) {
@@ -1328,21 +1372,21 @@ class PPFrame_Hash implements PPFrame {
 	 * @return array
 	 */
 	public function getArguments() {
-		return [];
+		return array();
 	}
 
 	/**
 	 * @return array
 	 */
 	public function getNumberedArguments() {
-		return [];
+		return array();
 	}
 
 	/**
 	 * @return array
 	 */
 	public function getNamedArguments() {
-		return [];
+		return array();
 	}
 
 	/**
@@ -1433,8 +1477,8 @@ class PPFrame_Hash implements PPFrame {
 /**
  * Expansion frame with template arguments
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPTemplateFrame_Hash extends PPFrame_Hash {
 	// @codingStandardsIgnoreEnd
 
@@ -1448,8 +1492,8 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 	 * @param array $namedArgs
 	 * @param bool|Title $title
 	 */
-	public function __construct( $preprocessor, $parent = false, $numberedArgs = [],
-		$namedArgs = [], $title = false
+	public function __construct( $preprocessor, $parent = false, $numberedArgs = array(),
+		$namedArgs = array(), $title = false
 	) {
 		parent::__construct( $preprocessor );
 
@@ -1465,7 +1509,7 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 			$this->loopCheckHash[$pdbk] = true;
 		}
 		$this->depth = $parent->depth + 1;
-		$this->numberedExpansionCache = $this->namedExpansionCache = [];
+		$this->numberedExpansionCache = $this->namedExpansionCache = array();
 	}
 
 	public function __toString() {
@@ -1516,7 +1560,7 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 	 * @return array
 	 */
 	public function getArguments() {
-		$arguments = [];
+		$arguments = array();
 		foreach ( array_merge(
 				array_keys( $this->numberedArgs ),
 				array_keys( $this->namedArgs ) ) as $key ) {
@@ -1529,7 +1573,7 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 	 * @return array
 	 */
 	public function getNumberedArguments() {
-		$arguments = [];
+		$arguments = array();
 		foreach ( array_keys( $this->numberedArgs ) as $key ) {
 			$arguments[$key] = $this->getArgument( $key );
 		}
@@ -1540,7 +1584,7 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 	 * @return array
 	 */
 	public function getNamedArguments() {
-		$arguments = [];
+		$arguments = array();
 		foreach ( array_keys( $this->namedArgs ) as $key ) {
 			$arguments[$key] = $this->getArgument( $key );
 		}
@@ -1616,8 +1660,8 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 /**
  * Expansion frame with custom arguments
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPCustomFrame_Hash extends PPFrame_Hash {
 	// @codingStandardsIgnoreEnd
 
@@ -1669,8 +1713,8 @@ class PPCustomFrame_Hash extends PPFrame_Hash {
 
 /**
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPNode_Hash_Tree implements PPNode {
 	// @codingStandardsIgnoreEnd
 
@@ -1722,7 +1766,7 @@ class PPNode_Hash_Tree implements PPNode {
 	 * @return PPNode_Hash_Array
 	 */
 	public function getChildren() {
-		$children = [];
+		$children = array();
 		for ( $child = $this->firstChild; $child; $child = $child->nextSibling ) {
 			$children[] = $child;
 		}
@@ -1738,13 +1782,13 @@ class PPNode_Hash_Tree implements PPNode {
 	}
 
 	public function getChildrenOfType( $name ) {
-		$children = [];
+		$children = array();
 		for ( $child = $this->firstChild; $child; $child = $child->nextSibling ) {
 			if ( isset( $child->name ) && $child->name === $name ) {
 				$children[] = $child;
 			}
 		}
-		return new PPNode_Hash_Array( $children );
+		return $children;
 	}
 
 	/**
@@ -1779,7 +1823,7 @@ class PPNode_Hash_Tree implements PPNode {
 	 * @return array
 	 */
 	public function splitArg() {
-		$bits = [];
+		$bits = array();
 		for ( $child = $this->firstChild; $child; $child = $child->nextSibling ) {
 			if ( !isset( $child->name ) ) {
 				continue;
@@ -1813,7 +1857,7 @@ class PPNode_Hash_Tree implements PPNode {
 	 * @return array
 	 */
 	public function splitExt() {
-		$bits = [];
+		$bits = array();
 		for ( $child = $this->firstChild; $child; $child = $child->nextSibling ) {
 			if ( !isset( $child->name ) ) {
 				continue;
@@ -1844,7 +1888,7 @@ class PPNode_Hash_Tree implements PPNode {
 		if ( $this->name !== 'h' ) {
 			throw new MWException( 'Invalid h node passed to ' . __METHOD__ );
 		}
-		$bits = [];
+		$bits = array();
 		for ( $child = $this->firstChild; $child; $child = $child->nextSibling ) {
 			if ( !isset( $child->name ) ) {
 				continue;
@@ -1868,8 +1912,8 @@ class PPNode_Hash_Tree implements PPNode {
 	 * @return array
 	 */
 	public function splitTemplate() {
-		$parts = [];
-		$bits = [ 'lineStart' => '' ];
+		$parts = array();
+		$bits = array( 'lineStart' => '' );
 		for ( $child = $this->firstChild; $child; $child = $child->nextSibling ) {
 			if ( !isset( $child->name ) ) {
 				continue;
@@ -1894,8 +1938,8 @@ class PPNode_Hash_Tree implements PPNode {
 
 /**
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPNode_Hash_Text implements PPNode {
 	// @codingStandardsIgnoreEnd
 
@@ -1955,8 +1999,8 @@ class PPNode_Hash_Text implements PPNode {
 
 /**
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPNode_Hash_Array implements PPNode {
 	// @codingStandardsIgnoreEnd
 
@@ -2013,8 +2057,8 @@ class PPNode_Hash_Array implements PPNode {
 
 /**
  * @ingroup Parser
+ * @codingStandardsIgnoreStart
  */
-// @codingStandardsIgnoreStart Squiz.Classes.ValidClassName.NotCamelCaps
 class PPNode_Hash_Attr implements PPNode {
 	// @codingStandardsIgnoreEnd
 

@@ -28,7 +28,7 @@ abstract class ProfilerOutput {
 	/** @var Profiler */
 	protected $collector;
 	/** @var array Configuration of $wgProfiler */
-	protected $params = [];
+	protected $params = array();
 
 	/**
 	 * Constructor

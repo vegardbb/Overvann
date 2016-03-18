@@ -14,16 +14,16 @@ class UIDGeneratorTest extends PHPUnit_Framework_TestCase {
 	 * @covers UIDGenerator::newTimestampedUID88
 	 */
 	public function testTimestampedUID( $method, $digitlen, $bits, $tbits, $hostbits ) {
-		$id = call_user_func( [ 'UIDGenerator', $method ] );
+		$id = call_user_func( array( 'UIDGenerator', $method ) );
 		$this->assertEquals( true, ctype_digit( $id ), "UID made of digit characters" );
 		$this->assertLessThanOrEqual( $digitlen, strlen( $id ),
 			"UID has the right number of digits" );
-		$this->assertLessThanOrEqual( $bits, strlen( Wikimedia\base_convert( $id, 10, 2 ) ),
+		$this->assertLessThanOrEqual( $bits, strlen( wfBaseConvert( $id, 10, 2 ) ),
 			"UID has the right number of bits" );
 
-		$ids = [];
+		$ids = array();
 		for ( $i = 0; $i < 300; $i++ ) {
-			$ids[] = call_user_func( [ 'UIDGenerator', $method ] );
+			$ids[] = call_user_func( array( 'UIDGenerator', $method ) );
 		}
 
 		$lastId = array_shift( $ids );
@@ -31,8 +31,8 @@ class UIDGeneratorTest extends PHPUnit_Framework_TestCase {
 		$this->assertSame( array_unique( $ids ), $ids, "All generated IDs are unique." );
 
 		foreach ( $ids as $id ) {
-			$id_bin = Wikimedia\base_convert( $id, 10, 2 );
-			$lastId_bin = Wikimedia\base_convert( $lastId, 10, 2 );
+			$id_bin = wfBaseConvert( $id, 10, 2 );
+			$lastId_bin = wfBaseConvert( $lastId, 10, 2 );
 
 			$this->assertGreaterThanOrEqual(
 				substr( $lastId_bin, 0, $tbits ),
@@ -55,53 +55,23 @@ class UIDGeneratorTest extends PHPUnit_Framework_TestCase {
 	 * NOTE: When adding a new method name here please update the covers tags for the tests!
 	 */
 	public static function provider_testTimestampedUID() {
-		return [
-			[ 'newTimestampedUID128', 39, 128, 46, 48 ],
-			[ 'newTimestampedUID128', 39, 128, 46, 48 ],
-			[ 'newTimestampedUID88', 27, 88, 46, 32 ],
-		];
-	}
-
-	/**
-	 * @covers UIDGenerator::newUUIDv1
-	 */
-	public function testUUIDv1() {
-		$ids = [];
-		for ( $i = 0; $i < 100; $i++ ) {
-			$id = UIDGenerator::newUUIDv1();
-			$this->assertEquals( true,
-				preg_match( '!^[0-9a-f]{8}-[0-9a-f]{4}-1[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$!', $id ),
-				"UID $id has the right format" );
-			$ids[] = $id;
-
-			$id = UIDGenerator::newRawUUIDv1();
-			$this->assertEquals( true,
-				preg_match( '!^[0-9a-f]{12}1[0-9a-f]{3}[89ab][0-9a-f]{15}$!', $id ),
-				"UID $id has the right format" );
-
-			$id = UIDGenerator::newRawUUIDv1();
-			$this->assertEquals( true,
-				preg_match( '!^[0-9a-f]{12}1[0-9a-f]{3}[89ab][0-9a-f]{15}$!', $id ),
-				"UID $id has the right format" );
-		}
-
-		$this->assertEquals( array_unique( $ids ), $ids, "All generated IDs are unique." );
+		return array(
+			array( 'newTimestampedUID128', 39, 128, 46, 48 ),
+			array( 'newTimestampedUID128', 39, 128, 46, 48 ),
+			array( 'newTimestampedUID88', 27, 88, 46, 32 ),
+		);
 	}
 
 	/**
 	 * @covers UIDGenerator::newUUIDv4
 	 */
 	public function testUUIDv4() {
-		$ids = [];
 		for ( $i = 0; $i < 100; $i++ ) {
 			$id = UIDGenerator::newUUIDv4();
-			$ids[] = $id;
 			$this->assertEquals( true,
 				preg_match( '!^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$!', $id ),
 				"UID $id has the right format" );
 		}
-
-		$this->assertEquals( array_unique( $ids ), $ids, 'All generated IDs are unique.' );
 	}
 
 	/**

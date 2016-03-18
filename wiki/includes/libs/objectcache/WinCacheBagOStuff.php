@@ -28,13 +28,7 @@
  * @ingroup Cache
  */
 class WinCacheBagOStuff extends BagOStuff {
-	protected function doGet( $key, $flags = 0 ) {
-		$casToken = null;
-
-		return $this->getWithToken( $key, $casToken, $flags );
-	}
-
-	protected function getWithToken( $key, &$casToken, $flags = 0 ) {
+	public function get( $key, &$casToken = null, $flags = 0 ) {
 		$val = wincache_ucache_get( $key );
 
 		$casToken = $val;
@@ -46,12 +40,12 @@ class WinCacheBagOStuff extends BagOStuff {
 		return $val;
 	}
 
-	public function set( $key, $value, $expire = 0, $flags = 0 ) {
+	public function set( $key, $value, $expire = 0 ) {
 		$result = wincache_ucache_set( $key, serialize( $value ), $expire );
 
 		/* wincache_ucache_set returns an empty array on success if $value
 		   was an array, bool otherwise */
-		return ( is_array( $result ) && $result === [] ) || $result;
+		return ( is_array( $result ) && $result === array() ) || $result;
 	}
 
 	protected function cas( $casToken, $key, $value, $exptime = 0 ) {
@@ -64,7 +58,7 @@ class WinCacheBagOStuff extends BagOStuff {
 		return true;
 	}
 
-	public function merge( $key, $callback, $exptime = 0, $attempts = 10, $flags = 0 ) {
+	public function merge( $key, $callback, $exptime = 0, $attempts = 10 ) {
 		if ( !is_callable( $callback ) ) {
 			throw new Exception( "Got invalid callback." );
 		}

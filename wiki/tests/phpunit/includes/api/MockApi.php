@@ -8,10 +8,10 @@ class MockApi extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
+		return array(
 			'filename' => null,
 			'enablechunks' => false,
 			'sessionkey' => null,
-		];
+		);
 	}
 }

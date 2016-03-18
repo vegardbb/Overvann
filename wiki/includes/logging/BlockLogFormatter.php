@@ -83,9 +83,9 @@ class BlockLogFormatter extends LogFormatter {
 		$title = $this->entry->getTarget();
 		// Preload user page for non-autoblocks
 		if ( substr( $title->getText(), 0, 1 ) !== '#' ) {
-			return [ $title->getTalkPage() ];
+			return array( $title->getTalkPage() );
 		}
-		return [];
+		return array();
 	}
 
 	public function getActionLinks() {
@@ -99,7 +99,7 @@ class BlockLogFormatter extends LogFormatter {
 
 		// Show unblock/change block link
 		$title = $this->entry->getTarget();
-		$links = [
+		$links = array(
 			Linker::linkKnown(
 				SpecialPage::getTitleFor( 'Unblock', $title->getDBkey() ),
 				$this->msg( 'unblocklink' )->escaped()
@@ -108,7 +108,7 @@ class BlockLogFormatter extends LogFormatter {
 				SpecialPage::getTitleFor( 'Block', $title->getDBkey() ),
 				$this->msg( 'change-blocklink' )->escaped()
 			)
-		];
+		);
 
 		return $this->msg( 'parentheses' )->rawParams(
 			$this->context->getLanguage()->pipeList( $links ) )->escaped();
@@ -125,7 +125,7 @@ class BlockLogFormatter extends LogFormatter {
 	public static function formatBlockFlags( $flags, $lang ) {
 		$flags = trim( $flags );
 		if ( $flags === '' ) {
-			return ''; // nothing to do
+			return ''; //nothing to do
 		}
 		$flags = explode( ',', $flags );
 		$flagsCount = count( $flags );
@@ -146,7 +146,7 @@ class BlockLogFormatter extends LogFormatter {
 	 * @return string
 	 */
 	public static function formatBlockFlag( $flag, $lang ) {
-		static $messages = [];
+		static $messages = array();
 
 		if ( !isset( $messages[$flag] ) ) {
 			$messages[$flag] = htmlspecialchars( $flag ); // Fallback
@@ -173,13 +173,13 @@ class BlockLogFormatter extends LogFormatter {
 		$entry = $this->entry;
 		$params = $entry->getParameters();
 
-		static $map = [
+		static $map = array(
 			// While this looks wrong to be starting at 5 rather than 4, it's
 			// because getMessageParameters uses $4 for its own purposes.
 			'5::duration',
 			'6:array:flags',
 			'6::flags' => '6:array:flags',
-		];
+		);
 		foreach ( $map as $index => $key ) {
 			if ( isset( $params[$index] ) ) {
 				$params[$key] = $params[$index];
@@ -190,14 +190,14 @@ class BlockLogFormatter extends LogFormatter {
 		$subtype = $entry->getSubtype();
 		if ( $subtype === 'block' || $subtype === 'reblock' ) {
 			// Defaults for old log entries missing some fields
-			$params += [
+			$params += array(
 				'5::duration' => 'infinite',
-				'6:array:flags' => [],
-			];
+				'6:array:flags' => array(),
+			);
 
 			if ( !is_array( $params['6:array:flags'] ) ) {
 				$params['6:array:flags'] = $params['6:array:flags'] === ''
-					? []
+					? array()
 					: explode( ',', $params['6:array:flags'] );
 			}
 

@@ -34,7 +34,7 @@ require_once __DIR__ . '/Maintenance.php';
 class ReassignEdits extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Reassign edits from one user to another' );
+		$this->mDescription = "Reassign edits from one user to another";
 		$this->addOption( "force", "Reassign even if the target user doesn't exist" );
 		$this->addOption( "norc", "Don't update the recent changes table" );
 		$this->addOption( "report", "Print out details of what would be changed, but don't update it" );
@@ -74,8 +74,8 @@ class ReassignEdits extends Maintenance {
 	 * @return int Number of entries changed, or that would be changed
 	 */
 	private function doReassignEdits( &$from, &$to, $rc = false, $report = false ) {
-		$dbw = $this->getDB( DB_MASTER );
-		$this->beginTransaction( $dbw, __METHOD__ );
+		$dbw = wfGetDB( DB_MASTER );
+		$dbw->begin( __METHOD__ );
 
 		# Count things
 		$this->output( "Checking current edits..." );
@@ -139,7 +139,7 @@ class ReassignEdits extends Maintenance {
 			}
 		}
 
-		$this->commitTransaction( $dbw, __METHOD__ );
+		$dbw->commit( __METHOD__ );
 
 		return (int)$total;
 	}
@@ -155,8 +155,8 @@ class ReassignEdits extends Maintenance {
 	 */
 	private function userConditions( &$user, $idfield, $utfield ) {
 		return $user->getId()
-			? [ $idfield => $user->getId() ]
-			: [ $utfield => $user->getName() ];
+			? array( $idfield => $user->getId() )
+			: array( $utfield => $user->getName() );
 	}
 
 	/**
@@ -169,7 +169,7 @@ class ReassignEdits extends Maintenance {
 	 * @return array
 	 */
 	private function userSpecification( &$user, $idfield, $utfield ) {
-		return [ $idfield => $user->getId(), $utfield => $user->getName() ];
+		return array( $idfield => $user->getId(), $utfield => $user->getName() );
 	}
 
 	/**

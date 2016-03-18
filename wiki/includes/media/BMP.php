@@ -32,7 +32,7 @@ class BmpHandler extends BitmapHandler {
 	 * @param File $file
 	 * @return bool
 	 */
-	public function mustRender( $file ) {
+	function mustRender( $file ) {
 		return true;
 	}
 
@@ -45,7 +45,7 @@ class BmpHandler extends BitmapHandler {
 	 * @return array
 	 */
 	function getThumbType( $text, $mime, $params = null ) {
-		return [ 'png', 'image/png' ];
+		return array( 'png', 'image/png' );
 	}
 
 	/**
@@ -75,6 +75,6 @@ class BmpHandler extends BitmapHandler {
 			return false;
 		}
 
-		return [ $w[1], $h[1] ];
+		return array( $w[1], $h[1] );
 	}
 }

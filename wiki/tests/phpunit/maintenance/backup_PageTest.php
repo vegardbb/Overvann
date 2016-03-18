@@ -6,7 +6,6 @@
  * @group Dump
  * @covers BackupDumper
  */
-
 class BackupDumperPageTest extends DumpTestCase {
 
 	// We'll add several pages, revision and texts. The following variables hold the
@@ -22,10 +21,10 @@ class BackupDumperPageTest extends DumpTestCase {
 
 	function addDBData() {
 		// be sure, titles created here using english namespace names
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgLanguageCode' => 'en',
 			'wgContLang' => Language::factory( 'en' ),
-		] );
+		) );
 
 		$this->tablesUsed[] = 'page';
 		$this->tablesUsed[] = 'revision';
@@ -91,23 +90,22 @@ class BackupDumperPageTest extends DumpTestCase {
 		// class), we have to assert, that the page id are consecutively
 		// increasing
 		$this->assertEquals(
-			[ $this->pageId2, $this->pageId3, $this->pageId4 ],
-			[ $this->pageId1 + 1, $this->pageId2 + 1, $this->pageId3 + 1 ],
+			array( $this->pageId2, $this->pageId3, $this->pageId4 ),
+			array( $this->pageId1 + 1, $this->pageId2 + 1, $this->pageId3 + 1 ),
 			"Page ids increasing without holes" );
 	}
 
 	function testFullTextPlain() {
 		// Preparing the dump
 		$fname = $this->getNewTempFile();
-
-		$dumper = new DumpBackup();
-		$dumper->loadWithArgv( [ '--full', '--quiet', '--output', 'file:' . $fname ] );
+		$dumper = new BackupDumper( array( "--output=file:" . $fname ) );
 		$dumper->startId = $this->pageId1;
 		$dumper->endId = $this->pageId4 + 1;
+		$dumper->reporting = false;
 		$dumper->setDb( $this->db );
 
 		// Performing the dump
-		$dumper->execute();
+		$dumper->dump( WikiExporter::FULL, WikiExporter::TEXT );
 
 		// Checking the dumped data
 		$this->assertDumpStart( $fname );
@@ -155,15 +153,14 @@ class BackupDumperPageTest extends DumpTestCase {
 	function testFullStubPlain() {
 		// Preparing the dump
 		$fname = $this->getNewTempFile();
-
-		$dumper = new DumpBackup();
-		$dumper->loadWithArgv( [ '--full', '--quiet', '--output', 'file:' . $fname, '--stub' ] );
+		$dumper = new BackupDumper( array( "--output=file:" . $fname ) );
 		$dumper->startId = $this->pageId1;
 		$dumper->endId = $this->pageId4 + 1;
+		$dumper->reporting = false;
 		$dumper->setDb( $this->db );
 
 		// Performing the dump
-		$dumper->execute();
+		$dumper->dump( WikiExporter::FULL, WikiExporter::STUB );
 
 		// Checking the dumped data
 		$this->assertDumpStart( $fname );
@@ -205,8 +202,7 @@ class BackupDumperPageTest extends DumpTestCase {
 	function testCurrentStubPlain() {
 		// Preparing the dump
 		$fname = $this->getNewTempFile();
-
-		$dumper = new DumpBackup( [ '--output', 'file:' . $fname ] );
+		$dumper = new BackupDumper( array( "--output=file:" . $fname ) );
 		$dumper->startId = $this->pageId1;
 		$dumper->endId = $this->pageId4 + 1;
 		$dumper->reporting = false;
@@ -251,8 +247,7 @@ class BackupDumperPageTest extends DumpTestCase {
 
 		// Preparing the dump
 		$fname = $this->getNewTempFile();
-
-		$dumper = new DumpBackup( [ '--output', 'gzip:' . $fname ] );
+		$dumper = new BackupDumper( array( "--output=gzip:" . $fname ) );
 		$dumper->startId = $this->pageId1;
 		$dumper->endId = $this->pageId4 + 1;
 		$dumper->reporting = false;
@@ -293,29 +288,28 @@ class BackupDumperPageTest extends DumpTestCase {
 		$this->assertDumpEnd();
 	}
 
-	/**
-	 * xmldumps-backup typically performs a single dump that that writes
-	 * out three files
-	 * - gzipped stubs of everything (meta-history)
-	 * - gzipped stubs of latest revisions of all pages (meta-current)
-	 * - gzipped stubs of latest revisions of all pages of namespage 0
-	 *   (articles)
-	 *
-	 * We reproduce such a setup with our mini fixture, although we omit
-	 * chunks, and all the other gimmicks of xmldumps-backup.
-	 */
 	function testXmlDumpsBackupUseCase() {
+		// xmldumps-backup typically performs a single dump that that writes
+		// out three files
+		// * gzipped stubs of everything (meta-history)
+		// * gzipped stubs of latest revisions of all pages (meta-current)
+		// * gzipped stubs of latest revisions of all pages of namespage 0
+		//   (articles)
+		//
+		// We reproduce such a setup with our mini fixture, although we omit
+		// chunks, and all the other gimmicks of xmldumps-backup.
+		//
 		$this->checkHasGzip();
 
 		$fnameMetaHistory = $this->getNewTempFile();
 		$fnameMetaCurrent = $this->getNewTempFile();
 		$fnameArticles = $this->getNewTempFile();
 
-		$dumper = new DumpBackup( [ "--full", "--stub", "--output=gzip:" . $fnameMetaHistory,
+		$dumper = new BackupDumper( array( "--output=gzip:" . $fnameMetaHistory,
 			"--output=gzip:" . $fnameMetaCurrent, "--filter=latest",
 			"--output=gzip:" . $fnameArticles, "--filter=latest",
 			"--filter=notalk", "--filter=namespace:!NS_USER",
-			"--reporting=1000" ] );
+			"--reporting=1000" ) );
 		$dumper->startId = $this->pageId1;
 		$dumper->endId = $this->pageId4 + 1;
 		$dumper->setDb( $this->db );

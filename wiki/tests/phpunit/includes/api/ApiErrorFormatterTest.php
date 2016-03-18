@@ -3,7 +3,7 @@
 /**
  * @group API
  */
-class ApiErrorFormatterTest extends MediaWikiLangTestCase {
+class ApiErrorFormatterTest extends MediaWikiTestCase {
 
 	/**
 	 * @covers ApiErrorFormatter
@@ -27,10 +27,10 @@ class ApiErrorFormatterTest extends MediaWikiLangTestCase {
 		$result->reset();
 		$formatter->addWarning( 'foo', 'mainpage' );
 		$formatter->addWarning( 'foo', 'mainpage' );
-		$formatter->addWarning( 'foo', [ 'parentheses', 'foobar' ] );
+		$formatter->addWarning( 'foo', array( 'parentheses', 'foobar' ) );
 		$msg1 = wfMessage( 'mainpage' );
 		$formatter->addWarning( 'message', $msg1 );
-		$msg2 = new ApiMessage( 'mainpage', 'overriddenCode', [ 'overriddenData' => true ] );
+		$msg2 = new ApiMessage( 'mainpage', 'overriddenCode', array( 'overriddenData' => true ) );
 		$formatter->addWarning( 'messageWithData', $msg2 );
 		$formatter->addError( 'errWithData', $msg2 );
 		$this->assertSame( $expect2, $result->getResultData(), 'Complex test' );
@@ -66,230 +66,182 @@ class ApiErrorFormatterTest extends MediaWikiLangTestCase {
 		$C = ApiResult::META_CONTENT;
 		$I = ApiResult::META_INDEXED_TAG_NAME;
 
-		return [
-			[ 'wikitext', 'de', true,
-				[
-					'errors' => [
-						'err' => [
-							[ 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ],
+		return array(
+			array( 'wikitext', 'de', true,
+				array(
+					'errors' => array(
+						'err' => array(
+							array( 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'string' => [
-							[ 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ],
+						),
+					),
+					'warnings' => array(
+						'string' => array(
+							array( 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ),
 							$I => 'warning',
-						],
-					],
-				],
-				[
-					'errors' => [
-						'errWithData' => [
-							[ 'code' => 'overriddenCode', 'text' => $mainpageText,
-								'overriddenData' => true, $C => 'text' ],
+						),
+					),
+				),
+				array(
+					'errors' => array(
+						'errWithData' => array(
+							array( 'code' => 'overriddenCode', 'text' => $mainpageText,
+								'overriddenData' => true, $C => 'text' ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'messageWithData' => [
-							[ 'code' => 'overriddenCode', 'text' => $mainpageText,
-								'overriddenData' => true, $C => 'text' ],
+						),
+					),
+					'warnings' => array(
+						'messageWithData' => array(
+							array( 'code' => 'overriddenCode', 'text' => $mainpageText,
+								'overriddenData' => true, $C => 'text' ),
 							$I => 'warning',
-						],
-						'message' => [
-							[ 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ],
+						),
+						'message' => array(
+							array( 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ),
 							$I => 'warning',
-						],
-						'foo' => [
-							[ 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ],
-							[ 'code' => 'parentheses', 'text' => $parensText, $C => 'text' ],
+						),
+						'foo' => array(
+							array( 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ),
+							array( 'code' => 'parentheses', 'text' => $parensText, $C => 'text' ),
 							$I => 'warning',
-						],
-					],
-				],
-				[
-					'errors' => [
-						'status' => [
-							[ 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ],
-							[ 'code' => 'parentheses', 'text' => $parensText, $C => 'text' ],
+						),
+					),
+				),
+				array(
+					'errors' => array(
+						'status' => array(
+							array( 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ),
+							array( 'code' => 'parentheses', 'text' => $parensText, $C => 'text' ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'status' => [
-							[ 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ],
-							[ 'code' => 'parentheses', 'text' => $parensText, $C => 'text' ],
-							[ 'code' => 'overriddenCode', 'text' => $mainpageText,
-								'overriddenData' => true, $C => 'text' ],
+						),
+					),
+					'warnings' => array(
+						'status' => array(
+							array( 'code' => 'mainpage', 'text' => $mainpageText, $C => 'text' ),
+							array( 'code' => 'parentheses', 'text' => $parensText, $C => 'text' ),
+							array( 'code' => 'overriddenCode', 'text' => $mainpageText,
+								'overriddenData' => true, $C => 'text' ),
 							$I => 'warning',
-						],
-					],
-				],
-			],
-			[ 'raw', 'fr', true,
-				[
-					'errors' => [
-						'err' => [
-							[
-								'code' => 'mainpage',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ]
-							],
+						),
+					),
+				),
+			),
+			array( 'raw', 'fr', true,
+				array(
+					'errors' => array(
+						'err' => array(
+							array( 'code' => 'mainpage', 'message' => 'mainpage', 'params' => array( $I => 'param' ) ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'string' => [
-							[
-								'code' => 'mainpage',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ]
-							],
+						),
+					),
+					'warnings' => array(
+						'string' => array(
+							array( 'code' => 'mainpage', 'message' => 'mainpage', 'params' => array( $I => 'param' ) ),
 							$I => 'warning',
-						],
-					],
-				],
-				[
-					'errors' => [
-						'errWithData' => [
-							[
-								'code' => 'overriddenCode',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ],
-								'overriddenData' => true
-							],
+						),
+					),
+				),
+				array(
+					'errors' => array(
+						'errWithData' => array(
+							array( 'code' => 'overriddenCode', 'message' => 'mainpage', 'params' => array( $I => 'param' ),
+								'overriddenData' => true ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'messageWithData' => [
-							[
-								'code' => 'overriddenCode',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ],
-								'overriddenData' => true
-							],
+						),
+					),
+					'warnings' => array(
+						'messageWithData' => array(
+							array( 'code' => 'overriddenCode', 'message' => 'mainpage', 'params' => array( $I => 'param' ),
+								'overriddenData' => true ),
 							$I => 'warning',
-						],
-						'message' => [
-							[
-								'code' => 'mainpage',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ]
-							],
+						),
+						'message' => array(
+							array( 'code' => 'mainpage', 'message' => 'mainpage', 'params' => array( $I => 'param' ) ),
 							$I => 'warning',
-						],
-						'foo' => [
-							[
-								'code' => 'mainpage',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ]
-							],
-							[
-								'code' => 'parentheses',
-								'message' => 'parentheses',
-								'params' => [ 'foobar', $I => 'param' ]
-							],
+						),
+						'foo' => array(
+							array( 'code' => 'mainpage', 'message' => 'mainpage', 'params' => array( $I => 'param' ) ),
+							array( 'code' => 'parentheses', 'message' => 'parentheses', 'params' => array( 'foobar', $I => 'param' ) ),
 							$I => 'warning',
-						],
-					],
-				],
-				[
-					'errors' => [
-						'status' => [
-							[
-								'code' => 'mainpage',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ]
-							],
-							[
-								'code' => 'parentheses',
-								'message' => 'parentheses',
-								'params' => [ 'foobar', $I => 'param' ]
-							],
+						),
+					),
+				),
+				array(
+					'errors' => array(
+						'status' => array(
+							array( 'code' => 'mainpage', 'message' => 'mainpage', 'params' => array( $I => 'param' ) ),
+							array( 'code' => 'parentheses', 'message' => 'parentheses', 'params' => array( 'foobar', $I => 'param' ) ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'status' => [
-							[
-								'code' => 'mainpage',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ]
-							],
-							[
-								'code' => 'parentheses',
-								'message' => 'parentheses',
-								'params' => [ 'foobar', $I => 'param' ]
-							],
-							[
-								'code' => 'overriddenCode',
-								'message' => 'mainpage',
-								'params' => [ $I => 'param' ],
-								'overriddenData' => true
-							],
+						),
+					),
+					'warnings' => array(
+						'status' => array(
+							array( 'code' => 'mainpage', 'message' => 'mainpage', 'params' => array( $I => 'param' ) ),
+							array( 'code' => 'parentheses', 'message' => 'parentheses', 'params' => array( 'foobar', $I => 'param' ) ),
+							array( 'code' => 'overriddenCode', 'message' => 'mainpage', 'params' => array( $I => 'param' ),
+								'overriddenData' => true ),
 							$I => 'warning',
-						],
-					],
-				],
-			],
-			[ 'none', 'fr', true,
-				[
-					'errors' => [
-						'err' => [
-							[ 'code' => 'mainpage' ],
+						),
+					),
+				),
+			),
+			array( 'none', 'fr', true,
+				array(
+					'errors' => array(
+						'err' => array(
+							array( 'code' => 'mainpage' ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'string' => [
-							[ 'code' => 'mainpage' ],
+						),
+					),
+					'warnings' => array(
+						'string' => array(
+							array( 'code' => 'mainpage' ),
 							$I => 'warning',
-						],
-					],
-				],
-				[
-					'errors' => [
-						'errWithData' => [
-							[ 'code' => 'overriddenCode', 'overriddenData' => true ],
+						),
+					),
+				),
+				array(
+					'errors' => array(
+						'errWithData' => array(
+							array( 'code' => 'overriddenCode', 'overriddenData' => true ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'messageWithData' => [
-							[ 'code' => 'overriddenCode', 'overriddenData' => true ],
+						),
+					),
+					'warnings' => array(
+						'messageWithData' => array(
+							array( 'code' => 'overriddenCode', 'overriddenData' => true ),
 							$I => 'warning',
-						],
-						'message' => [
-							[ 'code' => 'mainpage' ],
+						),
+						'message' => array(
+							array( 'code' => 'mainpage' ),
 							$I => 'warning',
-						],
-						'foo' => [
-							[ 'code' => 'mainpage' ],
-							[ 'code' => 'parentheses' ],
+						),
+						'foo' => array(
+							array( 'code' => 'mainpage' ),
+							array( 'code' => 'parentheses' ),
 							$I => 'warning',
-						],
-					],
-				],
-				[
-					'errors' => [
-						'status' => [
-							[ 'code' => 'mainpage' ],
-							[ 'code' => 'parentheses' ],
+						),
+					),
+				),
+				array(
+					'errors' => array(
+						'status' => array(
+							array( 'code' => 'mainpage' ),
+							array( 'code' => 'parentheses' ),
 							$I => 'error',
-						],
-					],
-					'warnings' => [
-						'status' => [
-							[ 'code' => 'mainpage' ],
-							[ 'code' => 'parentheses' ],
-							[ 'code' => 'overriddenCode', 'overriddenData' => true ],
+						),
+					),
+					'warnings' => array(
+						'status' => array(
+							array( 'code' => 'mainpage' ),
+							array( 'code' => 'parentheses' ),
+							array( 'code' => 'overriddenCode', 'overriddenData' => true ),
 							$I => 'warning',
-						],
-					],
-				],
-			],
-		];
+						),
+					),
+				),
+			),
+		);
 	}
 
 	/**
@@ -304,51 +256,51 @@ class ApiErrorFormatterTest extends MediaWikiLangTestCase {
 
 		$formatter->addWarning( 'string', 'mainpage' );
 		$formatter->addError( 'err', 'mainpage' );
-		$this->assertSame( [
-			'error' => [
+		$this->assertSame( array(
+			'error' => array(
 				'code' => 'mainpage',
 				'info' => $mainpagePlain,
-			],
-			'warnings' => [
-				'string' => [
+			),
+			'warnings' => array(
+				'string' => array(
 					'warnings' => $mainpagePlain,
 					ApiResult::META_CONTENT => 'warnings',
-				],
-			],
+				),
+			),
 			ApiResult::META_TYPE => 'assoc',
-		], $result->getResultData(), 'Simple test' );
+		), $result->getResultData(), 'Simple test' );
 
 		$result->reset();
 		$formatter->addWarning( 'foo', 'mainpage' );
 		$formatter->addWarning( 'foo', 'mainpage' );
-		$formatter->addWarning( 'foo', [ 'parentheses', 'foobar' ] );
+		$formatter->addWarning( 'foo', array( 'parentheses', 'foobar' ) );
 		$msg1 = wfMessage( 'mainpage' );
 		$formatter->addWarning( 'message', $msg1 );
-		$msg2 = new ApiMessage( 'mainpage', 'overriddenCode', [ 'overriddenData' => true ] );
+		$msg2 = new ApiMessage( 'mainpage', 'overriddenCode', array( 'overriddenData' => true ) );
 		$formatter->addWarning( 'messageWithData', $msg2 );
 		$formatter->addError( 'errWithData', $msg2 );
-		$this->assertSame( [
-			'error' => [
+		$this->assertSame( array(
+			'error' => array(
 				'code' => 'overriddenCode',
 				'info' => $mainpagePlain,
 				'overriddenData' => true,
-			],
-			'warnings' => [
-				'messageWithData' => [
+			),
+			'warnings' => array(
+				'messageWithData' => array(
 					'warnings' => $mainpagePlain,
 					ApiResult::META_CONTENT => 'warnings',
-				],
-				'message' => [
+				),
+				'message' => array(
 					'warnings' => $mainpagePlain,
 					ApiResult::META_CONTENT => 'warnings',
-				],
-				'foo' => [
+				),
+				'foo' => array(
 					'warnings' => "$mainpagePlain\n$parensPlain",
 					ApiResult::META_CONTENT => 'warnings',
-				],
-			],
+				),
+			),
 			ApiResult::META_TYPE => 'assoc',
-		], $result->getResultData(), 'Complex test' );
+		), $result->getResultData(), 'Complex test' );
 
 		$result->reset();
 		$status = Status::newGood();
@@ -359,62 +311,38 @@ class ApiErrorFormatterTest extends MediaWikiLangTestCase {
 		$status->error( 'mainpage' );
 		$status->error( 'parentheses', 'foobar' );
 		$formatter->addMessagesFromStatus( 'status', $status );
-		$this->assertSame( [
-			'error' => [
+		$this->assertSame( array(
+			'error' => array(
 				'code' => 'parentheses',
 				'info' => $parensPlain,
-			],
-			'warnings' => [
-				'status' => [
+			),
+			'warnings' => array(
+				'status' => array(
 					'warnings' => "$mainpagePlain\n$parensPlain",
 					ApiResult::META_CONTENT => 'warnings',
-				],
-			],
+				),
+			),
 			ApiResult::META_TYPE => 'assoc',
-		], $result->getResultData(), 'Status test' );
+		), $result->getResultData(), 'Status test' );
 
 		$I = ApiResult::META_INDEXED_TAG_NAME;
 		$this->assertSame(
-			[
-				[
-					'type' => 'error',
-					'message' => 'mainpage',
-					'params' => [ $I => 'param' ]
-				],
-				[
-					'type' => 'error',
-					'message' => 'parentheses',
-					'params' => [ 'foobar', $I => 'param' ]
-				],
+			array(
+				array( 'type' => 'error', 'message' => 'mainpage', 'params' => array( $I => 'param' ) ),
+				array( 'type' => 'error', 'message' => 'parentheses', 'params' => array( 'foobar', $I => 'param' ) ),
 				$I => 'error',
-			],
+			),
 			$formatter->arrayFromStatus( $status, 'error' ),
 			'arrayFromStatus test for error'
 		);
 		$this->assertSame(
-			[
-				[
-					'type' => 'warning',
-					'message' => 'mainpage',
-					'params' => [ $I => 'param' ]
-				],
-				[
-					'type' => 'warning',
-					'message' => 'parentheses',
-					'params' => [ 'foobar', $I => 'param' ]
-				],
-				[
-					'message' => 'mainpage',
-					'params' => [ $I => 'param' ],
-					'type' => 'warning'
-				],
-				[
-					'message' => 'mainpage',
-					'params' => [ $I => 'param' ],
-					'type' => 'warning'
-				],
+			array(
+				array( 'type' => 'warning', 'message' => 'mainpage', 'params' => array( $I => 'param' ) ),
+				array( 'type' => 'warning', 'message' => 'parentheses', 'params' => array( 'foobar', $I => 'param' ) ),
+				array( 'message' => 'mainpage', 'params' => array( $I => 'param' ), 'type' => 'warning' ),
+				array( 'message' => 'mainpage', 'params' => array( $I => 'param' ), 'type' => 'warning' ),
 				$I => 'warning',
-			],
+			),
 			$formatter->arrayFromStatus( $status, 'warning' ),
 			'arrayFromStatus test for warning'
 		);

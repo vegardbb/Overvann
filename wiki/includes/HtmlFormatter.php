@@ -27,8 +27,8 @@ class HtmlFormatter {
 	private $doc;
 
 	private $html;
-	private $itemsToRemove = [];
-	private $elementsToFlatten = [];
+	private $itemsToRemove = array();
+	private $elementsToFlatten = array();
 	protected $removeMedia = false;
 
 	/**
@@ -74,8 +74,10 @@ class HtmlFormatter {
 			}
 
 			// Workaround for bug that caused spaces before references
-			// to disappear during processing: https://phabricator.wikimedia.org/T55086
-			// TODO: Please replace with a better fix if one can be found.
+			// to disappear during processing:
+			// https://bugzilla.wikimedia.org/show_bug.cgi?id=53086
+			//
+			// Please replace with a better fix if one can be found.
 			$html = str_replace( ' <', '&#32;<', $html );
 
 			libxml_use_internal_errors( true );
@@ -148,7 +150,7 @@ class HtmlFormatter {
 			},
 			true
 		) ) {
-			return [];
+			return array();
 		}
 
 		$doc = $this->getDoc();
@@ -159,7 +161,7 @@ class HtmlFormatter {
 		// over them in a foreach loop. It will seemingly leave the internal
 		// iterator on the foreach out of wack and results will be quite
 		// strange. Though, making a queue of items to remove seems to work.
-		$domElemsToRemove = [];
+		$domElemsToRemove = array();
 		foreach ( $removals['TAG'] as $tagToRemove ) {
 			$tagToRemoveNodes = $doc->getElementsByTagName( $tagToRemove );
 			foreach ( $tagToRemoveNodes as $tagToRemoveNode ) {
@@ -171,7 +173,7 @@ class HtmlFormatter {
 		$removed = $this->removeElements( $domElemsToRemove );
 
 		// Elements with named IDs
-		$domElemsToRemove = [];
+		$domElemsToRemove = array();
 		foreach ( $removals['ID'] as $itemToRemove ) {
 			$itemToRemoveNode = $doc->getElementById( $itemToRemove );
 			if ( $itemToRemoveNode ) {
@@ -181,7 +183,7 @@ class HtmlFormatter {
 		$removed = array_merge( $removed, $this->removeElements( $domElemsToRemove ) );
 
 		// CSS Classes
-		$domElemsToRemove = [];
+		$domElemsToRemove = array();
 		$xpath = new DOMXPath( $doc );
 		foreach ( $removals['CLASS'] as $classToRemove ) {
 			$elements = $xpath->query( '//*[contains(@class, "' . $classToRemove . '")]' );
@@ -217,7 +219,7 @@ class HtmlFormatter {
 	private function removeElements( $elements ) {
 		$list = $elements;
 		if ( $elements instanceof DOMNodeList ) {
-			$list = [];
+			$list = array();
 			foreach ( $elements as $element ) {
 				$list[] = $element;
 			}
@@ -242,12 +244,12 @@ class HtmlFormatter {
 		if ( !$replacements ) {
 			// We don't include rules like '&#34;' => '&amp;quot;' because entities had already been
 			// normalized by libxml. Using this function with input not sanitized by libxml is UNSAFE!
-			$replacements = new ReplacementArray( [
+			$replacements = new ReplacementArray( array(
 				'&quot;' => '&amp;quot;',
 				'&amp;' => '&amp;amp;',
 				'&lt;' => '&amp;lt;',
 				'&gt;' => '&amp;gt;',
-			] );
+			) );
 		}
 		$html = $replacements->replace( $html );
 
@@ -279,7 +281,7 @@ class HtmlFormatter {
 			}
 			if ( $element ) {
 				$body = $this->doc->getElementsByTagName( 'body' )->item( 0 );
-				$nodesArray = [];
+				$nodesArray = array();
 				foreach ( $body->childNodes as $node ) {
 					$nodesArray[] = $node;
 				}
@@ -293,6 +295,7 @@ class HtmlFormatter {
 			$html = $this->fixLibXml( $html );
 			if ( wfIsWindows() ) {
 				// Cleanup for CRLF misprocessing of unknown origin on Windows.
+				//
 				// If this error continues in the future, please track it down in the
 				// XML code paths if possible and fix there.
 				$html = str_replace( '&#13;', '', $html );
@@ -349,12 +352,12 @@ class HtmlFormatter {
 	 * @return array
 	 */
 	protected function parseItemsToRemove() {
-		$removals = [
-			'ID' => [],
-			'TAG' => [],
-			'CLASS' => [],
-			'TAG_CLASS' => [],
-		];
+		$removals = array(
+			'ID' => array(),
+			'TAG' => array(),
+			'CLASS' => array(),
+			'TAG_CLASS' => array(),
+		);
 
 		foreach ( $this->itemsToRemove as $itemToRemove ) {
 			$type = '';

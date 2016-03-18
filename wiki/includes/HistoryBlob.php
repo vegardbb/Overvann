@@ -71,7 +71,7 @@ interface HistoryBlob {
  * Improves compression ratio by concatenating like objects before gzipping
  */
 class ConcatenatedGzipHistoryBlob implements HistoryBlob {
-	public $mVersion = 0, $mCompressed = false, $mItems = [], $mDefaultHash = '';
+	public $mVersion = 0, $mCompressed = false, $mItems = array(), $mDefaultHash = '';
 	public $mSize = 0;
 	public $mMaxSize = 10000000;
 	public $mMaxCount = 100;
@@ -165,7 +165,7 @@ class ConcatenatedGzipHistoryBlob implements HistoryBlob {
 	 */
 	function __sleep() {
 		$this->compress();
-		return [ 'mVersion', 'mCompressed', 'mItems', 'mDefaultHash' ];
+		return array( 'mVersion', 'mCompressed', 'mItems', 'mDefaultHash' );
 	}
 
 	function __wakeup() {
@@ -194,7 +194,7 @@ class HistoryBlobStub {
 	 * blob. By keeping the last-used one open, we avoid redundant
 	 * unserialization and decompression overhead.
 	 */
-	protected static $blobCache = [];
+	protected static $blobCache = array();
 
 	/** @var int */
 	public $mOldId;
@@ -248,8 +248,8 @@ class HistoryBlobStub {
 			$dbr = wfGetDB( DB_SLAVE );
 			$row = $dbr->selectRow(
 				'text',
-				[ 'old_flags', 'old_text' ],
-				[ 'old_id' => $this->mOldId ]
+				array( 'old_flags', 'old_text' ),
+				array( 'old_id' => $this->mOldId )
 			);
 
 			if ( !$row ) {
@@ -287,7 +287,7 @@ class HistoryBlobStub {
 			// Save this item for reference; if pulling many
 			// items in a row we'll likely use it again.
 			$obj->uncompress();
-			self::$blobCache = [ $this->mOldId => $obj ];
+			self::$blobCache = array( $this->mOldId => $obj );
 		}
 
 		return $obj->getItem( $this->mHash );
@@ -337,7 +337,7 @@ class HistoryBlobCurStub {
 	 */
 	function getText() {
 		$dbr = wfGetDB( DB_SLAVE );
-		$row = $dbr->selectRow( 'cur', [ 'cur_text' ], [ 'cur_id' => $this->mCurId ] );
+		$row = $dbr->selectRow( 'cur', array( 'cur_text' ), array( 'cur_id' => $this->mCurId ) );
 		if ( !$row ) {
 			return false;
 		}
@@ -351,7 +351,7 @@ class HistoryBlobCurStub {
  */
 class DiffHistoryBlob implements HistoryBlob {
 	/** @var array Uncompressed item cache */
-	public $mItems = [];
+	public $mItems = array();
 
 	/** @var int Total uncompressed size */
 	public $mSize = 0;
@@ -454,18 +454,18 @@ class DiffHistoryBlob implements HistoryBlob {
 		}
 
 		// Create two diff sequences: one for main text and one for small text
-		$sequences = [
-			'small' => [
+		$sequences = array(
+			'small' => array(
 				'tail' => '',
-				'diffs' => [],
-				'map' => [],
-			],
-			'main' => [
+				'diffs' => array(),
+				'map' => array(),
+			),
+			'main' => array(
 				'tail' => '',
-				'diffs' => [],
-				'map' => [],
-			],
-		];
+				'diffs' => array(),
+				'map' => array(),
+			),
+		);
 		$smallFactor = 0.5;
 
 		$mItemsCount = count( $this->mItems );
@@ -492,8 +492,8 @@ class DiffHistoryBlob implements HistoryBlob {
 
 		// Knit the sequences together
 		$tail = '';
-		$this->mDiffs = [];
-		$this->mDiffMap = [];
+		$this->mDiffs = array();
+		$this->mDiffMap = array();
 		foreach ( $sequences as $seq ) {
 			if ( !count( $seq['diffs'] ) ) {
 				continue;
@@ -644,16 +644,16 @@ class DiffHistoryBlob implements HistoryBlob {
 				$map .= $i - $prev;
 				$prev = $i;
 			}
-			$info = [
+			$info = array(
 				'diffs' => $this->mDiffs,
 				'map' => $map
-			];
+			);
 		}
 		if ( isset( $this->mDefaultKey ) ) {
 			$info['default'] = $this->mDefaultKey;
 		}
 		$this->mCompressed = gzdeflate( serialize( $info ) );
-		return [ 'mCompressed' ];
+		return array( 'mCompressed' );
 	}
 
 	function __wakeup() {
@@ -681,7 +681,7 @@ class DiffHistoryBlob implements HistoryBlob {
 			// New format
 			$map = explode( ',', $info['map'] );
 			$cur = 0;
-			$this->mDiffMap = [];
+			$this->mDiffMap = array();
 			foreach ( $map as $i ) {
 				$cur += $i;
 				$this->mDiffMap[] = $cur;

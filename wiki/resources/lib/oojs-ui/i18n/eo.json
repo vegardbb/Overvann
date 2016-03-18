@@ -5,8 +5,7 @@
 			"KuboF",
 			"Shirayuki",
 			"Yekrats",
-			"Kvardek du",
-			"Psychoslave"
+			"Kvardek du"
 		]
 	},
 	"ooui-outline-control-move-down": "Movi eron suben",
@@ -23,6 +22,5 @@
 	"ooui-dialog-process-continue": "Daŭrigi",
 	"ooui-selectfile-button-select": "Elekti dosieron",
 	"ooui-selectfile-not-supported": "Dosieroselekto ne estas subtenata.",
-	"ooui-selectfile-placeholder": "Vi ne selektis dosieron",
-	"ooui-selectfile-dragdrop-placeholder": "Ĵetu dosieron ĉi tie."
+	"ooui-selectfile-placeholder": "Vi ne selektis dosieron"
 }

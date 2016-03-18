@@ -5,8 +5,8 @@
  */
 ( function ( $, mw ) {
 
-// Cached access key modifiers for used browser
-var cachedAccessKeyModifiers,
+// Cached access key prefix for used browser
+var cachedAccessKeyPrefix,
 
 	// Whether to use 'test-' instead of correct prefix (used for testing)
 	useTestPrefix = false,
@@ -16,39 +16,37 @@ var cachedAccessKeyModifiers,
 	labelable = 'button, input, textarea, keygen, meter, output, progress, select';
 
 /**
- * Find the modifier keys that need to be pressed together with the accesskey to trigger the input.
+ * Get the prefix for the access key for browsers that don't support accessKeyLabel.
  *
- * The result is dependant on the ua paramater or the current platform.
  * For browsers that support accessKeyLabel, #getAccessKeyLabel never calls here.
- * Valid key values that are returned can be: ctrl, alt, option, shift, esc
  *
  * @private
  * @param {Object} [ua] An object with a 'userAgent' and 'platform' property.
- * @return {Array} Array with 0 or more of the string values: ctrl, option, alt, shift, esc
+ * @return {string} Access key prefix
  */
-function getAccessKeyModifiers( ua ) {
+function getAccessKeyPrefix( ua ) {
 	// use cached prefix if possible
-	if ( !ua && cachedAccessKeyModifiers ) {
-		return cachedAccessKeyModifiers;
+	if ( !ua && cachedAccessKeyPrefix ) {
+		return cachedAccessKeyPrefix;
 	}
 
 	var profile = $.client.profile( ua ),
-		accessKeyModifiers = [ 'alt' ];
+		accessKeyPrefix = 'alt-';
 
-	// Classic Opera on any platform
-	if ( profile.name === 'opera' && profile.versionNumber < 15 ) {
-		accessKeyModifiers = [ 'shift', 'esc' ];
+	// Opera on any platform
+	if ( profile.name === 'opera' ) {
+		accessKeyPrefix = 'shift-esc-';
 
-	// Chrome and modern Opera on any platform
-	} else if ( profile.name === 'chrome' || profile.name === 'opera' ) {
-		accessKeyModifiers = (
+	// Chrome on any platform
+	} else if ( profile.name === 'chrome' ) {
+		accessKeyPrefix = (
 			profile.platform === 'mac'
 				// Chrome on Mac
-				? [ 'ctrl', 'option' ]
+				? 'ctrl-option-'
 				// Chrome on Windows or Linux
 				// (both alt- and alt-shift work, but alt with E, D, F etc does not
 				// work since they are browser shortcuts)
-				: [ 'alt', 'shift' ]
+				: 'alt-shift-'
 		);
 
 	// Non-Windows Safari with webkit_version > 526
@@ -56,7 +54,7 @@ function getAccessKeyModifiers( ua ) {
 		&& profile.name === 'safari'
 		&& profile.layoutVersion > 526
 	) {
-		accessKeyModifiers = [ 'ctrl', 'alt' ];
+		accessKeyPrefix = 'ctrl-alt-';
 
 	// Safari/Konqueror on any platform, or any browser on Mac
 	// (but not Safari on Windows)
@@ -65,27 +63,27 @@ function getAccessKeyModifiers( ua ) {
 		|| profile.platform === 'mac'
 		|| profile.name === 'konqueror' )
 	) {
-		accessKeyModifiers = [ 'ctrl' ];
+		accessKeyPrefix = 'ctrl-';
 
 	// Firefox/Iceweasel 2.x and later
 	} else if ( ( profile.name === 'firefox' || profile.name === 'iceweasel' )
 		&& profile.versionBase > '1'
 	) {
-		accessKeyModifiers = [ 'alt', 'shift' ];
+		accessKeyPrefix = 'alt-shift-';
 	}
 
-	// cache modifiers
+	// cache prefix
 	if ( !ua ) {
-		cachedAccessKeyModifiers = accessKeyModifiers;
+		cachedAccessKeyPrefix = accessKeyPrefix;
 	}
-	return accessKeyModifiers;
+	return accessKeyPrefix;
 }
 
 /**
  * Get the access key label for an element.
  *
  * Will use native accessKeyLabel if available (currently only in Firefox 8+),
- * falls back to #getAccessKeyModifiers.
+ * falls back to #getAccessKeyPrefix.
  *
  * @private
  * @param {HTMLElement} element Element to get the label for
@@ -101,7 +99,7 @@ function getAccessKeyLabel( element ) {
 	if ( !useTestPrefix && element.accessKeyLabel ) {
 		return element.accessKeyLabel;
 	}
-	return ( useTestPrefix ? 'test' : getAccessKeyModifiers().join( '-' ) ) + '-' + element.accessKey;
+	return ( useTestPrefix ? 'test-' : getAccessKeyPrefix() ) + element.accessKey;
 }
 
 /**
@@ -177,30 +175,12 @@ $.fn.updateTooltipAccessKeys = function () {
 };
 
 /**
- * getAccessKeyModifiers
- *
- * @method updateTooltipAccessKeys_getAccessKeyModifiers
- * @inheritdoc #getAccessKeyModifiers
- */
-$.fn.updateTooltipAccessKeys.getAccessKeyModifiers = getAccessKeyModifiers;
-
-/**
- * getAccessKeyLabel
- *
- * @method updateTooltipAccessKeys_getAccessKeyLabel
- * @inheritdoc #getAccessKeyLabel
- */
-$.fn.updateTooltipAccessKeys.getAccessKeyLabel = getAccessKeyLabel;
-
-/**
- * getAccessKeyPrefix
+ * Exposed for testing.
  *
  * @method updateTooltipAccessKeys_getAccessKeyPrefix
- * @deprecated 1.27 Use #getAccessKeyModifiers
+ * @inheritdoc #getAccessKeyPrefix
  */
-$.fn.updateTooltipAccessKeys.getAccessKeyPrefix = function ( ua ) {
-	return getAccessKeyModifiers( ua ).join( '-' ) + '-';
-};
+$.fn.updateTooltipAccessKeys.getAccessKeyPrefix = getAccessKeyPrefix;
 
 /**
  * Switch test mode on and off.

@@ -65,10 +65,7 @@ class SpecialExport extends SpecialPage {
 					 */
 					$catpages = $this->getPagesFromCategory( $t );
 					if ( $catpages ) {
-						if ( $page !== '' ) {
-							$page .= "\n";
-						}
-						$page .= implode( "\n", $catpages );
+						$page .= "\n" . implode( "\n", $catpages );
 					}
 				}
 			}
@@ -109,11 +106,11 @@ class SpecialExport extends SpecialPage {
 			$maxHistory = $config->get( 'ExportMaxHistory' );
 			$limit = $request->getInt( 'limit' );
 			$dir = $request->getVal( 'dir' );
-			$history = [
+			$history = array(
 				'dir' => 'asc',
 				'offset' => false,
 				'limit' => $maxHistory,
-			];
+			);
 			$historyCheck = $request->getCheck( 'history' );
 
 			if ( $this->curonly ) {
@@ -189,8 +186,8 @@ class SpecialExport extends SpecialPage {
 			$categoryName = '';
 		}
 
-		$formDescriptor = [
-			'catname' => [
+		$formDescriptor = array(
+			'catname' => array(
 				'type' => 'textwithbutton',
 				'name' => 'catname',
 				'horizontal-label' => true,
@@ -200,11 +197,11 @@ class SpecialExport extends SpecialPage {
 				'buttontype' => 'submit',
 				'buttonname' => 'addcat',
 				'buttondefault' => $this->msg( 'export-addcat' )->text(),
-			],
-		];
+			),
+		);
 		if ( $config->get( 'ExportFromNamespaces' ) ) {
-			$formDescriptor += [
-				'nsindex' => [
+			$formDescriptor += array(
+				'nsindex' => array(
 					'type' => 'namespaceselectwithbutton',
 					'default' => $nsindex,
 					'label-message' => 'export-addnstext',
@@ -215,93 +212,93 @@ class SpecialExport extends SpecialPage {
 					'buttontype' => 'submit',
 					'buttonname' => 'addns',
 					'buttondefault' => $this->msg( 'export-addns' )->text(),
-				],
-			];
+				),
+			);
 		}
 
 		if ( $config->get( 'ExportAllowAll' ) ) {
-			$formDescriptor += [
-				'exportall' => [
+			$formDescriptor += array(
+				'exportall' => array(
 					'type' => 'check',
 					'label-message' => 'exportall',
 					'name' => 'exportall',
 					'id' => 'exportall',
 					'default' => $request->wasPosted() ? $request->getCheck( 'exportall' ) : false,
-				],
-			];
+				),
+			);
 		}
 
-		$formDescriptor += [
-			'textarea' => [
+		$formDescriptor += array(
+			'textarea' => array(
 				'class' => 'HTMLTextAreaField',
 				'name' => 'pages',
-				'label-message' => 'export-manual',
 				'nodata' => true,
+				'cols' => 40,
 				'rows' => 10,
 				'default' => $page,
-			],
-		];
+			),
+		);
 
 		if ( $config->get( 'ExportAllowHistory' ) ) {
-			$formDescriptor += [
-				'curonly' => [
+			$formDescriptor += array(
+				'curonly' => array(
 					'type' => 'check',
 					'label-message' => 'exportcuronly',
 					'name' => 'curonly',
 					'id' => 'curonly',
 					'default' => $request->wasPosted() ? $request->getCheck( 'curonly' ) : true,
-				],
-			];
+				),
+			);
 		} else {
 			$out->addWikiMsg( 'exportnohistory' );
 		}
 
-		$formDescriptor += [
-			'templates' => [
+		$formDescriptor += array(
+			'templates' => array(
 				'type' => 'check',
 				'label-message' => 'export-templates',
 				'name' => 'templates',
 				'id' => 'wpExportTemplates',
 				'default' => $request->wasPosted() ? $request->getCheck( 'templates' ) : false,
-			],
-		];
+			),
+		);
 
 		if ( $config->get( 'ExportMaxLinkDepth' ) || $this->userCanOverrideExportDepth() ) {
-			$formDescriptor += [
-				'pagelink-depth' => [
+			$formDescriptor += array(
+				'pagelink-depth' => array(
 					'type' => 'text',
 					'name' => 'pagelink-depth',
 					'id' => 'pagelink-depth',
 					'label-message' => 'export-pagelinks',
 					'default' => '0',
 					'size' => 20,
-				],
-			];
+				),
+			);
 		}
 
-		$formDescriptor += [
-			'wpDownload' => [
+		$formDescriptor += array(
+			'wpDownload' => array(
 				'type' => 'check',
 				'name' =>'wpDownload',
 				'id' => 'wpDownload',
 				'default' => $request->wasPosted() ? $request->getCheck( 'wpDownload' ) : true,
 				'label-message' => 'export-download',
-			],
-		];
+			),
+		);
 
 		if ( $config->get( 'ExportAllowListContributors' ) ) {
-			$formDescriptor += [
-				'listauthors' => [
+			$formDescriptor += array(
+				'listauthors' => array(
 					'type' => 'check',
 					'label-message' => 'exportlistauthors',
 					'default' => $request->wasPosted() ? $request->getCheck( 'listauthors' ) : false,
 					'name' => 'listauthors',
 					'id' => 'listauthors',
-				],
-			];
+				),
+			);
 		}
 
-		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() );
+		$htmlForm = HTMLForm::factory( 'div', $formDescriptor, $this->getContext() );
 		$htmlForm->setSubmitTextMsg( 'export-submit' );
 		$htmlForm->prepareForm()->displayForm( false );
 		$this->addHelpLink( 'Help:Export' );
@@ -329,7 +326,7 @@ class SpecialExport extends SpecialPage {
 		if ( $exportall ) {
 			$history = WikiExporter::FULL;
 		} else {
-			$pageSet = []; // Inverted index of all pages to look up
+			$pageSet = array(); // Inverted index of all pages to look up
 
 			// Split up and normalize input
 			foreach ( explode( "\n", $page ) as $pageName ) {
@@ -388,7 +385,7 @@ class SpecialExport extends SpecialPage {
 			$exporter->allPages();
 		} else {
 			foreach ( $pages as $page ) {
-				# Bug 8824: Only export pages the user can read
+				#Bug 8824: Only export pages the user can read
 				$title = Title::newFromText( $page );
 				if ( is_null( $title ) ) {
 					// @todo Perhaps output an <error> tag or something.
@@ -418,20 +415,18 @@ class SpecialExport extends SpecialPage {
 	private function getPagesFromCategory( $title ) {
 		global $wgContLang;
 
-		$maxPages = $this->getConfig()->get( 'ExportPagelistLimit' );
-
 		$name = $title->getDBkey();
 
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->select(
-			[ 'page', 'categorylinks' ],
-			[ 'page_namespace', 'page_title' ],
-			[ 'cl_from=page_id', 'cl_to' => $name ],
+			array( 'page', 'categorylinks' ),
+			array( 'page_namespace', 'page_title' ),
+			array( 'cl_from=page_id', 'cl_to' => $name ),
 			__METHOD__,
-			[ 'LIMIT' => $maxPages ]
+			array( 'LIMIT' => '5000' )
 		);
 
-		$pages = [];
+		$pages = array();
 
 		foreach ( $res as $row ) {
 			$n = $row->page_title;
@@ -453,18 +448,16 @@ class SpecialExport extends SpecialPage {
 	private function getPagesFromNamespace( $nsindex ) {
 		global $wgContLang;
 
-		$maxPages = $this->getConfig()->get( 'ExportPagelistLimit' );
-
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->select(
 			'page',
-			[ 'page_namespace', 'page_title' ],
-			[ 'page_namespace' => $nsindex ],
+			array( 'page_namespace', 'page_title' ),
+			array( 'page_namespace' => $nsindex ),
 			__METHOD__,
-			[ 'LIMIT' => $maxPages ]
+			array( 'LIMIT' => '5000' )
 		);
 
-		$pages = [];
+		$pages = array();
 
 		foreach ( $res as $row ) {
 			$n = $row->page_title;
@@ -489,8 +482,8 @@ class SpecialExport extends SpecialPage {
 	private function getTemplates( $inputPages, $pageSet ) {
 		return $this->getLinks( $inputPages, $pageSet,
 			'templatelinks',
-			[ 'namespace' => 'tl_namespace', 'title' => 'tl_title' ],
-			[ 'page_id=tl_from' ]
+			array( 'namespace' => 'tl_namespace', 'title' => 'tl_title' ),
+			array( 'page_id=tl_from' )
 		);
 	}
 
@@ -533,8 +526,8 @@ class SpecialExport extends SpecialPage {
 			// @codingStandardsIgnoreEnd
 			$pageSet = $this->getLinks(
 				$inputPages, $pageSet, 'pagelinks',
-				[ 'namespace' => 'pl_namespace', 'title' => 'pl_title' ],
-				[ 'page_id=pl_from' ]
+				array( 'namespace' => 'pl_namespace', 'title' => 'pl_title' ),
+				array( 'page_id=pl_from' )
 			);
 			$inputPages = array_keys( $pageSet );
 		}
@@ -562,14 +555,14 @@ class SpecialExport extends SpecialPage {
 				/// @todo FIXME: May or may not be more efficient to batch these
 				///        by namespace when given multiple input pages.
 				$result = $dbr->select(
-					[ 'page', $table ],
+					array( 'page', $table ),
 					$fields,
 					array_merge(
 						$join,
-						[
+						array(
 							'page_namespace' => $title->getNamespace(),
 							'page_title' => $title->getDBkey()
-						]
+						)
 					),
 					__METHOD__
 				);

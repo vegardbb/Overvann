@@ -55,16 +55,16 @@ class SitesCacheFileBuilder {
 	 * @return bool
 	 */
 	private function cacheSites( array $sites ) {
-		$sitesArray = [];
+		$sitesArray = array();
 
 		foreach ( $sites as $site ) {
 			$globalId = $site->getGlobalId();
 			$sitesArray[$globalId] = $this->getSiteAsArray( $site );
 		}
 
-		$json = json_encode( [
+		$json = json_encode( array(
 			'sites' => $sitesArray
-		] );
+		) );
 
 		$result = file_put_contents( $this->cacheFile, $json );
 
@@ -79,7 +79,7 @@ class SitesCacheFileBuilder {
 	private function getSiteAsArray( Site $site ) {
 		$siteEntry = unserialize( $site->serialize() );
 		$siteIdentifiers = $this->buildLocalIdentifiers( $site );
-		$identifiersArray = [];
+		$identifiersArray = array();
 
 		foreach ( $siteIdentifiers as $identifier ) {
 			$identifiersArray[] = $identifier;
@@ -96,14 +96,14 @@ class SitesCacheFileBuilder {
 	 * @return array Site local identifiers
 	 */
 	private function buildLocalIdentifiers( Site $site ) {
-		$localIds = [];
+		$localIds = array();
 
 		foreach ( $site->getLocalIds() as $idType => $ids ) {
 			foreach ( $ids as $id ) {
-				$localIds[] = [
+				$localIds[] = array(
 					'type' => $idType,
 					'key' => $id
-				];
+				);
 			}
 		}
 

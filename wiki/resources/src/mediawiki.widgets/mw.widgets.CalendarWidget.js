@@ -19,8 +19,6 @@
 	 *
 	 * @constructor
 	 * @param {Object} [config] Configuration options
-	 * @cfg {boolean} [lazyInitOnToggle=false] Don't build most of the interface until
-	 *     `.toggle( true )` is called. Meant to be used when the calendar is not immediately visible.
 	 * @cfg {string} [precision='day'] Date precision to use, 'day' or 'month'
 	 * @cfg {string|null} [date=null] Day or month date (depending on `precision`), in the format
 	 *     'YYYY-MM-DD' or 'YYYY-MM'. When null, the calendar will show today's date, but not select
@@ -38,7 +36,6 @@
 		OO.ui.mixin.FloatableElement.call( this, config );
 
 		// Properties
-		this.lazyInitOnToggle = !!config.lazyInitOnToggle;
 		this.precision = config.precision || 'day';
 		// Currently selected date (day or month)
 		this.date = null;
@@ -50,8 +47,36 @@
 		this.$bodyOuterWrapper = $( '<div>' ).addClass( 'mw-widget-calendarWidget-body-outer-wrapper' );
 		this.$bodyWrapper = $( '<div>' ).addClass( 'mw-widget-calendarWidget-body-wrapper' );
 		this.$body = $( '<div>' ).addClass( 'mw-widget-calendarWidget-body' );
+		this.labelButton = new OO.ui.ButtonWidget( {
+			tabIndex: -1,
+			label: '',
+			framed: false,
+			classes: [ 'mw-widget-calendarWidget-labelButton' ]
+		} );
+		this.upButton = new OO.ui.ButtonWidget( {
+			tabIndex: -1,
+			framed: false,
+			icon: 'collapse',
+			classes: [ 'mw-widget-calendarWidget-upButton' ]
+		} );
+		this.prevButton = new OO.ui.ButtonWidget( {
+			tabIndex: -1,
+			framed: false,
+			icon: 'previous',
+			classes: [ 'mw-widget-calendarWidget-prevButton' ]
+		} );
+		this.nextButton = new OO.ui.ButtonWidget( {
+			tabIndex: -1,
+			framed: false,
+			icon: 'next',
+			classes: [ 'mw-widget-calendarWidget-nextButton' ]
+		} );
 
 		// Events
+		this.labelButton.connect( this, { click: 'onUpButtonClick' } );
+		this.upButton.connect( this, { click: 'onUpButtonClick' } );
+		this.prevButton.connect( this, { click: 'onPrevButtonClick' } );
+		this.nextButton.connect( this, { click: 'onNextButtonClick' } );
 		this.$element.on( {
 			focus: this.onFocus.bind( this ),
 			mousedown: this.onClick.bind( this ),
@@ -62,9 +87,12 @@
 		this.$element
 			.addClass( 'mw-widget-calendarWidget' )
 			.append( this.$header, this.$bodyOuterWrapper.append( this.$bodyWrapper.append( this.$body ) ) );
-		if ( !this.lazyInitOnToggle ) {
-			this.buildHeaderButtons();
-		}
+		this.$header.append(
+			this.prevButton.$element,
+			this.nextButton.$element,
+			this.upButton.$element,
+			this.labelButton.$element
+		);
 		this.setDate( config.date !== undefined ? config.date : null );
 	};
 
@@ -91,7 +119,7 @@
 	 * internally and for dates accepted by #setDate and returned by #getDate.
 	 *
 	 * @private
-	 * @return {string} Format
+	 * @returns {string} Format
 	 */
 	mw.widgets.CalendarWidget.prototype.getDateFormat = function () {
 		return {
@@ -104,7 +132,7 @@
 	 * Get the date precision this calendar uses, 'day' or 'month'.
 	 *
 	 * @private
-	 * @return {string} Precision, 'day' or 'month'
+	 * @returns {string} Precision, 'day' or 'month'
 	 */
 	mw.widgets.CalendarWidget.prototype.getPrecision = function () {
 		return this.precision;
@@ -114,7 +142,7 @@
 	 * Get list of possible display layers.
 	 *
 	 * @private
-	 * @return {string[]} Layers
+	 * @returns {string[]} Layers
 	 */
 	mw.widgets.CalendarWidget.prototype.getDisplayLayers = function () {
 		return [ 'month', 'year', 'duodecade' ].slice( this.precision === 'month' ? 1 : 0 );
@@ -127,15 +155,11 @@
 	 * @param {string|null} [fade=null] Direction in which to fade out current calendar contents,
 	 *     'previous', 'next', 'up' or 'down'; or 'auto', which has the same result as 'previous' or
 	 *     'next' depending on whether the current date is later or earlier than the previous.
+	 * @returns {string} Format
 	 */
 	mw.widgets.CalendarWidget.prototype.updateUI = function ( fade ) {
 		var items, today, selected, currentMonth, currentYear, currentDay, i, needsFade,
 			$bodyWrapper = this.$bodyWrapper;
-
-		if ( this.lazyInitOnToggle ) {
-			// We're being called from the constructor and not being shown yet, do nothing
-			return;
-		}
 
 		if (
 			this.displayLayer === this.previousDisplayLayer &&
@@ -301,50 +325,6 @@
 	};
 
 	/**
-	 * Construct and display buttons to navigate the calendar.
-	 *
-	 * @private
-	 */
-	mw.widgets.CalendarWidget.prototype.buildHeaderButtons = function () {
-		this.labelButton = new OO.ui.ButtonWidget( {
-			tabIndex: -1,
-			label: '',
-			framed: false,
-			classes: [ 'mw-widget-calendarWidget-labelButton' ]
-		} );
-		this.upButton = new OO.ui.ButtonWidget( {
-			tabIndex: -1,
-			framed: false,
-			icon: 'collapse',
-			classes: [ 'mw-widget-calendarWidget-upButton' ]
-		} );
-		this.prevButton = new OO.ui.ButtonWidget( {
-			tabIndex: -1,
-			framed: false,
-			icon: 'previous',
-			classes: [ 'mw-widget-calendarWidget-prevButton' ]
-		} );
-		this.nextButton = new OO.ui.ButtonWidget( {
-			tabIndex: -1,
-			framed: false,
-			icon: 'next',
-			classes: [ 'mw-widget-calendarWidget-nextButton' ]
-		} );
-
-		this.labelButton.connect( this, { click: 'onUpButtonClick' } );
-		this.upButton.connect( this, { click: 'onUpButtonClick' } );
-		this.prevButton.connect( this, { click: 'onPrevButtonClick' } );
-		this.nextButton.connect( this, { click: 'onNextButtonClick' } );
-
-		this.$header.append(
-			this.prevButton.$element,
-			this.nextButton.$element,
-			this.upButton.$element,
-			this.labelButton.$element
-		);
-	};
-
-	/**
 	 * Handle click events on the "up" button, switching to less precise view.
 	 *
 	 * @private
@@ -483,7 +463,7 @@
 	 * Get current date, in the format 'YYYY-MM-DD' or 'YYYY-MM', depending on precision. Digits will
 	 * not be localised.
 	 *
-	 * @return {string|null} Date string
+	 * @returns {string|null} Date string
 	 */
 	mw.widgets.CalendarWidget.prototype.getDate = function () {
 		return this.date;
@@ -565,12 +545,6 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.CalendarWidget.prototype.toggle = function ( visible ) {
-		if ( this.lazyInitOnToggle && visible ) {
-			this.lazyInitOnToggle = false;
-			this.buildHeaderButtons();
-			this.updateUI();
-		}
-
 		// Parent method
 		mw.widgets.CalendarWidget.parent.prototype.toggle.call( this, visible );
 

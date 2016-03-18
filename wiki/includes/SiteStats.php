@@ -34,10 +34,10 @@ class SiteStats {
 	private static $jobs;
 
 	/** @var int[] */
-	private static $pageCount = [];
+	private static $pageCount = array();
 
 	/** @var int[] */
-	private static $groupMemberCounts = [];
+	private static $groupMemberCounts = array();
 
 	static function recache() {
 		self::load( true );
@@ -98,11 +98,11 @@ class SiteStats {
 	}
 
 	/**
-	 * @param IDatabase $db
+	 * @param DatabaseBase $db
 	 * @return bool|ResultWrapper
 	 */
 	static function doLoad( $db ) {
-		return $db->selectRow( 'site_stats', [
+		return $db->selectRow( 'site_stats', array(
 				'ss_row_id',
 				'ss_total_edits',
 				'ss_good_articles',
@@ -110,7 +110,7 @@ class SiteStats {
 				'ss_users',
 				'ss_active_users',
 				'ss_images',
-			], false, __METHOD__ );
+			), false, __METHOD__ );
 	}
 
 	/**
@@ -180,24 +180,23 @@ class SiteStats {
 	 * @return int
 	 */
 	static function numberingroup( $group ) {
-		$cache = ObjectCache::getMainWANInstance();
-		return $cache->getWithSetCallback(
-			wfMemcKey( 'SiteStats', 'groupcounts', $group ),
-			$cache::TTL_HOUR,
-			function ( $oldValue, &$ttl, array &$setOpts ) use ( $group ) {
+		if ( !isset( self::$groupMemberCounts[$group] ) ) {
+			global $wgMemc;
+			$key = wfMemcKey( 'SiteStats', 'groupcounts', $group );
+			$hit = $wgMemc->get( $key );
+			if ( !$hit ) {
 				$dbr = wfGetDB( DB_SLAVE );
-
-				$setOpts += Database::getCacheSetOptions( $dbr );
-
-				return $dbr->selectField(
+				$hit = $dbr->selectField(
 					'user_groups',
 					'COUNT(*)',
-					[ 'ug_group' => $group ],
+					array( 'ug_group' => $group ),
 					__METHOD__
 				);
-			},
-			[ 'pcTTL' => 10 ]
-		);
+				$wgMemc->set( $key, $hit, 3600 );
+			}
+			self::$groupMemberCounts[$group] = $hit;
+		}
+		return self::$groupMemberCounts[$group];
 	}
 
 	/**
@@ -229,7 +228,7 @@ class SiteStats {
 			self::$pageCount[$ns] = (int)$dbr->selectField(
 				'page',
 				'COUNT(*)',
-				[ 'page_namespace' => $ns ],
+				array( 'page_namespace' => $ns ),
 				__METHOD__
 			);
 		}
@@ -253,13 +252,13 @@ class SiteStats {
 			return false;
 		}
 		// Now check for underflow/overflow
-		foreach ( [
+		foreach ( array(
 			'ss_total_edits',
 			'ss_good_articles',
 			'ss_total_pages',
 			'ss_users',
 			'ss_images',
-		] as $member ) {
+		) as $member ) {
 			if ( $row->$member > 2000000000 || $row->$member < 0 ) {
 				return false;
 			}
@@ -282,12 +281,12 @@ class SiteStatsInit {
 
 	/**
 	 * Constructor
-	 * @param bool|IDatabase $database
-	 * - boolean: Whether to use the master DB
-	 * - IDatabase: Database connection to use
+	 * @param bool|DatabaseBase $database
+	 * - Boolean: whether to use the master DB
+	 * - DatabaseBase: database connection to use
 	 */
 	public function __construct( $database = false ) {
-		if ( $database instanceof IDatabase ) {
+		if ( $database instanceof DatabaseBase ) {
 			$this->db = $database;
 		} else {
 			$this->db = wfGetDB( $database ? DB_MASTER : DB_SLAVE );
@@ -311,11 +310,11 @@ class SiteStatsInit {
 	public function articles() {
 		global $wgArticleCountMethod;
 
-		$tables = [ 'page' ];
-		$conds = [
+		$tables = array( 'page' );
+		$conds = array(
 			'page_namespace' => MWNamespace::getContentNamespaces(),
 			'page_is_redirect' => 0,
-		];
+		);
 
 		if ( $wgArticleCountMethod == 'link' ) {
 			$tables[] = 'pagelinks';
@@ -365,14 +364,14 @@ class SiteStatsInit {
 	 * Do all updates and commit them. More or less a replacement
 	 * for the original initStats, but without output.
 	 *
-	 * @param IDatabase|bool $database
-	 * - boolean: Whether to use the master DB
-	 * - IDatabase: Database connection to use
+	 * @param DatabaseBase|bool $database
+	 * - Boolean: whether to use the master DB
+	 * - DatabaseBase: database connection to use
 	 * @param array $options Array of options, may contain the following values
-	 * - activeUsers boolean: Whether to update the number of active users (default: false)
+	 * - activeUsers Boolean: whether to update the number of active users (default: false)
 	 */
-	public static function doAllAndCommit( $database, array $options = [] ) {
-		$options += [ 'update' => false, 'activeUsers' => false ];
+	public static function doAllAndCommit( $database, array $options = array() ) {
+		$options += array( 'update' => false, 'activeUsers' => false );
 
 		// Grab the object and count everything
 		$counter = new SiteStatsInit( $database );
@@ -395,16 +394,16 @@ class SiteStatsInit {
 	 * Refresh site_stats
 	 */
 	public function refresh() {
-		$values = [
+		$values = array(
 			'ss_row_id' => 1,
 			'ss_total_edits' => ( $this->mEdits === null ? $this->edits() : $this->mEdits ),
 			'ss_good_articles' => ( $this->mArticles === null ? $this->articles() : $this->mArticles ),
 			'ss_total_pages' => ( $this->mPages === null ? $this->pages() : $this->mPages ),
 			'ss_users' => ( $this->mUsers === null ? $this->users() : $this->mUsers ),
 			'ss_images' => ( $this->mFiles === null ? $this->files() : $this->mFiles ),
-		];
+		);
 
 		$dbw = wfGetDB( DB_MASTER );
-		$dbw->upsert( 'site_stats', $values, [ 'ss_row_id' ], $values, __METHOD__ );
+		$dbw->upsert( 'site_stats', $values, array( 'ss_row_id' ), $values, __METHOD__ );
 	}
 }

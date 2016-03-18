@@ -53,7 +53,7 @@ class UsersPager extends AlphabeticPager {
 		$request = $this->getRequest();
 		$par = ( $par !== null ) ? $par : '';
 		$parms = explode( '/', $par );
-		$symsForAll = [ '*', 'user' ];
+		$symsForAll = array( '*', 'user' );
 
 		if ( $parms[0] != '' &&
 			( in_array( $par, User::getAllGroups() ) || in_array( $par, $symsForAll ) )
@@ -103,14 +103,14 @@ class UsersPager extends AlphabeticPager {
 	 */
 	function getQueryInfo() {
 		$dbr = wfGetDB( DB_SLAVE );
-		$conds = [];
+		$conds = array();
 
 		// Don't show hidden names
 		if ( !$this->getUser()->isAllowed( 'hideuser' ) ) {
 			$conds[] = 'ipb_deleted IS NULL OR ipb_deleted = 0';
 		}
 
-		$options = [];
+		$options = array();
 
 		if ( $this->requestedGroup != '' ) {
 			$conds['ug_group'] = $this->requestedGroup;
@@ -131,29 +131,29 @@ class UsersPager extends AlphabeticPager {
 
 		$options['GROUP BY'] = $this->creationSort ? 'user_id' : 'user_name';
 
-		$query = [
-			'tables' => [ 'user', 'user_groups', 'ipblocks' ],
-			'fields' => [
+		$query = array(
+			'tables' => array( 'user', 'user_groups', 'ipblocks' ),
+			'fields' => array(
 				'user_name' => $this->creationSort ? 'MAX(user_name)' : 'user_name',
 				'user_id' => $this->creationSort ? 'user_id' : 'MAX(user_id)',
 				'edits' => 'MAX(user_editcount)',
 				'creation' => 'MIN(user_registration)',
 				'ipb_deleted' => 'MAX(ipb_deleted)' // block/hide status
-			],
+			),
 			'options' => $options,
-			'join_conds' => [
-				'user_groups' => [ 'LEFT JOIN', 'user_id=ug_user' ],
-				'ipblocks' => [
-					'LEFT JOIN', [
+			'join_conds' => array(
+				'user_groups' => array( 'LEFT JOIN', 'user_id=ug_user' ),
+				'ipblocks' => array(
+					'LEFT JOIN', array(
 						'user_id=ipb_user',
 						'ipb_auto' => 0
-					]
-				],
-			],
+					)
+				),
+			),
 			'conds' => $conds
-		];
+		);
 
-		Hooks::run( 'SpecialListusersQueryInfo', [ $this, &$query ] );
+		Hooks::run( 'SpecialListusersQueryInfo', array( $this, &$query ) );
 
 		return $query;
 	}
@@ -163,7 +163,7 @@ class UsersPager extends AlphabeticPager {
 	 * @return string
 	 */
 	function formatRow( $row ) {
-		if ( $row->user_id == 0 ) { # Bug 16487
+		if ( $row->user_id == 0 ) { #Bug 16487
 			return '';
 		}
 
@@ -182,7 +182,7 @@ class UsersPager extends AlphabeticPager {
 		$groups_list = self::getGroups( intval( $row->user_id ), $this->userGroupCache );
 
 		if ( !$this->including && count( $groups_list ) > 0 ) {
-			$list = [];
+			$list = array();
 			foreach ( $groups_list as $group ) {
 				$list[] = self::buildGroupLink( $group, $userName );
 			}
@@ -214,14 +214,14 @@ class UsersPager extends AlphabeticPager {
 			' ' . $this->msg( 'listusers-blocked', $userName )->escaped() :
 			'';
 
-		Hooks::run( 'SpecialListusersFormatRow', [ &$item, $row ] );
+		Hooks::run( 'SpecialListusersFormatRow', array( &$item, $row ) );
 
-		return Html::rawElement( 'li', [], "{$item}{$edits}{$created}{$blocked}" );
+		return Html::rawElement( 'li', array(), "{$item}{$edits}{$created}{$blocked}" );
 	}
 
 	function doBatchLookups() {
 		$batch = new LinkBatch();
-		$userIds = [];
+		$userIds = array();
 		# Give some pointers to make user links
 		foreach ( $this->mResult as $row ) {
 			$batch->add( NS_USER, $row->user_name );
@@ -233,12 +233,12 @@ class UsersPager extends AlphabeticPager {
 		$dbr = wfGetDB( DB_SLAVE );
 		$groupRes = $dbr->select(
 			'user_groups',
-			[ 'ug_user', 'ug_group' ],
-			[ 'ug_user' => $userIds ],
+			array( 'ug_user', 'ug_group' ),
+			array( 'ug_user' => $userIds ),
 			__METHOD__
 		);
-		$cache = [];
-		$groups = [];
+		$cache = array();
+		$groups = array();
 		foreach ( $groupRes as $row ) {
 			$cache[intval( $row->ug_user )][] = $row->ug_group;
 			$groups[$row->ug_group] = true;
@@ -268,7 +268,7 @@ class UsersPager extends AlphabeticPager {
 		# Form tag
 		$out = Xml::openElement(
 			'form',
-			[ 'method' => 'get', 'action' => wfScript(), 'id' => 'mw-listusers-form' ]
+			array( 'method' => 'get', 'action' => wfScript(), 'id' => 'mw-listusers-form' )
 		) .
 			Xml::fieldset( $this->msg( 'listusers' )->text() ) .
 			Html::hidden( 'title', $self );
@@ -279,12 +279,12 @@ class UsersPager extends AlphabeticPager {
 				'username',
 				$this->requestedUser,
 				'text',
-				[
+				array(
 					'class' => 'mw-autocomplete-user',
 					'id' => 'offset',
 					'size' => 20,
 					'autofocus' => $this->requestedUser === ''
-				]
+				)
 			) . ' ';
 
 		# Group drop-down list
@@ -318,12 +318,12 @@ class UsersPager extends AlphabeticPager {
 		);
 		$out .= '<br />';
 
-		Hooks::run( 'SpecialListusersHeaderForm', [ $this, &$out ] );
+		Hooks::run( 'SpecialListusersHeaderForm', array( $this, &$out ) );
 
 		# Submit button and form bottom
 		$out .= Html::hidden( 'limit', $this->mLimit );
-		$out .= Xml::submitButton( $this->msg( 'listusers-submit' )->text() );
-		Hooks::run( 'SpecialListusersHeader', [ $this, &$out ] );
+		$out .= Xml::submitButton( $this->msg( 'allpagessubmit' )->text() );
+		Hooks::run( 'SpecialListusersHeader', array( $this, &$out ) );
 		$out .= Xml::closeElement( 'fieldset' ) .
 			Xml::closeElement( 'form' );
 
@@ -335,7 +335,7 @@ class UsersPager extends AlphabeticPager {
 	 * @return array
 	 */
 	function getAllGroups() {
-		$result = [];
+		$result = array();
 		foreach ( User::getAllGroups() as $group ) {
 			$result[$group] = User::getGroupName( $group );
 		}
@@ -356,7 +356,7 @@ class UsersPager extends AlphabeticPager {
 		if ( $this->requestedUser != '' ) {
 			$query['username'] = $this->requestedUser;
 		}
-		Hooks::run( 'SpecialListusersDefaultQuery', [ $this, &$query ] );
+		Hooks::run( 'SpecialListusersDefaultQuery', array( $this, &$query ) );
 
 		return $query;
 	}
@@ -373,7 +373,7 @@ class UsersPager extends AlphabeticPager {
 			$user = User::newFromId( $uid );
 			$effectiveGroups = $user->getEffectiveGroups();
 		} else {
-			$effectiveGroups = isset( $cache[$uid] ) ? $cache[$uid] : [];
+			$effectiveGroups = isset( $cache[$uid] ) ? $cache[$uid] : array();
 		}
 		$groups = array_diff( $effectiveGroups, User::getImplicitGroups() );
 
@@ -427,7 +427,7 @@ class SpecialListUsers extends IncludableSpecialPage {
 
 		if ( $usersbody ) {
 			$s .= $up->getNavigationBar();
-			$s .= Html::rawElement( 'ul', [], $usersbody );
+			$s .= Html::rawElement( 'ul', array(), $usersbody );
 			$s .= $up->getNavigationBar();
 		} else {
 			$s .= $this->msg( 'listusers-noresult' )->parseAsBlock();

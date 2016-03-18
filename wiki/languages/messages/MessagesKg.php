@@ -8,7 +8,7 @@
  *
  */
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_TALK             => 'Disolo',
 	NS_USER             => 'Kisadi',
 	NS_USER_TALK        => 'Disolo_kisadi',
@@ -19,5 +19,5 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Disolo_lusadisu',
 	NS_CATEGORY         => 'Kalasi',
 	NS_CATEGORY_TALK    => 'Disolo_kalasi',
-];
+);
 

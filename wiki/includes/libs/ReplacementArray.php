@@ -19,17 +19,19 @@
  */
 
 /**
- * Wrapper around strtr() that holds replacements
+ * Replacement array for FSS with fallback to strtr()
+ * Supports lazy initialisation of FSS resource
  */
 class ReplacementArray {
 	private $data = false;
+	private $fss = false;
 
 	/**
 	 * Create an object with the specified replacement array
 	 * The array should have the same form as the replacement array for strtr()
 	 * @param array $data
 	 */
-	public function __construct( $data = [] ) {
+	public function __construct( $data = array() ) {
 		$this->data = $data;
 	}
 
@@ -37,7 +39,11 @@ class ReplacementArray {
 	 * @return array
 	 */
 	public function __sleep() {
-		return [ 'data' ];
+		return array( 'data' );
+	}
+
+	public function __wakeup() {
+		$this->fss = false;
 	}
 
 	/**
@@ -46,6 +52,7 @@ class ReplacementArray {
 	 */
 	public function setArray( $data ) {
 		$this->data = $data;
+		$this->fss = false;
 	}
 
 	/**
@@ -62,6 +69,7 @@ class ReplacementArray {
 	 */
 	public function setPair( $from, $to ) {
 		$this->data[$from] = $to;
+		$this->fss = false;
 	}
 
 	/**
@@ -69,6 +77,7 @@ class ReplacementArray {
 	 */
 	public function mergeArray( $data ) {
 		$this->data = $data + $this->data;
+		$this->fss = false;
 	}
 
 	/**
@@ -76,6 +85,7 @@ class ReplacementArray {
 	 */
 	public function merge( ReplacementArray $other ) {
 		$this->data = $other->data + $this->data;
+		$this->fss = false;
 	}
 
 	/**
@@ -83,6 +93,7 @@ class ReplacementArray {
 	 */
 	public function removePair( $from ) {
 		unset( $this->data[$from] );
+		$this->fss = false;
 	}
 
 	/**
@@ -92,6 +103,7 @@ class ReplacementArray {
 		foreach ( $data as $from => $to ) {
 			$this->removePair( $from );
 		}
+		$this->fss = false;
 	}
 
 	/**
@@ -99,6 +111,18 @@ class ReplacementArray {
 	 * @return string
 	 */
 	public function replace( $subject ) {
-		return strtr( $subject, $this->data );
+		if (
+			function_exists( 'fss_prep_replace' )  &&
+			version_compare( PHP_VERSION, '5.5.0' ) < 0
+		) {
+			if ( $this->fss === false ) {
+				$this->fss = fss_prep_replace( $this->data );
+			}
+			$result = fss_exec_replace( $this->fss, $subject );
+		} else {
+			$result = strtr( $subject, $this->data );
+		}
+
+		return $result;
 	}
 }

@@ -135,7 +135,7 @@ OO.ui.Demo.static.pages.toolbars = function ( demo ) {
 			type: 'list',
 			indicator: 'down',
 			label: 'List',
-			icon: 'image',
+			icon: 'picture',
 			include: [ { group: 'listTools' } ],
 			allowCollapse: [ 'listTool1', 'listTool6' ]
 		},
@@ -143,14 +143,14 @@ OO.ui.Demo.static.pages.toolbars = function ( demo ) {
 			type: 'disabledList',
 			indicator: 'down',
 			label: 'List',
-			icon: 'image',
+			icon: 'picture',
 			include: [ { group: 'disabledListTools' } ]
 		},
 		{
 			type: 'list',
 			indicator: 'down',
 			label: 'Auto-disabling list',
-			icon: 'image',
+			icon: 'picture',
 			include: [ { group: 'autoDisableListTools' } ]
 		},
 		{
@@ -163,13 +163,13 @@ OO.ui.Demo.static.pages.toolbars = function ( demo ) {
 		{
 			type: 'menu',
 			indicator: 'down',
-			icon: 'image',
+			icon: 'picture',
 			include: [ { group: 'menuTools' } ]
 		},
 		{
 			type: 'disabledMenu',
 			indicator: 'down',
-			icon: 'image',
+			icon: 'picture',
 			include: [ { group: 'disabledMenuTools' } ]
 		}
 	] );
@@ -238,24 +238,24 @@ OO.ui.Demo.static.pages.toolbars = function ( demo ) {
 
 	toolGroups = {
 		barTools: [
-			[ 'barTool', 'image', 'Basic tool in bar' ],
-			[ 'disabledBarTool', 'image', 'Basic tool in bar disabled', setDisabled ]
+			[ 'barTool', 'picture', 'Basic tool in bar' ],
+			[ 'disabledBarTool', 'picture', 'Basic tool in bar disabled', setDisabled ]
 		],
 
 		disabledBarTools: [
-			[ 'barToolInDisabled', 'image', 'Basic tool in disabled bar' ]
+			[ 'barToolInDisabled', 'picture', 'Basic tool in disabled bar' ]
 		],
 
 		listTools: [
-			[ 'listTool', 'image', 'First basic tool in list' ],
-			[ 'listTool1', 'image', 'Basic tool in list' ],
-			[ 'listTool3', 'image', 'Basic disabled tool in list', setDisabled ],
-			[ 'listTool6', 'image', 'A final tool' ]
+			[ 'listTool', 'picture', 'First basic tool in list' ],
+			[ 'listTool1', 'picture', 'Basic tool in list' ],
+			[ 'listTool3', 'picture', 'Basic disabled tool in list', setDisabled ],
+			[ 'listTool6', 'picture', 'A final tool' ]
 		],
 
 		moreListTools: [
 			[ 'listTool2', 'code', 'Another basic tool' ],
-			[ 'listTool4', 'image', 'More basic tools' ],
+			[ 'listTool4', 'picture', 'More basic tools' ],
 			[ 'listTool5', 'ellipsis', 'And even more' ]
 		],
 
@@ -264,20 +264,20 @@ OO.ui.Demo.static.pages.toolbars = function ( demo ) {
 		],
 
 		disabledListTools: [
-			[ 'listToolInDisabled', 'image', 'Basic tool in disabled list' ]
+			[ 'listToolInDisabled', 'picture', 'Basic tool in disabled list' ]
 		],
 
 		autoDisableListTools: [
-			[ 'autoDisableListTool', 'image', 'Click to disable this tool', null, setDisabled ]
+			[ 'autoDisableListTool', 'picture', 'Click to disable this tool', null, setDisabled ]
 		],
 
 		menuTools: [
-			[ 'menuTool', 'image', 'Basic tool' ],
-			[ 'disabledMenuTool', 'image', 'Basic tool disabled', setDisabled ]
+			[ 'menuTool', 'picture', 'Basic tool' ],
+			[ 'disabledMenuTool', 'picture', 'Basic tool disabled', setDisabled ]
 		],
 
 		disabledMenuTools: [
-			[ 'menuToolInDisabled', 'image', 'Basic tool' ]
+			[ 'menuToolInDisabled', 'picture', 'Basic tool' ]
 		],
 
 		unusedStuff: [

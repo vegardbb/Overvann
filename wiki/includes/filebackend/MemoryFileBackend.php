@@ -33,7 +33,7 @@
  */
 class MemoryFileBackend extends FileBackendStore {
 	/** @var array Map of (file path => (data,mtime) */
-	protected $files = [];
+	protected $files = array();
 
 	public function getFeatures() {
 		return self::ATTR_UNICODE_PATHS;
@@ -53,10 +53,10 @@ class MemoryFileBackend extends FileBackendStore {
 			return $status;
 		}
 
-		$this->files[$dst] = [
+		$this->files[$dst] = array(
 			'data' => $params['content'],
 			'mtime' => wfTimestamp( TS_MW, time() )
-		];
+		);
 
 		return $status;
 	}
@@ -80,10 +80,10 @@ class MemoryFileBackend extends FileBackendStore {
 			return $status;
 		}
 
-		$this->files[$dst] = [
+		$this->files[$dst] = array(
 			'data' => $data,
 			'mtime' => wfTimestamp( TS_MW, time() )
-		];
+		);
 
 		return $status;
 	}
@@ -113,10 +113,10 @@ class MemoryFileBackend extends FileBackendStore {
 			return $status;
 		}
 
-		$this->files[$dst] = [
+		$this->files[$dst] = array(
 			'data' => $this->files[$src]['data'],
 			'mtime' => wfTimestamp( TS_MW, time() )
-		];
+		);
 
 		return $status;
 	}
@@ -151,17 +151,17 @@ class MemoryFileBackend extends FileBackendStore {
 		}
 
 		if ( isset( $this->files[$src] ) ) {
-			return [
+			return array(
 				'mtime' => $this->files[$src]['mtime'],
 				'size' => strlen( $this->files[$src]['data'] ),
-			];
+			);
 		}
 
 		return false;
 	}
 
 	protected function doGetLocalCopyMulti( array $params ) {
-		$tmpFiles = []; // (path => TempFSFile)
+		$tmpFiles = array(); // (path => TempFSFile)
 		foreach ( $params['srcs'] as $srcPath ) {
 			$src = $this->resolveHashKey( $srcPath );
 			if ( $src === null || !isset( $this->files[$src] ) ) {
@@ -210,7 +210,7 @@ class MemoryFileBackend extends FileBackendStore {
 	}
 
 	public function getDirectoryListInternal( $container, $dir, array $params ) {
-		$dirs = [];
+		$dirs = array();
 		$prefix = rtrim( "$container/$dir", '/' ) . '/';
 		$prefixLen = strlen( $prefix );
 		foreach ( $this->files as $path => $data ) {
@@ -239,7 +239,7 @@ class MemoryFileBackend extends FileBackendStore {
 	}
 
 	public function getFileListInternal( $container, $dir, array $params ) {
-		$files = [];
+		$files = array();
 		$prefix = rtrim( "$container/$dir", '/' ) . '/';
 		$prefixLen = strlen( $prefix );
 		foreach ( $this->files as $path => $data ) {

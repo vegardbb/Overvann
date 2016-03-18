@@ -46,7 +46,7 @@ class ApiQueryFileRepoInfo extends ApiQueryBase {
 		$params = $this->extractRequestParams();
 		$props = array_flip( $params['prop'] );
 
-		$repos = [];
+		$repos = array();
 
 		$repoGroup = $this->getInitialisedRepoGroup();
 		$foreignTargets = $conf->get( 'ForeignUploadTargets' );
@@ -66,7 +66,7 @@ class ApiQueryFileRepoInfo extends ApiQueryBase {
 		ApiResult::setIndexedTagName( $repos, 'repo' );
 		ApiResult::setArrayTypeRecursive( $repos, 'assoc' );
 		ApiResult::setArrayType( $repos, 'array' );
-		$result->addValue( [ 'query' ], 'repos', $repos );
+		$result->addValue( array( 'query' ), 'repos', $repos );
 	}
 
 	public function getCacheMode( $params ) {
@@ -76,17 +76,17 @@ class ApiQueryFileRepoInfo extends ApiQueryBase {
 	public function getAllowedParams() {
 		$props = $this->getProps();
 
-		return [
-			'prop' => [
-				ApiBase::PARAM_DFLT => implode( '|', $props ),
+		return array(
+			'prop' => array(
+				ApiBase::PARAM_DFLT => join( '|', $props ),
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_TYPE => $props,
-			],
-		];
+			),
+		);
 	}
 
 	public function getProps() {
-		$props = [];
+		$props = array();
 		$repoGroup = $this->getInitialisedRepoGroup();
 
 		$repoGroup->forEachForeignRepo( function ( $repo ) use ( &$props ) {
@@ -104,10 +104,10 @@ class ApiQueryFileRepoInfo extends ApiQueryBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=query&meta=filerepoinfo&friprop=apiurl|name|displayname'
 				=> 'apihelp-query+filerepoinfo-example-simple',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

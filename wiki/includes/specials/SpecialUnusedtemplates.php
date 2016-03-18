@@ -47,22 +47,22 @@ class UnusedtemplatesPage extends QueryPage {
 	}
 
 	public function getQueryInfo() {
-		return [
-			'tables' => [ 'page', 'templatelinks' ],
-			'fields' => [
+		return array(
+			'tables' => array( 'page', 'templatelinks' ),
+			'fields' => array(
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
 				'value' => 'page_title'
-			],
-			'conds' => [
+			),
+			'conds' => array(
 				'page_namespace' => NS_TEMPLATE,
 				'tl_from IS NULL',
 				'page_is_redirect' => 0
-			],
-			'join_conds' => [ 'templatelinks' => [
-				'LEFT JOIN', [ 'tl_title = page_title',
-					'tl_namespace = page_namespace' ] ] ]
-		];
+			),
+			'join_conds' => array( 'templatelinks' => array(
+				'LEFT JOIN', array( 'tl_title = page_title',
+					'tl_namespace = page_namespace' ) ) )
+		);
 	}
 
 	/**
@@ -75,8 +75,8 @@ class UnusedtemplatesPage extends QueryPage {
 		$pageLink = Linker::linkKnown(
 			$title,
 			null,
-			[],
-			[ 'redirect' => 'no' ]
+			array(),
+			array( 'redirect' => 'no' )
 		);
 		$wlhLink = Linker::linkKnown(
 			SpecialPage::getTitleFor( 'Whatlinkshere', $title->getPrefixedText() ),

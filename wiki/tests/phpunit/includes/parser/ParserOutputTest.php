@@ -7,28 +7,28 @@
 class ParserOutputTest extends MediaWikiTestCase {
 
 	public static function provideIsLinkInternal() {
-		return [
+		return array(
 			// Different domains
-			[ false, 'http://example.org', 'http://mediawiki.org' ],
+			array( false, 'http://example.org', 'http://mediawiki.org' ),
 			// Same domains
-			[ true, 'http://example.org', 'http://example.org' ],
-			[ true, 'https://example.org', 'https://example.org' ],
-			[ true, '//example.org', '//example.org' ],
+			array( true, 'http://example.org', 'http://example.org' ),
+			array( true, 'https://example.org', 'https://example.org' ),
+			array( true, '//example.org', '//example.org' ),
 			// Same domain different cases
-			[ true, 'http://example.org', 'http://EXAMPLE.ORG' ],
+			array( true, 'http://example.org', 'http://EXAMPLE.ORG' ),
 			// Paths, queries, and fragments are not relevant
-			[ true, 'http://example.org', 'http://example.org/wiki/Main_Page' ],
-			[ true, 'http://example.org', 'http://example.org?my=query' ],
-			[ true, 'http://example.org', 'http://example.org#its-a-fragment' ],
+			array( true, 'http://example.org', 'http://example.org/wiki/Main_Page' ),
+			array( true, 'http://example.org', 'http://example.org?my=query' ),
+			array( true, 'http://example.org', 'http://example.org#its-a-fragment' ),
 			// Different protocols
-			[ false, 'http://example.org', 'https://example.org' ],
-			[ false, 'https://example.org', 'http://example.org' ],
+			array( false, 'http://example.org', 'https://example.org' ),
+			array( false, 'https://example.org', 'http://example.org' ),
 			// Protocol relative servers always match http and https links
-			[ true, '//example.org', 'http://example.org' ],
-			[ true, '//example.org', 'https://example.org' ],
+			array( true, '//example.org', 'http://example.org' ),
+			array( true, '//example.org', 'https://example.org' ),
 			// But they don't match strange things like this
-			[ false, '//example.org', 'irc://example.org' ],
-		];
+			array( false, '//example.org', 'irc://example.org' ),
+		);
 	}
 
 	/**

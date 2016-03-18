@@ -1,4 +1,4 @@
-@chrome @firefox @vagrant
+@chrome @clean @firefox @phantomjs
 Feature: View History
 
   Scenario: Edit page and view history

@@ -84,14 +84,14 @@ class CategoryViewer extends ContextSource {
 	 * @param array $until An array with 3 keys for until of each section (since 1.17)
 	 * @param array $query
 	 */
-	function __construct( $title, IContextSource $context, $from = [],
-		$until = [], $query = []
+	function __construct( $title, IContextSource $context, $from = array(),
+		$until = array(), $query = array()
 	) {
 		$this->title = $title;
 		$this->setContext( $context );
-		$this->getOutput()->addModuleStyles( [
+		$this->getOutput()->addModuleStyles( array(
 			'mediawiki.action.view.categoryPage.styles'
-		] );
+		) );
 		$this->from = $from;
 		$this->until = $until;
 		$this->limit = $context->getConfig()->get( 'CategoryPagingLimit' );
@@ -138,7 +138,7 @@ class CategoryViewer extends ContextSource {
 		}
 
 		$lang = $this->getLanguage();
-		$langAttribs = [ 'lang' => $lang->getHtmlCode(), 'dir' => $lang->getDir() ];
+		$langAttribs = array( 'lang' => $lang->getHtmlCode(), 'dir' => $lang->getDir() );
 		# put a div around the headings which are in the user language
 		$r = Html::openElement( 'div', $langAttribs ) . $r . '</div>';
 
@@ -146,10 +146,10 @@ class CategoryViewer extends ContextSource {
 	}
 
 	function clearCategoryState() {
-		$this->articles = [];
-		$this->articles_start_char = [];
-		$this->children = [];
-		$this->children_start_char = [];
+		$this->articles = array();
+		$this->articles_start_char = array();
+		$this->children = array();
+		$this->children_start_char = array();
 		if ( $this->showGallery ) {
 			// Note that null for mode is taken to mean use default.
 			$mode = $this->getRequest()->getVal( 'gallerymode', null );
@@ -162,8 +162,8 @@ class CategoryViewer extends ContextSource {
 
 			$this->gallery->setHideBadImages();
 		} else {
-			$this->imgsNoGallery = [];
-			$this->imgsNoGallery_start_char = [];
+			$this->imgsNoGallery = array();
+			$this->imgsNoGallery_start_char = array();
 		}
 	}
 
@@ -190,7 +190,7 @@ class CategoryViewer extends ContextSource {
 
 	function generateLink( $type, Title $title, $isRedirect, $html = null ) {
 		$link = null;
-		Hooks::run( 'CategoryViewer::generateLink', [ $type, $title, $html, &$link ] );
+		Hooks::run( 'CategoryViewer::generateLink', array( $type, $title, $html, &$link ) );
 		if ( $link === null ) {
 			$link = Linker::link( $title, $html );
 		}
@@ -284,24 +284,24 @@ class CategoryViewer extends ContextSource {
 	function doCategoryQuery() {
 		$dbr = wfGetDB( DB_SLAVE, 'category' );
 
-		$this->nextPage = [
+		$this->nextPage = array(
 			'page' => null,
 			'subcat' => null,
 			'file' => null,
-		];
-		$this->prevPage = [
+		);
+		$this->prevPage = array(
 			'page' => null,
 			'subcat' => null,
 			'file' => null,
-		];
+		);
 
-		$this->flip = [ 'page' => false, 'subcat' => false, 'file' => false ];
+		$this->flip = array( 'page' => false, 'subcat' => false, 'file' => false );
 
-		foreach ( [ 'page', 'subcat', 'file' ] as $type ) {
+		foreach ( array( 'page', 'subcat', 'file' ) as $type ) {
 			# Get the sortkeys for start/end, if applicable.  Note that if
 			# the collation in the database differs from the one
 			# set in $wgCategoryCollation, pagination might go totally haywire.
-			$extraConds = [ 'cl_type' => $type ];
+			$extraConds = array( 'cl_type' => $type );
 			if ( isset( $this->from[$type] ) && $this->from[$type] !== null ) {
 				$extraConds[] = 'cl_sortkey >= '
 					. $dbr->addQuotes( $this->collation->getSortKey( $this->from[$type] ) );
@@ -312,28 +312,28 @@ class CategoryViewer extends ContextSource {
 			}
 
 			$res = $dbr->select(
-				[ 'page', 'categorylinks', 'category' ],
-				[ 'page_id', 'page_title', 'page_namespace', 'page_len',
+				array( 'page', 'categorylinks', 'category' ),
+				array( 'page_id', 'page_title', 'page_namespace', 'page_len',
 					'page_is_redirect', 'cl_sortkey', 'cat_id', 'cat_title',
 					'cat_subcats', 'cat_pages', 'cat_files',
-					'cl_sortkey_prefix', 'cl_collation' ],
-				array_merge( [ 'cl_to' => $this->title->getDBkey() ], $extraConds ),
+					'cl_sortkey_prefix', 'cl_collation' ),
+				array_merge( array( 'cl_to' => $this->title->getDBkey() ), $extraConds ),
 				__METHOD__,
-				[
-					'USE INDEX' => [ 'categorylinks' => 'cl_sortkey' ],
+				array(
+					'USE INDEX' => array( 'categorylinks' => 'cl_sortkey' ),
 					'LIMIT' => $this->limit + 1,
 					'ORDER BY' => $this->flip[$type] ? 'cl_sortkey DESC' : 'cl_sortkey',
-				],
-				[
-					'categorylinks' => [ 'INNER JOIN', 'cl_from = page_id' ],
-					'category' => [ 'LEFT JOIN', [
+				),
+				array(
+					'categorylinks' => array( 'INNER JOIN', 'cl_from = page_id' ),
+					'category' => array( 'LEFT JOIN', array(
 						'cat_title = page_title',
 						'page_namespace' => NS_CATEGORY
-					] ]
-				]
+					) )
+				)
 			);
 
-			Hooks::run( 'CategoryViewer::doCategoryQuery', [ $type, $res ] );
+			Hooks::run( 'CategoryViewer::doCategoryQuery', array( $type, $res ) );
 
 			$count = 0;
 			foreach ( $res as $row ) {
@@ -387,7 +387,6 @@ class CategoryViewer extends ContextSource {
 		$r = '';
 		$rescnt = count( $this->children );
 		$dbcnt = $this->cat->getSubcatCount();
-		// This function should be called even if the result isn't used, it has side-effects
 		$countmsg = $this->getCountMessage( $rescnt, $dbcnt, 'subcat' );
 
 		if ( $rescnt > 0 ) {
@@ -418,7 +417,6 @@ class CategoryViewer extends ContextSource {
 		$dbcnt = $this->cat->getPageCount() - $this->cat->getSubcatCount()
 			- $this->cat->getFileCount();
 		$rescnt = count( $this->articles );
-		// This function should be called even if the result isn't used, it has side-effects
 		$countmsg = $this->getCountMessage( $rescnt, $dbcnt, 'article' );
 
 		if ( $rescnt > 0 ) {
@@ -439,11 +437,10 @@ class CategoryViewer extends ContextSource {
 	function getImageSection() {
 		$r = '';
 		$rescnt = $this->showGallery ? $this->gallery->count() : count( $this->imgsNoGallery );
-		$dbcnt = $this->cat->getFileCount();
-		// This function should be called even if the result isn't used, it has side-effects
-		$countmsg = $this->getCountMessage( $rescnt, $dbcnt, 'file' );
-
 		if ( $rescnt > 0 ) {
+			$dbcnt = $this->cat->getFileCount();
+			$countmsg = $this->getCountMessage( $rescnt, $dbcnt, 'file' );
+
 			$r .= "<div id=\"mw-category-media\">\n";
 			$r .= '<h2>' .
 				$this->msg(
@@ -520,8 +517,8 @@ class CategoryViewer extends ContextSource {
 		}
 
 		$pageLang = $this->title->getPageLanguage();
-		$attribs = [ 'lang' => $pageLang->getHtmlCode(), 'dir' => $pageLang->getDir(),
-			'class' => 'mw-content-' . $pageLang->getDir() ];
+		$attribs = array( 'lang' => $pageLang->getHtmlCode(), 'dir' => $pageLang->getDir(),
+			'class' => 'mw-content-' . $pageLang->getDir() );
 		$list = Html::rawElement( 'div', $attribs, $list );
 
 		return $list;
@@ -544,15 +541,15 @@ class CategoryViewer extends ContextSource {
 	static function columnList( $articles, $articles_start_char ) {
 		$columns = array_combine( $articles, $articles_start_char );
 
-		$ret = Html::openElement( 'div', [ 'class' => 'mw-category' ] );
+		$ret = Html::openElement( 'div', array( 'class' => 'mw-category' ) );
 
-		$colContents = [];
+		$colContents = array();
 
 		# Kind of like array_flip() here, but we keep duplicates in an
 		# array instead of dropping them.
 		foreach ( $columns as $article => $char ) {
 			if ( !isset( $colContents[$char] ) ) {
-				$colContents[$char] = [];
+				$colContents[$char] = array();
 			}
 			$colContents[$char][] = $article;
 		}
@@ -615,7 +612,7 @@ class CategoryViewer extends ContextSource {
 			$prevLink = Linker::linkKnown(
 				$this->addFragmentToTitle( $this->title, $type ),
 				$prevLink,
-				[],
+				array(),
 				$prevQuery
 			);
 		}
@@ -629,7 +626,7 @@ class CategoryViewer extends ContextSource {
 			$nextLink = Linker::linkKnown(
 				$this->addFragmentToTitle( $this->title, $type ),
 				$nextLink,
-				[],
+				array(),
 				$lastQuery
 			);
 		}
@@ -716,7 +713,7 @@ class CategoryViewer extends ContextSource {
 			// quick due to the small number of entries.
 			$totalcnt = $rescnt;
 			$category = $this->cat;
-			DeferredUpdates::addCallableUpdate( function () use ( $category ) {
+			wfGetDB( DB_MASTER )->onTransactionIdle( function () use ( $category ) {
 				$category->refreshCounts();
 			} );
 		} else {

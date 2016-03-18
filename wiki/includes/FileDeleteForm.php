@@ -180,8 +180,6 @@ class FileDeleteForm {
 				$logEntry->setComment( $logComment );
 				$logid = $logEntry->insert();
 				$logEntry->publish( $logid );
-
-				$status->value = $logid;
 			}
 		} else {
 			$status = Status::newFatal( 'cannotdelete',
@@ -190,7 +188,6 @@ class FileDeleteForm {
 			$page = WikiPage::factory( $title );
 			$dbw = wfGetDB( DB_MASTER );
 			try {
-				$dbw->startAtomic( __METHOD__ );
 				// delete the associated article first
 				$error = '';
 				$deleteStatus = $page->doDeleteArticleReal( $reason, $suppress, 0, false, $error, $user );
@@ -199,15 +196,10 @@ class FileDeleteForm {
 				if ( $deleteStatus->isOK() ) {
 					$status = $file->delete( $reason, $suppress, $user );
 					if ( $status->isOK() ) {
-						$status->value = $deleteStatus->value; // log id
-						$dbw->endAtomic( __METHOD__ );
+						$dbw->commit( __METHOD__ );
 					} else {
-						// Page deleted but file still there? rollback page delete
 						$dbw->rollback( __METHOD__ );
 					}
-				} else {
-					// Done; nothing changed
-					$dbw->endAtomic( __METHOD__ );
 				}
 			} catch ( Exception $e ) {
 				// Rollback before returning to prevent UI from displaying
@@ -218,7 +210,7 @@ class FileDeleteForm {
 		}
 
 		if ( $status->isOK() ) {
-			Hooks::run( 'FileDeleteComplete', [ &$file, &$oldimage, &$page, &$user, &$reason ] );
+			Hooks::run( 'FileDeleteComplete', array( &$file, &$oldimage, &$page, &$user, &$reason ) );
 		}
 
 		return $status;
@@ -235,7 +227,7 @@ class FileDeleteForm {
 					<td></td>
 					<td class='mw-input'><strong>" .
 						Xml::checkLabel( wfMessage( 'revdelete-suppress' )->text(),
-							'wpSuppress', 'wpSuppress', false, [ 'tabindex' => '3' ] ) .
+							'wpSuppress', 'wpSuppress', false, array( 'tabindex' => '3' ) ) .
 					"</strong></td>
 				</tr>";
 		} else {
@@ -243,13 +235,13 @@ class FileDeleteForm {
 		}
 
 		$checkWatch = $wgUser->getBoolOption( 'watchdeletion' ) || $wgUser->isWatched( $this->title );
-		$form = Xml::openElement( 'form', [ 'method' => 'post', 'action' => $this->getAction(),
-			'id' => 'mw-img-deleteconfirm' ] ) .
+		$form = Xml::openElement( 'form', array( 'method' => 'post', 'action' => $this->getAction(),
+			'id' => 'mw-img-deleteconfirm' ) ) .
 			Xml::openElement( 'fieldset' ) .
 			Xml::element( 'legend', null, wfMessage( 'filedelete-legend' )->text() ) .
 			Html::hidden( 'wpEditToken', $wgUser->getEditToken( $this->oldimage ) ) .
 			$this->prepareMessage( 'filedelete-intro' ) .
-			Xml::openElement( 'table', [ 'id' => 'mw-img-deleteconfirm-table' ] ) .
+			Xml::openElement( 'table', array( 'id' => 'mw-img-deleteconfirm-table' ) ) .
 			"<tr>
 				<td class='mw-label'>" .
 					Xml::label( wfMessage( 'filedelete-comment' )->text(), 'wpDeleteReasonList' ) .
@@ -271,7 +263,7 @@ class FileDeleteForm {
 				"</td>
 				<td class='mw-input'>" .
 					Xml::input( 'wpReason', 60, $wgRequest->getText( 'wpReason' ),
-						[ 'type' => 'text', 'maxlength' => '255', 'tabindex' => '2', 'id' => 'wpReason' ] ) .
+						array( 'type' => 'text', 'maxlength' => '255', 'tabindex' => '2', 'id' => 'wpReason' ) ) .
 				"</td>
 			</tr>
 			{$suppress}";
@@ -281,7 +273,7 @@ class FileDeleteForm {
 				<td></td>
 				<td class='mw-input'>" .
 					Xml::checkLabel( wfMessage( 'watchthis' )->text(),
-						'wpWatch', 'wpWatch', $checkWatch, [ 'tabindex' => '3' ] ) .
+						'wpWatch', 'wpWatch', $checkWatch, array( 'tabindex' => '3' ) ) .
 				"</td>
 			</tr>";
 		}
@@ -291,11 +283,11 @@ class FileDeleteForm {
 				<td class='mw-submit'>" .
 					Xml::submitButton(
 						wfMessage( 'filedelete-submit' )->text(),
-						[
+						array(
 							'name' => 'mw-filedelete-submit',
 							'id' => 'mw-filedelete-submit',
 							'tabindex' => '4'
-						]
+						)
 					) .
 				"</td>
 			</tr>" .
@@ -308,8 +300,8 @@ class FileDeleteForm {
 				$link = Linker::linkKnown(
 					$title,
 					wfMessage( 'filedelete-edit-reasonlist' )->escaped(),
-					[],
-					[ 'action' => 'edit' ]
+					array(),
+					array( 'action' => 'edit' )
 				);
 				$form .= '<p class="mw-filedelete-editreasons">' . $link . '</p>';
 			}
@@ -398,7 +390,7 @@ class FileDeleteForm {
 	 * @return string
 	 */
 	private function getAction() {
-		$q = [];
+		$q = array();
 		$q['action'] = 'delete';
 
 		if ( $this->oldimage ) {

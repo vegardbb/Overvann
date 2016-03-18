@@ -40,21 +40,21 @@ require_once __DIR__ . '/Maintenance.php';
 class DumpLinks extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Quick demo hack to generate a plaintext link dump' );
+		$this->mDescription = "Quick demo hack to generate a plaintext link dump";
 	}
 
 	public function execute() {
-		$dbr = $this->getDB( DB_SLAVE );
-		$result = $dbr->select( [ 'pagelinks', 'page' ],
-			[
+		$dbr = wfGetDB( DB_SLAVE );
+		$result = $dbr->select( array( 'pagelinks', 'page' ),
+			array(
 				'page_id',
 				'page_namespace',
 				'page_title',
 				'pl_namespace',
-				'pl_title' ],
-			[ 'page_id=pl_from' ],
+				'pl_title' ),
+			array( 'page_id=pl_from' ),
 			__METHOD__,
-			[ 'ORDER BY' => 'page_id' ] );
+			array( 'ORDER BY' => 'page_id' ) );
 
 		$lastPage = null;
 		foreach ( $result as $row ) {

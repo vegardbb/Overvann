@@ -30,8 +30,8 @@
  * @note Consider using a TitleValue object instead. TitleValue is more lightweight
  *       and does not rely on global state or the database.
  */
-class Title implements LinkTarget {
-	/** @var HashBagOStuff */
+class Title {
+	/** @var MapCacheLRU */
 	static private $titleCache = null;
 
 	/**
@@ -94,7 +94,7 @@ class Title implements LinkTarget {
 	private $mEstimateRevisions;
 
 	/** @var array Array of groups allowed to edit this article */
-	public $mRestrictions = [];
+	public $mRestrictions = array();
 
 	/** @var string|bool */
 	protected $mOldRestrictions = false;
@@ -106,7 +106,7 @@ class Title implements LinkTarget {
 	public $mCascadingRestrictions;
 
 	/** @var array When do the restrictions on this page expire? */
-	protected $mRestrictionsExpiry = [];
+	protected $mRestrictionsExpiry = array();
 
 	/** @var bool Are cascading restrictions in effect on this page? */
 	protected $mHasCascadingRestrictions;
@@ -130,6 +130,12 @@ class Title implements LinkTarget {
 	 */
 	public $mDefaultNamespace = NS_MAIN;
 
+	/**
+	 * @var bool Is $wgUser watching this page? null if unfilled, accessed
+	 * through userIsWatching()
+	 */
+	protected $mWatched = null;
+
 	/** @var int The page length, 0 for special pages */
 	protected $mLength = -1;
 
@@ -137,7 +143,7 @@ class Title implements LinkTarget {
 	public $mRedirect = null;
 
 	/** @var array Associative array of user ID -> timestamp/false */
-	private $mNotificationTimestamp = [];
+	private $mNotificationTimestamp = array();
 
 	/** @var bool Whether a page has any subpages */
 	private $mHasSubpages;
@@ -145,9 +151,8 @@ class Title implements LinkTarget {
 	/** @var bool The (string) language code of the page's language and content code. */
 	private $mPageLanguage = false;
 
-	/** @var string|boolean|null The page language code from the database, null if not saved in
-	 * the database or false if not loaded, yet. */
-	private $mDbPageLanguage = false;
+	/** @var string The page language code from the database */
+	private $mDbPageLanguage = null;
 
 	/** @var TitleValue A corresponding TitleValue object */
 	private $mTitleValue = null;
@@ -162,9 +167,9 @@ class Title implements LinkTarget {
 	 * Avoid usage of this singleton by using TitleValue
 	 * and the associated services when possible.
 	 *
-	 * @return MediaWikiTitleCodec
+	 * @return TitleParser
 	 */
-	private static function getMediaWikiTitleCodec() {
+	private static function getTitleParser() {
 		global $wgContLang, $wgLocalInterwikis;
 
 		static $titleCodec = null;
@@ -174,7 +179,7 @@ class Title implements LinkTarget {
 		// make sure we are using the right one. To detect changes over the course
 		// of a request, we remember a fingerprint of the config used to create the
 		// codec singleton, and re-create it if the fingerprint doesn't match.
-		$fingerprint = spl_object_hash( $wgContLang ) . '|' . implode( '+', $wgLocalInterwikis );
+		$fingerprint = spl_object_hash( $wgContLang ) . '|' . join( '+', $wgLocalInterwikis );
 
 		if ( $fingerprint !== $titleCodecFingerprint ) {
 			$titleCodec = null;
@@ -201,9 +206,9 @@ class Title implements LinkTarget {
 	 * @return TitleFormatter
 	 */
 	private static function getTitleFormatter() {
-		// NOTE: we know that getMediaWikiTitleCodec() returns a MediaWikiTitleCodec,
+		//NOTE: we know that getTitleParser() returns a MediaWikiTitleCodec,
 		//      which implements TitleFormatter.
-		return self::getMediaWikiTitleCodec();
+		return self::getTitleParser();
 	}
 
 	function __construct() {
@@ -237,28 +242,17 @@ class Title implements LinkTarget {
 	 * @return Title
 	 */
 	public static function newFromTitleValue( TitleValue $titleValue ) {
-		return self::newFromLinkTarget( $titleValue );
-	}
-
-	/**
-	 * Create a new Title from a LinkTarget
-	 *
-	 * @param LinkTarget $linkTarget Assumed to be safe.
-	 *
-	 * @return Title
-	 */
-	public static function newFromLinkTarget( LinkTarget $linkTarget ) {
 		return self::makeTitle(
-			$linkTarget->getNamespace(),
-			$linkTarget->getText(),
-			$linkTarget->getFragment() );
+			$titleValue->getNamespace(),
+			$titleValue->getText(),
+			$titleValue->getFragment() );
 	}
 
 	/**
 	 * Create a new Title from text, such as what one would find in a link. De-
 	 * codes any HTML entities in the text.
 	 *
-	 * @param string|int|null $text The link text; spaces, prefixes, and an
+	 * @param string $text The link text; spaces, prefixes, and an
 	 *   initial ':' indicating the main namespace are accepted.
 	 * @param int $defaultNamespace The namespace to use if none is specified
 	 *   by a prefix.  If you want to force a specific namespace even if
@@ -270,18 +264,13 @@ class Title implements LinkTarget {
 	public static function newFromText( $text, $defaultNamespace = NS_MAIN ) {
 		if ( is_object( $text ) ) {
 			throw new InvalidArgumentException( '$text must be a string.' );
-		}
-		// DWIM: Integers can be passed in here when page titles are used as array keys.
-		if ( $text !== null && !is_string( $text ) && !is_int( $text ) ) {
+		} elseif ( !is_string( $text ) ) {
 			wfDebugLog( 'T76305', wfGetAllCallers( 5 ) );
-			return null;
-		}
-		if ( $text === null ) {
-			return null;
+			wfWarn( __METHOD__ . ': $text must be a string. This will throw an InvalidArgumentException in future.', 2 );
 		}
 
 		try {
-			return Title::newFromTextThrow( strval( $text ), $defaultNamespace );
+			return Title::newFromTextThrow( $text, $defaultNamespace );
 		} catch ( MalformedTitleException $ex ) {
 			return null;
 		}
@@ -303,23 +292,24 @@ class Title implements LinkTarget {
 	 */
 	public static function newFromTextThrow( $text, $defaultNamespace = NS_MAIN ) {
 		if ( is_object( $text ) ) {
-			throw new MWException( '$text must be a string, given an object' );
+			throw new MWException( 'Title::newFromTextThrow given an object' );
 		}
 
-		$titleCache = self::getTitleCache();
+		$cache = self::getTitleCache();
 
-		// Wiki pages often contain multiple links to the same page.
-		// Title normalization and parsing can become expensive on pages with many
-		// links, so we can save a little time by caching them.
-		// In theory these are value objects and won't get changed...
-		if ( $defaultNamespace == NS_MAIN ) {
-			$t = $titleCache->get( $text );
-			if ( $t ) {
-				return $t;
-			}
+		/**
+		 * Wiki pages often contain multiple links to the same page.
+		 * Title normalization and parsing can become expensive on
+		 * pages with many links, so we can save a little time by
+		 * caching them.
+		 *
+		 * In theory these are value objects and won't get changed...
+		 */
+		if ( $defaultNamespace == NS_MAIN && $cache->has( $text ) ) {
+			return $cache->get( $text );
 		}
 
-		// Convert things like &eacute; &#257; or &#x3017; into normalized (bug 14952) text
+		# Convert things like &eacute; &#257; or &#x3017; into normalized (bug 14952) text
 		$filteredText = Sanitizer::decodeCharReferencesAndNormalize( $text );
 
 		$t = new Title();
@@ -328,7 +318,7 @@ class Title implements LinkTarget {
 
 		$t->secureAndSplit();
 		if ( $defaultNamespace == NS_MAIN ) {
-			$titleCache->set( $text, $t );
+			$cache->set( $text, $t );
 		}
 		return $t;
 	}
@@ -369,11 +359,11 @@ class Title implements LinkTarget {
 	}
 
 	/**
-	 * @return HashBagOStuff
+	 * @return MapCacheLRU
 	 */
 	private static function getTitleCache() {
 		if ( self::$titleCache == null ) {
-			self::$titleCache = new HashBagOStuff( [ 'maxKeys' => self::CACHE_MAX ] );
+			self::$titleCache = new MapCacheLRU( self::CACHE_MAX );
 		}
 		return self::$titleCache;
 	}
@@ -386,19 +376,15 @@ class Title implements LinkTarget {
 	 * @return array
 	 */
 	protected static function getSelectFields() {
-		global $wgContentHandlerUseDB, $wgPageLanguageUseDB;
+		global $wgContentHandlerUseDB;
 
-		$fields = [
+		$fields = array(
 			'page_namespace', 'page_title', 'page_id',
 			'page_len', 'page_is_redirect', 'page_latest',
-		];
+		);
 
 		if ( $wgContentHandlerUseDB ) {
 			$fields[] = 'page_content_model';
-		}
-
-		if ( $wgPageLanguageUseDB ) {
-			$fields[] = 'page_lang';
 		}
 
 		return $fields;
@@ -416,7 +402,7 @@ class Title implements LinkTarget {
 		$row = $db->selectRow(
 			'page',
 			self::getSelectFields(),
-			[ 'page_id' => $id ],
+			array( 'page_id' => $id ),
 			__METHOD__
 		);
 		if ( $row !== false ) {
@@ -435,18 +421,18 @@ class Title implements LinkTarget {
 	 */
 	public static function newFromIDs( $ids ) {
 		if ( !count( $ids ) ) {
-			return [];
+			return array();
 		}
 		$dbr = wfGetDB( DB_SLAVE );
 
 		$res = $dbr->select(
 			'page',
 			self::getSelectFields(),
-			[ 'page_id' => $ids ],
+			array( 'page_id' => $ids ),
 			__METHOD__
 		);
 
-		$titles = [];
+		$titles = array();
 		foreach ( $res as $row ) {
 			$titles[] = Title::newFromRow( $row );
 		}
@@ -540,7 +526,7 @@ class Title implements LinkTarget {
 	 * @param string $title Database key form
 	 * @param string $fragment The link fragment (after the "#")
 	 * @param string $interwiki Interwiki prefix
-	 * @return Title|null The new object, or null on an error
+	 * @return Title The new object, or null on an error
 	 */
 	public static function makeTitleSafe( $ns, $title, $fragment = '', $interwiki = '' ) {
 		if ( !MWNamespace::exists( $ns ) ) {
@@ -634,8 +620,8 @@ class Title implements LinkTarget {
 
 		$s = $dbr->selectRow(
 			'page',
-			[ 'page_namespace', 'page_title' ],
-			[ 'page_id' => $id ],
+			array( 'page_namespace', 'page_title' ),
+			array( 'page_id' => $id ),
 			__METHOD__
 		);
 		if ( $s === false ) {
@@ -779,16 +765,16 @@ class Title implements LinkTarget {
 	 * @param string $title The DB key form the title
 	 * @param string $fragment The link fragment (after the "#")
 	 * @param string $interwiki The interwiki prefix
-	 * @param bool $canonicalNamespace If true, use the canonical name for
+	 * @param bool $canoncialNamespace If true, use the canonical name for
 	 *   $ns instead of the localized version.
 	 * @return string The prefixed form of the title
 	 */
 	public static function makeName( $ns, $title, $fragment = '', $interwiki = '',
-		$canonicalNamespace = false
+		$canoncialNamespace = false
 	) {
 		global $wgContLang;
 
-		if ( $canonicalNamespace ) {
+		if ( $canoncialNamespace ) {
 			$namespace = MWNamespace::getCanonicalName( $ns );
 		} else {
 			$namespace = $wgContLang->getNsText( $ns );
@@ -1018,8 +1004,10 @@ class Title implements LinkTarget {
 	 */
 	public function getNsText() {
 		if ( $this->isExternal() ) {
-			// This probably shouldn't even happen,
-			// but for interwiki transclusion it sometimes does.
+			// This probably shouldn't even happen. ohh man, oh yuck.
+			// But for interwiki transclusion it sometimes does.
+			// Shit. Shit shit shit.
+			//
 			// Use the canonical namespaces if possible to try to
 			// resolve a foreign namespace.
 			if ( MWNamespace::exists( $this->mNamespace ) ) {
@@ -1204,7 +1192,7 @@ class Title implements LinkTarget {
 		}
 
 		$result = true;
-		Hooks::run( 'TitleIsMovable', [ $this, &$result ] );
+		Hooks::run( 'TitleIsMovable', array( $this, &$result ) );
 		return $result;
 	}
 
@@ -1266,7 +1254,6 @@ class Title implements LinkTarget {
 	 * show "inactive" CSS or JS.
 	 *
 	 * @return bool
-	 * @todo FIXME: Rename to isSiteConfigPage() and remove deprecated hook
 	 */
 	public function isCssOrJsPage() {
 		$isCssOrJsPage = NS_MEDIAWIKI == $this->mNamespace
@@ -1277,7 +1264,7 @@ class Title implements LinkTarget {
 		#   It's called here again to make sure hook functions can force this
 		#   method to return true even outside the MediaWiki namespace.
 
-		Hooks::run( 'TitleIsCssOrJsPage', [ $this, &$isCssOrJsPage ], '1.25' );
+		Hooks::run( 'TitleIsCssOrJsPage', array( $this, &$isCssOrJsPage ), '1.25' );
 
 		return $isCssOrJsPage;
 	}
@@ -1285,7 +1272,6 @@ class Title implements LinkTarget {
 	/**
 	 * Is this a .css or .js subpage of a user page?
 	 * @return bool
-	 * @todo FIXME: Rename to isUserConfigPage()
 	 */
 	public function isCssJsSubpage() {
 		return ( NS_USER == $this->mNamespace && $this->isSubpage()
@@ -1430,7 +1416,6 @@ class Title implements LinkTarget {
 	 * Deprecated for public use, use Title::makeTitle() with fragment parameter.
 	 * Still in active use privately.
 	 *
-	 * @private
 	 * @param string $fragment Text
 	 */
 	public function setFragment( $fragment ) {
@@ -1666,7 +1651,7 @@ class Title implements LinkTarget {
 			if ( is_string( $query2 ) ) {
 				// $query2 is a string, we will consider this to be
 				// a deprecated $variant argument and add it to the query
-				$query2 = wfArrayToCgi( [ 'variant' => $query2 ] );
+				$query2 = wfArrayToCgi( array( 'variant' => $query2 ) );
 			} else {
 				$query2 = wfArrayToCgi( $query2 );
 			}
@@ -1705,7 +1690,7 @@ class Title implements LinkTarget {
 		# Finally, add the fragment.
 		$url .= $this->getFragmentForURL();
 
-		Hooks::run( 'GetFullURL', [ &$this, &$url, $query ] );
+		Hooks::run( 'GetFullURL', array( &$this, &$url, $query ) );
 		return $url;
 	}
 
@@ -1751,11 +1736,11 @@ class Title implements LinkTarget {
 			$dbkey = wfUrlencode( $this->getPrefixedDBkey() );
 			if ( $query == '' ) {
 				$url = str_replace( '$1', $dbkey, $wgArticlePath );
-				Hooks::run( 'GetLocalURL::Article', [ &$this, &$url ] );
+				Hooks::run( 'GetLocalURL::Article', array( &$this, &$url ) );
 			} else {
 				global $wgVariantArticlePath, $wgActionPaths, $wgContLang;
 				$url = false;
-				$matches = [];
+				$matches = array();
 
 				if ( !empty( $wgActionPaths )
 					&& preg_match( '/^(.*&|)action=([^&]*)(&(.*)|)$/', $query, $matches )
@@ -1796,7 +1781,7 @@ class Title implements LinkTarget {
 				}
 			}
 
-			Hooks::run( 'GetLocalURL::Internal', [ &$this, &$url, $query ] );
+			Hooks::run( 'GetLocalURL::Internal', array( &$this, &$url, $query ) );
 
 			// @todo FIXME: This causes breakage in various places when we
 			// actually expected a local URL and end up with dupe prefixes.
@@ -1804,7 +1789,7 @@ class Title implements LinkTarget {
 				$url = $wgServer . $url;
 			}
 		}
-		Hooks::run( 'GetLocalURL', [ &$this, &$url, $query ] );
+		Hooks::run( 'GetLocalURL', array( &$this, &$url, $query ) );
 		return $url;
 	}
 
@@ -1837,7 +1822,7 @@ class Title implements LinkTarget {
 
 	/**
 	 * Get the URL form for an internal link.
-	 * - Used in various CDN-related code, in case we have a different
+	 * - Used in various Squid-related code, in case we have a different
 	 * internal hostname for the server from the exposed one.
 	 *
 	 * This uses $wgInternalServer to qualify the path, or $wgServer
@@ -1852,7 +1837,7 @@ class Title implements LinkTarget {
 		$query = self::fixUrlQueryArgs( $query, $query2 );
 		$server = $wgInternalServer !== false ? $wgInternalServer : $wgServer;
 		$url = wfExpandUrl( $server . $this->getLocalURL( $query ), PROTO_HTTP );
-		Hooks::run( 'GetInternalURL', [ &$this, &$url, $query ] );
+		Hooks::run( 'GetInternalURL', array( &$this, &$url, $query ) );
 		return $url;
 	}
 
@@ -1870,7 +1855,7 @@ class Title implements LinkTarget {
 	public function getCanonicalURL( $query = '', $query2 = false ) {
 		$query = self::fixUrlQueryArgs( $query, $query2 );
 		$url = wfExpandUrl( $this->getLocalURL( $query ) . $this->getFragmentForURL(), PROTO_CANONICAL );
-		Hooks::run( 'GetCanonicalURL', [ &$this, &$url, $query ] );
+		Hooks::run( 'GetCanonicalURL', array( &$this, &$url, $query ) );
 		return $url;
 	}
 
@@ -1886,6 +1871,25 @@ class Title implements LinkTarget {
 		$s = $this->getLocalURL( 'action=edit' );
 
 		return $s;
+	}
+
+	/**
+	 * Is $wgUser watching this page?
+	 *
+	 * @deprecated since 1.20; use User::isWatched() instead.
+	 * @return bool
+	 */
+	public function userIsWatching() {
+		global $wgUser;
+
+		if ( is_null( $this->mWatched ) ) {
+			if ( NS_SPECIAL == $this->mNamespace || !$wgUser->isLoggedIn() ) {
+				$this->mWatched = false;
+			} else {
+				$this->mWatched = $wgUser->isWatched( $this );
+			}
+		}
+		return $this->mWatched;
 	}
 
 	/**
@@ -1937,21 +1941,18 @@ class Title implements LinkTarget {
 	 *   - secure : does cheap and expensive checks, using the master as needed
 	 * @param array $ignoreErrors Array of Strings Set this to a list of message keys
 	 *   whose corresponding errors may be ignored.
-	 * @return array Array of arrays of the arguments to wfMessage to explain permissions problems.
+	 * @return array Array of arguments to wfMessage to explain permissions problems.
 	 */
 	public function getUserPermissionsErrors(
-		$action, $user, $rigor = 'secure', $ignoreErrors = []
+		$action, $user, $rigor = 'secure', $ignoreErrors = array()
 	) {
 		$errors = $this->getUserPermissionsErrorsInternal( $action, $user, $rigor );
 
 		// Remove the errors being ignored.
 		foreach ( $errors as $index => $error ) {
-			$errKey = is_array( $error ) ? $error[0] : $error;
+			$error_key = is_array( $error ) ? $error[0] : $error;
 
-			if ( in_array( $errKey, $ignoreErrors ) ) {
-				unset( $errors[$index] );
-			}
-			if ( $errKey instanceof MessageSpecifier && in_array( $errKey->getKey(), $ignoreErrors ) ) {
+			if ( in_array( $error_key, $ignoreErrors ) ) {
 				unset( $errors[$index] );
 			}
 		}
@@ -1972,7 +1973,7 @@ class Title implements LinkTarget {
 	 */
 	private function checkQuickPermissions( $action, $user, $errors, $rigor, $short ) {
 		if ( !Hooks::run( 'TitleQuickPermissions',
-			[ $this, $user, $action, &$errors, ( $rigor !== 'quick' ), $short ] )
+			array( $this, $user, $action, &$errors, ( $rigor !== 'quick' ), $short ) )
 		) {
 			return $errors;
 		}
@@ -1982,23 +1983,23 @@ class Title implements LinkTarget {
 				( $this->isTalkPage() && !$user->isAllowed( 'createtalk' ) ) ||
 				( !$this->isTalkPage() && !$user->isAllowed( 'createpage' ) )
 			) {
-				$errors[] = $user->isAnon() ? [ 'nocreatetext' ] : [ 'nocreate-loggedin' ];
+				$errors[] = $user->isAnon() ? array( 'nocreatetext' ) : array( 'nocreate-loggedin' );
 			}
 		} elseif ( $action == 'move' ) {
 			if ( !$user->isAllowed( 'move-rootuserpages' )
 					&& $this->mNamespace == NS_USER && !$this->isSubpage() ) {
 				// Show user page-specific message only if the user can move other pages
-				$errors[] = [ 'cant-move-user-page' ];
+				$errors[] = array( 'cant-move-user-page' );
 			}
 
 			// Check if user is allowed to move files if it's a file
 			if ( $this->mNamespace == NS_FILE && !$user->isAllowed( 'movefile' ) ) {
-				$errors[] = [ 'movenotallowedfile' ];
+				$errors[] = array( 'movenotallowedfile' );
 			}
 
 			// Check if user is allowed to move category pages if it's a category page
 			if ( $this->mNamespace == NS_CATEGORY && !$user->isAllowed( 'move-categorypages' ) ) {
-				$errors[] = [ 'cant-move-category-page' ];
+				$errors[] = array( 'cant-move-category-page' );
 			}
 
 			if ( !$user->isAllowed( 'move' ) ) {
@@ -2007,23 +2008,23 @@ class Title implements LinkTarget {
 				$autoconfirmedCanMove = User::groupHasPermission( 'autoconfirmed', 'move' );
 				if ( $user->isAnon() && ( $userCanMove || $autoconfirmedCanMove ) ) {
 					// custom message if logged-in users without any special rights can move
-					$errors[] = [ 'movenologintext' ];
+					$errors[] = array( 'movenologintext' );
 				} else {
-					$errors[] = [ 'movenotallowed' ];
+					$errors[] = array( 'movenotallowed' );
 				}
 			}
 		} elseif ( $action == 'move-target' ) {
 			if ( !$user->isAllowed( 'move' ) ) {
 				// User can't move anything
-				$errors[] = [ 'movenotallowed' ];
+				$errors[] = array( 'movenotallowed' );
 			} elseif ( !$user->isAllowed( 'move-rootuserpages' )
 					&& $this->mNamespace == NS_USER && !$this->isSubpage() ) {
 				// Show user page-specific message only if the user can move other pages
-				$errors[] = [ 'cant-move-to-user-page' ];
+				$errors[] = array( 'cant-move-to-user-page' );
 			} elseif ( !$user->isAllowed( 'move-categorypages' )
 					&& $this->mNamespace == NS_CATEGORY ) {
 				// Show category page-specific message only if the user can move other pages
-				$errors[] = [ 'cant-move-to-category-page' ];
+				$errors[] = array( 'cant-move-to-category-page' );
 			}
 		} elseif ( !$user->isAllowed( $action ) ) {
 			$errors[] = $this->missingPermissionError( $action, $short );
@@ -2049,13 +2050,10 @@ class Title implements LinkTarget {
 			$errors = array_merge( $errors, $result );
 		} elseif ( $result !== '' && is_string( $result ) ) {
 			// A string representing a message-id
-			$errors[] = [ $result ];
-		} elseif ( $result instanceof MessageSpecifier ) {
-			// A message specifier representing an error
-			$errors[] = [ $result ];
+			$errors[] = array( $result );
 		} elseif ( $result === false ) {
 			// a generic "We don't want them to do that"
-			$errors[] = [ 'badaccess-group0' ];
+			$errors[] = array( 'badaccess-group0' );
 		}
 		return $errors;
 	}
@@ -2074,18 +2072,18 @@ class Title implements LinkTarget {
 	private function checkPermissionHooks( $action, $user, $errors, $rigor, $short ) {
 		// Use getUserPermissionsErrors instead
 		$result = '';
-		if ( !Hooks::run( 'userCan', [ &$this, &$user, $action, &$result ] ) ) {
-			return $result ? [] : [ [ 'badaccess-group0' ] ];
+		if ( !Hooks::run( 'userCan', array( &$this, &$user, $action, &$result ) ) ) {
+			return $result ? array() : array( array( 'badaccess-group0' ) );
 		}
 		// Check getUserPermissionsErrors hook
-		if ( !Hooks::run( 'getUserPermissionsErrors', [ &$this, &$user, $action, &$result ] ) ) {
+		if ( !Hooks::run( 'getUserPermissionsErrors', array( &$this, &$user, $action, &$result ) ) ) {
 			$errors = $this->resultToError( $errors, $result );
 		}
 		// Check getUserPermissionsErrorsExpensive hook
 		if (
 			$rigor !== 'quick'
 			&& !( $short && count( $errors ) > 0 )
-			&& !Hooks::run( 'getUserPermissionsErrorsExpensive', [ &$this, &$user, $action, &$result ] )
+			&& !Hooks::run( 'getUserPermissionsErrorsExpensive', array( &$this, &$user, $action, &$result ) )
 		) {
 			$errors = $this->resultToError( $errors, $result );
 		}
@@ -2108,7 +2106,7 @@ class Title implements LinkTarget {
 		# Only 'createaccount' can be performed on special pages,
 		# which don't actually exist in the DB.
 		if ( NS_SPECIAL == $this->mNamespace && $action !== 'createaccount' ) {
-			$errors[] = [ 'ns-specialprotected' ];
+			$errors[] = array( 'ns-specialprotected' );
 		}
 
 		# Check $wgNamespaceProtection for restricted namespaces
@@ -2116,7 +2114,7 @@ class Title implements LinkTarget {
 			$ns = $this->mNamespace == NS_MAIN ?
 				wfMessage( 'nstab-main' )->text() : $this->getNsText();
 			$errors[] = $this->mNamespace == NS_MEDIAWIKI ?
-				[ 'protectedinterface', $action ] : [ 'namespaceprotected', $ns, $action ];
+				array( 'protectedinterface', $action ) : array( 'namespaceprotected', $ns, $action );
 		}
 
 		return $errors;
@@ -2140,15 +2138,15 @@ class Title implements LinkTarget {
 		if ( $action != 'patrol' && !$user->isAllowed( 'editusercssjs' ) ) {
 			if ( preg_match( '/^' . preg_quote( $user->getName(), '/' ) . '\//', $this->mTextform ) ) {
 				if ( $this->isCssSubpage() && !$user->isAllowedAny( 'editmyusercss', 'editusercss' ) ) {
-					$errors[] = [ 'mycustomcssprotected', $action ];
+					$errors[] = array( 'mycustomcssprotected', $action );
 				} elseif ( $this->isJsSubpage() && !$user->isAllowedAny( 'editmyuserjs', 'edituserjs' ) ) {
-					$errors[] = [ 'mycustomjsprotected', $action ];
+					$errors[] = array( 'mycustomjsprotected', $action );
 				}
 			} else {
 				if ( $this->isCssSubpage() && !$user->isAllowed( 'editusercss' ) ) {
-					$errors[] = [ 'customcssprotected', $action ];
+					$errors[] = array( 'customcssprotected', $action );
 				} elseif ( $this->isJsSubpage() && !$user->isAllowed( 'edituserjs' ) ) {
-					$errors[] = [ 'customjsprotected', $action ];
+					$errors[] = array( 'customjsprotected', $action );
 				}
 			}
 		}
@@ -2183,9 +2181,9 @@ class Title implements LinkTarget {
 				continue;
 			}
 			if ( !$user->isAllowed( $right ) ) {
-				$errors[] = [ 'protectedpagetext', $right, $action ];
+				$errors[] = array( 'protectedpagetext', $right, $action );
 			} elseif ( $this->mCascadeRestriction && !$user->isAllowed( 'protect' ) ) {
-				$errors[] = [ 'protectedpagetext', 'protect', $action ];
+				$errors[] = array( 'protectedpagetext', 'protect', $action );
 			}
 		}
 
@@ -2230,7 +2228,7 @@ class Title implements LinkTarget {
 						foreach ( $cascadingSources as $page ) {
 							$pages .= '* [[:' . $page->getPrefixedText() . "]]\n";
 						}
-						$errors[] = [ 'cascadeprotected', count( $cascadingSources ), $pages, $action ];
+						$errors[] = array( 'cascadeprotected', count( $cascadingSources ), $pages, $action );
 					}
 				}
 			}
@@ -2256,7 +2254,7 @@ class Title implements LinkTarget {
 		if ( $action == 'protect' ) {
 			if ( count( $this->getUserPermissionsErrorsInternal( 'edit', $user, $rigor, true ) ) ) {
 				// If they can't edit, they shouldn't protect.
-				$errors[] = [ 'protect-cantedit' ];
+				$errors[] = array( 'protect-cantedit' );
 			}
 		} elseif ( $action == 'create' ) {
 			$title_protection = $this->getTitleProtection();
@@ -2264,42 +2262,42 @@ class Title implements LinkTarget {
 				if ( $title_protection['permission'] == ''
 					|| !$user->isAllowed( $title_protection['permission'] )
 				) {
-					$errors[] = [
+					$errors[] = array(
 						'titleprotected',
 						User::whoIs( $title_protection['user'] ),
 						$title_protection['reason']
-					];
+					);
 				}
 			}
 		} elseif ( $action == 'move' ) {
 			// Check for immobile pages
 			if ( !MWNamespace::isMovable( $this->mNamespace ) ) {
 				// Specific message for this case
-				$errors[] = [ 'immobile-source-namespace', $this->getNsText() ];
+				$errors[] = array( 'immobile-source-namespace', $this->getNsText() );
 			} elseif ( !$this->isMovable() ) {
 				// Less specific message for rarer cases
-				$errors[] = [ 'immobile-source-page' ];
+				$errors[] = array( 'immobile-source-page' );
 			}
 		} elseif ( $action == 'move-target' ) {
 			if ( !MWNamespace::isMovable( $this->mNamespace ) ) {
-				$errors[] = [ 'immobile-target-namespace', $this->getNsText() ];
+				$errors[] = array( 'immobile-target-namespace', $this->getNsText() );
 			} elseif ( !$this->isMovable() ) {
-				$errors[] = [ 'immobile-target-page' ];
+				$errors[] = array( 'immobile-target-page' );
 			}
 		} elseif ( $action == 'delete' ) {
-			$tempErrors = $this->checkPageRestrictions( 'edit', $user, [], $rigor, true );
+			$tempErrors = $this->checkPageRestrictions( 'edit', $user, array(), $rigor, true );
 			if ( !$tempErrors ) {
 				$tempErrors = $this->checkCascadingSourcesRestrictions( 'edit',
 					$user, $tempErrors, $rigor, true );
 			}
 			if ( $tempErrors ) {
 				// If protection keeps them from editing, they shouldn't be able to delete.
-				$errors[] = [ 'deleteprotected' ];
+				$errors[] = array( 'deleteprotected' );
 			}
 			if ( $rigor !== 'quick' && $wgDeleteRevisionsLimit
 				&& !$this->userCan( 'bigdelete', $user ) && $this->isBigDeletion()
 			) {
-				$errors[] = [ 'delete-toobig', $wgLang->formatNum( $wgDeleteRevisionsLimit ) ];
+				$errors[] = array( 'delete-toobig', $wgLang->formatNum( $wgDeleteRevisionsLimit ) );
 			}
 		}
 		return $errors;
@@ -2319,14 +2317,14 @@ class Title implements LinkTarget {
 	private function checkUserBlock( $action, $user, $errors, $rigor, $short ) {
 		// Account creation blocks handled at userlogin.
 		// Unblocking handled in SpecialUnblock
-		if ( $rigor === 'quick' || in_array( $action, [ 'createaccount', 'unblock' ] ) ) {
+		if ( $rigor === 'quick' || in_array( $action, array( 'createaccount', 'unblock' ) ) ) {
 			return $errors;
 		}
 
 		global $wgEmailConfirmToEdit;
 
 		if ( $wgEmailConfirmToEdit && !$user->isEmailConfirmed() ) {
-			$errors[] = [ 'confirmedittext' ];
+			$errors[] = array( 'confirmedittext' );
 		}
 
 		$useSlave = ( $rigor !== 'secure' );
@@ -2412,7 +2410,7 @@ class Title implements LinkTarget {
 
 		if ( !$whitelisted ) {
 			# If the title is not whitelisted, give extensions a chance to do so...
-			Hooks::run( 'TitleReadWhitelist', [ $this, $user, &$whitelisted ] );
+			Hooks::run( 'TitleReadWhitelist', array( $this, $user, &$whitelisted ) );
 			if ( !$whitelisted ) {
 				$errors[] = $this->missingPermissionError( $action, $short );
 			}
@@ -2432,21 +2430,21 @@ class Title implements LinkTarget {
 	private function missingPermissionError( $action, $short ) {
 		// We avoid expensive display logic for quickUserCan's and such
 		if ( $short ) {
-			return [ 'badaccess-group0' ];
+			return array( 'badaccess-group0' );
 		}
 
-		$groups = array_map( [ 'User', 'makeGroupLinkWiki' ],
+		$groups = array_map( array( 'User', 'makeGroupLinkWiki' ),
 			User::getGroupsWithPermission( $action ) );
 
 		if ( count( $groups ) ) {
 			global $wgLang;
-			return [
+			return array(
 				'badaccess-groups',
 				$wgLang->commaList( $groups ),
 				count( $groups )
-			];
+			);
 		} else {
-			return [ 'badaccess-group0' ];
+			return array( 'badaccess-group0' );
 		}
 	}
 
@@ -2471,31 +2469,31 @@ class Title implements LinkTarget {
 			$rigor = 'secure'; // b/c
 		} elseif ( $rigor === false ) {
 			$rigor = 'quick'; // b/c
-		} elseif ( !in_array( $rigor, [ 'quick', 'full', 'secure' ] ) ) {
+		} elseif ( !in_array( $rigor, array( 'quick', 'full', 'secure' ) ) ) {
 			throw new Exception( "Invalid rigor parameter '$rigor'." );
 		}
 
 		# Read has special handling
 		if ( $action == 'read' ) {
-			$checks = [
+			$checks = array(
 				'checkPermissionHooks',
 				'checkReadPermissions',
-			];
+			);
 		# Don't call checkSpecialsAndNSPermissions or checkCSSandJSPermissions
 		# here as it will lead to duplicate error messages. This is okay to do
 		# since anywhere that checks for create will also check for edit, and
 		# those checks are called for edit.
 		} elseif ( $action == 'create' ) {
-			$checks = [
+			$checks = array(
 				'checkQuickPermissions',
 				'checkPermissionHooks',
 				'checkPageRestrictions',
 				'checkCascadingSourcesRestrictions',
 				'checkActionPermissions',
 				'checkUserBlock'
-			];
+			);
 		} else {
-			$checks = [
+			$checks = array(
 				'checkQuickPermissions',
 				'checkPermissionHooks',
 				'checkSpecialsAndNSPermissions',
@@ -2504,10 +2502,10 @@ class Title implements LinkTarget {
 				'checkCascadingSourcesRestrictions',
 				'checkActionPermissions',
 				'checkUserBlock'
-			];
+			);
 		}
 
-		$errors = [];
+		$errors = array();
 		while ( count( $checks ) > 0 &&
 				!( $short && count( $errors ) > 0 ) ) {
 			$method = array_shift( $checks );
@@ -2529,10 +2527,10 @@ class Title implements LinkTarget {
 		$types = $wgRestrictionTypes;
 		if ( $exists ) {
 			# Remove the create restriction for existing titles
-			$types = array_diff( $types, [ 'create' ] );
+			$types = array_diff( $types, array( 'create' ) );
 		} else {
 			# Only the create and upload restrictions apply to non-existing titles
-			$types = array_intersect( $types, [ 'create', 'upload' ] );
+			$types = array_intersect( $types, array( 'create', 'upload' ) );
 		}
 		return $types;
 	}
@@ -2544,17 +2542,17 @@ class Title implements LinkTarget {
 	 */
 	public function getRestrictionTypes() {
 		if ( $this->isSpecialPage() ) {
-			return [];
+			return array();
 		}
 
 		$types = self::getFilteredRestrictionTypes( $this->exists() );
 
 		if ( $this->getNamespace() != NS_FILE ) {
 			# Remove the upload restriction for non-file titles
-			$types = array_diff( $types, [ 'upload' ] );
+			$types = array_diff( $types, array( 'upload' ) );
 		}
 
-		Hooks::run( 'TitleGetRestrictionTypes', [ $this, &$types ] );
+		Hooks::run( 'TitleGetRestrictionTypes', array( $this, &$types ) );
 
 		wfDebug( __METHOD__ . ': applicable restrictions to [[' .
 			$this->getPrefixedText() . ']] are {' . implode( ',', $types ) . "}\n" );
@@ -2584,13 +2582,13 @@ class Title implements LinkTarget {
 			$dbr = wfGetDB( DB_SLAVE );
 			$res = $dbr->select(
 				'protected_titles',
-				[
+				array(
 					'user' => 'pt_user',
 					'reason' => 'pt_reason',
 					'expiry' => 'pt_expiry',
 					'permission' => 'pt_create_perm'
-				],
-				[ 'pt_namespace' => $this->getNamespace(), 'pt_title' => $this->getDBkey() ],
+				),
+				array( 'pt_namespace' => $this->getNamespace(), 'pt_title' => $this->getDBkey() ),
 				__METHOD__
 			);
 
@@ -2618,7 +2616,7 @@ class Title implements LinkTarget {
 
 		$dbw->delete(
 			'protected_titles',
-			[ 'pt_namespace' => $this->getNamespace(), 'pt_title' => $this->getDBkey() ],
+			array( 'pt_namespace' => $this->getNamespace(), 'pt_title' => $this->getDBkey() ),
 			__METHOD__
 		);
 		$this->mTitleProtection = false;
@@ -2741,45 +2739,45 @@ class Title implements LinkTarget {
 	 *        false.
 	 */
 	public function getCascadeProtectionSources( $getPages = true ) {
-		$pagerestrictions = [];
+		$pagerestrictions = array();
 
 		if ( $this->mCascadeSources !== null && $getPages ) {
-			return [ $this->mCascadeSources, $this->mCascadingRestrictions ];
+			return array( $this->mCascadeSources, $this->mCascadingRestrictions );
 		} elseif ( $this->mHasCascadingRestrictions !== null && !$getPages ) {
-			return [ $this->mHasCascadingRestrictions, $pagerestrictions ];
+			return array( $this->mHasCascadingRestrictions, $pagerestrictions );
 		}
 
 		$dbr = wfGetDB( DB_SLAVE );
 
 		if ( $this->getNamespace() == NS_FILE ) {
-			$tables = [ 'imagelinks', 'page_restrictions' ];
-			$where_clauses = [
+			$tables = array( 'imagelinks', 'page_restrictions' );
+			$where_clauses = array(
 				'il_to' => $this->getDBkey(),
 				'il_from=pr_page',
 				'pr_cascade' => 1
-			];
+			);
 		} else {
-			$tables = [ 'templatelinks', 'page_restrictions' ];
-			$where_clauses = [
+			$tables = array( 'templatelinks', 'page_restrictions' );
+			$where_clauses = array(
 				'tl_namespace' => $this->getNamespace(),
 				'tl_title' => $this->getDBkey(),
 				'tl_from=pr_page',
 				'pr_cascade' => 1
-			];
+			);
 		}
 
 		if ( $getPages ) {
-			$cols = [ 'pr_page', 'page_namespace', 'page_title',
-				'pr_expiry', 'pr_type', 'pr_level' ];
+			$cols = array( 'pr_page', 'page_namespace', 'page_title',
+				'pr_expiry', 'pr_type', 'pr_level' );
 			$where_clauses[] = 'page_id=pr_page';
 			$tables[] = 'page';
 		} else {
-			$cols = [ 'pr_expiry' ];
+			$cols = array( 'pr_expiry' );
 		}
 
 		$res = $dbr->select( $tables, $cols, $where_clauses, __METHOD__ );
 
-		$sources = $getPages ? [] : false;
+		$sources = $getPages ? array() : false;
 		$now = wfTimestampNow();
 
 		foreach ( $res as $row ) {
@@ -2794,7 +2792,7 @@ class Title implements LinkTarget {
 					# Make sure this restriction type still exists
 
 					if ( !isset( $pagerestrictions[$row->pr_type] ) ) {
-						$pagerestrictions[$row->pr_type] = [];
+						$pagerestrictions[$row->pr_type] = array();
 					}
 
 					if (
@@ -2816,7 +2814,7 @@ class Title implements LinkTarget {
 			$this->mHasCascadingRestrictions = $sources;
 		}
 
-		return [ $sources, $pagerestrictions ];
+		return array( $sources, $pagerestrictions );
 	}
 
 	/**
@@ -2845,7 +2843,7 @@ class Title implements LinkTarget {
 		}
 		return isset( $this->mRestrictions[$action] )
 				? $this->mRestrictions[$action]
-				: [];
+				: array();
 	}
 
 	/**
@@ -2897,7 +2895,7 @@ class Title implements LinkTarget {
 	 *        restrictions from page table (pre 1.10)
 	 */
 	private function loadRestrictionsFromResultWrapper( $res, $oldFashionedRestrictions = null ) {
-		$rows = [];
+		$rows = array();
 
 		foreach ( $res as $row ) {
 			$rows[] = $row;
@@ -2921,7 +2919,7 @@ class Title implements LinkTarget {
 		$restrictionTypes = $this->getRestrictionTypes();
 
 		foreach ( $restrictionTypes as $type ) {
-			$this->mRestrictions[$type] = [];
+			$this->mRestrictions[$type] = array();
 			$this->mRestrictionsExpiry[$type] = 'infinity';
 		}
 
@@ -2934,7 +2932,7 @@ class Title implements LinkTarget {
 
 		if ( $this->mOldRestrictions === false ) {
 			$this->mOldRestrictions = $dbr->selectField( 'page', 'page_restrictions',
-				[ 'page_id' => $this->getArticleID() ], __METHOD__ );
+				array( 'page_id' => $this->getArticleID() ), __METHOD__ );
 		}
 
 		if ( $this->mOldRestrictions != '' ) {
@@ -2946,7 +2944,7 @@ class Title implements LinkTarget {
 					$this->mRestrictions['move'] = explode( ',', trim( $temp[0] ) );
 				} else {
 					$restriction = trim( $temp[1] );
-					if ( $restriction != '' ) { // some old entries are empty
+					if ( $restriction != '' ) { //some old entries are empty
 						$this->mRestrictions[$temp[0]] = explode( ',', $restriction );
 					}
 				}
@@ -2994,8 +2992,8 @@ class Title implements LinkTarget {
 			if ( $this->exists() ) {
 				$res = $dbr->select(
 					'page_restrictions',
-					[ 'pr_type', 'pr_expiry', 'pr_level', 'pr_cascade' ],
-					[ 'pr_page' => $this->getArticleID() ],
+					array( 'pr_type', 'pr_expiry', 'pr_level', 'pr_cascade' ),
+					array( 'pr_page' => $this->getArticleID() ),
 					__METHOD__
 				);
 
@@ -3039,22 +3037,20 @@ class Title implements LinkTarget {
 			return;
 		}
 
-		DeferredUpdates::addUpdate( new AtomicSectionUpdate(
-			wfGetDB( DB_MASTER ),
-			__METHOD__,
-			function ( IDatabase $dbw, $fname ) {
-				$dbw->delete(
-					'page_restrictions',
-					[ 'pr_expiry < ' . $dbw->addQuotes( $dbw->timestamp() ) ],
-					$fname
-				);
-				$dbw->delete(
-					'protected_titles',
-					[ 'pt_expiry < ' . $dbw->addQuotes( $dbw->timestamp() ) ],
-					$fname
-				);
-			}
-		) );
+		$method = __METHOD__;
+		$dbw = wfGetDB( DB_MASTER );
+		$dbw->onTransactionIdle( function () use ( $dbw, $method ) {
+			$dbw->delete(
+				'page_restrictions',
+				array( 'pr_expiry < ' . $dbw->addQuotes( $dbw->timestamp() ) ),
+				$method
+			);
+			$dbw->delete(
+				'protected_titles',
+				array( 'pt_expiry < ' . $dbw->addQuotes( $dbw->timestamp() ) ),
+				$method
+			);
+		} );
 	}
 
 	/**
@@ -3092,19 +3088,19 @@ class Title implements LinkTarget {
 	 */
 	public function getSubpages( $limit = -1 ) {
 		if ( !MWNamespace::hasSubpages( $this->getNamespace() ) ) {
-			return [];
+			return array();
 		}
 
 		$dbr = wfGetDB( DB_SLAVE );
 		$conds['page_namespace'] = $this->getNamespace();
 		$conds[] = 'page_title ' . $dbr->buildLike( $this->getDBkey() . '/', $dbr->anyString() );
-		$options = [];
+		$options = array();
 		if ( $limit > -1 ) {
 			$options['LIMIT'] = $limit;
 		}
 		$this->mSubpages = TitleArray::newFromResult(
 			$dbr->select( 'page',
-				[ 'page_id', 'page_namespace', 'page_title', 'page_is_redirect' ],
+				array( 'page_id', 'page_namespace', 'page_title', 'page_is_redirect' ),
 				$conds,
 				__METHOD__,
 				$options
@@ -3125,12 +3121,12 @@ class Title implements LinkTarget {
 			$dbr = wfGetDB( DB_SLAVE );
 
 			$n = $dbr->selectField( 'archive', 'COUNT(*)',
-				[ 'ar_namespace' => $this->getNamespace(), 'ar_title' => $this->getDBkey() ],
+				array( 'ar_namespace' => $this->getNamespace(), 'ar_title' => $this->getDBkey() ),
 				__METHOD__
 			);
 			if ( $this->getNamespace() == NS_FILE ) {
 				$n += $dbr->selectField( 'filearchive', 'COUNT(*)',
-					[ 'fa_name' => $this->getDBkey() ],
+					array( 'fa_name' => $this->getDBkey() ),
 					__METHOD__
 				);
 			}
@@ -3149,12 +3145,12 @@ class Title implements LinkTarget {
 		}
 		$dbr = wfGetDB( DB_SLAVE );
 		$deleted = (bool)$dbr->selectField( 'archive', '1',
-			[ 'ar_namespace' => $this->getNamespace(), 'ar_title' => $this->getDBkey() ],
+			array( 'ar_namespace' => $this->getNamespace(), 'ar_title' => $this->getDBkey() ),
 			__METHOD__
 		);
 		if ( !$deleted && $this->getNamespace() == NS_FILE ) {
 			$deleted = (bool)$dbr->selectField( 'filearchive', '1',
-				[ 'fa_name' => $this->getDBkey() ],
+				array( 'fa_name' => $this->getDBkey() ),
 				__METHOD__
 			);
 		}
@@ -3300,7 +3296,7 @@ class Title implements LinkTarget {
 			$this->mArticleID = intval( $newid );
 		}
 		$this->mRestrictionsLoaded = false;
-		$this->mRestrictions = [];
+		$this->mRestrictions = array();
 		$this->mOldRestrictions = false;
 		$this->mRedirect = null;
 		$this->mLength = -1;
@@ -3308,7 +3304,7 @@ class Title implements LinkTarget {
 		$this->mContentModel = false;
 		$this->mEstimateRevisions = null;
 		$this->mPageLanguage = false;
-		$this->mDbPageLanguage = false;
+		$this->mDbPageLanguage = null;
 		$this->mIsBigDeletion = null;
 	}
 
@@ -3360,7 +3356,7 @@ class Title implements LinkTarget {
 		// @note: splitTitleString() is a temporary hack to allow MediaWikiTitleCodec to share
 		//        the parsing code with Title, while avoiding massive refactoring.
 		// @todo: get rid of secureAndSplit, refactor parsing code.
-		$titleParser = self::getMediaWikiTitleCodec();
+		$titleParser = self::getTitleParser();
 		// MalformedTitleException can be thrown here
 		$parts = $titleParser->splitTitleString( $dbkey, $this->getDefaultNamespace() );
 
@@ -3395,7 +3391,7 @@ class Title implements LinkTarget {
 	 * @param string $prefix Fields prefix
 	 * @return Title[] Array of Title objects linking here
 	 */
-	public function getLinksTo( $options = [], $table = 'pagelinks', $prefix = 'pl' ) {
+	public function getLinksTo( $options = array(), $table = 'pagelinks', $prefix = 'pl' ) {
 		if ( count( $options ) > 0 ) {
 			$db = wfGetDB( DB_MASTER );
 		} else {
@@ -3403,17 +3399,17 @@ class Title implements LinkTarget {
 		}
 
 		$res = $db->select(
-			[ 'page', $table ],
+			array( 'page', $table ),
 			self::getSelectFields(),
-			[
+			array(
 				"{$prefix}_from=page_id",
 				"{$prefix}_namespace" => $this->getNamespace(),
-				"{$prefix}_title" => $this->getDBkey() ],
+				"{$prefix}_title" => $this->getDBkey() ),
 			__METHOD__,
 			$options
 		);
 
-		$retVal = [];
+		$retVal = array();
 		if ( $res->numRows() ) {
 			$linkCache = LinkCache::singleton();
 			foreach ( $res as $row ) {
@@ -3434,10 +3430,10 @@ class Title implements LinkTarget {
 	 * WARNING: do not use this function on arbitrary user-supplied titles!
 	 * On heavily-used templates it will max out the memory.
 	 *
-	 * @param array $options Query option to Database::select()
+	 * @param array $options May be FOR UPDATE
 	 * @return Title[] Array of Title the Title objects linking here
 	 */
-	public function getTemplateLinksTo( $options = [] ) {
+	public function getTemplateLinksTo( $options = array() ) {
 		return $this->getLinksTo( $options, 'templatelinks', 'tl' );
 	}
 
@@ -3448,40 +3444,44 @@ class Title implements LinkTarget {
 	 * WARNING: do not use this function on arbitrary user-supplied titles!
 	 * On heavily-used templates it will max out the memory.
 	 *
-	 * @param array $options Query option to Database::select()
+	 * @param array $options May be FOR UPDATE
 	 * @param string $table Table name
 	 * @param string $prefix Fields prefix
 	 * @return array Array of Title objects linking here
 	 */
-	public function getLinksFrom( $options = [], $table = 'pagelinks', $prefix = 'pl' ) {
+	public function getLinksFrom( $options = array(), $table = 'pagelinks', $prefix = 'pl' ) {
 		$id = $this->getArticleID();
 
 		# If the page doesn't exist; there can't be any link from this page
 		if ( !$id ) {
-			return [];
+			return array();
 		}
 
-		$db = wfGetDB( DB_SLAVE );
+		if ( count( $options ) > 0 ) {
+			$db = wfGetDB( DB_MASTER );
+		} else {
+			$db = wfGetDB( DB_SLAVE );
+		}
 
 		$blNamespace = "{$prefix}_namespace";
 		$blTitle = "{$prefix}_title";
 
 		$res = $db->select(
-			[ $table, 'page' ],
+			array( $table, 'page' ),
 			array_merge(
-				[ $blNamespace, $blTitle ],
+				array( $blNamespace, $blTitle ),
 				WikiPage::selectFields()
 			),
-			[ "{$prefix}_from" => $id ],
+			array( "{$prefix}_from" => $id ),
 			__METHOD__,
 			$options,
-			[ 'page' => [
+			array( 'page' => array(
 				'LEFT JOIN',
-				[ "page_namespace=$blNamespace", "page_title=$blTitle" ]
-			] ]
+				array( "page_namespace=$blNamespace", "page_title=$blTitle" )
+			) )
 		);
 
-		$retVal = [];
+		$retVal = array();
 		$linkCache = LinkCache::singleton();
 		foreach ( $res as $row ) {
 			if ( $row->page_id ) {
@@ -3506,7 +3506,7 @@ class Title implements LinkTarget {
 	 * @param array $options May be FOR UPDATE
 	 * @return Title[] Array of Title the Title objects used here
 	 */
-	public function getTemplateLinksFrom( $options = [] ) {
+	public function getTemplateLinksFrom( $options = array() ) {
 		return $this->getLinksFrom( $options, 'templatelinks', 'tl' );
 	}
 
@@ -3521,27 +3521,27 @@ class Title implements LinkTarget {
 	public function getBrokenLinksFrom() {
 		if ( $this->getArticleID() == 0 ) {
 			# All links from article ID 0 are false positives
-			return [];
+			return array();
 		}
 
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->select(
-			[ 'page', 'pagelinks' ],
-			[ 'pl_namespace', 'pl_title' ],
-			[
+			array( 'page', 'pagelinks' ),
+			array( 'pl_namespace', 'pl_title' ),
+			array(
 				'pl_from' => $this->getArticleID(),
 				'page_namespace IS NULL'
-			],
-			__METHOD__, [],
-			[
-				'page' => [
+			),
+			__METHOD__, array(),
+			array(
+				'page' => array(
 					'LEFT JOIN',
-					[ 'pl_namespace=page_namespace', 'pl_title=page_title' ]
-				]
-			]
+					array( 'pl_namespace=page_namespace', 'pl_title=page_title' )
+				)
+			)
 		);
 
-		$retVal = [];
+		$retVal = array();
 		foreach ( $res as $row ) {
 			$retVal[] = Title::makeTitle( $row->pl_namespace, $row->pl_title );
 		}
@@ -3549,22 +3549,22 @@ class Title implements LinkTarget {
 	}
 
 	/**
-	 * Get a list of URLs to purge from the CDN cache when this
+	 * Get a list of URLs to purge from the Squid cache when this
 	 * page changes
 	 *
 	 * @return string[] Array of String the URLs
 	 */
-	public function getCdnUrls() {
-		$urls = [
+	public function getSquidURLs() {
+		$urls = array(
 			$this->getInternalURL(),
 			$this->getInternalURL( 'action=history' )
-		];
+		);
 
 		$pageLang = $this->getPageLanguage();
 		if ( $pageLang->hasVariants() ) {
 			$variants = $pageLang->getVariants();
 			foreach ( $variants as $vCode ) {
-				$urls[] = $this->getInternalURL( $vCode );
+				$urls[] = $this->getInternalURL( '', $vCode );
 			}
 		}
 
@@ -3575,25 +3575,20 @@ class Title implements LinkTarget {
 			$urls[] = $this->getInternalUrl( 'action=raw&ctype=text/css' );
 		}
 
-		Hooks::run( 'TitleSquidURLs', [ $this, &$urls ] );
+		Hooks::run( 'TitleSquidURLs', array( $this, &$urls ) );
 		return $urls;
 	}
 
 	/**
-	 * @deprecated since 1.27 use getCdnUrls()
-	 */
-	public function getSquidURLs() {
-		return $this->getCdnUrls();
-	}
-
-	/**
-	 * Purge all applicable CDN URLs
+	 * Purge all applicable Squid URLs
 	 */
 	public function purgeSquid() {
-		DeferredUpdates::addUpdate(
-			new CdnCacheUpdate( $this->getCdnUrls() ),
-			DeferredUpdates::PRESEND
-		);
+		global $wgUseSquid;
+		if ( $wgUseSquid ) {
+			$urls = $this->getSquidURLs();
+			$u = new SquidUpdate( $urls );
+			$u->doUpdate();
+		}
 	}
 
 	/**
@@ -3624,7 +3619,7 @@ class Title implements LinkTarget {
 		if ( !( $nt instanceof Title ) ) {
 			// Normally we'd add this to $errors, but we'll get
 			// lots of syntax errors if $nt is not an object
-			return [ [ 'badtitletext' ] ];
+			return array( array( 'badtitletext' ) );
 		}
 
 		$mp = new MovePage( $this, $nt );
@@ -3648,14 +3643,14 @@ class Title implements LinkTarget {
 	protected function validateFileMoveOperation( $nt ) {
 		global $wgUser;
 
-		$errors = [];
+		$errors = array();
 
 		$destFile = wfLocalFile( $nt );
 		$destFile->load( File::READ_LATEST );
 		if ( !$wgUser->isAllowed( 'reupload-shared' )
 			&& !$destFile->exists() && wfFindFile( $nt )
 		) {
-			$errors[] = [ 'file-exists-sharedrepo' ];
+			$errors[] = array( 'file-exists-sharedrepo' );
 		}
 
 		return $errors;
@@ -3711,27 +3706,27 @@ class Title implements LinkTarget {
 		global $wgMaximumMovedPages;
 		// Check permissions
 		if ( !$this->userCan( 'move-subpages' ) ) {
-			return [ 'cant-move-subpages' ];
+			return array( 'cant-move-subpages' );
 		}
 		// Do the source and target namespaces support subpages?
 		if ( !MWNamespace::hasSubpages( $this->getNamespace() ) ) {
-			return [ 'namespace-nosubpages',
-				MWNamespace::getCanonicalName( $this->getNamespace() ) ];
+			return array( 'namespace-nosubpages',
+				MWNamespace::getCanonicalName( $this->getNamespace() ) );
 		}
 		if ( !MWNamespace::hasSubpages( $nt->getNamespace() ) ) {
-			return [ 'namespace-nosubpages',
-				MWNamespace::getCanonicalName( $nt->getNamespace() ) ];
+			return array( 'namespace-nosubpages',
+				MWNamespace::getCanonicalName( $nt->getNamespace() ) );
 		}
 
 		$subpages = $this->getSubpages( $wgMaximumMovedPages + 1 );
-		$retval = [];
+		$retval = array();
 		$count = 0;
 		foreach ( $subpages as $oldSubpage ) {
 			$count++;
 			if ( $count > $wgMaximumMovedPages ) {
 				$retval[$oldSubpage->getPrefixedText()] =
-						[ 'movepage-max-pages',
-							$wgMaximumMovedPages ];
+						array( 'movepage-max-pages',
+							$wgMaximumMovedPages );
 				break;
 			}
 
@@ -3780,7 +3775,7 @@ class Title implements LinkTarget {
 		$dbw = wfGetDB( DB_MASTER );
 
 		# Is it a redirect?
-		$fields = [ 'page_is_redirect', 'page_latest', 'page_id' ];
+		$fields = array( 'page_is_redirect', 'page_latest', 'page_id' );
 		if ( $wgContentHandlerUseDB ) {
 			$fields[] = 'page_content_model';
 		}
@@ -3789,7 +3784,7 @@ class Title implements LinkTarget {
 			$fields,
 			$this->pageCond(),
 			__METHOD__,
-			[ 'FOR UPDATE' ]
+			array( 'FOR UPDATE' )
 		);
 		# Cache some fields we may want
 		$this->mArticleID = $row ? intval( $row->page_id ) : 0;
@@ -3803,15 +3798,15 @@ class Title implements LinkTarget {
 			return false;
 		}
 		# Does the article have a history?
-		$row = $dbw->selectField( [ 'page', 'revision' ],
+		$row = $dbw->selectField( array( 'page', 'revision' ),
 			'rev_id',
-			[ 'page_namespace' => $this->getNamespace(),
+			array( 'page_namespace' => $this->getNamespace(),
 				'page_title' => $this->getDBkey(),
 				'page_id=rev_page',
 				'page_latest != rev_id'
-			],
+			),
 			__METHOD__,
-			[ 'FOR UPDATE' ]
+			array( 'FOR UPDATE' )
 		);
 		# Return true if there was no history
 		return ( $row === false );
@@ -3876,7 +3871,7 @@ class Title implements LinkTarget {
 	public function getParentCategories() {
 		global $wgContLang;
 
-		$data = [];
+		$data = array();
 
 		$titleKey = $this->getArticleID();
 
@@ -3889,7 +3884,7 @@ class Title implements LinkTarget {
 		$res = $dbr->select(
 			'categorylinks',
 			'cl_to',
-			[ 'cl_from' => $titleKey ],
+			array( 'cl_from' => $titleKey ),
 			__METHOD__
 		);
 
@@ -3908,19 +3903,19 @@ class Title implements LinkTarget {
 	 * @param array $children Array with the children in the keys, to check for circular refs
 	 * @return array Tree of parent categories
 	 */
-	public function getParentCategoryTree( $children = [] ) {
-		$stack = [];
+	public function getParentCategoryTree( $children = array() ) {
+		$stack = array();
 		$parents = $this->getParentCategories();
 
 		if ( $parents ) {
 			foreach ( $parents as $parent => $current ) {
 				if ( array_key_exists( $parent, $children ) ) {
 					# Circular reference
-					$stack[$parent] = [];
+					$stack[$parent] = array();
 				} else {
 					$nt = Title::newFromText( $parent );
 					if ( $nt ) {
-						$stack[$parent] = $nt->getParentCategoryTree( $children + [ $parent => 1 ] );
+						$stack[$parent] = $nt->getParentCategoryTree( $children + array( $parent => 1 ) );
 					}
 				}
 			}
@@ -3938,9 +3933,9 @@ class Title implements LinkTarget {
 	public function pageCond() {
 		if ( $this->mArticleID > 0 ) {
 			// PK avoids secondary lookups in InnoDB, shouldn't hurt other DBs
-			return [ 'page_id' => $this->mArticleID ];
+			return array( 'page_id' => $this->mArticleID );
 		} else {
-			return [ 'page_namespace' => $this->mNamespace, 'page_title' => $this->mDbkeyform ];
+			return array( 'page_namespace' => $this->mNamespace, 'page_title' => $this->mDbkeyform );
 		}
 	}
 
@@ -3954,12 +3949,12 @@ class Title implements LinkTarget {
 	public function getPreviousRevisionID( $revId, $flags = 0 ) {
 		$db = ( $flags & self::GAID_FOR_UPDATE ) ? wfGetDB( DB_MASTER ) : wfGetDB( DB_SLAVE );
 		$revId = $db->selectField( 'revision', 'rev_id',
-			[
+			array(
 				'rev_page' => $this->getArticleID( $flags ),
 				'rev_id < ' . intval( $revId )
-			],
+			),
 			__METHOD__,
-			[ 'ORDER BY' => 'rev_id DESC' ]
+			array( 'ORDER BY' => 'rev_id DESC' )
 		);
 
 		if ( $revId === false ) {
@@ -3979,12 +3974,12 @@ class Title implements LinkTarget {
 	public function getNextRevisionID( $revId, $flags = 0 ) {
 		$db = ( $flags & self::GAID_FOR_UPDATE ) ? wfGetDB( DB_MASTER ) : wfGetDB( DB_SLAVE );
 		$revId = $db->selectField( 'revision', 'rev_id',
-			[
+			array(
 				'rev_page' => $this->getArticleID( $flags ),
 				'rev_id > ' . intval( $revId )
-			],
+			),
 			__METHOD__,
-			[ 'ORDER BY' => 'rev_id' ]
+			array( 'ORDER BY' => 'rev_id' )
 		);
 
 		if ( $revId === false ) {
@@ -4005,9 +4000,9 @@ class Title implements LinkTarget {
 		if ( $pageId ) {
 			$db = ( $flags & self::GAID_FOR_UPDATE ) ? wfGetDB( DB_MASTER ) : wfGetDB( DB_SLAVE );
 			$row = $db->selectRow( 'revision', Revision::selectFields(),
-				[ 'rev_page' => $pageId ],
+				array( 'rev_page' => $pageId ),
 				__METHOD__,
-				[ 'ORDER BY' => 'rev_timestamp ASC', 'LIMIT' => 1 ]
+				array( 'ORDER BY' => 'rev_timestamp ASC', 'LIMIT' => 1 )
 			);
 			if ( $row ) {
 				return new Revision( $row );
@@ -4055,9 +4050,9 @@ class Title implements LinkTarget {
 			$revCount = $dbr->selectRowCount(
 				'revision',
 				'1',
-				[ 'rev_page' => $this->getArticleID() ],
+				array( 'rev_page' => $this->getArticleID() ),
 				__METHOD__,
-				[ 'LIMIT' => $wgDeleteRevisionsLimit + 1 ]
+				array( 'LIMIT' => $wgDeleteRevisionsLimit + 1 )
 			);
 
 			$this->mIsBigDeletion = $revCount > $wgDeleteRevisionsLimit;
@@ -4079,7 +4074,7 @@ class Title implements LinkTarget {
 		if ( $this->mEstimateRevisions === null ) {
 			$dbr = wfGetDB( DB_SLAVE );
 			$this->mEstimateRevisions = $dbr->estimateRowCount( 'revision', '*',
-				[ 'rev_page' => $this->getArticleID() ], __METHOD__ );
+				array( 'rev_page' => $this->getArticleID() ), __METHOD__ );
 		}
 
 		return $this->mEstimateRevisions;
@@ -4105,16 +4100,16 @@ class Title implements LinkTarget {
 			return 0; // nothing to compare
 		}
 		$dbr = wfGetDB( DB_SLAVE );
-		$conds = [
+		$conds = array(
 			'rev_page' => $this->getArticleID(),
 			'rev_timestamp > ' . $dbr->addQuotes( $dbr->timestamp( $old->getTimestamp() ) ),
 			'rev_timestamp < ' . $dbr->addQuotes( $dbr->timestamp( $new->getTimestamp() ) )
-		];
+		);
 		if ( $max !== null ) {
 			return $dbr->selectRowCount( 'revision', '1',
 				$conds,
 				__METHOD__,
-				[ 'LIMIT' => $max + 1 ] // extra to detect truncation
+				array( 'LIMIT' => $max + 1 ) // extra to detect truncation
 			);
 		} else {
 			return (int)$dbr->selectField( 'revision', 'count(*)', $conds, __METHOD__ );
@@ -4137,7 +4132,7 @@ class Title implements LinkTarget {
 	 *     Unknown option values are ignored.
 	 * @return array|null Names of revision authors in the range; null if not both revisions exist
 	 */
-	public function getAuthorsBetween( $old, $new, $limit, $options = [] ) {
+	public function getAuthorsBetween( $old, $new, $limit, $options = array() ) {
 		if ( !( $old instanceof Revision ) ) {
 			$old = Revision::newFromTitle( $this, (int)$old );
 		}
@@ -4150,7 +4145,7 @@ class Title implements LinkTarget {
 		if ( !$old || !$new ) {
 			return null; // nothing to compare
 		}
-		$authors = [];
+		$authors = array();
 		$old_cmp = '>';
 		$new_cmp = '<';
 		$options = (array)$options;
@@ -4167,8 +4162,8 @@ class Title implements LinkTarget {
 		// No DB query needed if $old and $new are the same or successive revisions:
 		if ( $old->getId() === $new->getId() ) {
 			return ( $old_cmp === '>' && $new_cmp === '<' ) ?
-				[] :
-				[ $old->getUserText( Revision::RAW ) ];
+				array() :
+				array( $old->getUserText( Revision::RAW ) );
 		} elseif ( $old->getId() === $new->getParentId() ) {
 			if ( $old_cmp === '>=' && $new_cmp === '<=' ) {
 				$authors[] = $old->getUserText( Revision::RAW );
@@ -4184,12 +4179,12 @@ class Title implements LinkTarget {
 		}
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->select( 'revision', 'DISTINCT rev_user_text',
-			[
+			array(
 				'rev_page' => $this->getArticleID(),
 				"rev_timestamp $old_cmp " . $dbr->addQuotes( $dbr->timestamp( $old->getTimestamp() ) ),
 				"rev_timestamp $new_cmp " . $dbr->addQuotes( $dbr->timestamp( $new->getTimestamp() ) )
-			], __METHOD__,
-			[ 'LIMIT' => $limit + 1 ] // add one so caller knows it was truncated
+			), __METHOD__,
+			array( 'LIMIT' => $limit + 1 ) // add one so caller knows it was truncated
 		);
 		foreach ( $res as $row ) {
 			$authors[] = $row->rev_user_text;
@@ -4211,7 +4206,7 @@ class Title implements LinkTarget {
 	 *     Unknown option values are ignored.
 	 * @return int Number of revision authors in the range; zero if not both revisions exist
 	 */
-	public function countAuthorsBetween( $old, $new, $limit, $options = [] ) {
+	public function countAuthorsBetween( $old, $new, $limit, $options = array() ) {
 		$authors = $this->getAuthorsBetween( $old, $new, $limit, $options );
 		return $authors ? count( $authors ) : 0;
 	}
@@ -4254,7 +4249,7 @@ class Title implements LinkTarget {
 	 */
 	public function exists( $flags = 0 ) {
 		$exists = $this->getArticleID( $flags ) != 0;
-		Hooks::run( 'TitleExists', [ $this, &$exists ] );
+		Hooks::run( 'TitleExists', array( $this, &$exists ) );
 		return $exists;
 	}
 
@@ -4287,7 +4282,7 @@ class Title implements LinkTarget {
 		 * @param Title $title
 		 * @param bool|null $isKnown
 		 */
-		Hooks::run( 'TitleIsAlwaysKnown', [ $this, &$isKnown ] );
+		Hooks::run( 'TitleIsAlwaysKnown', array( $this, &$isKnown ) );
 
 		if ( !is_null( $isKnown ) ) {
 			return $isKnown;
@@ -4384,7 +4379,7 @@ class Title implements LinkTarget {
 	/**
 	 * Updates page_touched for this page; called from LinksUpdate.php
 	 *
-	 * @param string $purgeTime [optional] TS_MW timestamp
+	 * @param integer $purgeTime TS_MW timestamp [optional]
 	 * @return bool True if the update succeeded
 	 */
 	public function invalidateCache( $purgeTime = null ) {
@@ -4404,8 +4399,8 @@ class Title implements LinkTarget {
 
 			$dbw->update(
 				'page',
-				[ 'page_touched' => $dbTimestamp ],
-				$conds + [ 'page_touched < ' . $dbw->addQuotes( $dbTimestamp ) ],
+				array( 'page_touched' => $dbTimestamp ),
+				$conds + array( 'page_touched < ' . $dbw->addQuotes( $dbTimestamp ) ),
 				$method
 			);
 		} );
@@ -4414,21 +4409,24 @@ class Title implements LinkTarget {
 	}
 
 	/**
-	 * Update page_touched timestamps and send CDN purge messages for
+	 * Update page_touched timestamps and send squid purge messages for
 	 * pages linking to this title. May be sent to the job queue depending
 	 * on the number of links. Typically called on create and delete.
 	 */
 	public function touchLinks() {
-		DeferredUpdates::addUpdate( new HTMLCacheUpdate( $this, 'pagelinks' ) );
+		$u = new HTMLCacheUpdate( $this, 'pagelinks' );
+		$u->doUpdate();
+
 		if ( $this->getNamespace() == NS_CATEGORY ) {
-			DeferredUpdates::addUpdate( new HTMLCacheUpdate( $this, 'categorylinks' ) );
+			$u = new HTMLCacheUpdate( $this, 'categorylinks' );
+			$u->doUpdate();
 		}
 	}
 
 	/**
 	 * Get the last touched timestamp
 	 *
-	 * @param IDatabase $db Optional db
+	 * @param DatabaseBase $db Optional db
 	 * @return string Last-touched timestamp
 	 */
 	public function getTouched( $db = null ) {
@@ -4463,15 +4461,11 @@ class Title implements LinkTarget {
 		}
 		// Don't cache too much!
 		if ( count( $this->mNotificationTimestamp ) >= self::CACHE_MAX ) {
-			$this->mNotificationTimestamp = [];
+			$this->mNotificationTimestamp = array();
 		}
 
-		$watchedItem = WatchedItemStore::getDefaultInstance()->getWatchedItem( $user, $this );
-		if ( $watchedItem ) {
-			$this->mNotificationTimestamp[$uid] = $watchedItem->getNotificationTimestamp();
-		} else {
-			$this->mNotificationTimestamp[$uid] = false;
-		}
+		$watchedItem = WatchedItem::fromUserTitle( $user, $this );
+		$this->mNotificationTimestamp[$uid] = $watchedItem->getNotificationTimestamp();
 
 		return $this->mNotificationTimestamp[$uid];
 	}
@@ -4514,14 +4508,14 @@ class Title implements LinkTarget {
 	 * @return Title[] Array of Title redirects to this title
 	 */
 	public function getRedirectsHere( $ns = null ) {
-		$redirs = [];
+		$redirs = array();
 
 		$dbr = wfGetDB( DB_SLAVE );
-		$where = [
+		$where = array(
 			'rd_namespace' => $this->getNamespace(),
 			'rd_title' => $this->getDBkey(),
 			'rd_from = page_id'
-		];
+		);
 		if ( $this->isExternal() ) {
 			$where['rd_interwiki'] = $this->getInterwiki();
 		} else {
@@ -4532,8 +4526,8 @@ class Title implements LinkTarget {
 		}
 
 		$res = $dbr->select(
-			[ 'redirect', 'page' ],
-			[ 'page_namespace', 'page_title' ],
+			array( 'redirect', 'page' ),
+			array( 'page_namespace', 'page_title' ),
 			$where,
 			__METHOD__
 		);
@@ -4610,7 +4604,7 @@ class Title implements LinkTarget {
 		// on the Title object passed in, and should probably
 		// tell the users to run updateCollations.php --force
 		// in order to re-sort existing category relations.
-		Hooks::run( 'GetDefaultSortkey', [ $this, &$unprefixed ] );
+		Hooks::run( 'GetDefaultSortkey', array( $this, &$unprefixed ) );
 		if ( $prefix !== '' ) {
 			# Separate with a line feed, so the unprefixed part is only used as
 			# a tiebreaker when two pages have the exact same prefix.
@@ -4620,27 +4614,6 @@ class Title implements LinkTarget {
 			return "$prefix\n$unprefixed";
 		}
 		return $unprefixed;
-	}
-
-	/**
-	 * Returns the page language code saved in the database, if $wgPageLanguageUseDB is set
-	 * to true in LocalSettings.php, otherwise returns false. If there is no language saved in
-	 * the db, it will return NULL.
-	 *
-	 * @return string|null|boolean
-	 */
-	private function getDbPageLanguageCode() {
-		global $wgPageLanguageUseDB;
-
-		// check, if the page language could be saved in the database, and if so and
-		// the value is not requested already, lookup the page language using LinkCache
-		if ( $wgPageLanguageUseDB && $this->mDbPageLanguage === false ) {
-			$linkCache = LinkCache::singleton();
-			$linkCache->addLinkObj( $this );
-			$this->mDbPageLanguage = $linkCache->getGoodLinkFieldObj( $this, 'lang' );
-		}
-
-		return $this->mDbPageLanguage;
 	}
 
 	/**
@@ -4659,9 +4632,8 @@ class Title implements LinkTarget {
 		}
 
 		// Checking if DB language is set
-		$dbPageLanguage = $this->getDbPageLanguageCode();
-		if ( $dbPageLanguage ) {
-			return wfGetLangObj( $dbPageLanguage );
+		if ( $this->mDbPageLanguage ) {
+			return wfGetLangObj( $this->mDbPageLanguage );
 		}
 
 		if ( !$this->mPageLanguage || $this->mPageLanguage[1] !== $wgLanguageCode ) {
@@ -4672,8 +4644,8 @@ class Title implements LinkTarget {
 			// Checking $wgLanguageCode hasn't changed for the benefit of unit
 			// tests.
 			$contentHandler = ContentHandler::getForTitle( $this );
-			$langObj = $contentHandler->getPageLanguage( $this );
-			$this->mPageLanguage = [ $langObj->getCode(), $wgLanguageCode ];
+			$langObj = wfGetLangObj( $contentHandler->getPageLanguage( $this ) );
+			$this->mPageLanguage = array( $langObj->getCode(), $wgLanguageCode );
 		} else {
 			$langObj = wfGetLangObj( $this->mPageLanguage[0] );
 		}
@@ -4703,18 +4675,6 @@ class Title implements LinkTarget {
 			return $wgLang;
 		}
 
-		// Checking if DB language is set
-		$dbPageLanguage = $this->getDbPageLanguageCode();
-		if ( $dbPageLanguage ) {
-			$pageLang = wfGetLangObj( $dbPageLanguage );
-			$variant = $pageLang->getPreferredVariant();
-			if ( $pageLang->getCode() !== $variant ) {
-				$pageLang = Language::factory( $variant );
-			}
-
-			return $pageLang;
-		}
-
 		// @note Can't be cached persistently, depends on user settings.
 		// @note ContentHandler::getPageViewLanguage() may need to load the
 		//   content to determine the page language!
@@ -4734,7 +4694,7 @@ class Title implements LinkTarget {
 	 * @return array
 	 */
 	public function getEditNotices( $oldid = 0 ) {
-		$notices = [];
+		$notices = array();
 
 		// Optional notice for the entire namespace
 		$editnotice_ns = 'editnotice-' . $this->getNamespace();
@@ -4745,11 +4705,11 @@ class Title implements LinkTarget {
 			if ( trim( $html ) !== '' ) {
 				$notices[$editnotice_ns] = Html::rawElement(
 					'div',
-					[ 'class' => [
+					array( 'class' => array(
 						'mw-editnotice',
 						'mw-editnotice-namespace',
 						Sanitizer::escapeClass( "mw-$editnotice_ns" )
-					] ],
+					) ),
 					$html
 				);
 			}
@@ -4767,11 +4727,11 @@ class Title implements LinkTarget {
 					if ( trim( $html ) !== '' ) {
 						$notices[$editnotice_base] = Html::rawElement(
 							'div',
-							[ 'class' => [
+							array( 'class' => array(
 								'mw-editnotice',
 								'mw-editnotice-base',
 								Sanitizer::escapeClass( "mw-$editnotice_base" )
-							] ],
+							) ),
 							$html
 						);
 					}
@@ -4786,18 +4746,18 @@ class Title implements LinkTarget {
 				if ( trim( $html ) !== '' ) {
 					$notices[$editnoticeText] = Html::rawElement(
 						'div',
-						[ 'class' => [
+						array( 'class' => array(
 							'mw-editnotice',
 							'mw-editnotice-page',
 							Sanitizer::escapeClass( "mw-$editnoticeText" )
-						] ],
+						) ),
 						$html
 					);
 				}
 			}
 		}
 
-		Hooks::run( 'TitleGetEditNotices', [ $this, $oldid, &$notices ] );
+		Hooks::run( 'TitleGetEditNotices', array( $this, $oldid, &$notices ) );
 		return $notices;
 	}
 
@@ -4805,7 +4765,7 @@ class Title implements LinkTarget {
 	 * @return array
 	 */
 	public function __sleep() {
-		return [
+		return array(
 			'mNamespace',
 			'mDbkeyform',
 			'mFragment',
@@ -4813,7 +4773,7 @@ class Title implements LinkTarget {
 			'mLocalInterwiki',
 			'mUserCaseDBKey',
 			'mDefaultNamespace',
-		];
+		);
 	}
 
 	public function __wakeup() {

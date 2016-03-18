@@ -19,9 +19,9 @@ class HTMLInfoField extends HTMLFormField {
 			$value = new OOUI\HtmlSnippet( $value );
 		}
 
-		return new OOUI\LabelWidget( [
+		return new OOUI\LabelWidget( array(
 			'label' => $value,
-		] );
+		) );
 	}
 
 	public function getTableRow( $value ) {

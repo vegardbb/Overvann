@@ -31,6 +31,9 @@ class TempFSFile extends FSFile {
 	/** @var bool Garbage collect the temp file */
 	protected $canDelete = false;
 
+	/** @var array Active temp files to purge on shutdown */
+	protected static $instances = array();
+
 	/** @var array Map of (path => 1) for paths to delete on shutdown */
 	protected static $pathsCollect = null;
 
@@ -38,8 +41,8 @@ class TempFSFile extends FSFile {
 		parent::__construct( $path );
 
 		if ( self::$pathsCollect === null ) {
-			self::$pathsCollect = [];
-			register_shutdown_function( [ __CLASS__, 'purgeAllOnShutdown' ] );
+			self::$pathsCollect = array();
+			register_shutdown_function( array( __CLASS__, 'purgeAllOnShutdown' ) );
 		}
 	}
 
@@ -52,25 +55,25 @@ class TempFSFile extends FSFile {
 	 * @return TempFSFile|null
 	 */
 	public static function factory( $prefix, $extension = '' ) {
-		$ext = ( $extension != '' ) ? ".{$extension}" : '';
-
-		$attempts = 5;
-		while ( $attempts-- ) {
-			$path = wfTempDir() . '/' . $prefix . wfRandomString( 12 ) . $ext;
+		$base = wfTempDir() . '/' . $prefix . wfRandomString( 12 );
+		$ext = ( $extension != '' ) ? ".{$extension}" : "";
+		for ( $attempt = 1; true; $attempt++ ) {
+			$path = "{$base}-{$attempt}{$ext}";
 			MediaWiki\suppressWarnings();
 			$newFileHandle = fopen( $path, 'x' );
 			MediaWiki\restoreWarnings();
 			if ( $newFileHandle ) {
 				fclose( $newFileHandle );
-				$tmpFile = new self( $path );
-				$tmpFile->autocollect();
-				// Safely instantiated, end loop.
-				return $tmpFile;
+				break; // got it
+			}
+			if ( $attempt >= 5 ) {
+				return null; // give up
 			}
 		}
+		$tmpFile = new self( $path );
+		$tmpFile->autocollect(); // safely instantiated
 
-		// Give up
-		return null;
+		return $tmpFile;
 	}
 
 	/**
@@ -99,7 +102,7 @@ class TempFSFile extends FSFile {
 		if ( is_object( $object ) ) {
 			if ( !isset( $object->tempFSFileReferences ) ) {
 				// Init first since $object might use __get() and return only a copy variable
-				$object->tempFSFileReferences = [];
+				$object->tempFSFileReferences = array();
 			}
 			$object->tempFSFileReferences[] = $this;
 		}

@@ -38,20 +38,20 @@ class UnusedCategoriesPage extends QueryPage {
 	}
 
 	public function getQueryInfo() {
-		return [
-			'tables' => [ 'page', 'categorylinks' ],
-			'fields' => [
+		return array(
+			'tables' => array( 'page', 'categorylinks' ),
+			'fields' => array(
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
 				'value' => 'page_title'
-			],
-			'conds' => [
+			),
+			'conds' => array(
 				'cl_from IS NULL',
 				'page_namespace' => NS_CATEGORY,
 				'page_is_redirect' => 0
-			],
-			'join_conds' => [ 'categorylinks' => [ 'LEFT JOIN', 'cl_to = page_title' ] ]
-		];
+			),
+			'join_conds' => array( 'categorylinks' => array( 'LEFT JOIN', 'cl_to = page_title' ) )
+		);
 	}
 
 	/**

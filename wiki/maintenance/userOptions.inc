@@ -22,8 +22,8 @@
  */
 
 // Options we will use
-$options = [ 'list', 'nowarn', 'quiet', 'usage', 'dry' ];
-$optionsWithArgs = [ 'old', 'new' ];
+$options = array( 'list', 'nowarn', 'quiet', 'usage', 'dry' );
+$optionsWithArgs = array( 'old', 'new' );
 
 require_once __DIR__ . '/commandLine.inc';
 
@@ -105,9 +105,7 @@ class UserOptions {
 		return true;
 	}
 
-	/**
-	 * Dumb stuff to run a mode.
-	 */
+	// Dumb stuff to run a mode.
 	public function run() {
 		if ( !$this->mReady ) {
 			return false;
@@ -118,9 +116,11 @@ class UserOptions {
 		return true;
 	}
 
-	/**
-	 * List default options and their value
-	 */
+	#
+	# Modes.
+	#
+
+	/** List default options and their value */
 	private function LISTER() {
 		$def = User::getDefaultOptions();
 		ksort( $def );
@@ -133,18 +133,16 @@ class UserOptions {
 		}
 	}
 
-	/**
-	 * List options usage
-	 */
+	/** List options usage */
 	private function USAGER() {
-		$ret = [];
+		$ret = array();
 		$defaultOptions = User::getDefaultOptions();
 
 		// We list user by user_id from one of the slave database
 		$dbr = wfGetDB( DB_SLAVE );
 		$result = $dbr->select( 'user',
-			[ 'user_id' ],
-			[],
+			array( 'user_id' ),
+			array(),
 			__METHOD__
 		);
 
@@ -188,17 +186,15 @@ class UserOptions {
 		}
 	}
 
-	/**
-	 * Change our users options
-	 */
+	/** Change our users options */
 	private function CHANGER() {
 		$this->warn();
 
 		// We list user by user_id from one of the slave database
 		$dbr = wfGetDB( DB_SLAVE );
 		$result = $dbr->select( 'user',
-			[ 'user_id' ],
-			[],
+			array( 'user_id' ),
+			array(),
 			__METHOD__
 		);
 
@@ -238,13 +234,17 @@ class UserOptions {
 	 */
 	public static function getDefaultOptionsNames() {
 		$def = User::getDefaultOptions();
-		$ret = [];
+		$ret = array();
 		foreach ( $def as $optname => $defaultValue ) {
 			array_push( $ret, $optname );
 		}
 
 		return $ret;
 	}
+
+	#
+	# Helper methods
+	#
 
 	public static function showUsageAndExit() {
 		print <<<USAGE

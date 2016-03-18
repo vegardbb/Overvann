@@ -21,7 +21,7 @@ function infuseAll() {
 		return OO.ui.infuse( e.id );
 	} );
 	end = now();
-	window.console.log( 'Took ' + ( end - start ) + ' ms to infuse demo page.' );
+	window.console.log( 'Infusion time: ' + ( end - start ) );
 	infuseButton.setDisabled( true );
 }
 

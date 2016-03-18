@@ -32,17 +32,17 @@ require_once __DIR__ . '/Maintenance.php';
 class DeleteSelfExternals extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Delete self-references to $wgServer from externallinks' );
+		$this->mDescription = 'Delete self-references to $wgServer from externallinks';
 		$this->mBatchSize = 1000;
 	}
 
 	public function execute() {
 		global $wgServer;
 		$this->output( "Deleting self externals from $wgServer\n" );
-		$db = $this->getDB( DB_MASTER );
+		$db = wfGetDB( DB_MASTER );
 		while ( 1 ) {
 			wfWaitForSlaves();
-			$this->commitTransaction( $db, __METHOD__ );
+			$db->commit( __METHOD__ );
 			$q = $db->limitResult( "DELETE /* deleteSelfExternals */ FROM externallinks WHERE el_to"
 				. $db->buildLike( $wgServer . '/', $db->anyString() ), $this->mBatchSize );
 			$this->output( "Deleting a batch\n" );

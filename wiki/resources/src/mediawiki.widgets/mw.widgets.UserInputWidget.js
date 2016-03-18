@@ -99,7 +99,7 @@
 	 * Get list of menu items from a server response.
 	 *
 	 * @param {Object} data Query result
-	 * @return {OO.ui.MenuOptionWidget[]} Menu items
+	 * @returns {OO.ui.MenuOptionWidget[]} Menu items
 	 */
 	mw.widgets.UserInputWidget.prototype.getLookupMenuOptionsFromData = function ( data ) {
 		var len, i, user,

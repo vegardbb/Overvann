@@ -83,12 +83,13 @@ class Less_Cache{
 		$hash = md5(json_encode($less_files));
  		$list_file = Less_Cache::$cache_dir . Less_Cache::$prefix . $hash . '.list';
 
+
  		// check cached content
  		if( !isset($parser_options['use_cache']) || $parser_options['use_cache'] === true ){
 			if( file_exists($list_file) ){
 
 				self::ListFiles($list_file, $list, $cached_name);
-				$compiled_name = self::CompiledName($list, $hash);
+				$compiled_name = self::CompiledName($list);
 
 				// if $cached_name is the same as the $compiled name, don't regenerate
 				if( !$cached_name || $cached_name === $compiled_name ){
@@ -108,7 +109,7 @@ class Less_Cache{
 			return false;
 		}
 
-		$compiled_name = self::CompiledName( $less_files, $hash );
+		$compiled_name = self::CompiledName( $less_files );
 		$output_file = self::OutputFile($compiled_name, $parser_options );
 
 
@@ -193,7 +194,7 @@ class Less_Cache{
 	}
 
 
-	private static function CompiledName( $files, $extrahash ){
+	private static function CompiledName( $files ){
 
 		//save the file list
 		$temp = array(Less_Version::cache_version);
@@ -201,7 +202,7 @@ class Less_Cache{
 			$temp[] = filemtime($file)."\t".filesize($file)."\t".$file;
 		}
 
-		return Less_Cache::$prefix.sha1(json_encode($temp).$extrahash).'.css';
+		return Less_Cache::$prefix.sha1(json_encode($temp)).'.css';
 	}
 
 

@@ -54,18 +54,18 @@ class ListDuplicatedFilesPage extends QueryPage {
 	 * @return array
 	 */
 	public function getQueryInfo() {
-		return [
-			'tables' => [ 'image' ],
-			'fields' => [
+		return array(
+			'tables' => array( 'image' ),
+			'fields' => array(
 				'namespace' => NS_FILE,
 				'title' => 'MIN(img_name)',
 				'value' => 'count(*)'
-			],
-			'options' => [
+			),
+			'options' => array(
 				'GROUP BY' => 'img_sha1',
 				'HAVING' => 'count(*) > 1',
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -86,6 +86,7 @@ class ListDuplicatedFilesPage extends QueryPage {
 			$linkBatch->execute();
 		}
 	}
+
 
 	/**
 	 * @param Skin $skin

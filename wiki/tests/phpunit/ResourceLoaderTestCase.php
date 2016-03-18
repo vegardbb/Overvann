@@ -8,16 +8,16 @@ abstract class ResourceLoaderTestCase extends MediaWikiTestCase {
 	 */
 	protected function getResourceLoaderContext( $lang = 'en', $dir = 'ltr' ) {
 		$resourceLoader = new ResourceLoader();
-		$request = new FauxRequest( [
+		$request = new FauxRequest( array(
 				'lang' => $lang,
 				'modules' => 'startup',
 				'only' => 'scripts',
 				'skin' => 'vector',
-				'target' => 'phpunit',
-		] );
+				'target' => 'test',
+		) );
 		$ctx = $this->getMockBuilder( 'ResourceLoaderContext' )
-			->setConstructorArgs( [ $resourceLoader, $request ] )
-			->setMethods( [ 'getDirection' ] )
+			->setConstructorArgs( array( $resourceLoader, $request ) )
+			->setMethods( array( 'getDirection' ) )
 			->getMock();
 		$ctx->expects( $this->any() )->method( 'getDirection' )->will(
 			$this->returnValue( $dir )
@@ -26,7 +26,7 @@ abstract class ResourceLoaderTestCase extends MediaWikiTestCase {
 	}
 
 	public static function getSettings() {
-		return [
+		return array(
 			// For ResourceLoader::inDebugMode since it doesn't have context
 			'ResourceLoaderDebug' => true,
 
@@ -34,14 +34,14 @@ abstract class ResourceLoaderTestCase extends MediaWikiTestCase {
 			'CacheEpoch' => '20140101000000',
 
 			// For ResourceLoader::__construct()
-			'ResourceLoaderSources' => [],
+			'ResourceLoaderSources' => array(),
 
 			// For wfScript()
 			'ScriptPath' => '/w',
 			'ScriptExtension' => '.php',
 			'Script' => '/w/index.php',
 			'LoadScript' => '/w/load.php',
-		];
+		);
 	}
 
 	protected function setUp() {
@@ -49,7 +49,7 @@ abstract class ResourceLoaderTestCase extends MediaWikiTestCase {
 
 		ResourceLoader::clearCache();
 
-		$globals = [];
+		$globals = array();
 		foreach ( self::getSettings() as $key => $value ) {
 			$globals['wg' . $key] = $value;
 		}
@@ -60,17 +60,16 @@ abstract class ResourceLoaderTestCase extends MediaWikiTestCase {
 /* Stubs */
 
 class ResourceLoaderTestModule extends ResourceLoaderModule {
-	protected $messages = [];
-	protected $dependencies = [];
+	protected $dependencies = array();
 	protected $group = null;
 	protected $source = 'local';
 	protected $script = '';
 	protected $styles = '';
 	protected $skipFunction = null;
 	protected $isRaw = false;
-	protected $targets = [ 'phpunit' ];
+	protected $targets = array( 'test' );
 
-	public function __construct( $options = [] ) {
+	public function __construct( $options = array() ) {
 		foreach ( $options as $key => $value ) {
 			$this->$key = $value;
 		}
@@ -81,11 +80,7 @@ class ResourceLoaderTestModule extends ResourceLoaderModule {
 	}
 
 	public function getStyles( ResourceLoaderContext $context ) {
-		return [ '' => $this->styles ];
-	}
-
-	public function getMessages() {
-		return $this->messages;
+		return array( '' => $this->styles );
 	}
 
 	public function getDependencies( ResourceLoaderContext $context = null ) {

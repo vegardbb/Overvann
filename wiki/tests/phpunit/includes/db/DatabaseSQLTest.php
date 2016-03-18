@@ -31,102 +31,102 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 		$this->database->select(
 			$sql['tables'],
 			$sql['fields'],
-			isset( $sql['conds'] ) ? $sql['conds'] : [],
+			isset( $sql['conds'] ) ? $sql['conds'] : array(),
 			__METHOD__,
-			isset( $sql['options'] ) ? $sql['options'] : [],
-			isset( $sql['join_conds'] ) ? $sql['join_conds'] : []
+			isset( $sql['options'] ) ? $sql['options'] : array(),
+			isset( $sql['join_conds'] ) ? $sql['join_conds'] : array()
 		);
 		$this->assertLastSql( $sqlText );
 	}
 
 	public static function provideSelect() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'tables' => 'table',
-					'fields' => [ 'field', 'alias' => 'field2' ],
-					'conds' => [ 'alias' => 'text' ],
-				],
+					'fields' => array( 'field', 'alias' => 'field2' ),
+					'conds' => array( 'alias' => 'text' ),
+				),
 				"SELECT field,field2 AS alias " .
 					"FROM table " .
 					"WHERE alias = 'text'"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'tables' => 'table',
-					'fields' => [ 'field', 'alias' => 'field2' ],
-					'conds' => [ 'alias' => 'text' ],
-					'options' => [ 'LIMIT' => 1, 'ORDER BY' => 'field' ],
-				],
+					'fields' => array( 'field', 'alias' => 'field2' ),
+					'conds' => array( 'alias' => 'text' ),
+					'options' => array( 'LIMIT' => 1, 'ORDER BY' => 'field' ),
+				),
 				"SELECT field,field2 AS alias " .
 					"FROM table " .
 					"WHERE alias = 'text' " .
 					"ORDER BY field " .
 					"LIMIT 1"
-			],
-			[
-				[
-					'tables' => [ 'table', 't2' => 'table2' ],
-					'fields' => [ 'tid', 'field', 'alias' => 'field2', 't2.id' ],
-					'conds' => [ 'alias' => 'text' ],
-					'options' => [ 'LIMIT' => 1, 'ORDER BY' => 'field' ],
-					'join_conds' => [ 't2' => [
+			),
+			array(
+				array(
+					'tables' => array( 'table', 't2' => 'table2' ),
+					'fields' => array( 'tid', 'field', 'alias' => 'field2', 't2.id' ),
+					'conds' => array( 'alias' => 'text' ),
+					'options' => array( 'LIMIT' => 1, 'ORDER BY' => 'field' ),
+					'join_conds' => array( 't2' => array(
 						'LEFT JOIN', 'tid = t2.id'
-					] ],
-				],
+					) ),
+				),
 				"SELECT tid,field,field2 AS alias,t2.id " .
 					"FROM table LEFT JOIN table2 t2 ON ((tid = t2.id)) " .
 					"WHERE alias = 'text' " .
 					"ORDER BY field " .
 					"LIMIT 1"
-			],
-			[
-				[
-					'tables' => [ 'table', 't2' => 'table2' ],
-					'fields' => [ 'tid', 'field', 'alias' => 'field2', 't2.id' ],
-					'conds' => [ 'alias' => 'text' ],
-					'options' => [ 'LIMIT' => 1, 'GROUP BY' => 'field', 'HAVING' => 'COUNT(*) > 1' ],
-					'join_conds' => [ 't2' => [
+			),
+			array(
+				array(
+					'tables' => array( 'table', 't2' => 'table2' ),
+					'fields' => array( 'tid', 'field', 'alias' => 'field2', 't2.id' ),
+					'conds' => array( 'alias' => 'text' ),
+					'options' => array( 'LIMIT' => 1, 'GROUP BY' => 'field', 'HAVING' => 'COUNT(*) > 1' ),
+					'join_conds' => array( 't2' => array(
 						'LEFT JOIN', 'tid = t2.id'
-					] ],
-				],
+					) ),
+				),
 				"SELECT tid,field,field2 AS alias,t2.id " .
 					"FROM table LEFT JOIN table2 t2 ON ((tid = t2.id)) " .
 					"WHERE alias = 'text' " .
 					"GROUP BY field HAVING COUNT(*) > 1 " .
 					"LIMIT 1"
-			],
-			[
-				[
-					'tables' => [ 'table', 't2' => 'table2' ],
-					'fields' => [ 'tid', 'field', 'alias' => 'field2', 't2.id' ],
-					'conds' => [ 'alias' => 'text' ],
-					'options' => [
+			),
+			array(
+				array(
+					'tables' => array( 'table', 't2' => 'table2' ),
+					'fields' => array( 'tid', 'field', 'alias' => 'field2', 't2.id' ),
+					'conds' => array( 'alias' => 'text' ),
+					'options' => array(
 						'LIMIT' => 1,
-						'GROUP BY' => [ 'field', 'field2' ],
-						'HAVING' => [ 'COUNT(*) > 1', 'field' => 1 ]
-					],
-					'join_conds' => [ 't2' => [
+						'GROUP BY' => array( 'field', 'field2' ),
+						'HAVING' => array( 'COUNT(*) > 1', 'field' => 1 )
+					),
+					'join_conds' => array( 't2' => array(
 						'LEFT JOIN', 'tid = t2.id'
-					] ],
-				],
+					) ),
+				),
 				"SELECT tid,field,field2 AS alias,t2.id " .
 					"FROM table LEFT JOIN table2 t2 ON ((tid = t2.id)) " .
 					"WHERE alias = 'text' " .
 					"GROUP BY field,field2 HAVING (COUNT(*) > 1) AND field = '1' " .
 					"LIMIT 1"
-			],
-			[
-				[
-					'tables' => [ 'table' ],
-					'fields' => [ 'alias' => 'field' ],
-					'conds' => [ 'alias' => [ 1, 2, 3, 4 ] ],
-				],
+			),
+			array(
+				array(
+					'tables' => array( 'table' ),
+					'fields' => array( 'alias' => 'field' ),
+					'conds' => array( 'alias' => array( 1, 2, 3, 4 ) ),
+				),
 				"SELECT field AS alias " .
 					"FROM table " .
 					"WHERE alias IN ('1','2','3','4')"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -139,46 +139,46 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 			$sql['values'],
 			$sql['conds'],
 			__METHOD__,
-			isset( $sql['options'] ) ? $sql['options'] : []
+			isset( $sql['options'] ) ? $sql['options'] : array()
 		);
 		$this->assertLastSql( $sqlText );
 	}
 
 	public static function provideUpdate() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'table' => 'table',
-					'values' => [ 'field' => 'text', 'field2' => 'text2' ],
-					'conds' => [ 'alias' => 'text' ],
-				],
+					'values' => array( 'field' => 'text', 'field2' => 'text2' ),
+					'conds' => array( 'alias' => 'text' ),
+				),
 				"UPDATE table " .
 					"SET field = 'text'" .
 					",field2 = 'text2' " .
 					"WHERE alias = 'text'"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'table',
-					'values' => [ 'field = other', 'field2' => 'text2' ],
-					'conds' => [ 'id' => '1' ],
-				],
+					'values' => array( 'field = other', 'field2' => 'text2' ),
+					'conds' => array( 'id' => '1' ),
+				),
 				"UPDATE table " .
 					"SET field = other" .
 					",field2 = 'text2' " .
 					"WHERE id = '1'"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'table',
-					'values' => [ 'field = other', 'field2' => 'text2' ],
+					'values' => array( 'field = other', 'field2' => 'text2' ),
 					'conds' => '*',
-				],
+				),
 				"UPDATE table " .
 					"SET field = other" .
 					",field2 = 'text2'"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -195,23 +195,23 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideDelete() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'table' => 'table',
-					'conds' => [ 'alias' => 'text' ],
-				],
+					'conds' => array( 'alias' => 'text' ),
+				),
 				"DELETE FROM table " .
 					"WHERE alias = 'text'"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'table',
 					'conds' => '*',
-				],
+				),
 				"DELETE FROM table"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -230,14 +230,14 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideUpsert() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'table' => 'upsert_table',
-					'rows' => [ 'field' => 'text', 'field2' => 'text2' ],
-					'uniqueIndexes' => [ 'field' ],
-					'set' => [ 'field' => 'set' ],
-				],
+					'rows' => array( 'field' => 'text', 'field2' => 'text2' ),
+					'uniqueIndexes' => array( 'field' ),
+					'set' => array( 'field' => 'set' ),
+				),
 				"BEGIN; " .
 					"UPDATE upsert_table " .
 					"SET field = 'set' " .
@@ -246,8 +246,8 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 					"(field,field2) " .
 					"VALUES ('text','text2'); " .
 					"COMMIT"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -267,34 +267,34 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideDeleteJoin() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'delTable' => 'table',
 					'joinTable' => 'table_join',
 					'delVar' => 'field',
 					'joinVar' => 'field_join',
-					'conds' => [ 'alias' => 'text' ],
-				],
+					'conds' => array( 'alias' => 'text' ),
+				),
 				"DELETE FROM table " .
 					"WHERE field IN (" .
 					"SELECT field_join FROM table_join WHERE alias = 'text'" .
 					")"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'delTable' => 'table',
 					'joinTable' => 'table_join',
 					'delVar' => 'field',
 					'joinVar' => 'field_join',
 					'conds' => '*',
-				],
+				),
 				"DELETE FROM table " .
 					"WHERE field IN (" .
 					"SELECT field_join FROM table_join " .
 					")"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -306,48 +306,48 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 			$sql['table'],
 			$sql['rows'],
 			__METHOD__,
-			isset( $sql['options'] ) ? $sql['options'] : []
+			isset( $sql['options'] ) ? $sql['options'] : array()
 		);
 		$this->assertLastSql( $sqlText );
 	}
 
 	public static function provideInsert() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'table' => 'table',
-					'rows' => [ 'field' => 'text', 'field2' => 2 ],
-				],
+					'rows' => array( 'field' => 'text', 'field2' => 2 ),
+				),
 				"INSERT INTO table " .
 					"(field,field2) " .
 					"VALUES ('text','2')"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'table',
-					'rows' => [ 'field' => 'text', 'field2' => 2 ],
+					'rows' => array( 'field' => 'text', 'field2' => 2 ),
 					'options' => 'IGNORE',
-				],
+				),
 				"INSERT IGNORE INTO table " .
 					"(field,field2) " .
 					"VALUES ('text','2')"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'table',
-					'rows' => [
-						[ 'field' => 'text', 'field2' => 2 ],
-						[ 'field' => 'multi', 'field2' => 3 ],
-					],
+					'rows' => array(
+						array( 'field' => 'text', 'field2' => 2 ),
+						array( 'field' => 'multi', 'field2' => 3 ),
+					),
 					'options' => 'IGNORE',
-				],
+				),
 				"INSERT IGNORE INTO table " .
 					"(field,field2) " .
 					"VALUES " .
 					"('text','2')," .
 					"('multi','3')"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -361,56 +361,56 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 			$sql['varMap'],
 			$sql['conds'],
 			__METHOD__,
-			isset( $sql['insertOptions'] ) ? $sql['insertOptions'] : [],
-			isset( $sql['selectOptions'] ) ? $sql['selectOptions'] : []
+			isset( $sql['insertOptions'] ) ? $sql['insertOptions'] : array(),
+			isset( $sql['selectOptions'] ) ? $sql['selectOptions'] : array()
 		);
 		$this->assertLastSql( $sqlText );
 	}
 
 	public static function provideInsertSelect() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'destTable' => 'insert_table',
 					'srcTable' => 'select_table',
-					'varMap' => [ 'field_insert' => 'field_select', 'field' => 'field2' ],
+					'varMap' => array( 'field_insert' => 'field_select', 'field' => 'field2' ),
 					'conds' => '*',
-				],
+				),
 				"INSERT INTO insert_table " .
 					"(field_insert,field) " .
 					"SELECT field_select,field2 " .
 					"FROM select_table"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'destTable' => 'insert_table',
 					'srcTable' => 'select_table',
-					'varMap' => [ 'field_insert' => 'field_select', 'field' => 'field2' ],
-					'conds' => [ 'field' => 2 ],
-				],
+					'varMap' => array( 'field_insert' => 'field_select', 'field' => 'field2' ),
+					'conds' => array( 'field' => 2 ),
+				),
 				"INSERT INTO insert_table " .
 					"(field_insert,field) " .
 					"SELECT field_select,field2 " .
 					"FROM select_table " .
 					"WHERE field = '2'"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'destTable' => 'insert_table',
 					'srcTable' => 'select_table',
-					'varMap' => [ 'field_insert' => 'field_select', 'field' => 'field2' ],
-					'conds' => [ 'field' => 2 ],
+					'varMap' => array( 'field_insert' => 'field_select', 'field' => 'field2' ),
+					'conds' => array( 'field' => 2 ),
 					'insertOptions' => 'IGNORE',
-					'selectOptions' => [ 'ORDER BY' => 'field' ],
-				],
+					'selectOptions' => array( 'ORDER BY' => 'field' ),
+				),
 				"INSERT IGNORE INTO insert_table " .
 					"(field_insert,field) " .
 					"SELECT field_select,field2 " .
 					"FROM select_table " .
 					"WHERE field = '2' " .
 					"ORDER BY field"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -428,51 +428,51 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideReplace() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'table' => 'replace_table',
-					'uniqueIndexes' => [ 'field' ],
-					'rows' => [ 'field' => 'text', 'field2' => 'text2' ],
-				],
+					'uniqueIndexes' => array( 'field' ),
+					'rows' => array( 'field' => 'text', 'field2' => 'text2' ),
+				),
 				"DELETE FROM replace_table " .
 					"WHERE ( field='text' ); " .
 					"INSERT INTO replace_table " .
 					"(field,field2) " .
 					"VALUES ('text','text2')"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'module_deps',
-					'uniqueIndexes' => [ [ 'md_module', 'md_skin' ] ],
-					'rows' => [
+					'uniqueIndexes' => array( array( 'md_module', 'md_skin' ) ),
+					'rows' => array(
 						'md_module' => 'module',
 						'md_skin' => 'skin',
 						'md_deps' => 'deps',
-					],
-				],
+					),
+				),
 				"DELETE FROM module_deps " .
 					"WHERE ( md_module='module' AND md_skin='skin' ); " .
 					"INSERT INTO module_deps " .
 					"(md_module,md_skin,md_deps) " .
 					"VALUES ('module','skin','deps')"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'module_deps',
-					'uniqueIndexes' => [ [ 'md_module', 'md_skin' ] ],
-					'rows' => [
-						[
+					'uniqueIndexes' => array( array( 'md_module', 'md_skin' ) ),
+					'rows' => array(
+						array(
 							'md_module' => 'module',
 							'md_skin' => 'skin',
 							'md_deps' => 'deps',
-						], [
+						), array(
 							'md_module' => 'module2',
 							'md_skin' => 'skin2',
 							'md_deps' => 'deps2',
-						],
-					],
-				],
+						),
+					),
+				),
 				"DELETE FROM module_deps " .
 					"WHERE ( md_module='module' AND md_skin='skin' ); " .
 					"INSERT INTO module_deps " .
@@ -483,23 +483,23 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 					"INSERT INTO module_deps " .
 					"(md_module,md_skin,md_deps) " .
 					"VALUES ('module2','skin2','deps2')"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'module_deps',
-					'uniqueIndexes' => [ 'md_module', 'md_skin' ],
-					'rows' => [
-						[
+					'uniqueIndexes' => array( 'md_module', 'md_skin' ),
+					'rows' => array(
+						array(
 							'md_module' => 'module',
 							'md_skin' => 'skin',
 							'md_deps' => 'deps',
-						], [
+						), array(
 							'md_module' => 'module2',
 							'md_skin' => 'skin2',
 							'md_deps' => 'deps2',
-						],
-					],
-				],
+						),
+					),
+				),
 				"DELETE FROM module_deps " .
 					"WHERE ( md_module='module' ) OR ( md_skin='skin' ); " .
 					"INSERT INTO module_deps " .
@@ -510,22 +510,22 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 					"INSERT INTO module_deps " .
 					"(md_module,md_skin,md_deps) " .
 					"VALUES ('module2','skin2','deps2')"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'table' => 'module_deps',
-					'uniqueIndexes' => [],
-					'rows' => [
+					'uniqueIndexes' => array(),
+					'rows' => array(
 						'md_module' => 'module',
 						'md_skin' => 'skin',
 						'md_deps' => 'deps',
-					],
-				],
+					),
+				),
 				"INSERT INTO module_deps " .
 					"(md_module,md_skin,md_deps) " .
 					"VALUES ('module','skin','deps')"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -542,17 +542,17 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideNativeReplace() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'table' => 'replace_table',
-					'rows' => [ 'field' => 'text', 'field2' => 'text2' ],
-				],
+					'rows' => array( 'field' => 'text', 'field2' => 'text2' ),
+				),
 				"REPLACE INTO replace_table " .
 					"(field,field2) " .
 					"VALUES ('text','text2')"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -568,32 +568,32 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideConditional() {
-		return [
-			[
-				[
-					'conds' => [ 'field' => 'text' ],
+		return array(
+			array(
+				array(
+					'conds' => array( 'field' => 'text' ),
 					'true' => 1,
 					'false' => 'NULL',
-				],
+				),
 				"(CASE WHEN field = 'text' THEN 1 ELSE NULL END)"
-			],
-			[
-				[
-					'conds' => [ 'field' => 'text', 'field2' => 'anothertext' ],
+			),
+			array(
+				array(
+					'conds' => array( 'field' => 'text', 'field2' => 'anothertext' ),
 					'true' => 1,
 					'false' => 'NULL',
-				],
+				),
 				"(CASE WHEN field = 'text' AND field2 = 'anothertext' THEN 1 ELSE NULL END)"
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'conds' => 'field=1',
 					'true' => 1,
 					'false' => 'NULL',
-				],
+				),
 				"(CASE WHEN field=1 THEN 1 ELSE NULL END)"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -607,16 +607,16 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideBuildConcat() {
-		return [
-			[
-				[ 'field', 'field2' ],
+		return array(
+			array(
+				array( 'field', 'field2' ),
 				"CONCAT(field,field2)"
-			],
-			[
-				[ "'test'", 'field2' ],
+			),
+			array(
+				array( "'test'", 'field2' ),
 				"CONCAT('test',field2)"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -630,24 +630,24 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideBuildLike() {
-		return [
-			[
+		return array(
+			array(
 				'text',
 				"LIKE 'text'"
-			],
-			[
-				[ 'text', new LikeMatch( '%' ) ],
+			),
+			array(
+				array( 'text', new LikeMatch( '%' ) ),
 				"LIKE 'text%'"
-			],
-			[
-				[ 'text', new LikeMatch( '%' ), 'text2' ],
+			),
+			array(
+				array( 'text', new LikeMatch( '%' ), 'text2' ),
 				"LIKE 'text%text2'"
-			],
-			[
-				[ 'text', new LikeMatch( '_' ) ],
+			),
+			array(
+				array( 'text', new LikeMatch( '_' ) ),
 				"LIKE 'text_'"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -662,29 +662,29 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideUnionQueries() {
-		return [
-			[
-				[
-					'sqls' => [ 'RAW SQL', 'RAW2SQL' ],
+		return array(
+			array(
+				array(
+					'sqls' => array( 'RAW SQL', 'RAW2SQL' ),
 					'all' => true,
-				],
+				),
 				"(RAW SQL) UNION ALL (RAW2SQL)"
-			],
-			[
-				[
-					'sqls' => [ 'RAW SQL', 'RAW2SQL' ],
+			),
+			array(
+				array(
+					'sqls' => array( 'RAW SQL', 'RAW2SQL' ),
 					'all' => false,
-				],
+				),
 				"(RAW SQL) UNION (RAW2SQL)"
-			],
-			[
-				[
-					'sqls' => [ 'RAW SQL', 'RAW2SQL', 'RAW3SQL' ],
+			),
+			array(
+				array(
+					'sqls' => array( 'RAW SQL', 'RAW2SQL', 'RAW3SQL' ),
 					'all' => false,
-				],
+				),
 				"(RAW SQL) UNION (RAW2SQL) UNION (RAW3SQL)"
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -709,7 +709,7 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	 * @covers DatabaseBase::dropTable
 	 */
 	public function testDropTable() {
-		$this->database->setExistingTables( [ 'table' ] );
+		$this->database->setExistingTables( array( 'table' ) );
 		$this->database->dropTable( 'table', __METHOD__ );
 		$this->assertLastSql( 'DROP TABLE table' );
 	}
@@ -734,72 +734,72 @@ class DatabaseSQLTest extends MediaWikiTestCase {
 	}
 
 	public static function provideMakeList() {
-		return [
-			[
-				[ 'value', 'value2' ],
+		return array(
+			array(
+				array( 'value', 'value2' ),
 				LIST_COMMA,
 				"'value','value2'"
-			],
-			[
-				[ 'field', 'field2' ],
+			),
+			array(
+				array( 'field', 'field2' ),
 				LIST_NAMES,
 				"field,field2"
-			],
-			[
-				[ 'field' => 'value', 'field2' => 'value2' ],
+			),
+			array(
+				array( 'field' => 'value', 'field2' => 'value2' ),
 				LIST_AND,
 				"field = 'value' AND field2 = 'value2'"
-			],
-			[
-				[ 'field' => null, "field2 != 'value2'" ],
+			),
+			array(
+				array( 'field' => null, "field2 != 'value2'" ),
 				LIST_AND,
 				"field IS NULL AND (field2 != 'value2')"
-			],
-			[
-				[ 'field' => [ 'value', null, 'value2' ], 'field2' => 'value2' ],
+			),
+			array(
+				array( 'field' => array( 'value', null, 'value2' ), 'field2' => 'value2' ),
 				LIST_AND,
 				"(field IN ('value','value2')  OR field IS NULL) AND field2 = 'value2'"
-			],
-			[
-				[ 'field' => [ null ], 'field2' => null ],
+			),
+			array(
+				array( 'field' => array( null ), 'field2' => null ),
 				LIST_AND,
 				"field IS NULL AND field2 IS NULL"
-			],
-			[
-				[ 'field' => 'value', 'field2' => 'value2' ],
+			),
+			array(
+				array( 'field' => 'value', 'field2' => 'value2' ),
 				LIST_OR,
 				"field = 'value' OR field2 = 'value2'"
-			],
-			[
-				[ 'field' => 'value', 'field2' => null ],
+			),
+			array(
+				array( 'field' => 'value', 'field2' => null ),
 				LIST_OR,
 				"field = 'value' OR field2 IS NULL"
-			],
-			[
-				[ 'field' => [ 'value', 'value2' ], 'field2' => [ 'value' ] ],
+			),
+			array(
+				array( 'field' => array( 'value', 'value2' ), 'field2' => array( 'value' ) ),
 				LIST_OR,
 				"field IN ('value','value2')  OR field2 = 'value'"
-			],
-			[
-				[ 'field' => [ null, 'value', null, 'value2' ], "field2 != 'value2'" ],
+			),
+			array(
+				array( 'field' => array( null, 'value', null, 'value2' ), "field2 != 'value2'" ),
 				LIST_OR,
 				"(field IN ('value','value2')  OR field IS NULL) OR (field2 != 'value2')"
-			],
-			[
-				[ 'field' => 'value', 'field2' => 'value2' ],
+			),
+			array(
+				array( 'field' => 'value', 'field2' => 'value2' ),
 				LIST_SET,
 				"field = 'value',field2 = 'value2'"
-			],
-			[
-				[ 'field' => 'value', 'field2' => null ],
+			),
+			array(
+				array( 'field' => 'value', 'field2' => null ),
 				LIST_SET,
 				"field = 'value',field2 = NULL"
-			],
-			[
-				[ 'field' => 'value', "field2 != 'value2'" ],
+			),
+			array(
+				array( 'field' => 'value', "field2 != 'value2'" ),
 				LIST_SET,
 				"field = 'value',field2 != 'value2'"
-			],
-		];
+			),
+		);
 	}
 }

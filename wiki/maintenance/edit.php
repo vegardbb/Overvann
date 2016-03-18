@@ -31,7 +31,7 @@ require_once __DIR__ . '/Maintenance.php';
 class EditCLI extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Edit an article from the command line, text is from stdin' );
+		$this->mDescription = "Edit an article from the command line, text is from stdin";
 		$this->addOption( 'user', 'Username', false, true, 'u' );
 		$this->addOption( 'summary', 'Edit summary', false, true, 's' );
 		$this->addOption( 'minor', 'Minor edit', false, false, 'm' );
@@ -46,18 +46,14 @@ class EditCLI extends Maintenance {
 	public function execute() {
 		global $wgUser;
 
-		$userName = $this->getOption( 'user', false );
+		$userName = $this->getOption( 'user', 'Maintenance script' );
 		$summary = $this->getOption( 'summary', '' );
 		$minor = $this->hasOption( 'minor' );
 		$bot = $this->hasOption( 'bot' );
 		$autoSummary = $this->hasOption( 'autosummary' );
 		$noRC = $this->hasOption( 'no-rc' );
 
-		if ( $userName === false ) {
-			$wgUser = User::newSystemUser( 'Maintenance script', [ 'steal' => true ] );
-		} else {
-			$wgUser = User::newFromName( $userName );
-		}
+		$wgUser = User::newFromName( $userName );
 		if ( !$wgUser ) {
 			$this->error( "Invalid username", true );
 		}

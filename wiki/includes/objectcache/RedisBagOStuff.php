@@ -65,8 +65,8 @@ class RedisBagOStuff extends BagOStuff {
 	 */
 	function __construct( $params ) {
 		parent::__construct( $params );
-		$redisConf = [ 'serializer' => 'none' ]; // manage that in this class
-		foreach ( [ 'connectTimeout', 'persistent', 'password' ] as $opt ) {
+		$redisConf = array( 'serializer' => 'none' ); // manage that in this class
+		foreach ( array( 'connectTimeout', 'persistent', 'password' ) as $opt ) {
 			if ( isset( $params[$opt] ) ) {
 				$redisConf[$opt] = $params[$opt];
 			}
@@ -85,13 +85,14 @@ class RedisBagOStuff extends BagOStuff {
 		}
 	}
 
-	protected function doGet( $key, $flags = 0 ) {
+	public function get( $key, &$casToken = null, $flags = 0 ) {
 		list( $server, $conn ) = $this->getConnection( $key );
 		if ( !$conn ) {
 			return false;
 		}
 		try {
 			$value = $conn->get( $key );
+			$casToken = $value;
 			$result = $this->unserialize( $value );
 		} catch ( RedisException $e ) {
 			$result = false;
@@ -102,7 +103,7 @@ class RedisBagOStuff extends BagOStuff {
 		return $result;
 	}
 
-	public function set( $key, $value, $expiry = 0, $flags = 0 ) {
+	public function set( $key, $value, $expiry = 0 ) {
 		list( $server, $conn ) = $this->getConnection( $key );
 		if ( !$conn ) {
 			return false;
@@ -143,8 +144,8 @@ class RedisBagOStuff extends BagOStuff {
 	}
 
 	public function getMulti( array $keys, $flags = 0 ) {
-		$batches = [];
-		$conns = [];
+		$batches = array();
+		$conns = array();
 		foreach ( $keys as $key ) {
 			list( $server, $conn ) = $this->getConnection( $key );
 			if ( !$conn ) {
@@ -153,7 +154,7 @@ class RedisBagOStuff extends BagOStuff {
 			$conns[$server] = $conn;
 			$batches[$server][] = $key;
 		}
-		$result = [];
+		$result = array();
 		foreach ( $batches as $server => $batchKeys ) {
 			$conn = $conns[$server];
 			try {
@@ -187,8 +188,8 @@ class RedisBagOStuff extends BagOStuff {
 	 * @return bool
 	 */
 	public function setMulti( array $data, $expiry = 0 ) {
-		$batches = [];
-		$conns = [];
+		$batches = array();
+		$conns = array();
 		foreach ( $data as $key => $value ) {
 			list( $server, $conn ) = $this->getConnection( $key );
 			if ( !$conn ) {
@@ -241,7 +242,7 @@ class RedisBagOStuff extends BagOStuff {
 				$result = $conn->set(
 					$key,
 					$this->serialize( $value ),
-					[ 'nx', 'ex' => $expiry ]
+					array( 'nx', 'ex' => $expiry )
 				);
 			} else {
 				$result = $conn->setnx( $key, $this->serialize( $value ) );
@@ -356,12 +357,12 @@ class RedisBagOStuff extends BagOStuff {
 				}
 			}
 
-			return [ $server, $conn ];
+			return array( $server, $conn );
 		}
 
 		$this->setLastError( BagOStuff::ERR_UNREACHABLE );
 
-		return [ false, false ];
+		return array( false, false );
 	}
 
 	/**

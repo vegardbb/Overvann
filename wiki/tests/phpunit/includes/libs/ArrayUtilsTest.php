@@ -23,10 +23,11 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function provideFindLowerBound() {
-		$indexValueCallback = function ( $size ) {
-			return function ( $val ) use ( $size ) {
-				$this->assertTrue( $val >= 0 );
-				$this->assertTrue( $val < $size );
+		$that = $this;
+		$indexValueCallback = function ( $size ) use ( $that ) {
+			return function ( $val ) use ( $that, $size ) {
+				$that->assertTrue( $val >= 0 );
+				$that->assertTrue( $val < $size );
 				return $val;
 			};
 		};
@@ -34,99 +35,99 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase {
 			return $a - $b;
 		};
 
-		return [
-			[
+		return array(
+			array(
 				$indexValueCallback( 0 ),
 				0,
 				$comparisonCallback,
 				1,
 				false,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 1 ),
 				1,
 				$comparisonCallback,
 				-1,
 				false,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 1 ),
 				1,
 				$comparisonCallback,
 				0,
 				0,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 1 ),
 				1,
 				$comparisonCallback,
 				1,
 				0,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 2 ),
 				2,
 				$comparisonCallback,
 				-1,
 				false,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 2 ),
 				2,
 				$comparisonCallback,
 				0,
 				0,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 2 ),
 				2,
 				$comparisonCallback,
 				0.5,
 				0,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 2 ),
 				2,
 				$comparisonCallback,
 				1,
 				1,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 2 ),
 				2,
 				$comparisonCallback,
 				1.5,
 				1,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 3 ),
 				3,
 				$comparisonCallback,
 				1,
 				1,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 3 ),
 				3,
 				$comparisonCallback,
 				1.5,
 				1,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 3 ),
 				3,
 				$comparisonCallback,
 				2,
 				2,
-			],
-			[
+			),
+			array(
 				$indexValueCallback( 3 ),
 				3,
 				$comparisonCallback,
 				3,
 				2,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -142,169 +143,169 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function provideArrayDiffAssocRecursive() {
-		return [
-			[
-				[],
-				[],
-				[],
-			],
-			[
-				[],
-				[],
-				[],
-				[],
-			],
-			[
-				[ 1 ],
-				[ 1 ],
-				[],
-			],
-			[
-				[ 1 ],
-				[ 1 ],
-				[],
-				[],
-			],
-			[
-				[],
-				[],
-				[ 1 ],
-			],
-			[
-				[],
-				[],
-				[ 1 ],
-				[ 2 ],
-			],
-			[
-				[ '' => 1 ],
-				[ '' => 1 ],
-				[],
-			],
-			[
-				[],
-				[],
-				[ '' => 1 ],
-			],
-			[
-				[ 1 ],
-				[ 1 ],
-				[ 2 ],
-			],
-			[
-				[],
-				[ 1 ],
-				[ 2 ],
-				[ 1 ],
-			],
-			[
-				[],
-				[ 1 ],
-				[ 1, 2 ],
-			],
-			[
-				[ 1 => 1 ],
-				[ 1 => 1 ],
-				[ 1 ],
-			],
-			[
-				[],
-				[ 1 => 1 ],
-				[ 1 ],
-				[ 1 => 1 ],
-			],
-			[
-				[],
-				[ 1 => 1 ],
-				[ 1, 1, 1 ],
-			],
-			[
-				[],
-				[ [] ],
-				[],
-			],
-			[
-				[],
-				[ [ [] ] ],
-				[],
-			],
-			[
-				[ 1, [ 1 ] ],
-				[ 1, [ 1 ] ],
-				[],
-			],
-			[
-				[ 1 ],
-				[ 1, [ 1 ] ],
-				[ 2, [ 1 ] ],
-			],
-			[
-				[],
-				[ 1, [ 1 ] ],
-				[ 2, [ 1 ] ],
-				[ 1, [ 2 ] ],
-			],
-			[
-				[ 1 ],
-				[ 1, [] ],
-				[ 2 ],
-			],
-			[
-				[],
-				[ 1, [] ],
-				[ 2 ],
-				[ 1 ],
-			],
-			[
-				[ 1, [ 1 => 2 ] ],
-				[ 1, [ 1, 2 ] ],
-				[ 2, [ 1 ] ],
-			],
-			[
-				[ 1 ],
-				[ 1, [ 1, 2 ] ],
-				[ 2, [ 1 ] ],
-				[ 2, [ 1 => 2 ] ],
-			],
-			[
-				[ 1 => [ 1, 2 ] ],
-				[ 1, [ 1, 2 ] ],
-				[ 1, [ 2 ] ],
-			],
-			[
-				[ 1 => [ [ 2, 3 ], 2 ] ],
-				[ 1, [ [ 2, 3 ], 2 ] ],
-				[ 1, [ 2 ] ],
-			],
-			[
-				[ 1 => [ [ 2 ], 2 ] ],
-				[ 1, [ [ 2, 3 ], 2 ] ],
-				[ 1, [ [ 1 => 3 ] ] ],
-			],
-			[
-				[ 1 => [ 1 => 2 ] ],
-				[ 1, [ [ 2, 3 ], 2 ] ],
-				[ 1, [ [ 1 => 3, 0 => 2 ] ] ],
-			],
-			[
-				[ 1 => [ 1 => 2 ] ],
-				[ 1, [ [ 2, 3 ], 2 ] ],
-				[ 1, [ [ 1 => 3 ] ] ],
-				[ 1 => [ [ 2 ] ] ],
-			],
-			[
-				[],
-				[ 1, [ [ 2, 3 ], 2 ] ],
-				[ 1 => [ 1 => 2, 0 => [ 1 => 3, 0 => 2 ] ], 0 => 1 ],
-			],
-			[
-				[],
-				[ 1, [ [ 2, 3 ], 2 ] ],
-				[ 1 => [ 1 => 2 ] ],
-				[ 1 => [ [ 1 => 3 ] ] ],
-				[ 1 => [ [ 2 ] ] ],
-				[ 1 ],
-			],
-		];
+		return array(
+			array(
+				array(),
+				array(),
+				array(),
+			),
+			array(
+				array(),
+				array(),
+				array(),
+				array(),
+			),
+			array(
+				array( 1 ),
+				array( 1 ),
+				array(),
+			),
+			array(
+				array( 1 ),
+				array( 1 ),
+				array(),
+				array(),
+			),
+			array(
+				array(),
+				array(),
+				array( 1 ),
+			),
+			array(
+				array(),
+				array(),
+				array( 1 ),
+				array( 2 ),
+			),
+			array(
+				array( '' => 1 ),
+				array( '' => 1 ),
+				array(),
+			),
+			array(
+				array(),
+				array(),
+				array( '' => 1 ),
+			),
+			array(
+				array( 1 ),
+				array( 1 ),
+				array( 2 ),
+			),
+			array(
+				array(),
+				array( 1 ),
+				array( 2 ),
+				array( 1 ),
+			),
+			array(
+				array(),
+				array( 1 ),
+				array( 1, 2 ),
+			),
+			array(
+				array( 1 => 1 ),
+				array( 1 => 1 ),
+				array( 1 ),
+			),
+			array(
+				array(),
+				array( 1 => 1 ),
+				array( 1 ),
+				array( 1 => 1 ),
+			),
+			array(
+				array(),
+				array( 1 => 1 ),
+				array( 1, 1, 1 ),
+			),
+			array(
+				array(),
+				array( array() ),
+				array(),
+			),
+			array(
+				array(),
+				array( array( array() ) ),
+				array(),
+			),
+			array(
+				array( 1, array( 1 ) ),
+				array( 1, array( 1 ) ),
+				array(),
+			),
+			array(
+				array( 1 ),
+				array( 1, array( 1 ) ),
+				array( 2, array( 1 ) ),
+			),
+			array(
+				array(),
+				array( 1, array( 1 ) ),
+				array( 2, array( 1 ) ),
+				array( 1, array( 2 ) ),
+			),
+			array(
+				array( 1 ),
+				array( 1, array() ),
+				array( 2 ),
+			),
+			array(
+				array(),
+				array( 1, array() ),
+				array( 2 ),
+				array( 1 ),
+			),
+			array(
+				array( 1, array( 1 => 2 ) ),
+				array( 1, array( 1, 2 ) ),
+				array( 2, array( 1 ) ),
+			),
+			array(
+				array( 1 ),
+				array( 1, array( 1, 2 ) ),
+				array( 2, array( 1 ) ),
+				array( 2, array( 1 => 2 ) ),
+			),
+			array(
+				array( 1 => array( 1, 2 ) ),
+				array( 1, array( 1, 2 ) ),
+				array( 1, array( 2 ) ),
+			),
+			array(
+				array( 1 => array( array( 2, 3 ), 2 ) ),
+				array( 1, array( array( 2, 3 ), 2 ) ),
+				array( 1, array( 2 ) ),
+			),
+			array(
+				array( 1 => array( array( 2 ), 2 ) ),
+				array( 1, array( array( 2, 3 ), 2 ) ),
+				array( 1, array( array( 1 => 3 ) ) ),
+			),
+			array(
+				array( 1 => array( 1 => 2 ) ),
+				array( 1, array( array( 2, 3 ), 2 ) ),
+				array( 1, array( array( 1 => 3, 0 => 2 ) ) ),
+			),
+			array(
+				array( 1 => array( 1 => 2 ) ),
+				array( 1, array( array( 2, 3 ), 2 ) ),
+				array( 1, array( array( 1 => 3 ) ) ),
+				array( 1 => array( array( 2 ) ) ),
+			),
+			array(
+				array(),
+				array( 1, array( array( 2, 3 ), 2 ) ),
+				array( 1 => array( 1 => 2, 0 => array( 1 => 3, 0 => 2 ) ), 0 => 1 ),
+			),
+			array(
+				array(),
+				array( 1, array( array( 2, 3 ), 2 ) ),
+				array( 1 => array( 1 => 2 ) ),
+				array( 1 => array( array( 1 => 3 ) ) ),
+				array( 1 => array( array( 2 ) ) ),
+				array( 1 ),
+			),
+		);
 	}
 }

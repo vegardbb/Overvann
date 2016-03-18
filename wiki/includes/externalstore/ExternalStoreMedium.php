@@ -30,12 +30,12 @@
  */
 abstract class ExternalStoreMedium {
 	/** @var array */
-	protected $params = [];
+	protected $params = array();
 
 	/**
 	 * @param array $params Options
 	 */
-	public function __construct( array $params = [] ) {
+	public function __construct( array $params = array() ) {
 		$this->params = $params;
 	}
 
@@ -55,7 +55,7 @@ abstract class ExternalStoreMedium {
 	 * @return array Map from the url to the text stored. Unfound data is not represented
 	 */
 	public function batchFetchFromURLs( array $urls ) {
-		$retval = [];
+		$retval = array();
 		foreach ( $urls as $url ) {
 			$data = $this->fetchFromURL( $url );
 			// Dont return when false to allow for simpler implementations.

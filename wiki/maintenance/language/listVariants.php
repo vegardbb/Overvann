@@ -32,14 +32,14 @@ class ListVariants extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Outputs a list of language variants' );
+		$this->mDescription = 'Outputs a list of language variants';
 		$this->addOption( 'flat', 'Output variants in a flat list' );
 		$this->addOption( 'json', 'Output variants as JSON' );
 	}
 
 	public function execute() {
-		$variantLangs = [];
-		$variants = [];
+		$variantLangs = array();
+		$variants = array();
 		foreach ( LanguageConverter::$languagesWithVariants as $langCode ) {
 			$lang = Language::factory( $langCode );
 			if ( count( $lang->getVariants() ) > 1 ) {

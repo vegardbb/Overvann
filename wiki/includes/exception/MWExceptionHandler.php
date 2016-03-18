@@ -33,10 +33,10 @@ class MWExceptionHandler {
 	/**
 	 * @var array $fatalErrorTypes
 	 */
-	protected static $fatalErrorTypes = [
+	protected static $fatalErrorTypes = array(
 		E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR,
 		/* HHVM's FATAL_ERROR level */ 16777217,
-	];
+	);
 	/**
 	 * @var bool $handledFatalCallback
 	 */
@@ -143,7 +143,7 @@ class MWExceptionHandler {
 				self::getLogMessage( $e ),
 				self::getLogContext( $e )
 			);
-			$factory->rollbackMasterChanges( __METHOD__ );
+			$factory->rollbackMasterChanges();
 		}
 	}
 
@@ -197,7 +197,6 @@ class MWExceptionHandler {
 	 * @param string $message
 	 * @param string $file
 	 * @param int $line
-	 * @return bool
 	 *
 	 * @see logError()
 	 */
@@ -245,6 +244,7 @@ class MWExceptionHandler {
 		// to continue regular handling.
 		return false;
 	}
+
 
 	/**
 	 * Dual purpose callback used as both a set_error_handler() callback and
@@ -326,17 +326,17 @@ TXT;
 		// log.
 		$trace = $trace ?: debug_backtrace();
 		$logger = LoggerFactory::getInstance( 'fatal' );
-		$logger->error( $msg, [
-			'exception' => [
+		$logger->error( $msg, array(
+			'exception' => array(
 				'class' => 'ErrorException',
 				'message' => "PHP Fatal Error: {$message}",
 				'code' => $level,
 				'file' => $file,
 				'line' => $line,
 				'trace' => static::redactTrace( $trace ),
-			],
+			),
 			'exception_id' => wfRandomString( 8 ),
-		] );
+		) );
 
 		// Remember call so we don't double process via HHVM's fatal
 		// notifications and the shutdown hook behavior
@@ -369,7 +369,6 @@ TXT;
 	public static function prettyPrintTrace( array $trace, $pad = '' ) {
 		$text = '';
 
-		$level = 0;
 		foreach ( $trace as $level => $frame ) {
 			if ( isset( $frame['file'] ) && isset( $frame['line'] ) ) {
 				$text .= "{$pad}#{$level} {$frame['file']}({$frame['line']}): ";
@@ -381,12 +380,10 @@ TXT;
 				$text .= "{$pad}#{$level} [internal function]: ";
 			}
 
-			if ( isset( $frame['class'] ) && isset( $frame['type'] ) && isset( $frame['function'] ) ) {
+			if ( isset( $frame['class'] ) ) {
 				$text .= $frame['class'] . $frame['type'] . $frame['function'];
-			} elseif ( isset( $frame['function'] ) ) {
-				$text .= $frame['function'];
 			} else {
-				$text .= 'NO_FUNCTION_GIVEN';
+				$text .= $frame['function'];
 			}
 
 			if ( isset( $frame['args'] ) ) {
@@ -488,14 +485,6 @@ TXT;
 		return "[$id] $url   $type from line $line of $file: $message";
 	}
 
-	public static function getPublicLogMessage( Exception $e ) {
-		$logId = self::getLogId( $e );
-		$type = get_class( $e );
-		return '[' . $logId . '] '
-			. gmdate( 'Y-m-d H:i:s' ) . ': '
-			. 'Fatal exception of type ' . $type;
-	}
-
 	/**
 	 * Get a PSR-3 log event context from an Exception.
 	 *
@@ -507,10 +496,10 @@ TXT;
 	 * @return array
 	 */
 	public static function getLogContext( $e ) {
-		return [
+		return array(
 			'exception' => $e,
 			'exception_id' => static::getLogId( $e ),
-		];
+		);
 	}
 
 	/**
@@ -526,7 +515,7 @@ TXT;
 	 */
 	public static function getStructuredExceptionData( $e ) {
 		global $wgLogExceptionBacktrace;
-		$data = [
+		$data = array(
 			'id' => self::getLogId( $e ),
 			'type' => get_class( $e ),
 			'file' => $e->getFile(),
@@ -534,7 +523,7 @@ TXT;
 			'message' => $e->getMessage(),
 			'code' => $e->getCode(),
 			'url' => self::getURL() ?: null,
-		];
+		);
 
 		if ( $e instanceof ErrorException &&
 			( error_reporting() & $e->getSeverity() ) === 0
@@ -633,10 +622,10 @@ TXT;
 			$json = self::jsonSerializeException( $e, false, FormatJson::ALL_OK );
 			if ( $json !== false ) {
 				$logger = LoggerFactory::getInstance( 'exception-json' );
-				$logger->error( $json, [ 'private' => true ] );
+				$logger->error( $json, array( 'private' => true ) );
 			}
 
-			Hooks::run( 'LogException', [ $e, false ] );
+			Hooks::run( 'LogException', array( $e, false ) );
 		}
 	}
 
@@ -664,9 +653,9 @@ TXT;
 		$json = self::jsonSerializeException( $e, false, FormatJson::ALL_OK );
 		if ( $json !== false ) {
 			$logger = LoggerFactory::getInstance( "{$channel}-json" );
-			$logger->error( $json, [ 'private' => true ] );
+			$logger->error( $json, array( 'private' => true ) );
 		}
 
-		Hooks::run( 'LogException', [ $e, $suppressed ] );
+		Hooks::run( 'LogException', array( $e, $suppressed ) );
 	}
 }

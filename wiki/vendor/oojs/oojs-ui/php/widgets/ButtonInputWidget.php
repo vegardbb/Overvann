@@ -36,9 +36,9 @@ class ButtonInputWidget extends InputWidget {
 	 *   label, and it won't be possible to set a value (which will internally become identical to the
 	 *   label). (default: false)
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Configuration initialization
-		$config = array_merge( [ 'type' => 'button', 'useInputTag' => false ], $config );
+		$config = array_merge( array( 'type' => 'button', 'useInputTag' => false ), $config );
 
 		// Properties (must be set before parent constructor, which calls setValue())
 		$this->useInputTag = $config['useInputTag'];
@@ -48,13 +48,13 @@ class ButtonInputWidget extends InputWidget {
 
 		// Mixins
 		$this->mixin( new ButtonElement( $this,
-			array_merge( $config, [ 'button' => $this->input ] ) ) );
+			array_merge( $config, array( 'button' => $this->input ) ) ) );
 		$this->mixin( new IconElement( $this, $config ) );
 		$this->mixin( new IndicatorElement( $this, $config ) );
 		// HACK: We need to have access to the mixin to override the setLabel() method
 		$this->mixin( $this->labelElementMixin = new LabelElement( $this, $config ) );
 		$this->mixin( new TitledElement( $this,
-			array_merge( $config, [ 'titled' => $this->input ] ) ) );
+			array_merge( $config, array( 'titled' => $this->input ) ) ) );
 
 		// Initialization
 		if ( !$config['useInputTag'] ) {
@@ -65,15 +65,16 @@ class ButtonInputWidget extends InputWidget {
 		// how we implement mixins. Switching to traits will fix that.
 		$this->setLabel( isset( $config['label'] ) ? $config['label'] : null );
 
-		$this->addClasses( [ 'oo-ui-buttonInputWidget' ] );
+		$this->addClasses( array( 'oo-ui-buttonInputWidget' ) );
 	}
 
 	protected function getInputElement( $config ) {
-		$type = in_array( $config['type'], [ 'button', 'submit', 'reset' ] ) ?
+		$type = in_array( $config['type'], array( 'button', 'submit', 'reset' ) ) ?
 			$config['type'] :
 			'button';
-		$tag = $config['useInputTag'] ? 'input' : 'button';
-		return ( new Tag( $tag ) )->setAttributes( [ 'type' => $type ] );
+		$input = new Tag( $config['useInputTag'] ? 'input' : 'button' );
+		$input->setAttributes( array( 'type' => $type ) );
+		return $input;
 	}
 
 	/**
@@ -82,7 +83,7 @@ class ButtonInputWidget extends InputWidget {
 	 * Overridden to support setting the 'value' of `<input/>` elements.
 	 *
 	 * @param string|null $label Label text
-	 * @return $this
+	 * @chainable
 	 */
 	public function setLabel( $label ) {
 		$this->labelElementMixin->setLabel( $label );
@@ -102,7 +103,7 @@ class ButtonInputWidget extends InputWidget {
 	 * Overridden to disable for `<input/>` elements, which have value identical to the label.
 	 *
 	 * @param string $value New value
-	 * @return $this
+	 * @chainable
 	 */
 	public function setValue( $value ) {
 		if ( !$this->useInputTag ) {

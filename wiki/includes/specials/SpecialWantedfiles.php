@@ -106,43 +106,43 @@ class WantedFilesPage extends WantedQueryPage {
 	}
 
 	function getQueryInfo() {
-		return [
-			'tables' => [
+		return array(
+			'tables' => array(
 				'imagelinks',
 				'page',
 				'redirect',
 				'img1' => 'image',
 				'img2' => 'image',
-			],
-			'fields' => [
+			),
+			'fields' => array(
 				'namespace' => NS_FILE,
 				'title' => 'il_to',
 				'value' => 'COUNT(*)'
-			],
-			'conds' => [
+			),
+			'conds' => array(
 				'img1.img_name' => null,
 				// We also need to exclude file redirects
 				'img2.img_name' => null,
-			],
-			'options' => [ 'GROUP BY' => 'il_to' ],
-			'join_conds' => [
-				'img1' => [ 'LEFT JOIN',
+			),
+			'options' => array( 'GROUP BY' => 'il_to' ),
+			'join_conds' => array(
+				'img1' => array( 'LEFT JOIN',
 					'il_to = img1.img_name'
-				],
-				'page' => [ 'LEFT JOIN', [
+				),
+				'page' => array( 'LEFT JOIN', array(
 					'il_to = page_title',
 					'page_namespace' => NS_FILE,
-				] ],
-				'redirect' => [ 'LEFT JOIN', [
+				) ),
+				'redirect' => array( 'LEFT JOIN', array(
 					'page_id = rd_from',
 					'rd_namespace' => NS_FILE,
 					'rd_interwiki' => ''
-				] ],
-				'img2' => [ 'LEFT JOIN',
+				) ),
+				'img2' => array( 'LEFT JOIN',
 					'rd_title = img2.img_name'
-				]
-			]
-		];
+				)
+			)
+		);
 	}
 
 	protected function getGroupName() {

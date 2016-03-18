@@ -54,7 +54,7 @@ abstract class ApiFormatTestBase extends MediaWikiTestCase {
 	/**
 	 * @dataProvider provideGeneralEncoding
 	 */
-	public function testGeneralEncoding( array $data, $expect, array $params = [] ) {
+	public function testGeneralEncoding( array $data, $expect, array $params = array() ) {
 		if ( isset( $params['SKIP'] ) ) {
 			$this->markTestSkipped( $expect );
 		}

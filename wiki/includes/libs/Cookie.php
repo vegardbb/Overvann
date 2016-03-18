@@ -208,7 +208,7 @@ class Cookie {
 }
 
 class CookieJar {
-	private $cookie = [];
+	private $cookie = array();
 
 	/**
 	 * Set a cookie in the cookie jar. Make sure only one cookie per-name exists.
@@ -237,7 +237,7 @@ class CookieJar {
 	 * @return string
 	 */
 	public function serializeToHttpRequest( $path, $domain ) {
-		$cookies = [];
+		$cookies = array();
 
 		foreach ( $this->cookie as $c ) {
 			$serialized = $c->serializeToHttpRequest( $path, $domain );
@@ -268,7 +268,7 @@ class CookieJar {
 
 		if ( count( $bit ) >= 1 ) {
 			list( $name, $value ) = explode( '=', array_shift( $bit ), 2 );
-			$attr = [];
+			$attr = array();
 
 			foreach ( $bit as $piece ) {
 				$parts = explode( '=', $piece );

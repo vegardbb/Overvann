@@ -25,23 +25,22 @@
  */
 class ApiTag extends ApiBase {
 
+	protected function getAvailableTags() {
+		return ChangeTags::listExplicitlyDefinedTags();
+	}
+
 	public function execute() {
 		$params = $this->extractRequestParams();
-		$user = $this->getUser();
 
 		// make sure the user is allowed
-		if ( !$user->isAllowed( 'changetags' ) ) {
+		if ( !$this->getUser()->isAllowed( 'changetags' ) ) {
 			$this->dieUsage( "You don't have permission to add or remove change tags from individual edits",
 				'permissiondenied' );
 		}
 
-		if ( $user->isBlocked() ) {
-			$this->dieBlocked( $user->getBlock() );
-		}
-
 		// validate and process each revid, rcid and logid
 		$this->requireAtLeastOneParameter( $params, 'revid', 'rcid', 'logid' );
-		$ret = [];
+		$ret = array();
 		if ( $params['revid'] ) {
 			foreach ( $params['revid'] as $id ) {
 				$ret[] = $this->processIndividual( 'revid', $params, $id );
@@ -64,13 +63,13 @@ class ApiTag extends ApiBase {
 
 	protected static function validateLogId( $logid ) {
 		$dbr = wfGetDB( DB_SLAVE );
-		$result = $dbr->selectField( 'logging', 'log_id', [ 'log_id' => $logid ],
+		$result = $dbr->selectField( 'logging', 'log_id', array( 'log_id' => $logid ),
 			__METHOD__ );
 		return (bool)$result;
 	}
 
 	protected function processIndividual( $type, $params, $id ) {
-		$idResult = [ $type => $id ];
+		$idResult = array( $type => $id );
 
 		// validate the ID
 		$valid = false;
@@ -88,7 +87,7 @@ class ApiTag extends ApiBase {
 
 		if ( !$valid ) {
 			$idResult['status'] = 'error';
-			$idResult += $this->parseMsg( [ "nosuch$type", $id ] );
+			$idResult += $this->parseMsg( array( "nosuch$type", $id ) );
 			return $idResult;
 		}
 
@@ -132,31 +131,31 @@ class ApiTag extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
-			'rcid' => [
+		return array(
+			'rcid' => array(
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_ISMULTI => true,
-			],
-			'revid' => [
+			),
+			'revid' => array(
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_ISMULTI => true,
-			],
-			'logid' => [
+			),
+			'logid' => array(
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_ISMULTI => true,
-			],
-			'add' => [
-				ApiBase::PARAM_TYPE => 'tags',
+			),
+			'add' => array(
+				ApiBase::PARAM_TYPE => $this->getAvailableTags(),
 				ApiBase::PARAM_ISMULTI => true,
-			],
-			'remove' => [
+			),
+			'remove' => array(
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_ISMULTI => true,
-			],
-			'reason' => [
+			),
+			'reason' => array(
 				ApiBase::PARAM_DFLT => '',
-			],
-		];
+			),
+		);
 	}
 
 	public function needsToken() {
@@ -164,12 +163,12 @@ class ApiTag extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=tag&revid=123&add=vandalism&token=123ABC'
 				=> 'apihelp-tag-example-rev',
 			'action=tag&logid=123&remove=spam&reason=Wrongly+applied&token=123ABC'
 				=> 'apihelp-tag-example-log',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

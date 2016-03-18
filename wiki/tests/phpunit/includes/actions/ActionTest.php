@@ -14,7 +14,7 @@ class ActionTest extends MediaWikiTestCase {
 		parent::setUp();
 
 		$context = $this->getContext();
-		$this->setMwGlobals( 'wgActions', [
+		$this->setMwGlobals( 'wgActions', array(
 			'null' => null,
 			'disabled' => false,
 			'view' => true,
@@ -23,9 +23,9 @@ class ActionTest extends MediaWikiTestCase {
 			'dummy' => true,
 			'string' => 'NamedDummyAction',
 			'declared' => 'NonExistingClassName',
-			'callable' => [ $this, 'dummyActionCallback' ],
+			'callable' => array( $this, 'dummyActionCallback' ),
 			'object' => new InstantiatedDummyAction( $context->getWikiPage(), $context ),
-		] );
+		) );
 	}
 
 	private function getPage() {
@@ -33,7 +33,7 @@ class ActionTest extends MediaWikiTestCase {
 	}
 
 	private function getContext( $requestedAction = null ) {
-		$request = new FauxRequest( [ 'action' => $requestedAction ] );
+		$request = new FauxRequest( array( 'action' => $requestedAction ) );
 
 		$context = new DerivativeContext( RequestContext::getMain() );
 		$context->setRequest( $request );
@@ -43,22 +43,22 @@ class ActionTest extends MediaWikiTestCase {
 	}
 
 	public function actionProvider() {
-		return [
-			[ 'dummy', 'DummyAction' ],
-			[ 'string', 'NamedDummyAction' ],
-			[ 'callable', 'CalledDummyAction' ],
-			[ 'object', 'InstantiatedDummyAction' ],
+		return array(
+			array( 'dummy', 'DummyAction' ),
+			array( 'string', 'NamedDummyAction' ),
+			array( 'callable', 'CalledDummyAction' ),
+			array( 'object', 'InstantiatedDummyAction' ),
 
 			// Capitalization is ignored
-			[ 'DUMMY', 'DummyAction' ],
-			[ 'STRING', 'NamedDummyAction' ],
+			array( 'DUMMY', 'DummyAction' ),
+			array( 'STRING', 'NamedDummyAction' ),
 
 			// Null and non-existing values
-			[ 'null', null ],
-			[ 'undeclared', null ],
-			[ '', null ],
-			[ false, null ],
-		];
+			array( 'null', null ),
+			array( 'undeclared', null ),
+			array( '', null ),
+			array( false, null ),
+		);
 	}
 
 	/**
@@ -92,7 +92,7 @@ class ActionTest extends MediaWikiTestCase {
 	}
 
 	public function testGetActionName_editredlinkWorkaround() {
-		// See https://phabricator.wikimedia.org/T22966
+		// See https://bugzilla.wikimedia.org/show_bug.cgi?id=20966
 		$context = $this->getContext( 'editredlink' );
 		$actionName = Action::getActionName( $context );
 
@@ -100,7 +100,7 @@ class ActionTest extends MediaWikiTestCase {
 	}
 
 	public function testGetActionName_historysubmitWorkaround() {
-		// See https://phabricator.wikimedia.org/T22966
+		// See https://bugzilla.wikimedia.org/show_bug.cgi?id=20966
 		$context = $this->getContext( 'historysubmit' );
 		$actionName = Action::getActionName( $context );
 
@@ -108,7 +108,7 @@ class ActionTest extends MediaWikiTestCase {
 	}
 
 	public function testGetActionName_revisiondeleteWorkaround() {
-		// See https://phabricator.wikimedia.org/T22966
+		// See https://bugzilla.wikimedia.org/show_bug.cgi?id=20966
 		$context = $this->getContext( 'historysubmit' );
 		$context->getRequest()->setVal( 'revisiondelete', true );
 		$actionName = Action::getActionName( $context );
@@ -117,7 +117,7 @@ class ActionTest extends MediaWikiTestCase {
 	}
 
 	public function testGetActionName_whenCanNotUseWikiPage_defaultsToView() {
-		$request = new FauxRequest( [ 'action' => 'edit' ] );
+		$request = new FauxRequest( array( 'action' => 'edit' ) );
 		$context = new DerivativeContext( RequestContext::getMain() );
 		$context->setRequest( $request );
 		$actionName = Action::getActionName( $context );
@@ -187,7 +187,7 @@ class ActionTest extends MediaWikiTestCase {
 class DummyAction extends Action {
 
 	public function getName() {
-		return static::class;
+		return get_called_class();
 	}
 
 	public function show() {

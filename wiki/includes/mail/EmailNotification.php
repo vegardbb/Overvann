@@ -59,7 +59,7 @@ class EmailNotification {
 
 	protected $subject, $body, $replyto, $from;
 	protected $timestamp, $summary, $minorEdit, $oldid, $composed_common, $pageStatus;
-	protected $mailTargets = [];
+	protected $mailTargets = array();
 
 	/**
 	 * @var Title
@@ -72,30 +72,54 @@ class EmailNotification {
 	protected $editor;
 
 	/**
-	 * @deprecated since 1.27 use WatchedItemStore::updateNotificationTimestamp directly
-	 *
 	 * @param User $editor The editor that triggered the update.  Their notification
 	 *  timestamp will not be updated(they have already seen it)
-	 * @param LinkTarget $linkTarget The link target of the title to update timestamps for
+	 * @param Title $title The title to update timestamps for
 	 * @param string $timestamp Set the update timestamp to this value
-	 *
-	 * @return int[] Array of user IDs
+	 * @return int[]
 	 */
-	public static function updateWatchlistTimestamp(
-		User $editor,
-		LinkTarget $linkTarget,
-		$timestamp
-	) {
-		// wfDeprecated( __METHOD__, '1.27' );
-		$config = RequestContext::getMain()->getConfig();
-		if ( !$config->get( 'EnotifWatchlist' ) && !$config->get( 'ShowUpdatedMarker' ) ) {
-			return [];
+	public static function updateWatchlistTimestamp( User $editor, Title $title, $timestamp ) {
+		global $wgEnotifWatchlist, $wgShowUpdatedMarker;
+
+		if ( !$wgEnotifWatchlist && !$wgShowUpdatedMarker ) {
+			return array();
 		}
-		return WatchedItemStore::getDefaultInstance()->updateNotificationTimestamp(
-			$editor,
-			$linkTarget,
-			$timestamp
+
+		$dbw = wfGetDB( DB_MASTER );
+		$res = $dbw->select( array( 'watchlist' ),
+			array( 'wl_user' ),
+			array(
+				'wl_user != ' . intval( $editor->getID() ),
+				'wl_namespace' => $title->getNamespace(),
+				'wl_title' => $title->getDBkey(),
+				'wl_notificationtimestamp IS NULL',
+			), __METHOD__
 		);
+
+		$watchers = array();
+		foreach ( $res as $row ) {
+			$watchers[] = intval( $row->wl_user );
+		}
+
+		if ( $watchers ) {
+			// Update wl_notificationtimestamp for all watching users except the editor
+			$fname = __METHOD__;
+			$dbw->onTransactionIdle(
+				function () use ( $dbw, $timestamp, $watchers, $title, $fname ) {
+					$dbw->update( 'watchlist',
+						array( /* SET */
+							'wl_notificationtimestamp' => $dbw->timestamp( $timestamp )
+						), array( /* WHERE */
+							'wl_user' => $watchers,
+							'wl_namespace' => $title->getNamespace(),
+							'wl_title' => $title->getDBkey(),
+						), $fname
+					);
+				}
+			);
+		}
+
+		return $watchers;
 	}
 
 	/**
@@ -114,28 +138,21 @@ class EmailNotification {
 	public function notifyOnPageChange( $editor, $title, $timestamp, $summary,
 		$minorEdit, $oldid = false, $pageStatus = 'changed'
 	) {
-		global $wgEnotifMinorEdits, $wgUsersNotifiedOnAllChanges, $wgEnotifUserTalk;
+		global $wgEnotifUseJobQ, $wgEnotifMinorEdits, $wgUsersNotifiedOnAllChanges, $wgEnotifUserTalk;
 
 		if ( $title->getNamespace() < 0 ) {
 			return;
 		}
 
 		// update wl_notificationtimestamp for watchers
-		$config = RequestContext::getMain()->getConfig();
-		$watchers = [];
-		if ( $config->get( 'EnotifWatchlist' ) || $config->get( 'ShowUpdatedMarker' ) ) {
-			$watchers = WatchedItemStore::getDefaultInstance()->updateNotificationTimestamp(
-				$editor,
-				$title,
-				$timestamp
-			);
-		}
+		$watchers = self::updateWatchlistTimestamp( $editor, $title, $timestamp );
 
 		$sendEmail = true;
-		// $watchers deals with $wgEnotifWatchlist.
 		// If nobody is watching the page, and there are no users notified on all changes
 		// don't bother creating a job/trying to send emails, unless it's a
 		// talk page with an applicable notification.
+		//
+		// $watchers deals with $wgEnotifWatchlist
 		if ( !count( $watchers ) && !count( $wgUsersNotifiedOnAllChanges ) ) {
 			$sendEmail = false;
 			// Only send notification for non minor edits, unless $wgEnotifMinorEdits
@@ -150,20 +167,34 @@ class EmailNotification {
 			}
 		}
 
-		if ( $sendEmail ) {
-			JobQueueGroup::singleton()->lazyPush( new EnotifNotifyJob(
+		if ( !$sendEmail ) {
+			return;
+		}
+
+		if ( $wgEnotifUseJobQ ) {
+			$params = array(
+				'editor' => $editor->getName(),
+				'editorID' => $editor->getID(),
+				'timestamp' => $timestamp,
+				'summary' => $summary,
+				'minorEdit' => $minorEdit,
+				'oldid' => $oldid,
+				'watchers' => $watchers,
+				'pageStatus' => $pageStatus
+			);
+			$job = new EnotifNotifyJob( $title, $params );
+			JobQueueGroup::singleton()->lazyPush( $job );
+		} else {
+			$this->actuallyNotifyOnPageChange(
+				$editor,
 				$title,
-				[
-					'editor' => $editor->getName(),
-					'editorID' => $editor->getID(),
-					'timestamp' => $timestamp,
-					'summary' => $summary,
-					'minorEdit' => $minorEdit,
-					'oldid' => $oldid,
-					'watchers' => $watchers,
-					'pageStatus' => $pageStatus
-				]
-			) );
+				$timestamp,
+				$summary,
+				$minorEdit,
+				$oldid,
+				$watchers,
+				$pageStatus
+			);
 		}
 	}
 
@@ -186,7 +217,6 @@ class EmailNotification {
 	public function actuallyNotifyOnPageChange( $editor, $title, $timestamp, $summary, $minorEdit,
 		$oldid, $watchers, $pageStatus = 'changed' ) {
 		# we use $wgPasswordSender as sender's address
-		global $wgUsersNotifiedOnAllChanges;
 		global $wgEnotifWatchlist, $wgBlockDisablesLogin;
 		global $wgEnotifMinorEdits, $wgEnotifUserTalk;
 
@@ -205,9 +235,9 @@ class EmailNotification {
 		$this->composed_common = false;
 		$this->pageStatus = $pageStatus;
 
-		$formattedPageStatus = [ 'deleted', 'created', 'moved', 'restored', 'changed' ];
+		$formattedPageStatus = array( 'deleted', 'created', 'moved', 'restored', 'changed' );
 
-		Hooks::run( 'UpdateUserMailerFormattedPageStatus', [ &$formattedPageStatus ] );
+		Hooks::run( 'UpdateUserMailerFormattedPageStatus', array( &$formattedPageStatus ) );
 		if ( !in_array( $this->pageStatus, $formattedPageStatus ) ) {
 			throw new MWException( 'Not a valid page status!' );
 		}
@@ -233,10 +263,9 @@ class EmailNotification {
 						&& ( !$minorEdit || $watchingUser->getOption( 'enotifminoredits' ) )
 						&& $watchingUser->isEmailConfirmed()
 						&& $watchingUser->getID() != $userTalkId
-						&& !in_array( $watchingUser->getName(), $wgUsersNotifiedOnAllChanges )
 						&& !( $wgBlockDisablesLogin && $watchingUser->isBlocked() )
 					) {
-						if ( Hooks::run( 'SendWatchlistEmailNotification', [ $watchingUser, $title, $this ] ) ) {
+						if ( Hooks::run( 'SendWatchlistEmailNotification', array( $watchingUser, $title, $this ) ) ) {
 							$this->compose( $watchingUser, self::WATCHLIST );
 						}
 					}
@@ -244,6 +273,7 @@ class EmailNotification {
 			}
 		}
 
+		global $wgUsersNotifiedOnAllChanges;
 		foreach ( $wgUsersNotifiedOnAllChanges as $name ) {
 			if ( $editor->getName() == $name ) {
 				// No point notifying the user that actually made the change!
@@ -280,7 +310,7 @@ class EmailNotification {
 			) {
 				if ( !$targetUser->isEmailConfirmed() ) {
 					wfDebug( __METHOD__ . ": talk page owner doesn't have validated email\n" );
-				} elseif ( !Hooks::run( 'AbortTalkPageEmailNotification', [ $targetUser, $title ] ) ) {
+				} elseif ( !Hooks::run( 'AbortTalkPageEmailNotification', array( $targetUser, $title ) ) ) {
 					wfDebug( __METHOD__ . ": talk page update notification is aborted for this user\n" );
 				} else {
 					wfDebug( __METHOD__ . ": sending talk page update notification\n" );
@@ -307,22 +337,22 @@ class EmailNotification {
 		# named variables when composing your notification emails while
 		# simply editing the Meta pages
 
-		$keys = [];
-		$postTransformKeys = [];
+		$keys = array();
+		$postTransformKeys = array();
 		$pageTitleUrl = $this->title->getCanonicalURL();
 		$pageTitle = $this->title->getPrefixedText();
 
 		if ( $this->oldid ) {
 			// Always show a link to the diff which triggered the mail. See bug 32210.
 			$keys['$NEWPAGE'] = "\n\n" . wfMessage( 'enotif_lastdiff',
-					$this->title->getCanonicalURL( [ 'diff' => 'next', 'oldid' => $this->oldid ] ) )
+					$this->title->getCanonicalURL( array( 'diff' => 'next', 'oldid' => $this->oldid ) ) )
 					->inContentLanguage()->text();
 
 			if ( !$wgEnotifImpersonal ) {
 				// For personal mail, also show a link to the diff of all changes
 				// since last visited.
 				$keys['$NEWPAGE'] .= "\n\n" . wfMessage( 'enotif_lastvisited',
-						$this->title->getCanonicalURL( [ 'diff' => '0', 'oldid' => $this->oldid ] ) )
+						$this->title->getCanonicalURL( array( 'diff' => '0', 'oldid' => $this->oldid ) ) )
 						->inContentLanguage()->text();
 			}
 			$keys['$OLDID'] = $this->oldid;
@@ -459,24 +489,24 @@ class EmailNotification {
 		# expressed in terms of individual local time of the notification
 		# recipient, i.e. watching user
 		$body = str_replace(
-			[ '$WATCHINGUSERNAME',
+			array( '$WATCHINGUSERNAME',
 				'$PAGEEDITDATE',
-				'$PAGEEDITTIME' ],
-			[ $wgEnotifUseRealName && $watchingUser->getRealName() !== ''
+				'$PAGEEDITTIME' ),
+			array( $wgEnotifUseRealName && $watchingUser->getRealName() !== ''
 				? $watchingUser->getRealName() : $watchingUser->getName(),
 				$wgContLang->userDate( $this->timestamp, $watchingUser ),
-				$wgContLang->userTime( $this->timestamp, $watchingUser ) ],
+				$wgContLang->userTime( $this->timestamp, $watchingUser ) ),
 			$this->body );
 
-		$headers = [];
+		$headers = array();
 		if ( $source === self::WATCHLIST ) {
 			$headers['List-Help'] = 'https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Watchlist';
 		}
 
-		return UserMailer::send( $to, $this->from, $this->subject, $body, [
+		return UserMailer::send( $to, $this->from, $this->subject, $body, array(
 			'replyTo' => $this->replyto,
 			'headers' => $headers,
-		] );
+		) );
 	}
 
 	/**
@@ -493,17 +523,17 @@ class EmailNotification {
 		}
 
 		$body = str_replace(
-			[ '$WATCHINGUSERNAME',
+			array( '$WATCHINGUSERNAME',
 				'$PAGEEDITDATE',
-				'$PAGEEDITTIME' ],
-			[ wfMessage( 'enotif_impersonal_salutation' )->inContentLanguage()->text(),
+				'$PAGEEDITTIME' ),
+			array( wfMessage( 'enotif_impersonal_salutation' )->inContentLanguage()->text(),
 				$wgContLang->date( $this->timestamp, false, false ),
-				$wgContLang->time( $this->timestamp, false, false ) ],
+				$wgContLang->time( $this->timestamp, false, false ) ),
 			$this->body );
 
-		return UserMailer::send( $addresses, $this->from, $this->subject, $body, [
+		return UserMailer::send( $addresses, $this->from, $this->subject, $body, array(
 			'replyTo' => $this->replyto,
-		] );
+		) );
 	}
 
 }

@@ -21,33 +21,35 @@ class CheckboxInputWidget extends InputWidget {
 	 * @param boolean $config['selected'] Whether the checkbox is initially selected
 	 *   (default: false)
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Parent constructor
 		parent::__construct( $config );
 
 		// Initialization
-		$this->addClasses( [ 'oo-ui-checkboxInputWidget' ] );
+		$this->addClasses( array( 'oo-ui-checkboxInputWidget' ) );
 		// Required for pretty styling in MediaWiki theme
 		$this->appendContent( new Tag( 'span' ) );
 		$this->setSelected( isset( $config['selected'] ) ? $config['selected'] : false );
 	}
 
 	protected function getInputElement( $config ) {
-		return ( new Tag( 'input' ) )->setAttributes( [ 'type' => 'checkbox' ] );
+		$input = new Tag( 'input' );
+		$input->setAttributes( array( 'type' => 'checkbox' ) );
+		return $input;
 	}
 
 	/**
 	 * Set selection state of this checkbox.
 	 *
 	 * @param boolean $state Whether the checkbox is selected
-	 * @return $this
+	 * @chainable
 	 */
 	public function setSelected( $state ) {
 		$this->selected = (bool)$state;
 		if ( $this->selected ) {
-			$this->input->setAttributes( [ 'checked' => 'checked' ] );
+			$this->input->setAttributes( array( 'checked' => 'checked' ) );
 		} else {
-			$this->input->removeAttributes( [ 'checked' ] );
+			$this->input->removeAttributes( array( 'checked' ) );
 		}
 		return $this;
 	}

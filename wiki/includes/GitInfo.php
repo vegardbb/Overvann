@@ -96,7 +96,7 @@ class GitInfo {
 	 *
 	 * @param string $repoDir The root directory of the repo where .git can be found
 	 * @return string Path to GitInfo cache file in $wgGitInfoCacheDirectory or
-	 * fallback in the extension directory itself
+	 * null if $wgGitInfoCacheDirectory is false (cache disabled).
 	 * @since 1.24
 	 */
 	protected static function getCacheFilePath( $repoDir ) {
@@ -119,13 +119,9 @@ class GitInfo {
 			// a filename
 			$repoName = strtr( $repoName, DIRECTORY_SEPARATOR, '-' );
 			$fileName = 'info' . $repoName . '.json';
-			$cachePath = "{$wgGitInfoCacheDirectory}/{$fileName}";
-			if ( is_readable( $cachePath ) ) {
-				return $cachePath;
-			}
+			return "{$wgGitInfoCacheDirectory}/{$fileName}";
 		}
-
-		return "$repoDir/gitinfo.json";
+		return null;
 	}
 
 	/**

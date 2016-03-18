@@ -42,7 +42,7 @@ class SkinApi extends SkinTemplate {
 	// Skip work and hooks for stuff we don't use
 
 	function buildSidebar() {
-		return [];
+		return array();
 	}
 
 	function getNewtalks() {
@@ -54,18 +54,18 @@ class SkinApi extends SkinTemplate {
 	}
 
 	public function getLanguages() {
-		return [];
+		return array();
 	}
 
 	protected function buildPersonalUrls() {
-		return [];
+		return array();
 	}
 
 	protected function buildContentNavigationUrls() {
-		return [];
+		return array();
 	}
 
 	protected function buildNavUrls() {
-		return [];
+		return array();
 	}
 }

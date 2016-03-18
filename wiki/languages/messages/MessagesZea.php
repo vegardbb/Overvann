@@ -22,7 +22,7 @@ $fallback = 'nl';
  * Namespace names
  * (bug 8708)
  */
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Media',
 	NS_SPECIAL          => 'Speciaol',
 	NS_TALK             => 'Overleg',
@@ -39,5 +39,5 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Overleg_ulpe',
 	NS_CATEGORY         => 'Categorie',
 	NS_CATEGORY_TALK    => 'Overleg_categorie',
-];
+);
 

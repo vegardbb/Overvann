@@ -8,45 +8,45 @@ class UploadLogFormatterTest extends LogFormatterTestCase {
 	 * Do not change the existing data, just add a new database row
 	 */
 	public static function provideUploadLogDatabaseRows() {
-		return [
+		return array(
 			// Current format
-			[
-				[
+			array(
+				array(
 					'type' => 'upload',
 					'action' => 'upload',
 					'comment' => 'upload comment',
 					'namespace' => NS_FILE,
 					'title' => 'File.png',
-					'params' => [
+					'params' => array(
 						'img_sha1' => 'hash',
 						'img_timestamp' => '20150101000000',
-					],
-				],
-				[
+					),
+				),
+				array(
 					'text' => 'User uploaded File:File.png',
-					'api' => [
+					'api' => array(
 						'img_sha1' => 'hash',
 						'img_timestamp' => '2015-01-01T00:00:00Z',
-					],
-				],
-			],
+					),
+				),
+			),
 
 			// Old format without params
-			[
-				[
+			array(
+				array(
 					'type' => 'upload',
 					'action' => 'upload',
 					'comment' => 'upload comment',
 					'namespace' => NS_FILE,
 					'title' => 'File.png',
-					'params' => [],
-				],
-				[
+					'params' => array(),
+				),
+				array(
 					'text' => 'User uploaded File:File.png',
-					'api' => [],
-				],
-			],
-		];
+					'api' => array(),
+				),
+			),
+		);
 	}
 
 	/**
@@ -62,45 +62,45 @@ class UploadLogFormatterTest extends LogFormatterTestCase {
 	 * Do not change the existing data, just add a new database row
 	 */
 	public static function provideOverwriteLogDatabaseRows() {
-		return [
+		return array(
 			// Current format
-			[
-				[
+			array(
+				array(
 					'type' => 'upload',
 					'action' => 'overwrite',
 					'comment' => 'upload comment',
 					'namespace' => NS_FILE,
 					'title' => 'File.png',
-					'params' => [
+					'params' => array(
 						'img_sha1' => 'hash',
 						'img_timestamp' => '20150101000000',
-					],
-				],
-				[
+					),
+				),
+				array(
 					'text' => 'User uploaded a new version of File:File.png',
-					'api' => [
+					'api' => array(
 						'img_sha1' => 'hash',
 						'img_timestamp' => '2015-01-01T00:00:00Z',
-					],
-				],
-			],
+					),
+				),
+			),
 
 			// Old format without params
-			[
-				[
+			array(
+				array(
 					'type' => 'upload',
 					'action' => 'overwrite',
 					'comment' => 'upload comment',
 					'namespace' => NS_FILE,
 					'title' => 'File.png',
-					'params' => [],
-				],
-				[
+					'params' => array(),
+				),
+				array(
 					'text' => 'User uploaded a new version of File:File.png',
-					'api' => [],
-				],
-			],
-		];
+					'api' => array(),
+				),
+			),
+		);
 	}
 
 	/**
@@ -116,45 +116,45 @@ class UploadLogFormatterTest extends LogFormatterTestCase {
 	 * Do not change the existing data, just add a new database row
 	 */
 	public static function provideRevertLogDatabaseRows() {
-		return [
+		return array(
 			// Current format
-			[
-				[
+			array(
+				array(
 					'type' => 'upload',
 					'action' => 'revert',
 					'comment' => 'upload comment',
 					'namespace' => NS_FILE,
 					'title' => 'File.png',
-					'params' => [
+					'params' => array(
 						'img_sha1' => 'hash',
 						'img_timestamp' => '20150101000000',
-					],
-				],
-				[
+					),
+				),
+				array(
 					'text' => 'User uploaded File:File.png',
-					'api' => [
+					'api' => array(
 						'img_sha1' => 'hash',
 						'img_timestamp' => '2015-01-01T00:00:00Z',
-					],
-				],
-			],
+					),
+				),
+			),
 
 			// Old format without params
-			[
-				[
+			array(
+				array(
 					'type' => 'upload',
 					'action' => 'revert',
 					'comment' => 'upload comment',
 					'namespace' => NS_FILE,
 					'title' => 'File.png',
-					'params' => [],
-				],
-				[
+					'params' => array(),
+				),
+				array(
 					'text' => 'User uploaded File:File.png',
-					'api' => [],
-				],
-			],
-		];
+					'api' => array(),
+				),
+			),
+		);
 	}
 
 	/**

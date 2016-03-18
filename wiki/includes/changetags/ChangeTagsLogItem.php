@@ -91,11 +91,7 @@ class ChangeTagsLogItem extends RevisionItemBase {
 		$attribs = array();
 		$tags = $this->getTags();
 		if ( $tags ) {
-			list( $tagSummary, $classes ) = ChangeTags::formatSummaryRow(
-				$tags,
-				'edittags',
-				$this->list->getContext()
-			);
+			list( $tagSummary, $classes ) = ChangeTags::formatSummaryRow( $tags, 'edittags' );
 			$content .= " $tagSummary";
 			$attribs['class'] = implode( ' ', $classes );
 		}

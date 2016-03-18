@@ -15,10 +15,10 @@ class XmlJs extends PHPUnit_Framework_TestCase {
 	}
 
 	public static function provideConstruction() {
-		return [
-			[ null ],
-			[ '' ],
-		];
+		return array(
+			array( null ),
+			array( '' ),
+		);
 	}
 
 }

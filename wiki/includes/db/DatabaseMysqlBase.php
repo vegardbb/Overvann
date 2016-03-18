@@ -29,30 +29,17 @@
  * @since 1.22
  * @see Database
  */
-abstract class DatabaseMysqlBase extends Database {
+abstract class DatabaseMysqlBase extends DatabaseBase {
 	/** @var MysqlMasterPos */
 	protected $lastKnownSlavePos;
-	/** @var string Method to detect slave lag */
-	protected $lagDetectionMethod;
+
+	/** @var null|int */
+	protected $mFakeSlaveLag = null;
+
+	protected $mFakeMaster = false;
 
 	/** @var string|null */
 	private $serverVersion = null;
-
-	/**
-	 * Additional $params include:
-	 *   - lagDetectionMethod : set to one of (Seconds_Behind_Master,pt-heartbeat).
-	 *                          pt-heartbeat assumes the table is at heartbeat.heartbeat
-	 *                          and uses UTC timestamps in the heartbeat.ts column.
-	 *                          (https://www.percona.com/doc/percona-toolkit/2.2/pt-heartbeat.html)
-	 * @param array $params
-	 */
-	function __construct( array $params ) {
-		parent::__construct( $params );
-
-		$this->lagDetectionMethod = isset( $params['lagDetectionMethod'] )
-			? $params['lagDetectionMethod']
-			: 'Seconds_Behind_Master';
-	}
 
 	/**
 	 * @return string
@@ -98,10 +85,10 @@ abstract class DatabaseMysqlBase extends Database {
 			}
 			wfLogDBError(
 				"Error connecting to {db_server}: {error}",
-				$this->getLogContext( [
+				$this->getLogContext( array(
 					'method' => __METHOD__,
 					'error' => $error,
-				] )
+				) )
 			);
 			wfDebug( "DB connection error\n" .
 				"Server: $server, User: $user, Password: " .
@@ -117,9 +104,9 @@ abstract class DatabaseMysqlBase extends Database {
 			if ( !$success ) {
 				wfLogDBError(
 					"Error selecting database {db_name} on server {db_server}",
-					$this->getLogContext( [
+					$this->getLogContext( array(
 						'method' => __METHOD__,
-					] )
+					) )
 				);
 				wfDebug( "Error selecting database $dbName on server {$this->mServer} " .
 					"from client host " . wfHostname() . "\n" );
@@ -134,7 +121,7 @@ abstract class DatabaseMysqlBase extends Database {
 		}
 
 		// Abstract over any insane MySQL defaults
-		$set = [ 'group_concat_max_len = 262144' ];
+		$set = array( 'group_concat_max_len = 262144' );
 		// Set SQL mode, default is turning them all off, can be overridden or skipped with null
 		if ( is_string( $wgSQLMode ) ) {
 			$set[] = 'sql_mode = ' . $this->addQuotes( $wgSQLMode );
@@ -151,13 +138,13 @@ abstract class DatabaseMysqlBase extends Database {
 
 		if ( $set ) {
 			// Use doQuery() to avoid opening implicit transactions (DBO_TRX)
-			$success = $this->doQuery( 'SET ' . implode( ', ', $set ) );
+			$success = $this->doQuery( 'SET ' . implode( ', ', $set ), __METHOD__ );
 			if ( !$success ) {
 				wfLogDBError(
 					'Error setting MySQL variables on server {db_server} (check $wgSQLMode)',
-					$this->getLogContext( [
+					$this->getLogContext( array(
 						'method' => __METHOD__,
-					] )
+					) )
 				);
 				$this->reportConnectionError(
 					'Error setting MySQL variables on server {db_server} (check $wgSQLMode)' );
@@ -315,7 +302,7 @@ abstract class DatabaseMysqlBase extends Database {
 		// We are not checking for any errors here, since
 		// these are no errors mysql_num_rows can cause.
 		// See http://dev.mysql.com/doc/refman/5.0/en/mysql-fetch-row.html.
-		// See https://phabricator.wikimedia.org/T44430
+		// See https://bugzilla.wikimedia.org/42430
 		return $n;
 	}
 
@@ -468,7 +455,7 @@ abstract class DatabaseMysqlBase extends Database {
 	 * @return bool|int
 	 */
 	public function estimateRowCount( $table, $vars = '*', $conds = '',
-		$fname = __METHOD__, $options = []
+		$fname = __METHOD__, $options = array()
 	) {
 		$options['EXPLAIN'] = true;
 		$res = $this->select( $table, $vars, $conds, $fname, $options );
@@ -541,7 +528,7 @@ abstract class DatabaseMysqlBase extends Database {
 			return null;
 		}
 
-		$result = [];
+		$result = array();
 
 		foreach ( $res as $row ) {
 			if ( $row->Key_name == $index ) {
@@ -568,12 +555,6 @@ abstract class DatabaseMysqlBase extends Database {
 	}
 
 	/**
-	 * @param string $s
-	 * @return mixed
-	 */
-	abstract protected function mysqlRealEscapeString( $s );
-
-	/**
 	 * MySQL uses `backticks` for identifier quoting instead of the sql standard "double quotes".
 	 *
 	 * @param string $s
@@ -582,7 +563,7 @@ abstract class DatabaseMysqlBase extends Database {
 	public function addIdentifierQuotes( $s ) {
 		// Characters in the range \u0001-\uFFFF are valid in a quoted identifier
 		// Remove NUL bytes and escape backticks by doubling
-		return '`' . str_replace( [ "\0", '`' ], [ '', '``' ], $s ) . '`';
+		return '`' . str_replace( array( "\0", '`' ), array( '', '``' ), $s ) . '`';
 	}
 
 	/**
@@ -620,180 +601,109 @@ abstract class DatabaseMysqlBase extends Database {
 	 */
 	abstract protected function mysqlPing();
 
-	function getLag() {
-		if ( $this->getLagDetectionMethod() === 'pt-heartbeat' ) {
-			return $this->getLagFromPtHeartbeat();
-		} else {
-			return $this->getLagFromSlaveStatus();
-		}
+	/**
+	 * Set lag time in seconds for a fake slave
+	 *
+	 * @param int $lag
+	 */
+	public function setFakeSlaveLag( $lag ) {
+		$this->mFakeSlaveLag = $lag;
 	}
 
 	/**
-	 * @return string
+	 * Make this connection a fake master
+	 *
+	 * @param bool $enabled
 	 */
-	protected function getLagDetectionMethod() {
-		return $this->lagDetectionMethod;
+	public function setFakeMaster( $enabled = true ) {
+		$this->mFakeMaster = $enabled;
+	}
+
+	/**
+	 * Returns slave lag.
+	 *
+	 * This will do a SHOW SLAVE STATUS
+	 *
+	 * @return int
+	 */
+	function getLag() {
+		if ( !is_null( $this->mFakeSlaveLag ) ) {
+			wfDebug( "getLag: fake slave lagged {$this->mFakeSlaveLag} seconds\n" );
+
+			return $this->mFakeSlaveLag;
+		}
+
+		return $this->getLagFromSlaveStatus();
 	}
 
 	/**
 	 * @return bool|int
 	 */
-	protected function getLagFromSlaveStatus() {
+	function getLagFromSlaveStatus() {
 		$res = $this->query( 'SHOW SLAVE STATUS', __METHOD__ );
-		$row = $res ? $res->fetchObject() : false;
-		if ( $row && strval( $row->Seconds_Behind_Master ) !== '' ) {
+		if ( !$res ) {
+			return false;
+		}
+		$row = $res->fetchObject();
+		if ( !$row ) {
+			return false;
+		}
+		if ( strval( $row->Seconds_Behind_Master ) === '' ) {
+			return false;
+		} else {
 			return intval( $row->Seconds_Behind_Master );
 		}
-
-		return false;
 	}
 
 	/**
-	 * @return bool|float
+	 * Wait for the slave to catch up to a given master position.
+	 * @todo Return values for this and base class are rubbish
+	 *
+	 * @param DBMasterPos|MySQLMasterPos $pos
+	 * @param int $timeout The maximum number of seconds to wait for synchronisation
+	 * @return int Zero if the slave was past that position already,
+	 *   greater than zero if we waited for some period of time, less than
+	 *   zero if we timed out.
 	 */
-	protected function getLagFromPtHeartbeat() {
-		$masterInfo = $this->getMasterServerInfo();
-		if ( !$masterInfo ) {
-			wfLogDBError(
-				"Unable to query master of {db_server} for server ID",
-				$this->getLogContext( [
-					'method' => __METHOD__
-				] )
-			);
-
-			return false; // could not get master server ID
-		}
-
-		list( $time, $nowUnix ) = $this->getHeartbeatData( $masterInfo['serverId'] );
-		if ( $time !== null ) {
-			// @time is in ISO format like "2015-09-25T16:48:10.000510"
-			$dateTime = new DateTime( $time, new DateTimeZone( 'UTC' ) );
-			$timeUnix = (int)$dateTime->format( 'U' ) + $dateTime->format( 'u' ) / 1e6;
-
-			return max( $nowUnix - $timeUnix, 0.0 );
-		}
-
-		wfLogDBError(
-			"Unable to find pt-heartbeat row for {db_server}",
-			$this->getLogContext( [
-				'method' => __METHOD__
-			] )
-		);
-
-		return false;
-	}
-
-	protected function getMasterServerInfo() {
-		$cache = $this->srvCache;
-		$key = $cache->makeGlobalKey(
-			'mysql',
-			'master-info',
-			// Using one key for all cluster slaves is preferable
-			$this->getLBInfo( 'clusterMasterHost' ) ?: $this->getServer()
-		);
-
-		return $cache->getWithSetCallback(
-			$key,
-			$cache::TTL_INDEFINITE,
-			function () use ( $cache, $key ) {
-				// Get and leave a lock key in place for a short period
-				if ( !$cache->lock( $key, 0, 10 ) ) {
-					return false; // avoid master connection spike slams
-				}
-
-				$conn = $this->getLazyMasterHandle();
-				if ( !$conn ) {
-					return false; // something is misconfigured
-				}
-
-				// Connect to and query the master; catch errors to avoid outages
-				try {
-					$res = $conn->query( 'SELECT @@server_id AS id', __METHOD__ );
-					$row = $res ? $res->fetchObject() : false;
-					$id = $row ? (int)$row->id : 0;
-				} catch ( DBError $e ) {
-					$id = 0;
-				}
-
-				// Cache the ID if it was retrieved
-				return $id ? [ 'serverId' => $id, 'asOf' => time() ] : false;
-			}
-		);
-	}
-
-	/**
-	 * @param string $masterId Server ID
-	 * @return array (heartbeat `ts` column value or null, UNIX timestamp)
-	 * @see https://www.percona.com/doc/percona-toolkit/2.1/pt-heartbeat.html
-	 */
-	protected function getHeartbeatData( $masterId ) {
-		// Get the status row for this master; use the oldest for sanity in case the master
-		// has entries listed under different server IDs (which should really not happen).
-		// Note: this would use "MAX(TIMESTAMPDIFF(MICROSECOND,ts,UTC_TIMESTAMP(6)))" but the
-		// percision field is not supported in MySQL <= 5.5.
-		$res = $this->query(
-			"SELECT ts FROM heartbeat.heartbeat WHERE server_id=" . intval( $masterId )
-		);
-		$row = $res ? $res->fetchObject() : false;
-
-		return [ $row ? $row->ts : null, microtime( true ) ];
-	}
-
-	public function getApproximateLagStatus() {
-		if ( $this->getLagDetectionMethod() === 'pt-heartbeat' ) {
-			// Disable caching since this is fast enough and we don't wan't
-			// to be *too* pessimistic by having both the cache TTL and the
-			// pt-heartbeat interval count as lag in getSessionLagStatus()
-			return parent::getApproximateLagStatus();
-		}
-
-		$key = $this->srvCache->makeGlobalKey( 'mysql-lag', $this->getServer() );
-		$approxLag = $this->srvCache->get( $key );
-		if ( !$approxLag ) {
-			$approxLag = parent::getApproximateLagStatus();
-			$this->srvCache->set( $key, $approxLag, 1 );
-		}
-
-		return $approxLag;
-	}
-
 	function masterPosWait( DBMasterPos $pos, $timeout ) {
-		if ( !( $pos instanceof MySQLMasterPos ) ) {
-			throw new InvalidArgumentException( "Position not an instance of MySQLMasterPos" );
-		}
-
 		if ( $this->lastKnownSlavePos && $this->lastKnownSlavePos->hasReached( $pos ) ) {
-			return 0;
+			return '0'; // http://dev.mysql.com/doc/refman/5.0/en/miscellaneous-functions.html
 		}
 
 		# Commit any open transactions
 		$this->commit( __METHOD__, 'flush' );
 
+		if ( !is_null( $this->mFakeSlaveLag ) ) {
+			$wait = intval( ( $pos->pos - microtime( true ) + $this->mFakeSlaveLag ) * 1e6 );
+
+			if ( $wait > $timeout * 1e6 ) {
+				wfDebug( "Fake slave timed out waiting for $pos ($wait us)\n" );
+
+				return -1;
+			} elseif ( $wait > 0 ) {
+				wfDebug( "Fake slave waiting $wait us\n" );
+				usleep( $wait );
+
+				return 1;
+			} else {
+				wfDebug( "Fake slave up to date ($wait us)\n" );
+
+				return 0;
+			}
+		}
+
 		# Call doQuery() directly, to avoid opening a transaction if DBO_TRX is set
 		$encFile = $this->addQuotes( $pos->file );
 		$encPos = intval( $pos->pos );
-		$res = $this->doQuery( "SELECT MASTER_POS_WAIT($encFile, $encPos, $timeout)" );
+		$sql = "SELECT MASTER_POS_WAIT($encFile, $encPos, $timeout)";
+		$res = $this->doQuery( $sql );
 
-		$row = $res ? $this->fetchRow( $res ) : false;
-		if ( !$row ) {
-			throw new DBExpectedError( $this, "Failed to query MASTER_POS_WAIT()" );
-		}
-
-		// Result can be NULL (error), -1 (timeout), or 0+ per the MySQL manual
-		$status = ( $row[0] !== null ) ? intval( $row[0] ) : null;
-		if ( $status === null ) {
-			// T126436: jobs programmed to wait on master positions might be referencing binlogs
-			// with an old master hostname. Such calls make MASTER_POS_WAIT() return null. Try
-			// to detect this and treat the slave as having reached the position; a proper master
-			// switchover already requires that the new master be caught up before the switch.
-			$slavePos = $this->getSlavePos();
-			if ( $slavePos && !$slavePos->channelsMatch( $pos ) ) {
-				$this->lastKnownSlavePos = $slavePos;
-				$status = 0;
+		$status = false;
+		if ( $res && $row = $this->fetchRow( $res ) ) {
+			$status = $row[0]; // can be NULL, -1, or 0+ per the MySQL manual
+			if ( ctype_digit( $status ) ) { // success
+				$this->lastKnownSlavePos = $pos;
 			}
-		} elseif ( $status >= 0 ) {
-			// Remember that this position was reached to save queries next time
-			$this->lastKnownSlavePos = $pos;
 		}
 
 		return $status;
@@ -805,6 +715,13 @@ abstract class DatabaseMysqlBase extends Database {
 	 * @return MySQLMasterPos|bool
 	 */
 	function getSlavePos() {
+		if ( !is_null( $this->mFakeSlaveLag ) ) {
+			$pos = new MySQLMasterPos( 'fake', microtime( true ) - $this->mFakeSlaveLag );
+			wfDebug( __METHOD__ . ": fake slave pos = $pos\n" );
+
+			return $pos;
+		}
+
 		$res = $this->query( 'SHOW SLAVE STATUS', 'DatabaseBase::getSlavePos' );
 		$row = $this->fetchObject( $res );
 
@@ -825,6 +742,10 @@ abstract class DatabaseMysqlBase extends Database {
 	 * @return MySQLMasterPos|bool
 	 */
 	function getMasterPos() {
+		if ( $this->mFakeMaster ) {
+			return new MySQLMasterPos( 'fake', microtime( true ) );
+		}
+
 		$res = $this->query( 'SHOW MASTER STATUS', 'DatabaseBase::getMasterPos' );
 		$row = $this->fetchObject( $res );
 
@@ -916,7 +837,7 @@ abstract class DatabaseMysqlBase extends Database {
 	 * @since 1.20
 	 */
 	public function lockIsFree( $lockName, $method ) {
-		$lockName = $this->addQuotes( $this->makeLockName( $lockName ) );
+		$lockName = $this->addQuotes( $lockName );
 		$result = $this->query( "SELECT IS_FREE_LOCK($lockName) AS lockstatus", $method );
 		$row = $this->fetchObject( $result );
 
@@ -930,18 +851,17 @@ abstract class DatabaseMysqlBase extends Database {
 	 * @return bool
 	 */
 	public function lock( $lockName, $method, $timeout = 5 ) {
-		$lockName = $this->addQuotes( $this->makeLockName( $lockName ) );
+		$lockName = $this->addQuotes( $lockName );
 		$result = $this->query( "SELECT GET_LOCK($lockName, $timeout) AS lockstatus", $method );
 		$row = $this->fetchObject( $result );
 
 		if ( $row->lockstatus == 1 ) {
-			parent::lock( $lockName, $method, $timeout ); // record
 			return true;
+		} else {
+			wfDebug( __METHOD__ . " failed to acquire lock\n" );
+
+			return false;
 		}
-
-		wfDebug( __METHOD__ . " failed to acquire lock\n" );
-
-		return false;
 	}
 
 	/**
@@ -952,24 +872,11 @@ abstract class DatabaseMysqlBase extends Database {
 	 * @return bool
 	 */
 	public function unlock( $lockName, $method ) {
-		$lockName = $this->addQuotes( $this->makeLockName( $lockName ) );
+		$lockName = $this->addQuotes( $lockName );
 		$result = $this->query( "SELECT RELEASE_LOCK($lockName) as lockstatus", $method );
 		$row = $this->fetchObject( $result );
 
-		if ( $row->lockstatus == 1 ) {
-			parent::unlock( $lockName, $method ); // record
-			return true;
-		}
-
-		wfDebug( __METHOD__ . " failed to release lock\n" );
-
-		return false;
-	}
-
-	private function makeLockName( $lockName ) {
-		// http://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_get-lock
-		// Newer version enforce a 64 char length limit.
-		return ( strlen( $lockName ) > 64 ) ? sha1( $lockName ) : $lockName;
+		return ( $row->lockstatus == 1 );
 	}
 
 	public function namedLocksEnqueue() {
@@ -984,7 +891,7 @@ abstract class DatabaseMysqlBase extends Database {
 	 * @return bool
 	 */
 	public function lockTables( $read, $write, $method, $lowPriority = true ) {
-		$items = [];
+		$items = array();
 
 		foreach ( $write as $table ) {
 			$tbl = $this->tableName( $table ) .
@@ -1033,8 +940,7 @@ abstract class DatabaseMysqlBase extends Database {
 				$value = $this->mDefaultBigSelects;
 			}
 		} elseif ( $this->mDefaultBigSelects === null ) {
-			$this->mDefaultBigSelects =
-				(bool)$this->selectField( false, '@@sql_big_selects', '', __METHOD__ );
+			$this->mDefaultBigSelects = (bool)$this->selectField( false, '@@sql_big_selects', '', __METHOD__ );
 		}
 		$encValue = $value ? '1' : '0';
 		$this->query( "SET sql_big_selects=$encValue", __METHOD__ );
@@ -1083,14 +989,14 @@ abstract class DatabaseMysqlBase extends Database {
 		}
 
 		if ( !is_array( reset( $rows ) ) ) {
-			$rows = [ $rows ];
+			$rows = array( $rows );
 		}
 
 		$table = $this->tableName( $table );
 		$columns = array_keys( $rows[0] );
 
 		$sql = "INSERT INTO $table (" . implode( ',', $columns ) . ') VALUES ';
-		$rowTuples = [];
+		$rowTuples = array();
 		foreach ( $rows as $row ) {
 			$rowTuples[] = '(' . $this->makeList( $row ) . ')';
 		}
@@ -1201,7 +1107,7 @@ abstract class DatabaseMysqlBase extends Database {
 	function listTables( $prefix = null, $fname = __METHOD__ ) {
 		$result = $this->query( "SHOW TABLES", $fname );
 
-		$endArray = [];
+		$endArray = array();
 
 		foreach ( $result as $table ) {
 			$vars = get_object_vars( $table );
@@ -1251,7 +1157,7 @@ abstract class DatabaseMysqlBase extends Database {
 	 */
 	function getMysqlStatus( $which = "%" ) {
 		$res = $this->query( "SHOW STATUS LIKE '{$which}'" );
-		$status = [];
+		$status = array();
 
 		foreach ( $res as $row ) {
 			$status[$row->Variable_name] = $row->Value;
@@ -1278,7 +1184,7 @@ abstract class DatabaseMysqlBase extends Database {
 
 			// Query for the VIEWS
 			$result = $this->query( 'SHOW FULL TABLES WHERE TABLE_TYPE = "VIEW"' );
-			$this->allViews = [];
+			$this->allViews = array();
 			while ( ( $row = $this->fetchRow( $result ) ) !== false ) {
 				array_push( $this->allViews, $row[$propertyName] );
 			}
@@ -1288,7 +1194,7 @@ abstract class DatabaseMysqlBase extends Database {
 			return $this->allViews;
 		}
 
-		$filteredViews = [];
+		$filteredViews = array();
 		foreach ( $this->allViews as $viewName ) {
 			// Does the name of this VIEW start with the table-prefix?
 			if ( strpos( $viewName, $prefix ) === 0 ) {
@@ -1350,7 +1256,7 @@ class MySQLField implements Field {
 	 * @return string
 	 */
 	function tableName() {
-		return $this->tablename;
+		return $this->tableName;
 	}
 
 	/**
@@ -1435,58 +1341,31 @@ class MySQLMasterPos implements DBMasterPos {
 		$this->asOfTime = microtime( true );
 	}
 
-	function asOfTime() {
-		return $this->asOfTime;
-	}
-
-	function hasReached( DBMasterPos $pos ) {
-		if ( !( $pos instanceof self ) ) {
-			throw new InvalidArgumentException( "Position not an instance of " . __CLASS__ );
-		}
-
-		$thisPos = $this->getCoordinates();
-		$thatPos = $pos->getCoordinates();
-
-		return ( $thisPos && $thatPos && $thisPos >= $thatPos );
-	}
-
-	function channelsMatch( DBMasterPos $pos ) {
-		if ( !( $pos instanceof self ) ) {
-			throw new InvalidArgumentException( "Position not an instance of " . __CLASS__ );
-		}
-
-		$thisBinlog = $this->getBinlogName();
-		$thatBinlog = $pos->getBinlogName();
-
-		return ( $thisBinlog !== false && $thisBinlog === $thatBinlog );
-	}
-
 	function __toString() {
 		// e.g db1034-bin.000976/843431247
 		return "{$this->file}/{$this->pos}";
 	}
 
 	/**
-	 * @return string|bool
+	 * @return array|bool (int, int)
 	 */
-	protected function getBinlogName() {
-		$m = [];
-		if ( preg_match( '!^(.+)\.(\d+)/(\d+)$!', (string)$this, $m ) ) {
-			return $m[1];
+	protected function getCoordinates() {
+		$m = array();
+		if ( preg_match( '!\.(\d+)/(\d+)$!', (string)$this, $m ) ) {
+			return array( (int)$m[1], (int)$m[2] );
 		}
 
 		return false;
 	}
 
-	/**
-	 * @return array|bool (int, int)
-	 */
-	protected function getCoordinates() {
-		$m = [];
-		if ( preg_match( '!\.(\d+)/(\d+)$!', (string)$this, $m ) ) {
-			return [ (int)$m[1], (int)$m[2] ];
-		}
+	function hasReached( MySQLMasterPos $pos ) {
+		$thisPos = $this->getCoordinates();
+		$thatPos = $pos->getCoordinates();
 
-		return false;
+		return ( $thisPos && $thatPos && $thisPos >= $thatPos );
+	}
+
+	function asOfTime() {
+		return $this->asOfTime;
 	}
 }

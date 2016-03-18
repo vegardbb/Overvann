@@ -19,7 +19,7 @@
  *
  * @file
  * @author TyA <tya.wiki@gmail.com>
- * @see https://phabricator.wikimedia.org/T32976
+ * @see [[bugzilla:30976]]
  * @ingroup Maintenance
  */
 
@@ -34,16 +34,16 @@ class CleanupPreferences extends Maintenance {
 	public function execute() {
 		global $wgHiddenPrefs;
 
-		$dbw = $this->getDB( DB_MASTER );
-		$this->beginTransaction( $dbw, __METHOD__ );
+		$dbw = wfGetDB( DB_MASTER );
+		$dbw->begin( __METHOD__ );
 		foreach ( $wgHiddenPrefs as $item ) {
 			$dbw->delete(
 				'user_properties',
-				[ 'up_property' => $item ],
+				array( 'up_property' => $item ),
 				__METHOD__
 			);
 		};
-		$this->commitTransaction( $dbw, __METHOD__ );
+		$dbw->commit( __METHOD__ );
 		$this->output( "Finished!\n" );
 	}
 }

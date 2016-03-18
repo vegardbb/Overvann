@@ -70,8 +70,8 @@ class WikiDiff3 {
 		$this->heuristicUsed = false;
 
 		// output
-		$removed = $m > 0 ? array_fill( 0, $m, true ) : [];
-		$added = $n > 0 ? array_fill( 0, $n, true ) : [];
+		$removed = $m > 0 ? array_fill( 0, $m, true ) : array();
+		$added = $n > 0 ? array_fill( 0, $n, true ) : array();
 
 		// reduce the complexity for the next step (intentionally done twice)
 		// remove common tokens at the start
@@ -90,10 +90,10 @@ class WikiDiff3 {
 			++$j;
 		}
 
-		$this->from = $newFromIndex = $this->to = $newToIndex = [];
+		$this->from = $newFromIndex = $this->to = $newToIndex = array();
 
 		// remove tokens not in both sequences
-		$shared = [];
+		$shared = array();
 		foreach ( $from as $key ) {
 			$shared[$key] = false;
 		}
@@ -119,8 +119,8 @@ class WikiDiff3 {
 		$this->m = count( $this->from );
 		$this->n = count( $this->to );
 
-		$this->removed = $this->m > 0 ? array_fill( 0, $this->m, true ) : [];
-		$this->added = $this->n > 0 ? array_fill( 0, $this->n, true ) : [];
+		$this->removed = $this->m > 0 ? array_fill( 0, $this->m, true ) : array();
+		$this->added = $this->n > 0 ? array_fill( 0, $this->n, true ) : array();
 
 		if ( $this->m == 0 || $this->n == 0 ) {
 			$this->length = 0;
@@ -154,8 +154,8 @@ class WikiDiff3 {
 			}
 
 			$temp = array_fill( 0, $this->m + $this->n + 1, 0 );
-			$V = [ $temp, $temp ];
-			$snake = [ 0, 0, 0 ];
+			$V = array( $temp, $temp );
+			$snake = array( 0, 0, 0 );
 
 			$this->length = $forwardBound + $this->m - $backBoundL1 - 1
 				+ $this->lcs_rec(
@@ -192,7 +192,7 @@ class WikiDiff3 {
 		$this->diff( $from_lines, $to_lines );
 		unset( $from_lines, $to_lines );
 
-		$ranges = [];
+		$ranges = array();
 		$xi = $yi = 0;
 		while ( $xi < $this->m || $yi < $this->n ) {
 			// Matching "snake".
@@ -509,7 +509,7 @@ class WikiDiff3 {
 
 		$backward_end_diag = -min( $M, $limit );
 
-		$temp = [ 0, 0, 0 ];
+		$temp = array( 0, 0, 0 );
 
 		$max_progress = array_fill( 0, ceil( max( $forward_end_diag - $forward_start_diag,
 				$backward_end_diag - $backward_start_diag ) / 2 ), $temp );

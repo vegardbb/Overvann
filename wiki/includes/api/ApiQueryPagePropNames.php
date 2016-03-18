@@ -69,38 +69,38 @@ class ApiQueryPagePropNames extends ApiQueryBase {
 				break;
 			}
 
-			$vals = [];
+			$vals = array();
 			$vals['propname'] = $row->pp_propname;
-			$fit = $result->addValue( [ 'query', $this->getModuleName() ], null, $vals );
+			$fit = $result->addValue( array( 'query', $this->getModuleName() ), null, $vals );
 			if ( !$fit ) {
 				$this->setContinueEnumParameter( 'continue', $row->pp_propname );
 				break;
 			}
 		}
 
-		$result->addIndexedTagName( [ 'query', $this->getModuleName() ], 'p' );
+		$result->addIndexedTagName( array( 'query', $this->getModuleName() ), 'p' );
 	}
 
 	public function getAllowedParams() {
-		return [
-			'continue' => [
+		return array(
+			'continue' => array(
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			],
-			'limit' => [
+			),
+			'limit' => array(
 				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_DFLT => 10,
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => ApiBase::LIMIT_BIG1,
 				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_BIG2
-			],
-		];
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=query&list=pagepropnames'
 				=> 'apihelp-query+pagepropnames-example-simple',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

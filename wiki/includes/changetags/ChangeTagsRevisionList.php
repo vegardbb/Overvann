@@ -29,24 +29,24 @@ class ChangeTagsRevisionList extends ChangeTagsList {
 	}
 
 	/**
-	 * @param IDatabase $db
+	 * @param DatabaseBase $db
 	 * @return mixed
 	 */
 	public function doQuery( $db ) {
 		$ids = array_map( 'intval', $this->ids );
-		$queryInfo = [
-			'tables' => [ 'revision', 'user' ],
+		$queryInfo = array(
+			'tables' => array( 'revision', 'user' ),
 			'fields' => array_merge( Revision::selectFields(), Revision::selectUserFields() ),
-			'conds' => [
+			'conds' => array(
 				'rev_page' => $this->title->getArticleID(),
 				'rev_id' => $ids,
-			],
-			'options' => [ 'ORDER BY' => 'rev_id DESC' ],
-			'join_conds' => [
+			),
+			'options' => array( 'ORDER BY' => 'rev_id DESC' ),
+			'join_conds' => array(
 				'page' => Revision::pageJoinCond(),
 				'user' => Revision::userJoinCond(),
-			],
-		];
+			),
+		);
 		ChangeTags::modifyDisplayQuery(
 			$queryInfo['tables'],
 			$queryInfo['fields'],

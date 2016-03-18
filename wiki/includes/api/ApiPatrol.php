@@ -40,12 +40,12 @@ class ApiPatrol extends ApiBase {
 		if ( isset( $params['rcid'] ) ) {
 			$rc = RecentChange::newFromId( $params['rcid'] );
 			if ( !$rc ) {
-				$this->dieUsageMsg( [ 'nosuchrcid', $params['rcid'] ] );
+				$this->dieUsageMsg( array( 'nosuchrcid', $params['rcid'] ) );
 			}
 		} else {
 			$rev = Revision::newFromId( $params['revid'] );
 			if ( !$rev ) {
-				$this->dieUsageMsg( [ 'nosuchrevid', $params['revid'] ] );
+				$this->dieUsageMsg( array( 'nosuchrevid', $params['revid'] ) );
 			}
 			$rc = $rev->getRecentChange();
 			if ( !$rc ) {
@@ -56,24 +56,13 @@ class ApiPatrol extends ApiBase {
 			}
 		}
 
-		$user = $this->getUser();
-		$tags = $params['tags'];
-
-		// Check if user can add tags
-		if ( !is_null( $tags ) ) {
-			$ableToTag = ChangeTags::canAddTagsAccompanyingChange( $tags, $user );
-			if ( !$ableToTag->isOK() ) {
-				$this->dieStatus( $ableToTag );
-			}
-		}
-
-		$retval = $rc->doMarkPatrolled( $user, false, $tags );
+		$retval = $rc->doMarkPatrolled( $this->getUser() );
 
 		if ( $retval ) {
 			$this->dieUsageMsg( reset( $retval ) );
 		}
 
-		$result = [ 'rcid' => intval( $rc->getAttribute( 'rc_id' ) ) ];
+		$result = array( 'rcid' => intval( $rc->getAttribute( 'rc_id' ) ) );
 		ApiQueryBase::addTitleInfo( $result, $rc->getTitle() );
 		$this->getResult()->addValue( null, $this->getModuleName(), $result );
 	}
@@ -87,18 +76,14 @@ class ApiPatrol extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
-			'rcid' => [
+		return array(
+			'rcid' => array(
 				ApiBase::PARAM_TYPE => 'integer'
-			],
-			'revid' => [
+			),
+			'revid' => array(
 				ApiBase::PARAM_TYPE => 'integer'
-			],
-			'tags' => [
-				ApiBase::PARAM_TYPE => 'tags',
-				ApiBase::PARAM_ISMULTI => true,
-			],
-		];
+			),
+		);
 	}
 
 	public function needsToken() {
@@ -106,12 +91,12 @@ class ApiPatrol extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=patrol&token=123ABC&rcid=230672766'
 				=> 'apihelp-patrol-example-rcid',
 			'action=patrol&token=123ABC&revid=230672766'
 				=> 'apihelp-patrol-example-revid',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

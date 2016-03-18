@@ -61,7 +61,7 @@ class CLIParser extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Parse a given wikitext' );
+		$this->mDescription = "Parse a given wikitext";
 		$this->addOption(
 			'title',
 			'Title name for the given wikitext (Default: \'CLIParser\')',

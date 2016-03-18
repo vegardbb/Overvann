@@ -28,7 +28,7 @@ class LCStoreStaticArray implements LCStore {
 	private $currentLang = null;
 
 	/** @var array Localisation data. */
-	private $data = [];
+	private $data = array();
 
 	/** @var string File name. */
 	private $fname = null;
@@ -36,7 +36,7 @@ class LCStoreStaticArray implements LCStore {
 	/** @var string Directory for cache files. */
 	private $directory;
 
-	public function __construct( $conf = [] ) {
+	public function __construct( $conf = array() ) {
 		global $wgCacheDirectory;
 
 		if ( isset( $conf['directory'] ) ) {
@@ -49,7 +49,7 @@ class LCStoreStaticArray implements LCStore {
 	public function startWrite( $code ) {
 		$this->currentLang = $code;
 		$this->fname = $this->directory . '/' . $code . '.l10n.php';
-		$this->data[$code] = [];
+		$this->data[$code] = array();
 		if ( file_exists( $this->fname ) ) {
 			$this->data[$code] = require $this->fname;
 		}
@@ -69,17 +69,17 @@ class LCStoreStaticArray implements LCStore {
 	public static function encode( $value ) {
 		if ( is_scalar( $value ) || $value === null ) {
 			// [V]alue
-			return [ 'v', $value ];
+			return array( 'v', $value );
 		}
 		if ( is_object( $value ) ) {
 			// [S]erialized
-			return [ 's', serialize( $value ) ];
+			return array( 's', serialize( $value ) );
 		}
 		if ( is_array( $value ) ) {
 			// [A]rray
-			return [ 'a', array_map( function ( $v ) {
+			return array( 'a', array_map( function ( $v ) {
 				return LCStoreStaticArray::encode( $v );
-			}, $value ) ];
+			}, $value ) );
 		}
 
 		throw new RuntimeException( 'Cannot encode ' . var_export( $value, true ) );

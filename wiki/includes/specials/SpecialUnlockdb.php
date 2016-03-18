@@ -32,10 +32,6 @@ class SpecialUnlockdb extends FormSpecialPage {
 		parent::__construct( 'Unlockdb', 'siteadmin' );
 	}
 
-	public function doesWrites() {
-		return true;
-	}
-
 	public function requiresWrite() {
 		return false;
 	}
@@ -49,12 +45,12 @@ class SpecialUnlockdb extends FormSpecialPage {
 	}
 
 	protected function getFormFields() {
-		return [
-			'Confirm' => [
+		return array(
+			'Confirm' => array(
 				'type' => 'toggle',
 				'label-message' => 'unlockconfirm',
-			],
-		];
+			),
+		);
 	}
 
 	protected function alterForm( HTMLForm $form ) {

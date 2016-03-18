@@ -25,15 +25,15 @@ class ComposerLock {
 	 * @return array
 	 */
 	public function getInstalledDependencies() {
-		$deps = [];
+		$deps = array();
 		foreach ( $this->contents['packages'] as $installed ) {
-			$deps[$installed['name']] = [
+			$deps[$installed['name']] = array(
 				'version' => ComposerJson::normalizeVersion( $installed['version'] ),
 				'type' => $installed['type'],
-				'licenses' => isset( $installed['license'] ) ? $installed['license'] : [],
-				'authors' => isset( $installed['authors'] ) ? $installed['authors'] : [],
+				'licenses' => isset( $installed['license'] ) ? $installed['license'] : array(),
+				'authors' => isset( $installed['authors'] ) ? $installed['authors'] : array(),
 				'description' => isset( $installed['description'] ) ? $installed['description']: '',
-			];
+			);
 		}
 
 		return $deps;

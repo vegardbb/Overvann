@@ -46,7 +46,7 @@ class ApiComparePages extends ApiBase {
 			true,
 			false );
 
-		$vals = [];
+		$vals = array();
 		if ( isset( $params['fromtitle'] ) ) {
 			$vals['fromtitle'] = $params['fromtitle'];
 		}
@@ -89,14 +89,14 @@ class ApiComparePages extends ApiBase {
 		} elseif ( $titleText ) {
 			$title = Title::newFromText( $titleText );
 			if ( !$title || $title->isExternal() ) {
-				$this->dieUsageMsg( [ 'invalidtitle', $titleText ] );
+				$this->dieUsageMsg( array( 'invalidtitle', $titleText ) );
 			}
 
 			return $title->getLatestRevID();
 		} elseif ( $titleId ) {
 			$title = Title::newFromID( $titleId );
 			if ( !$title ) {
-				$this->dieUsageMsg( [ 'nosuchpageid', $titleId ] );
+				$this->dieUsageMsg( array( 'nosuchpageid', $titleId ) );
 			}
 
 			return $title->getLatestRevID();
@@ -108,28 +108,28 @@ class ApiComparePages extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
+		return array(
 			'fromtitle' => null,
-			'fromid' => [
+			'fromid' => array(
 				ApiBase::PARAM_TYPE => 'integer'
-			],
-			'fromrev' => [
+			),
+			'fromrev' => array(
 				ApiBase::PARAM_TYPE => 'integer'
-			],
+			),
 			'totitle' => null,
-			'toid' => [
+			'toid' => array(
 				ApiBase::PARAM_TYPE => 'integer'
-			],
-			'torev' => [
+			),
+			'torev' => array(
 				ApiBase::PARAM_TYPE => 'integer'
-			],
-		];
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=compare&fromrev=1&torev=2'
 				=> 'apihelp-compare-example-1',
-		];
+		);
 	}
 }

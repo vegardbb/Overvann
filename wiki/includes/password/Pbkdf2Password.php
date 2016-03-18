@@ -30,11 +30,11 @@
  */
 class Pbkdf2Password extends ParameterizedPassword {
 	protected function getDefaultParams() {
-		return [
+		return array(
 			'algo' => $this->config['algo'],
 			'rounds' => $this->config['cost'],
 			'length' => $this->config['length']
-		];
+		);
 	}
 
 	protected function getDelimiter() {

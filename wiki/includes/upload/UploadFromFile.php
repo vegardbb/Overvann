@@ -82,13 +82,14 @@ class UploadFromFile extends UploadBase {
 		# proper error can be shown to the user
 		if ( is_null( $this->mTempPath ) || $this->isEmptyFile() ) {
 			if ( $this->mUpload->isIniSizeOverflow() ) {
-				return [
+				return array(
 					'status' => UploadBase::FILE_TOO_LARGE,
 					'max' => min(
 						self::getMaxUploadSize( $this->getSourceType() ),
-						self::getMaxPhpUploadSize()
+						wfShorthandToInteger( ini_get( 'upload_max_filesize' ) ),
+						wfShorthandToInteger( ini_get( 'post_max_size' ) )
 					),
-				];
+				);
 			}
 		}
 

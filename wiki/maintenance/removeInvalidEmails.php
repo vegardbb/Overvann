@@ -29,17 +29,17 @@ class RemoveInvalidEmails extends Maintenance {
 		do {
 			$rows = $dbr->select(
 				'user',
-				[ 'user_id', 'user_email' ],
-				[
+				array( 'user_id', 'user_email' ),
+				array(
 					'user_id > ' . $dbr->addQuotes( $lastId ),
 					'user_email != ""',
 					'user_email_authenticated IS NULL'
-				],
+				),
 				__METHOD__,
-				[ 'LIMIT' => $this->mBatchSize ]
+				array( 'LIMIT' => $this->mBatchSize )
 			);
 			$count = $rows->numRows();
-			$badIds = [];
+			$badIds = array();
 			foreach ( $rows as $row ) {
 				if ( !Sanitizer::validateEmail( trim( $row->user_email ) ) ) {
 					$this->output( "Found bad email: {$row->user_email} for user #{$row->user_id}\n" );
@@ -56,8 +56,8 @@ class RemoveInvalidEmails extends Maintenance {
 					$this->output( "Removing $badCount emails from the database.\n" );
 					$dbw->update(
 						'user',
-						[ 'user_email' => '' ],
-						[ 'user_id' => $badIds ],
+						array( 'user_email' => '' ),
+						array( 'user_id' => $badIds ),
 						__METHOD__
 					);
 					foreach ( $badIds as $badId ) {

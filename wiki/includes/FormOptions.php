@@ -64,7 +64,7 @@ class FormOptions implements ArrayAccess {
 	 *   consumeValue() or consumeValues()
 	 * - 'type' - one of the type constants (but never AUTO)
 	 */
-	protected $options = [];
+	protected $options = array();
 
 	# Setting up
 
@@ -76,7 +76,7 @@ class FormOptions implements ArrayAccess {
 	 * @param int $type One of the type constants (optional, defaults to AUTO)
 	 */
 	public function add( $name, $default, $type = self::AUTO ) {
-		$option = [];
+		$option = array();
 		$option['default'] = $default;
 		$option['value'] = null;
 		$option['consumed'] = false;
@@ -228,7 +228,7 @@ class FormOptions implements ArrayAccess {
 	 * @return array Array of option values, or the default values if they are null
 	 */
 	public function consumeValues( $names ) {
-		$out = [];
+		$out = array();
 
 		foreach ( $names as $name ) {
 			$this->validateName( $name, true );
@@ -278,7 +278,7 @@ class FormOptions implements ArrayAccess {
 	 * @return array
 	 */
 	public function getUnconsumedValues( $all = false ) {
-		$values = [];
+		$values = array();
 
 		foreach ( $this->options as $name => $data ) {
 			if ( !$data['consumed'] ) {
@@ -296,7 +296,7 @@ class FormOptions implements ArrayAccess {
 	 * @return array
 	 */
 	public function getChangedValues() {
-		$values = [];
+		$values = array();
 
 		foreach ( $this->options as $name => $data ) {
 			if ( $data['value'] !== null ) {
@@ -312,7 +312,7 @@ class FormOptions implements ArrayAccess {
 	 * @return array
 	 */
 	public function getAllValues() {
-		$values = [];
+		$values = array();
 
 		foreach ( $this->options as $name => $data ) {
 			$values[$name] = $this->getValueReal( $data );

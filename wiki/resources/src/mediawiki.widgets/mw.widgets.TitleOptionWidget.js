@@ -13,9 +13,9 @@
 	 * @extends OO.ui.MenuOptionWidget
 	 *
 	 * @constructor
-	 * @param {Object} config Configuration options
-	 * @cfg {string} data Label to display
-	 * @cfg {string} url URL of page
+	 * @param {Object} [config] Configuration options
+	 * @cfg {string} [data] Label to display
+	 * @cfg {mw.Title} [title] Page title object
 	 * @cfg {string} [imageUrl] Thumbnail image URL with URL encoding
 	 * @cfg {string} [description] Page description
 	 * @cfg {boolean} [missing] Page doesn't exist
@@ -40,30 +40,24 @@
 		config = $.extend( {
 			icon: icon,
 			label: config.data,
-			autoFitLabel: false,
-			$label: $( '<a>' )
+			href: config.title.getUrl(),
+			autoFitLabel: false
 		}, config );
 
 		// Parent constructor
 		mw.widgets.TitleOptionWidget.parent.call( this, config );
 
 		// Initialization
-		this.$label.attr( 'href', config.url );
+		this.$label.wrap( '<a>' );
+		this.$link = this.$label.parent();
+		this.$link.attr( 'href', config.href );
 		this.$element.addClass( 'mw-widget-titleOptionWidget' );
-
-		// Allow opening the link in new tab, but not regular navigation.
-		this.$label.on( 'click', function ( e ) {
-			// Don't interfere with special clicks (e.g. to open in new tab)
-			if ( !( e.which !== 1 || e.altKey || e.ctrlKey || e.shiftKey || e.metaKey ) ) {
-				e.preventDefault();
-			}
-		} );
 
 		// Highlight matching parts of link suggestion
 		this.$label.autoEllipsis( { hasSpan: false, tooltip: true, matchText: config.query } );
 
 		if ( config.missing ) {
-			this.$label.addClass( 'new' );
+			this.$link.addClass( 'new' );
 		}
 
 		if ( config.imageUrl ) {
@@ -77,7 +71,6 @@
 				$( '<span>' )
 					.addClass( 'mw-widget-titleOptionWidget-description' )
 					.text( config.description )
-					.attr( 'title', config.description )
 			);
 		}
 	};

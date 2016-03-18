@@ -33,10 +33,6 @@ class SpecialLockdb extends FormSpecialPage {
 		parent::__construct( 'Lockdb', 'siteadmin' );
 	}
 
-	public function doesWrites() {
-		return true;
-	}
-
 	public function requiresWrite() {
 		return false;
 	}
@@ -50,18 +46,18 @@ class SpecialLockdb extends FormSpecialPage {
 	}
 
 	protected function getFormFields() {
-		return [
-			'Reason' => [
+		return array(
+			'Reason' => array(
 				'type' => 'textarea',
 				'rows' => 4,
 				'vertical-label' => true,
 				'label-message' => 'enterlockreason',
-			],
-			'Confirm' => [
+			),
+			'Confirm' => array(
 				'type' => 'toggle',
 				'label-message' => 'lockconfirm',
-			],
-		];
+			),
+		);
 	}
 
 	protected function alterForm( HTMLForm $form ) {

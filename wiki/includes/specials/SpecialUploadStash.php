@@ -36,24 +36,18 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 	// UploadStash
 	private $stash;
 
-	/**
-	 * Since we are directly writing the file to STDOUT,
-	 * we should not be reading in really big files and serving them out.
-	 *
-	 * We also don't want people using this as a file drop, even if they
-	 * share credentials.
-	 *
-	 * This service is really for thumbnails and other such previews while
-	 * uploading.
-	 */
+	// Since we are directly writing the file to STDOUT,
+	// we should not be reading in really big files and serving them out.
+	//
+	// We also don't want people using this as a file drop, even if they
+	// share credentials.
+	//
+	// This service is really for thumbnails and other such previews while
+	// uploading.
 	const MAX_SERVE_BYTES = 1048576; // 1MB
 
 	public function __construct() {
 		parent::__construct( 'UploadStash', 'upload' );
-	}
-
-	public function doesWrites() {
-		return true;
 	}
 
 	/**
@@ -145,14 +139,14 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 			if ( $handler ) {
 				$params = $handler->parseParamString( $paramString );
 
-				return [ 'file' => $file, 'type' => $type, 'params' => $params ];
+				return array( 'file' => $file, 'type' => $type, 'params' => $params );
 			} else {
 				throw new UploadStashBadPathException( 'No handler found for ' .
 					"mime {$file->getMimeType()} of file {$file->getPath()}" );
 			}
 		}
 
-		return [ 'file' => $file, 'type' => $type ];
+		return array( 'file' => $file, 'type' => $type );
 	}
 
 	/**
@@ -253,10 +247,10 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 			'/' . rawurlencode( $scalerThumbName );
 
 		// make a curl call to the scaler to create a thumbnail
-		$httpOptions = [
+		$httpOptions = array(
 			'method' => 'GET',
 			'timeout' => 5 // T90599 attempt to time out cleanly
-		];
+		);
 		$req = MWHttpRequest::factory( $scalerThumbUrl, $httpOptions, __METHOD__ );
 		$status = $req->execute();
 		if ( !$status->isOK() ) {
@@ -288,8 +282,8 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 		}
 
 		return $file->getRepo()->streamFile( $file->getPath(),
-			[ 'Content-Transfer-Encoding: binary',
-				'Expires: Sun, 17-Jan-2038 19:14:07 GMT' ]
+			array( 'Content-Transfer-Encoding: binary',
+				'Expires: Sun, 17-Jan-2038 19:14:07 GMT' )
 		);
 	}
 
@@ -367,14 +361,14 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 
 		$context = new DerivativeContext( $this->getContext() );
 		$context->setTitle( $this->getPageTitle() ); // Remove subpage
-		$form = new HTMLForm( [
-			'Clear' => [
+		$form = new HTMLForm( array(
+			'Clear' => array(
 				'type' => 'hidden',
 				'default' => true,
 				'name' => 'clear',
-			]
-		], $context, 'clearStashedUploads' );
-		$form->setSubmitCallback( [ __CLASS__, 'tryClearStashedUploads' ] );
+			)
+		), $context, 'clearStashedUploads' );
+		$form->setSubmitCallback( array( __CLASS__, 'tryClearStashedUploads' ) );
 		$form->setSubmitTextMsg( 'uploadstash-clear' );
 
 		$form->prepareForm();
@@ -382,7 +376,7 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 
 		// show the files + form, if there are any, or just say there are none
 		$refreshHtml = Html::element( 'a',
-			[ 'href' => $this->getPageTitle()->getLocalURL() ],
+			array( 'href' => $this->getPageTitle()->getLocalURL() ),
 			$this->msg( 'uploadstash-refresh' )->text() );
 		$files = $this->stash->listFiles();
 		if ( $files && count( $files ) ) {
@@ -390,17 +384,17 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 			$fileListItemsHtml = '';
 			foreach ( $files as $file ) {
 				// TODO: Use Linker::link or even construct the list in plain wikitext
-				$fileListItemsHtml .= Html::rawElement( 'li', [],
-					Html::element( 'a', [ 'href' =>
-						$this->getPageTitle( "file/$file" )->getLocalURL() ], $file )
+				$fileListItemsHtml .= Html::rawElement( 'li', array(),
+					Html::element( 'a', array( 'href' =>
+						$this->getPageTitle( "file/$file" )->getLocalURL() ), $file )
 				);
 			}
-			$this->getOutput()->addHtml( Html::rawElement( 'ul', [], $fileListItemsHtml ) );
+			$this->getOutput()->addHtml( Html::rawElement( 'ul', array(), $fileListItemsHtml ) );
 			$form->displayForm( $formResult );
-			$this->getOutput()->addHtml( Html::rawElement( 'p', [], $refreshHtml ) );
+			$this->getOutput()->addHtml( Html::rawElement( 'p', array(), $refreshHtml ) );
 		} else {
-			$this->getOutput()->addHtml( Html::rawElement( 'p', [],
-				Html::element( 'span', [], $this->msg( 'uploadstash-nofiles' )->text() )
+			$this->getOutput()->addHtml( Html::rawElement( 'p', array(),
+				Html::element( 'span', array(), $this->msg( 'uploadstash-nofiles' )->text() )
 				. ' '
 				. $refreshHtml
 			) );

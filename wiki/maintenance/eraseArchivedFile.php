@@ -35,7 +35,7 @@ require_once __DIR__ . '/Maintenance.php';
 class EraseArchivedFile extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Erases traces of deleted files.' );
+		$this->mDescription = "Erases traces of deleted files.";
 		$this->addOption( 'delete', 'Perform the deletion' );
 		$this->addOption( 'filename', 'File name', false, true );
 		$this->addOption( 'filekey', 'File storage key (with extension) or "*"', true, true );
@@ -55,9 +55,9 @@ class EraseArchivedFile extends Maintenance {
 			}
 			$afile = false;
 		} else { // specified version
-			$dbw = $this->getDB( DB_MASTER );
+			$dbw = wfGetDB( DB_MASTER );
 			$row = $dbw->selectRow( 'filearchive', '*',
-				[ 'fa_storage_group' => 'deleted', 'fa_storage_key' => $filekey ],
+				array( 'fa_storage_group' => 'deleted', 'fa_storage_key' => $filekey ),
 				__METHOD__ );
 			if ( !$row ) {
 				$this->error( "No deleted file exists with key '$filekey'.", 1 );
@@ -85,9 +85,9 @@ class EraseArchivedFile extends Maintenance {
 	}
 
 	protected function scrubAllVersions( $name ) {
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 		$res = $dbw->select( 'filearchive', '*',
-			[ 'fa_name' => $name, 'fa_storage_group' => 'deleted' ],
+			array( 'fa_name' => $name, 'fa_storage_group' => 'deleted' ),
 			__METHOD__ );
 		foreach ( $res as $row ) {
 			$this->scrubVersion( ArchivedFile::newFromRow( $row ) );
@@ -101,7 +101,7 @@ class EraseArchivedFile extends Maintenance {
 		$repo = RepoGroup::singleton()->getLocalRepo();
 		$path = $repo->getZonePath( 'deleted' ) . '/' . $repo->getDeletedHashPath( $key ) . $key;
 		if ( $this->hasOption( 'delete' ) ) {
-			$status = $repo->getBackend()->delete( [ 'src' => $path ] );
+			$status = $repo->getBackend()->delete( array( 'src' => $path ) );
 			if ( $status->isOK() ) {
 				$this->output( "Deleted version '$key' ($ts) of file '$name'\n" );
 			} else {

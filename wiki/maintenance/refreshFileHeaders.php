@@ -34,7 +34,7 @@ require_once __DIR__ . '/Maintenance.php';
 class RefreshFileHeaders extends Maintenance {
 	function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Script to update file HTTP headers' );
+		$this->mDescription = 'Script to update file HTTP headers';
 		$this->addOption( 'verbose', 'Output information about each file.', false, false, 'v' );
 		$this->addOption( 'start', 'Name of file to start with', false, true );
 		$this->addOption( 'end', 'Name of file to end with', false, true );
@@ -47,14 +47,14 @@ class RefreshFileHeaders extends Maintenance {
 		$end = str_replace( ' ', '_', $this->getOption( 'end', '' ) ); // page on img_name
 
 		$count = 0;
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_SLAVE );
 		do {
-			$conds = [ "img_name > {$dbr->addQuotes( $start )}" ];
+			$conds = array( "img_name > {$dbr->addQuotes( $start )}" );
 			if ( strlen( $end ) ) {
 				$conds[] = "img_name <= {$dbr->addQuotes( $end )}";
 			}
 			$res = $dbr->select( 'image', '*', $conds,
-				__METHOD__, [ 'LIMIT' => $this->mBatchSize, 'ORDER BY' => 'img_name ASC' ] );
+				__METHOD__, array( 'LIMIT' => $this->mBatchSize, 'ORDER BY' => 'img_name ASC' ) );
 			foreach ( $res as $row ) {
 				$file = $repo->newFileFromRow( $row );
 				$headers = $file->getStreamHeaders();
@@ -80,9 +80,9 @@ class RefreshFileHeaders extends Maintenance {
 	}
 
 	protected function updateFileHeaders( File $file, array $headers ) {
-		$status = $file->getRepo()->getBackend()->describe( [
+		$status = $file->getRepo()->getBackend()->describe( array(
 			'src' => $file->getPath(), 'headers' => $headers
-		] );
+		) );
 		if ( !$status->isGood() ) {
 			$this->error( "Encountered error: " . print_r( $status, true ) );
 		}

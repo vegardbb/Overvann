@@ -44,24 +44,24 @@ class SpecialSearchTest extends MediaWikiTestCase {
 		 * after an assertion fail.
 		 */
 		$this->assertEquals(
-			[ /** Expected: */
+			array( /** Expected: */
 				'ProfileName' => $expectedProfile,
 				'Namespaces' => $expectedNS,
-			],
-			[ /** Actual: */
+			),
+			array( /** Actual: */
 				'ProfileName' => $search->getProfile(),
 				'Namespaces' => $search->getNamespaces(),
-			],
+			),
 			$message
 		);
 	}
 
 	public static function provideSearchOptionsTests() {
 		$defaultNS = SearchEngine::defaultNamespaces();
-		$EMPTY_REQUEST = [];
+		$EMPTY_REQUEST = array();
 		$NO_USER_PREF = null;
 
-		return [
+		return array(
 			/**
 			 * Parameters:
 			 *     <Web Request>, <User options>
@@ -69,28 +69,28 @@ class SpecialSearchTest extends MediaWikiTestCase {
 			 *     <ProfileName>, <NSList>
 			 * Then an optional message.
 			 */
-			[
+			array(
 				$EMPTY_REQUEST, $NO_USER_PREF,
 				'default', $defaultNS,
 				'Bug 33270: No request nor user preferences should give default profile'
-			],
-			[
-				[ 'ns5' => 1 ], $NO_USER_PREF,
-				'advanced', [ 5 ],
+			),
+			array(
+				array( 'ns5' => 1 ), $NO_USER_PREF,
+				'advanced', array( 5 ),
 				'Web request with specific NS should override user preference'
-			],
-			[
-				$EMPTY_REQUEST, [
+			),
+			array(
+				$EMPTY_REQUEST, array(
 				'searchNs2' => 1,
 				'searchNs14' => 1,
-			] + array_fill_keys( array_map( function ( $ns ) {
+			) + array_fill_keys( array_map( function ( $ns ) {
 				return "searchNs$ns";
 			}, $defaultNS ), 0 ),
-				'advanced', [ 2, 14 ],
+				'advanced', array( 2, 14 ),
 				'Bug 33583: search with no option should honor User search preferences'
 					. ' and have all other namespace disabled'
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -115,9 +115,9 @@ class SpecialSearchTest extends MediaWikiTestCase {
 	 * https://gerrit.wikimedia.org/r/4841
 	 */
 	public function testSearchTermIsNotExpanded() {
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgSearchType' => null,
-		] );
+		) );
 
 		# Initialize [[Special::Search]]
 		$search = new SpecialSearch();
@@ -143,29 +143,29 @@ class SpecialSearchTest extends MediaWikiTestCase {
 	}
 
 	public function provideRewriteQueryWithSuggestion() {
-		return [
-			[
+		return array(
+			array(
 				'With suggestion and no rewritten query shows did you mean',
 				'/Did you mean: <a[^>]+>first suggestion/',
-				new SpecialSearchTestMockResultSet( 'first suggestion', null, [
+				new SpecialSearchTestMockResultSet( 'first suggestion', null, array(
 					SearchResult::newFromTitle( Title::newMainPage() ),
-				] ),
-			],
+				) ),
+			),
 
-			[
+			array(
 				'With rewritten query informs user of change',
 				'/Showing results for <a[^>]+>first suggestion/',
-				new SpecialSearchTestMockResultSet( 'asdf', 'first suggestion', [
+				new SpecialSearchTestMockResultSet( 'asdf', 'first suggestion', array(
 					SearchResult::newFromTitle( Title::newMainPage() ),
-				] ),
-			],
+				) ),
+			),
 
-			[
+			array(
 				'When both queries have no results user gets no results',
 				'/There were no results matching the query/',
-				new SpecialSearchTestMockResultSet( 'first suggestion', 'first suggestion', [] ),
-			],
-		];
+				new SpecialSearchTestMockResultSet( 'first suggestion', 'first suggestion', array() ),
+			),
+		);
 	}
 
 	/**
@@ -174,14 +174,13 @@ class SpecialSearchTest extends MediaWikiTestCase {
 	public function testRewriteQueryWithSuggestion( $message, $expectRegex, $results ) {
 		$mockSearchEngine = $this->mockSearchEngine( $results );
 		$search = $this->getMockBuilder( 'SpecialSearch' )
-			->setMethods( [ 'getSearchEngine' ] )
+			->setMethods( array( 'getSearchEngine' ) )
 			->getMock();
 		$search->expects( $this->any() )
 			->method( 'getSearchEngine' )
 			->will( $this->returnValue( $mockSearchEngine ) );
 
 		$search->getContext()->setTitle( Title::makeTitle( NS_SPECIAL, 'Search' ) );
-		$search->getContext()->setLanguage( Language::factory( 'en' ) );
 		$search->load();
 		$search->showResults( 'this is a fake search' );
 
@@ -193,7 +192,7 @@ class SpecialSearchTest extends MediaWikiTestCase {
 
 	protected function mockSearchEngine( $results ) {
 		$mock = $this->getMockBuilder( 'SearchEngine' )
-			->setMethods( [ 'searchText', 'searchTitle' ] )
+			->setMethods( array( 'searchText', 'searchTitle' ) )
 			->getMock();
 
 		$mock->expects( $this->any() )
@@ -208,12 +207,7 @@ class SpecialSearchTestMockResultSet extends SearchResultSet {
 	protected $results;
 	protected $suggestion;
 
-	public function __construct(
-		$suggestion = null,
-		$rewrittenQuery = null,
-		array $results = [],
-		$containedSyntax = false
-	) {
+	public function __construct( $suggestion = null, $rewrittenQuery = null, array $results = array(), $containedSyntax = false) {
 		$this->suggestion = $suggestion;
 		$this->rewrittenQuery = $rewrittenQuery;
 		$this->results = $results;

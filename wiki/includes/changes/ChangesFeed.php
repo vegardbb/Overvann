@@ -83,8 +83,7 @@ class ChangesFeed {
 		}
 
 		$optionsHash = md5( serialize( $opts->getAllValues() ) ) . $wgRenderHashAppend;
-		$timekey = wfMemcKey(
-			$this->type, $this->format, $wgLang->getCode(), $optionsHash, 'timestamp' );
+		$timekey = wfMemcKey( $this->type, $this->format, $wgLang->getCode(), $optionsHash, 'timestamp' );
 		$key = wfMemcKey( $this->type, $this->format, $wgLang->getCode(), $optionsHash );
 
 		FeedUtils::checkPurge( $timekey, $key );
@@ -111,20 +110,21 @@ class ChangesFeed {
 	}
 
 	/**
-	 * Save to feed result to cache
+	 * Save to feed result to $messageMemc
 	 *
 	 * @param string $feed Feed's content
 	 * @param string $timekey Memcached key of the last modification
 	 * @param string $key Memcached key of the content
 	 */
 	public function saveToCache( $feed, $timekey, $key ) {
-		$cache = ObjectCache::getMainWANInstance();
-		$cache->set( $key, $feed, $cache::TTL_DAY );
-		$cache->set( $timekey, wfTimestamp( TS_MW ), $cache::TTL_DAY );
+		global $messageMemc;
+		$expire = 3600 * 24; # One day
+		$messageMemc->set( $key, $feed, $expire );
+		$messageMemc->set( $timekey, wfTimestamp( TS_MW ), $expire );
 	}
 
 	/**
-	 * Try to load the feed result from cache
+	 * Try to load the feed result from $messageMemc
 	 *
 	 * @param int $lastmod Timestamp of the last item in the recentchanges table
 	 * @param string $timekey Memcached key of the last modification
@@ -132,10 +132,9 @@ class ChangesFeed {
 	 * @return string|bool Feed's content on cache hit or false on cache miss
 	 */
 	public function loadFromCache( $lastmod, $timekey, $key ) {
-		global $wgFeedCacheTimeout, $wgOut;
+		global $wgFeedCacheTimeout, $wgOut, $messageMemc;
 
-		$cache = ObjectCache::getMainWANInstance();
-		$feedLastmod = $cache->get( $timekey );
+		$feedLastmod = $messageMemc->get( $timekey );
 
 		if ( ( $wgFeedCacheTimeout > 0 ) && $feedLastmod ) {
 			/**
@@ -154,7 +153,7 @@ class ChangesFeed {
 				if ( $feedLastmodUnix < $lastmodUnix ) {
 					$wgOut->setLastModified( $feedLastmod ); // bug 21916
 				}
-				return $cache->get( $key );
+				return $messageMemc->get( $key );
 			} else {
 				wfDebug( "RC: cached feed timestamp check failed ($feedLastmod; $lastmod)\n" );
 			}
@@ -165,7 +164,7 @@ class ChangesFeed {
 	/**
 	 * Generate the feed items given a row from the database, printing the feed.
 	 * @param object $rows DatabaseBase resource with recentchanges rows
-	 * @param ChannelFeed $feed
+	 * @param Feed $feed
 	 */
 	public static function generateFeed( $rows, &$feed ) {
 		$items = self::buildItems( $rows );
@@ -182,10 +181,10 @@ class ChangesFeed {
 	 * @return array
 	 */
 	public static function buildItems( $rows ) {
-		$items = [];
+		$items = array();
 
 		# Merge adjacent edits by one user
-		$sorted = [];
+		$sorted = array();
 		$n = 0;
 		foreach ( $rows as $obj ) {
 			if ( $obj->rc_type == RC_EXTERNAL ) {
@@ -216,10 +215,10 @@ class ChangesFeed {
 			}
 
 			if ( $obj->rc_this_oldid ) {
-				$url = $title->getFullURL( [
+				$url = $title->getFullURL( array(
 					'diff' => $obj->rc_this_oldid,
 					'oldid' => $obj->rc_last_oldid,
-				] );
+				) );
 			} else {
 				// log entry or something like that.
 				$url = $title->getFullURL();

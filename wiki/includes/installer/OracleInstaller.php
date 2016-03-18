@@ -29,19 +29,19 @@
  */
 class OracleInstaller extends DatabaseInstaller {
 
-	protected $globalNames = [
+	protected $globalNames = array(
 		'wgDBserver',
 		'wgDBname',
 		'wgDBuser',
 		'wgDBpassword',
 		'wgDBprefix',
-	];
+	);
 
-	protected $internalDefaults = [
+	protected $internalDefaults = array(
 		'_OracleDefTS' => 'USERS',
 		'_OracleTempTS' => 'TEMP',
 		'_InstallUser' => 'SYSTEM',
-	];
+	);
 
 	public $minimumVersion = '9.0.1'; // 9iR1
 
@@ -63,17 +63,17 @@ class OracleInstaller extends DatabaseInstaller {
 		return $this->getTextBox(
 			'wgDBserver',
 			'config-db-host-oracle',
-			[],
+			array(),
 			$this->parent->getHelpBox( 'config-db-host-oracle-help' )
 		) .
 			Html::openElement( 'fieldset' ) .
-			Html::element( 'legend', [], wfMessage( 'config-db-wiki-settings' )->text() ) .
+			Html::element( 'legend', array(), wfMessage( 'config-db-wiki-settings' )->text() ) .
 			$this->getTextBox( 'wgDBprefix', 'config-db-prefix' ) .
 			$this->getTextBox( '_OracleDefTS', 'config-oracle-def-ts' ) .
 			$this->getTextBox(
 				'_OracleTempTS',
 				'config-oracle-temp-ts',
-				[],
+				array(),
 				$this->parent->getHelpBox( 'config-db-oracle-help' )
 			) .
 			Html::closeElement( 'fieldset' ) .
@@ -91,12 +91,12 @@ class OracleInstaller extends DatabaseInstaller {
 
 	public function submitConnectForm() {
 		// Get variables from the request
-		$newValues = $this->setVarsFromRequest( [
+		$newValues = $this->setVarsFromRequest( array(
 			'wgDBserver',
 			'wgDBprefix',
 			'wgDBuser',
 			'wgDBpassword'
-		] );
+		) );
 		$this->parent->setVar( 'wgDBname', $this->getVar( 'wgDBuser' ) );
 
 		// Validate them
@@ -214,10 +214,10 @@ class OracleInstaller extends DatabaseInstaller {
 
 	public function preInstall() {
 		# Add our user callback to installSteps, right before the tables are created.
-		$callback = [
+		$callback = array(
 			'name' => 'user',
-			'callback' => [ $this, 'setupUser' ]
-		];
+			'callback' => array( $this, 'setupUser' )
+		);
 		$this->parent->addInstallStep( $callback, 'database' );
 	}
 
@@ -293,7 +293,7 @@ class OracleInstaller extends DatabaseInstaller {
 	}
 
 	public function getSchemaVars() {
-		$varNames = [
+		$varNames = array(
 			# These variables are used by maintenance/oracle/user.sql
 			'_OracleDefTS',
 			'_OracleTempTS',
@@ -302,8 +302,8 @@ class OracleInstaller extends DatabaseInstaller {
 
 			# These are used by tables.sql
 			'wgDBprefix',
-		];
-		$vars = [];
+		);
+		$vars = array();
 		foreach ( $varNames as $name ) {
 			$vars[$name] = $this->getVar( $name );
 		}

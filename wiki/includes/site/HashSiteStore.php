@@ -34,12 +34,12 @@ class HashSiteStore implements SiteStore {
 	/**
 	 * @var Site[]
 	 */
-	private $sites = [];
+	private $sites = array();
 
 	/**
 	 * @param array $sites
 	 */
-	public function __construct( $sites = [] ) {
+	public function __construct( $sites = array() ) {
 		$this->saveSites( $sites );
 	}
 
@@ -115,7 +115,7 @@ class HashSiteStore implements SiteStore {
 	 * list and getSite() will return null until saveSite() or saveSites() is called.
 	 */
 	public function clear() {
-		$this->sites = [];
+		$this->sites = array();
 
 		return true;
 	}

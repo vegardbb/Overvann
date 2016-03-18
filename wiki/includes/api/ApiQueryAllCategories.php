@@ -94,23 +94,23 @@ class ApiQueryAllCategories extends ApiQueryGeneratorBase {
 		$this->addOption( 'ORDER BY', 'cat_title' . $sort );
 
 		$prop = array_flip( $params['prop'] );
-		$this->addFieldsIf( [ 'cat_pages', 'cat_subcats', 'cat_files' ], isset( $prop['size'] ) );
+		$this->addFieldsIf( array( 'cat_pages', 'cat_subcats', 'cat_files' ), isset( $prop['size'] ) );
 		if ( isset( $prop['hidden'] ) ) {
-			$this->addTables( [ 'page', 'page_props' ] );
-			$this->addJoinConds( [
-				'page' => [ 'LEFT JOIN', [
+			$this->addTables( array( 'page', 'page_props' ) );
+			$this->addJoinConds( array(
+				'page' => array( 'LEFT JOIN', array(
 					'page_namespace' => NS_CATEGORY,
-					'page_title=cat_title' ] ],
-				'page_props' => [ 'LEFT JOIN', [
+					'page_title=cat_title' ) ),
+				'page_props' => array( 'LEFT JOIN', array(
 					'pp_page=page_id',
-					'pp_propname' => 'hiddencat' ] ],
-			] );
-			$this->addFields( [ 'cat_hidden' => 'pp_propname' ] );
+					'pp_propname' => 'hiddencat' ) ),
+			) );
+			$this->addFields( array( 'cat_hidden' => 'pp_propname' ) );
 		}
 
 		$res = $this->select( __METHOD__ );
 
-		$pages = [];
+		$pages = array();
 
 		$result = $this->getResult();
 		$count = 0;
@@ -127,7 +127,7 @@ class ApiQueryAllCategories extends ApiQueryGeneratorBase {
 			if ( !is_null( $resultPageSet ) ) {
 				$pages[] = $titleObj;
 			} else {
-				$item = [];
+				$item = array();
 				ApiResult::setContentValue( $item, 'category', $titleObj->getText() );
 				if ( isset( $prop['size'] ) ) {
 					$item['size'] = intval( $row->cat_pages );
@@ -138,7 +138,7 @@ class ApiQueryAllCategories extends ApiQueryGeneratorBase {
 				if ( isset( $prop['hidden'] ) ) {
 					$item['hidden'] = (bool)$row->cat_hidden;
 				}
-				$fit = $result->addValue( [ 'query', $this->getModuleName() ], null, $item );
+				$fit = $result->addValue( array( 'query', $this->getModuleName() ), null, $item );
 				if ( !$fit ) {
 					$this->setContinueEnumParameter( 'continue', $row->cat_title );
 					break;
@@ -147,56 +147,58 @@ class ApiQueryAllCategories extends ApiQueryGeneratorBase {
 		}
 
 		if ( is_null( $resultPageSet ) ) {
-			$result->addIndexedTagName( [ 'query', $this->getModuleName() ], 'c' );
+			$result->addIndexedTagName( array( 'query', $this->getModuleName() ), 'c' );
 		} else {
 			$resultPageSet->populateFromTitles( $pages );
 		}
 	}
 
 	public function getAllowedParams() {
-		return [
+		return array(
 			'from' => null,
-			'continue' => [
+			'continue' => array(
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			],
+			),
 			'to' => null,
 			'prefix' => null,
-			'dir' => [
+			'dir' => array(
 				ApiBase::PARAM_DFLT => 'ascending',
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'ascending',
 					'descending'
-				],
-			],
-			'min' => [
+				),
+			),
+			'min' => array(
+				ApiBase::PARAM_DFLT => null,
 				ApiBase::PARAM_TYPE => 'integer'
-			],
-			'max' => [
+			),
+			'max' => array(
+				ApiBase::PARAM_DFLT => null,
 				ApiBase::PARAM_TYPE => 'integer'
-			],
-			'limit' => [
+			),
+			'limit' => array(
 				ApiBase::PARAM_DFLT => 10,
 				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => ApiBase::LIMIT_BIG1,
 				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_BIG2
-			],
-			'prop' => [
-				ApiBase::PARAM_TYPE => [ 'size', 'hidden' ],
+			),
+			'prop' => array(
+				ApiBase::PARAM_TYPE => array( 'size', 'hidden' ),
 				ApiBase::PARAM_DFLT => '',
 				ApiBase::PARAM_ISMULTI => true,
-				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
-			],
-		];
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => array(),
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=query&list=allcategories&acprop=size'
 				=> 'apihelp-query+allcategories-example-size',
 			'action=query&generator=allcategories&gacprefix=List&prop=info'
 				=> 'apihelp-query+allcategories-example-generator',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

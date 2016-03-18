@@ -34,18 +34,12 @@ class SiteSQLStore extends CachingSiteStore {
 	 * @since 1.21
 	 * @deprecated 1.25 Construct a SiteStore instance directly instead.
 	 *
-	 * @param null $sitesTable Unused
+	 * @param ORMTable|null $sitesTable
 	 * @param BagOStuff|null $cache
 	 *
 	 * @return SiteStore
 	 */
-	public static function newInstance( $sitesTable = null, BagOStuff $cache = null ) {
-		if ( $sitesTable !== null ) {
-			throw new InvalidArgumentException(
-				__METHOD__ . ': $sitesTable parameter is unused and must be null'
-			);
-		}
-
+	public static function newInstance( ORMTable $sitesTable = null, BagOStuff $cache = null ) {
 		if ( $cache === null ) {
 			$cache = wfGetCache( wfIsHHVM() ? CACHE_ACCEL : CACHE_ANYTHING );
 		}

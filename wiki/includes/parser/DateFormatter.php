@@ -108,13 +108,13 @@ class DateFormatter {
 		$this->rules[self::ALL][self::DM] = self::DM;
 		$this->rules[self::NONE][self::ISO2] = self::ISO1;
 
-		$this->preferences = [
+		$this->preferences = array(
 			'default' => self::NONE,
 			'dmy' => self::DMY,
 			'mdy' => self::MDY,
 			'ymd' => self::YMD,
 			'ISO 8601' => self::ISO1,
-		];
+		);
 	}
 
 	/**
@@ -124,23 +124,18 @@ class DateFormatter {
 	 * 		Defaults to the site content language
 	 * @return DateFormatter
 	 */
-	public static function getInstance( $lang = null ) {
-		global $wgContLang, $wgMainCacheType;
-
-		$lang = $lang ? wfGetLangObj( $lang ) : $wgContLang;
-		$cache = ObjectCache::getLocalServerInstance( $wgMainCacheType );
-
+	public static function &getInstance( $lang = null ) {
+		global $wgMemc, $wgContLang;
 		static $dateFormatter = false;
+		$lang = $lang ? wfGetLangObj( $lang ) : $wgContLang;
+		$key = wfMemcKey( 'dateformatter', $lang->getCode() );
 		if ( !$dateFormatter ) {
-			$dateFormatter = $cache->getWithSetCallback(
-				$cache->makeKey( 'dateformatter', $lang->getCode() ),
-				$cache::TTL_HOUR,
-				function () use ( $lang ) {
-					return new DateFormatter( $lang );
-				}
-			);
+			$dateFormatter = $wgMemc->get( $key );
+			if ( !$dateFormatter ) {
+				$dateFormatter = new DateFormatter( $lang );
+				$wgMemc->set( $key, $dateFormatter, 3600 );
+			}
 		}
-
 		return $dateFormatter;
 	}
 
@@ -151,7 +146,7 @@ class DateFormatter {
 	 *
 	 * @return string
 	 */
-	public function reformat( $preference, $text, $options = [ 'linked' ] ) {
+	public function reformat( $preference, $text, $options = array( 'linked' ) ) {
 		$linked = in_array( 'linked', $options );
 		$match_whole = in_array( 'match-whole', $options );
 
@@ -179,7 +174,7 @@ class DateFormatter {
 
 			// Horrible hack
 			if ( !$linked ) {
-				$regex = str_replace( [ '\[\[', '\]\]' ], '', $regex );
+				$regex = str_replace( array( '\[\[', '\]\]' ), '', $regex );
 			}
 
 			if ( $match_whole ) {
@@ -191,7 +186,7 @@ class DateFormatter {
 
 			// Another horrible hack
 			$this->mLinked = $linked;
-			$text = preg_replace_callback( $regex, [ &$this, 'replace' ], $text );
+			$text = preg_replace_callback( $regex, array( &$this, 'replace' ), $text );
 			unset( $this->mLinked );
 		}
 		return $text;
@@ -208,7 +203,7 @@ class DateFormatter {
 			$linked = $this->mLinked;
 		}
 
-		$bits = [];
+		$bits = array();
 		$key = $this->keys[$this->mSource];
 		$keyLength = strlen( $key );
 		for ( $p = 0; $p < $keyLength; $p++ ) {
@@ -232,7 +227,7 @@ class DateFormatter {
 			// strip piped links
 			$format = preg_replace( '/\[\[[^|]+\|([^\]]+)\]\]/', '$1', $format );
 			// strip remaining links
-			$format = str_replace( [ '[[', ']]' ], '', $format );
+			$format = str_replace( array( '[[', ']]' ), '', $format );
 		}
 
 		# Construct new date
@@ -304,7 +299,7 @@ class DateFormatter {
 			$text = $matches[0];
 		}
 
-		$isoBits = [];
+		$isoBits = array();
 		if ( isset( $bits['y'] ) ) {
 			$isoBits[] = $bits['y'];
 		}
@@ -314,7 +309,7 @@ class DateFormatter {
 
 		// Output is not strictly HTML (it's wikitext), but <span> is whitelisted.
 		$text = Html::rawElement( 'span',
-					[ 'class' => 'mw-formatted-date', 'title' => $isoDate ], $text );
+					array( 'class' => 'mw-formatted-date', 'title' => $isoDate ), $text );
 
 		return $text;
 	}
@@ -324,7 +319,7 @@ class DateFormatter {
 	 * @return string regex to find the months with
 	 */
 	public function getMonthRegex() {
-		$names = [];
+		$names = array();
 		for ( $i = 1; $i <= 12; $i++ ) {
 			$names[] = $this->lang->getMonthName( $i );
 			$names[] = $this->lang->getMonthAbbreviation( $i );

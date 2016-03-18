@@ -47,7 +47,7 @@ class NamespaceConflictChecker extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Find and fix pages affected by namespace addition/removal' );
+		$this->mDescription = "";
 		$this->addOption( 'fix', 'Attempt to automatically fix errors' );
 		$this->addOption( 'merge', "Instead of renaming conflicts, do a history merge with " .
 			"the correct title" );
@@ -67,16 +67,16 @@ class NamespaceConflictChecker extends Maintenance {
 	}
 
 	public function execute() {
-		$this->db = $this->getDB( DB_MASTER );
+		$this->db = wfGetDB( DB_MASTER );
 
-		$options = [
+		$options = array(
 			'fix' => $this->hasOption( 'fix' ),
 			'merge' => $this->hasOption( 'merge' ),
 			'add-suffix' => $this->getOption( 'add-suffix', '' ),
 			'add-prefix' => $this->getOption( 'add-prefix', '' ),
 			'move-talk' => $this->hasOption( 'move-talk' ),
 			'source-pseudo-namespace' => $this->getOption( 'source-pseudo-namespace', '' ),
-			'dest-namespace' => intval( $this->getOption( 'dest-namespace', 0 ) ) ];
+			'dest-namespace' => intval( $this->getOption( 'dest-namespace', 0 ) ) );
 
 		if ( $options['source-pseudo-namespace'] !== '' ) {
 			$retval = $this->checkPrefix( $options );
@@ -101,7 +101,7 @@ class NamespaceConflictChecker extends Maintenance {
 	private function checkAll( $options ) {
 		global $wgContLang, $wgNamespaceAliases, $wgCapitalLinks;
 
-		$spaces = [];
+		$spaces = array();
 
 		// List interwikis first, so they'll be overridden
 		// by any conflicting local namespaces.
@@ -132,7 +132,7 @@ class NamespaceConflictChecker extends Maintenance {
 		// We'll need to check for lowercase keys as well,
 		// since we're doing case-sensitive searches in the db.
 		foreach ( $spaces as $name => $ns ) {
-			$moreNames = [];
+			$moreNames = array();
 			$moreNames[] = $wgContLang->uc( $name );
 			$moreNames[] = $wgContLang->ucfirst( $wgContLang->lc( $name ) );
 			$moreNames[] = $wgContLang->ucwords( $name );
@@ -179,22 +179,22 @@ class NamespaceConflictChecker extends Maintenance {
 
 		foreach ( $spaces as $name => $ns ) {
 			if ( $ns != 0 ) {
-				/* Fix up link destinations for non-interwiki links only.
-				 *
-				 * For example if a page has [[Foo:Bar]] and then a Foo namespace
-				 * is introduced, pagelinks needs to be updated to have
-				 * page_namespace = NS_FOO.
-				 *
-				 * If instead an interwiki prefix was introduced called "Foo",
-				 * the link should instead be moved to the iwlinks table. If a new
-				 * language is introduced called "Foo", or if there is a pagelink
-				 * [[fr:Bar]] when interlanguage magic links are turned on, the
-				 * link would have to be moved to the langlinks table. Let's put
-				 * those cases in the too-hard basket for now. The consequences are
-				 * not especially severe.
-				 * @fixme Handle interwiki links, and pagelinks to Category:, File:
-				 * which probably need reparsing.
-				 */
+				// Fix up link destinations for non-interwiki links only.
+				//
+				// For example if a page has [[Foo:Bar]] and then a Foo namespace
+				// is introduced, pagelinks needs to be updated to have
+				// page_namespace = NS_FOO.
+				//
+				// If instead an interwiki prefix was introduced called "Foo",
+				// the link should instead be moved to the iwlinks table. If a new
+				// language is introduced called "Foo", or if there is a pagelink
+				// [[fr:Bar]] when interlanguage magic links are turned on, the
+				// link would have to be moved to the langlinks table. Let's put
+				// those cases in the too-hard basket for now. The consequences are
+				// not especially severe.
+				//
+				// @fixme Handle interwiki links, and pagelinks to Category:, File:
+				// which probably need reparsing.
 
 				$this->checkLinkTable( 'pagelinks', 'pl', $ns, $name, $options );
 				$this->checkLinkTable( 'templatelinks', 'tl', $ns, $name, $options );
@@ -204,9 +204,9 @@ class NamespaceConflictChecker extends Maintenance {
 				// have rd_interwiki=w and rd_namespace=0, which would match the
 				// query for a conflicting namespace "Foo" if filtering wasn't done.
 				$this->checkLinkTable( 'redirect', 'rd', $ns, $name, $options,
-					[ 'rd_interwiki' => null ] );
+					array( 'rd_interwiki' => null ) );
 				$this->checkLinkTable( 'redirect', 'rd', $ns, $name, $options,
-					[ 'rd_interwiki' => '' ] );
+					array( 'rd_interwiki' => '' ) );
 			}
 		}
 
@@ -223,7 +223,7 @@ class NamespaceConflictChecker extends Maintenance {
 	 */
 	private function getInterwikiList() {
 		$result = Interwiki::getAllPrefixes();
-		$prefixes = [];
+		$prefixes = array();
 		foreach ( $result as $row ) {
 			$prefixes[] = $row['iw_prefix'];
 		}
@@ -336,9 +336,9 @@ class NamespaceConflictChecker extends Maintenance {
 	 * @param array $extraConds Extra conditions for the SQL query
 	 */
 	private function checkLinkTable( $table, $fieldPrefix, $ns, $name, $options,
-		$extraConds = []
+		$extraConds = array()
 	) {
-		$batchConds = [];
+		$batchConds = array();
 		$fromField = "{$fieldPrefix}_from";
 		$namespaceField = "{$fieldPrefix}_namespace";
 		$titleField = "{$fieldPrefix}_title";
@@ -346,16 +346,16 @@ class NamespaceConflictChecker extends Maintenance {
 		while ( true ) {
 			$res = $this->db->select(
 				$table,
-				[ $fromField, $namespaceField, $titleField ],
-				array_merge( $batchConds, $extraConds, [
+				array( $fromField, $namespaceField, $titleField ),
+				array_merge( $batchConds, $extraConds, array(
 					$namespaceField => 0,
 					$titleField . $this->db->buildLike( "$name:", $this->db->anyString() )
-				] ),
+				) ),
 				__METHOD__,
-				[
-					'ORDER BY' => [ $titleField, $fromField ],
+				array(
+					'ORDER BY' => array( $titleField, $fromField ),
 					'LIMIT' => $batchSize
-				]
+				)
 			);
 
 			if ( $res->numRows() == 0 ) {
@@ -380,18 +380,17 @@ class NamespaceConflictChecker extends Maintenance {
 
 				$this->db->update( $table,
 					// SET
-					[
+					array(
 						$namespaceField => $destTitle->getNamespace(),
 						$titleField => $destTitle->getDBkey()
-					],
+					),
 					// WHERE
-					[
+					array(
 						$namespaceField => 0,
 						$titleField => $row->$titleField,
 						$fromField => $row->$fromField
-					],
-					__METHOD__,
-					[ 'IGNORE' ]
+					),
+					__METHOD__
 				);
 				$this->output( "$table $logTitle -> " .
 					$destTitle->getPrefixedDBkey() . "\n" );
@@ -399,9 +398,9 @@ class NamespaceConflictChecker extends Maintenance {
 			$encLastTitle = $this->db->addQuotes( $row->$titleField );
 			$encLastFrom = $this->db->addQuotes( $row->$fromField );
 
-			$batchConds = [
+			$batchConds = array(
 				"$titleField > $encLastTitle " .
-				"OR ($titleField = $encLastTitle AND $fromField > $encLastFrom)" ];
+				"OR ($titleField = $encLastTitle AND $fromField > $encLastFrom)" );
 
 			wfWaitForSlaves();
 		}
@@ -434,21 +433,21 @@ class NamespaceConflictChecker extends Maintenance {
 	 */
 	private function getTargetList( $ns, $name, $options ) {
 		if ( $options['move-talk'] && MWNamespace::isSubject( $ns ) ) {
-			$checkNamespaces = [ NS_MAIN, NS_TALK ];
+			$checkNamespaces = array( NS_MAIN, NS_TALK );
 		} else {
 			$checkNamespaces = NS_MAIN;
 		}
 
 		return $this->db->select( 'page',
-			[
+			array(
 				'page_id',
 				'page_title',
 				'page_namespace',
-			],
-			[
+			),
+			array(
 				'page_namespace' => $checkNamespaces,
 				'page_title' . $this->db->buildLike( "$name:", $this->db->anyString() ),
-			],
+			),
 			__METHOD__
 		);
 	}
@@ -484,19 +483,19 @@ class NamespaceConflictChecker extends Maintenance {
 	 * Get an alternative title to move a page to. This is used if the
 	 * preferred destination title already exists.
 	 *
-	 * @param LinkTarget $linkTarget
+	 * @param Title $title
 	 * @param array $options Associative array of validated command-line options
 	 * @return Title|bool
 	 */
-	private function getAlternateTitle( LinkTarget $linkTarget, $options ) {
+	private function getAlternateTitle( $title, $options ) {
 		$prefix = $options['add-prefix'];
 		$suffix = $options['add-suffix'];
 		if ( $prefix == '' && $suffix == '' ) {
 			return false;
 		}
 		while ( true ) {
-			$dbk = $prefix . $linkTarget->getDBkey() . $suffix;
-			$title = Title::makeTitleSafe( $linkTarget->getNamespace(), $dbk );
+			$dbk = $prefix . $title->getDBkey() . $suffix;
+			$title = Title::makeTitleSafe( $title->getNamespace(), $dbk );
 			if ( !$title ) {
 				return false;
 			}
@@ -510,32 +509,32 @@ class NamespaceConflictChecker extends Maintenance {
 	 * Move a page
 	 *
 	 * @param integer $id The page_id
-	 * @param LinkTarget $newLinkTarget The new title link target
+	 * @param Title $newTitle The new title
 	 * @return bool
 	 */
-	private function movePage( $id, LinkTarget $newLinkTarget ) {
+	private function movePage( $id, Title $newTitle ) {
 		$this->db->update( 'page',
-			[
-				"page_namespace" => $newLinkTarget->getNamespace(),
-				"page_title" => $newLinkTarget->getDBkey(),
-			],
-			[
+			array(
+				"page_namespace" => $newTitle->getNamespace(),
+				"page_title" => $newTitle->getDBkey(),
+			),
+			array(
 				"page_id" => $id,
-			],
+			),
 			__METHOD__ );
 
 		// Update *_from_namespace in links tables
-		$fromNamespaceTables = [
-			[ 'pagelinks', 'pl' ],
-			[ 'templatelinks', 'tl' ],
-			[ 'imagelinks', 'il' ] ];
+		$fromNamespaceTables = array(
+			array( 'pagelinks', 'pl' ),
+			array( 'templatelinks', 'tl' ),
+			array( 'imagelinks', 'il' ) );
 		foreach ( $fromNamespaceTables as $tableInfo ) {
 			list( $table, $fieldPrefix ) = $tableInfo;
 			$this->db->update( $table,
 				// SET
-				[ "{$fieldPrefix}_from_namespace" => $newLinkTarget->getNamespace() ],
+				array( "{$fieldPrefix}_from_namespace" => $newTitle->getNamespace() ),
 				// WHERE
-				[ "{$fieldPrefix}_from" => $id ],
+				array( "{$fieldPrefix}_from" => $id ),
 				__METHOD__ );
 		}
 
@@ -550,12 +549,12 @@ class NamespaceConflictChecker extends Maintenance {
 	 * recentchanges review, etc.
 	 *
 	 * @param integer $id The page_id
-	 * @param LinkTarget $linkTarget The new link target
+	 * @param Title $newTitle The new title
 	 * @param string $logStatus This is set to the log status message on failure
 	 * @return bool
 	 */
-	private function canMerge( $id, LinkTarget $linkTarget, &$logStatus ) {
-		$latestDest = Revision::newFromTitle( $linkTarget, 0, Revision::READ_LATEST );
+	private function canMerge( $id, Title $newTitle, &$logStatus ) {
+		$latestDest = Revision::newFromTitle( $newTitle, 0, Revision::READ_LATEST );
 		$latestSource = Revision::newFromPageId( $id, 0, Revision::READ_LATEST );
 		if ( $latestSource->getTimestamp() > $latestDest->getTimestamp() ) {
 			$logStatus = 'cannot merge since source is later';
@@ -570,7 +569,6 @@ class NamespaceConflictChecker extends Maintenance {
 	 *
 	 * @param integer $id The page_id
 	 * @param Title $newTitle The new title
-	 * @return bool
 	 */
 	private function mergePage( $row, Title $newTitle ) {
 		$id = $row->page_id;
@@ -584,28 +582,27 @@ class NamespaceConflictChecker extends Maintenance {
 		$wikiPage->loadPageData( 'fromdbmaster' );
 
 		$destId = $newTitle->getArticleId();
-		$this->beginTransaction( $this->db, __METHOD__ );
+		$this->db->begin( __METHOD__ );
 		$this->db->update( 'revision',
 			// SET
-			[ 'rev_page' => $destId ],
+			array( 'rev_page' => $destId ),
 			// WHERE
-			[ 'rev_page' => $id ],
+			array( 'rev_page' => $id ),
 			__METHOD__ );
 
-		$this->db->delete( 'page', [ 'page_id' => $id ], __METHOD__ );
+		$this->db->delete( 'page', array( 'page_id' => $id ), __METHOD__ );
 
-		/* Call LinksDeletionUpdate to delete outgoing links from the old title,
-		 * and update category counts.
-		 *
-		 * Calling external code with a fake broken Title is a fairly dubious
-		 * idea. It's necessary because it's quite a lot of code to duplicate,
-		 * but that also makes it fragile since it would be easy for someone to
-		 * accidentally introduce an assumption of title validity to the code we
-		 * are calling.
-		 */
+		// Call LinksDeletionUpdate to delete outgoing links from the old title,
+		// and update category counts.
+		//
+		// Calling external code with a fake broken Title is a fairly dubious
+		// idea. It's necessary because it's quite a lot of code to duplicate,
+		// but that also makes it fragile since it would be easy for someone to
+		// accidentally introduce an assumption of title validity to the code we
+		// are calling.
 		$update = new LinksDeletionUpdate( $wikiPage );
 		$update->doUpdate();
-		$this->commitTransaction( $this->db, __METHOD__ );
+		$this->db->commit( __METHOD__ );
 
 		return true;
 	}

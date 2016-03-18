@@ -34,32 +34,6 @@ class MWContentSerializationException extends MWException {
 }
 
 /**
- * Exception thrown when an unregistered content model is requested. This error
- * can be triggered by user input, so a separate exception class is provided so
- * callers can substitute a context-specific, internationalised error message.
- *
- * @ingroup Content
- * @since 1.27
- */
-class MWUnknownContentModelException extends MWException {
-	/** @var string The name of the unknown content model */
-	private $modelId;
-
-	/** @param string $modelId */
-	function __construct( $modelId ) {
-		parent::__construct( "The content model '$modelId' is not registered on this wiki.\n" .
-			'See https://www.mediawiki.org/wiki/Content_handlers to find out which extensions ' .
-			'handle this content model.' );
-		$this->modelId = $modelId;
-	}
-
-	/** @return string */
-	public function getModelId() {
-		return $modelId;
-	}
-}
-
-/**
  * A content handler knows how do deal with a specific type of content on a wiki
  * page. Content is stored in the database in a serialized form (using a
  * serialization format a.k.a. MIME type) and is unserialized into its native
@@ -227,7 +201,7 @@ abstract class ContentHandler {
 		$model = MWNamespace::getNamespaceContentModel( $ns );
 
 		// Hook can determine default model
-		if ( !Hooks::run( 'ContentHandlerDefaultModelFor', [ $title, &$model ] ) ) {
+		if ( !Hooks::run( 'ContentHandlerDefaultModelFor', array( $title, &$model ) ) ) {
 			if ( !is_null( $model ) ) {
 				return $model;
 			}
@@ -240,7 +214,7 @@ abstract class ContentHandler {
 		}
 
 		// Hook can force JS/CSS
-		Hooks::run( 'TitleIsCssOrJsPage', [ $title, &$isCodePage ], '1.25' );
+		Hooks::run( 'TitleIsCssOrJsPage', array( $title, &$isCodePage ), '1.25' );
 
 		// Is this a user subpage containing code?
 		$isCodeSubpage = NS_USER == $ns
@@ -255,7 +229,7 @@ abstract class ContentHandler {
 		$isWikitext = $isWikitext && !$isCodePage && !$isCodeSubpage;
 
 		// Hook can override $isWikitext
-		Hooks::run( 'TitleIsWikitextPage', [ $title, &$isWikitext ], '1.25' );
+		Hooks::run( 'TitleIsWikitextPage', array( $title, &$isWikitext ), '1.25' );
 
 		if ( !$isWikitext ) {
 			switch ( $ext ) {
@@ -333,8 +307,7 @@ abstract class ContentHandler {
 	 * @param string $modelId The ID of the content model for which to get a
 	 *    handler. Use CONTENT_MODEL_XXX constants.
 	 *
-	 * @throws MWException For internal errors and problems in the configuration.
-	 * @throws MWUnknownContentModelException If no handler is known for the model ID.
+	 * @throws MWException If no handler is known for the model ID.
 	 * @return ContentHandler The ContentHandler singleton for handling the model given by the ID.
 	 */
 	public static function getForModelID( $modelId ) {
@@ -347,26 +320,21 @@ abstract class ContentHandler {
 		if ( empty( $wgContentHandlers[$modelId] ) ) {
 			$handler = null;
 
-			Hooks::run( 'ContentHandlerForModelID', [ $modelId, &$handler ] );
+			Hooks::run( 'ContentHandlerForModelID', array( $modelId, &$handler ) );
 
 			if ( $handler === null ) {
-				throw new MWUnknownContentModelException( $modelId );
+				throw new MWException( "No handler for model '$modelId' registered in \$wgContentHandlers" );
 			}
 
 			if ( !( $handler instanceof ContentHandler ) ) {
 				throw new MWException( "ContentHandlerForModelID must supply a ContentHandler instance" );
 			}
 		} else {
-			$classOrCallback = $wgContentHandlers[$modelId];
-
-			if ( is_callable( $classOrCallback ) ) {
-				$handler = call_user_func( $classOrCallback, $modelId );
-			} else {
-				$handler = new $classOrCallback( $modelId );
-			}
+			$class = $wgContentHandlers[$modelId];
+			$handler = new $class( $modelId );
 
 			if ( !( $handler instanceof ContentHandler ) ) {
-				throw new MWException( "$classOrCallback from \$wgContentHandlers is not " .
+				throw new MWException( "$class from \$wgContentHandlers is not " .
 					"compatible with ContentHandler" );
 			}
 		}
@@ -414,7 +382,7 @@ abstract class ContentHandler {
 	public static function getAllContentFormats() {
 		global $wgContentHandlers;
 
-		$formats = [];
+		$formats = array();
 
 		foreach ( $wgContentHandlers as $model => $class ) {
 			$handler = ContentHandler::getForModelID( $model );
@@ -644,7 +612,7 @@ abstract class ContentHandler {
 	 * @return array Always an empty array.
 	 */
 	public function getActionOverrides() {
-		return [];
+		return array();
 	}
 
 	/**
@@ -662,13 +630,13 @@ abstract class ContentHandler {
 	 * @return DifferenceEngine
 	 */
 	public function createDifferenceEngine( IContextSource $context, $old = 0, $new = 0,
-		$rcid = 0, // FIXME: Deprecated, no longer used
+		$rcid = 0, //FIXME: Deprecated, no longer used
 		$refreshCache = false, $unhide = false ) {
 
 		// hook: get difference engine
 		$differenceEngine = null;
 		if ( !Hooks::run( 'GetDifferenceEngine',
-			[ $context, $old, $new, $refreshCache, $unhide, &$differenceEngine ]
+			array( $context, $old, $new, $refreshCache, $unhide, &$differenceEngine )
 		) ) {
 			return $differenceEngine;
 		}
@@ -705,7 +673,7 @@ abstract class ContentHandler {
 			$pageLang = wfGetLangObj( $lang );
 		}
 
-		Hooks::run( 'PageContentLanguage', [ $title, &$pageLang, $wgLang ] );
+		Hooks::run( 'PageContentLanguage', array( $title, &$pageLang, $wgLang ) );
 
 		return wfGetLangObj( $pageLang );
 	}
@@ -764,7 +732,7 @@ abstract class ContentHandler {
 	public function canBeUsedOn( Title $title ) {
 		$ok = true;
 
-		Hooks::run( 'ContentModelCanBeUsedOn', [ $this->getModelID(), $title, &$ok ] );
+		Hooks::run( 'ContentModelCanBeUsedOn', array( $this->getModelID(), $title, &$ok ) );
 
 		return $ok;
 	}
@@ -923,12 +891,12 @@ abstract class ContentHandler {
 		// Find out if there was only one contributor
 		// Only scan the last 20 revisions
 		$res = $dbw->select( 'revision', 'rev_user_text',
-			[
+			array(
 				'rev_page' => $title->getArticleID(),
 				$dbw->bitAnd( 'rev_deleted', Revision::DELETED_USER ) . ' = 0'
-			],
+			),
 			__METHOD__,
-			[ 'LIMIT' => 20 ]
+			array( 'LIMIT' => 20 )
 		);
 
 		if ( $res === false ) {
@@ -1083,16 +1051,6 @@ abstract class ContentHandler {
 	}
 
 	/**
-	 * Returns true if this content model supports categories.
-	 * The default implementation returns true.
-	 *
-	 * @return bool Always true.
-	 */
-	public function supportsCategories() {
-		return true;
-	}
-
-	/**
 	 * Returns true if this content model supports redirects.
 	 * This default implementation returns false.
 	 *
@@ -1159,7 +1117,7 @@ abstract class ContentHandler {
 	 *
 	 * @see ContentHandler::$enableDeprecationWarnings
 	 */
-	public static function runLegacyHooks( $event, $args = [],
+	public static function runLegacyHooks( $event, $args = array(),
 		$warn = null
 	) {
 
@@ -1176,7 +1134,7 @@ abstract class ContentHandler {
 			// so we can find and fix them.
 
 			$handlers = Hooks::getHandlers( $event );
-			$handlerInfo = [];
+			$handlerInfo = array();
 
 			MediaWiki\suppressWarnings();
 
@@ -1208,8 +1166,8 @@ abstract class ContentHandler {
 		}
 
 		// convert Content objects to text
-		$contentObjects = [];
-		$contentTexts = [];
+		$contentObjects = array();
+		$contentTexts = array();
 
 		foreach ( $args as $k => $v ) {
 			if ( $v instanceof Content ) {

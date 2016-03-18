@@ -17,7 +17,7 @@
  * @author לערי ריינהארט
  */
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Медиа',
 	NS_SPECIAL          => 'Вижа',
 	NS_TALK             => 'Баҳс',
@@ -34,25 +34,25 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Баҳси_роҳнамо',
 	NS_CATEGORY         => 'Гурӯҳ',
 	NS_CATEGORY_TALK    => 'Баҳси_гурӯҳ',
-];
+);
 
-$datePreferences = [
+$datePreferences = array(
 	'default',
 	'dmy',
 	'persian',
 	'ISO 8601',
-];
+);
 
 $defaultDateFormat = 'dmy';
 
-$datePreferenceMigrationMap = [
+$datePreferenceMigrationMap = array(
 	'default',
 	'default',
 	'default',
 	'default'
-];
+);
 
-$dateFormats = [
+$dateFormats = array(
 	'dmy time' => 'H:i',
 	'dmy date' => 'j xg Y',
 	'dmy both' => 'H:i، j xg Y',
@@ -64,7 +64,7 @@ $dateFormats = [
 	'ISO 8601 time' => 'xnH:xni:xns',
 	'ISO 8601 date' => 'xnY-xnm-xnd',
 	'ISO 8601 both' => 'xnY-xnm-xnd"T"xnH:xni:xns',
-];
+);
 
 $linkTrail = '/^([a-zабвгдеёжзийклмнопрстуфхчшъэюяғӣқўҳҷцщыь]+)(.*)$/sDu';
 

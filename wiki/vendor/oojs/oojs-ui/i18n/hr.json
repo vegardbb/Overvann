@@ -17,7 +17,5 @@
 	"ooui-dialog-message-reject": "Odustani",
 	"ooui-dialog-process-error": "Nešto je pošlo po zlu",
 	"ooui-dialog-process-dismiss": "Zatvori",
-	"ooui-dialog-process-retry": "Pokušajte ponovo",
-	"ooui-selectfile-button-select": "Odaberi datoteku",
-	"ooui-selectfile-placeholder": "Datoteka nije označena"
+	"ooui-dialog-process-retry": "Pokušajte ponovo"
 }

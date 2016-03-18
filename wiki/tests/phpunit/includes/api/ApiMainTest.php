@@ -13,7 +13,7 @@ class ApiMainTest extends ApiTestCase {
 	 */
 	public function testApi() {
 		$api = new ApiMain(
-			new FauxRequest( [ 'action' => 'query', 'meta' => 'siteinfo' ] )
+			new FauxRequest( array( 'action' => 'query', 'meta' => 'siteinfo' ) )
 		);
 		$api->execute();
 		$data = $api->getResult()->getResultData();
@@ -22,13 +22,13 @@ class ApiMainTest extends ApiTestCase {
 	}
 
 	public static function provideAssert() {
-		return [
-			[ false, [], 'user', 'assertuserfailed' ],
-			[ true, [], 'user', false ],
-			[ true, [], 'bot', 'assertbotfailed' ],
-			[ true, [ 'bot' ], 'user', false ],
-			[ true, [ 'bot' ], 'bot', false ],
-		];
+		return array(
+			array( false, array(), 'user', 'assertuserfailed' ),
+			array( true, array(), 'user', false ),
+			array( true, array(), 'bot', 'assertbotfailed' ),
+			array( true, array( 'bot' ), 'user', false ),
+			array( true, array( 'bot' ), 'bot', false ),
+		);
 	}
 
 	/**
@@ -48,10 +48,10 @@ class ApiMainTest extends ApiTestCase {
 		}
 		$user->mRights = $rights;
 		try {
-			$this->doApiRequest( [
+			$this->doApiRequest( array(
 				'action' => 'query',
 				'assert' => $assert,
-			], null, null, $user );
+			), null, null, $user );
 			$this->assertFalse( $error ); // That no error was expected
 		} catch ( UsageException $e ) {
 			$this->assertEquals( $e->getCodeString(), $error );
@@ -68,7 +68,7 @@ class ApiMainTest extends ApiTestCase {
 		$classes = $wgAutoloadLocalClasses + $wgAutoloadClasses;
 
 		$api = new ApiMain(
-			new FauxRequest( [ 'action' => 'query', 'meta' => 'siteinfo' ] )
+			new FauxRequest( array( 'action' => 'query', 'meta' => 'siteinfo' ) )
 		);
 		$modules = $api->getModuleManager()->getNamesWithClasses();
 		foreach ( $modules as $name => $class ) {
@@ -90,21 +90,18 @@ class ApiMainTest extends ApiTestCase {
 	 * @param int $status Expected response status
 	 * @param bool $post Request is a POST
 	 */
-	public function testCheckConditionalRequestHeaders(
-		$headers, $conditions, $status, $post = false
-	) {
-		$request = new FauxRequest( [ 'action' => 'query', 'meta' => 'siteinfo' ], $post );
+	public function testCheckConditionalRequestHeaders( $headers, $conditions, $status, $post = false ) {
+		$request = new FauxRequest( array( 'action' => 'query', 'meta' => 'siteinfo' ), $post );
 		$request->setHeaders( $headers );
 		$request->response()->statusHeader( 200 ); // Why doesn't it default?
 
-		$context = $this->apiContext->newTestContext( $request, null );
-		$api = new ApiMain( $context );
+		$api = new ApiMain( $request );
 		$priv = TestingAccessWrapper::newFromObject( $api );
 		$priv->mInternalMode = false;
 
 		$module = $this->getMockBuilder( 'ApiBase' )
-			->setConstructorArgs( [ $api, 'mock' ] )
-			->setMethods( [ 'getConditionalRequestData' ] )
+			->setConstructorArgs( array( $api, 'mock' ) )
+			->setMethods( array( 'getConditionalRequestData' ) )
 			->getMockForAbstractClass();
 		$module->expects( $this->any() )
 			->method( 'getConditionalRequestData' )
@@ -121,64 +118,64 @@ class ApiMainTest extends ApiTestCase {
 	public static function provideCheckConditionalRequestHeaders() {
 		$now = time();
 
-		return [
+		return array(
 			// Non-existing from module is ignored
-			[ [ 'If-None-Match' => '"foo", "bar"' ], [], 200 ],
-			[ [ 'If-Modified-Since' => 'Tue, 18 Aug 2015 00:00:00 GMT' ], [], 200 ],
+			array( array( 'If-None-Match' => '"foo", "bar"' ), array(), 200 ),
+			array( array( 'If-Modified-Since' => 'Tue, 18 Aug 2015 00:00:00 GMT' ), array(), 200 ),
 
 			// No headers
-			[
-				[],
-				[
+			array(
+				array(),
+				array(
 					'etag' => '""',
 					'last-modified' => '20150815000000',
-				],
+				),
 				200
-			],
+			),
 
 			// Basic If-None-Match
-			[ [ 'If-None-Match' => '"foo", "bar"' ], [ 'etag' => '"bar"' ], 304 ],
-			[ [ 'If-None-Match' => '"foo", "bar"' ], [ 'etag' => '"baz"' ], 200 ],
-			[ [ 'If-None-Match' => '"foo"' ], [ 'etag' => 'W/"foo"' ], 304 ],
-			[ [ 'If-None-Match' => 'W/"foo"' ], [ 'etag' => '"foo"' ], 304 ],
-			[ [ 'If-None-Match' => 'W/"foo"' ], [ 'etag' => 'W/"foo"' ], 304 ],
+			array( array( 'If-None-Match' => '"foo", "bar"' ), array( 'etag' => '"bar"' ), 304 ),
+			array( array( 'If-None-Match' => '"foo", "bar"' ), array( 'etag' => '"baz"' ), 200 ),
+			array( array( 'If-None-Match' => '"foo"' ), array( 'etag' => 'W/"foo"' ), 304 ),
+			array( array( 'If-None-Match' => 'W/"foo"' ), array( 'etag' => '"foo"' ), 304 ),
+			array( array( 'If-None-Match' => 'W/"foo"' ), array( 'etag' => 'W/"foo"' ), 304 ),
 
 			// Pointless, but supported
-			[ [ 'If-None-Match' => '*' ], [], 304 ],
+			array( array( 'If-None-Match' => '*' ), array(), 304 ),
 
 			// Basic If-Modified-Since
-			[ [ 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ], 304 ],
-			[ [ 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now ) ], 304 ],
-			[ [ 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now + 1 ) ], 200 ],
+			array( array( 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ), 304 ),
+			array( array( 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now ) ), 304 ),
+			array( array( 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now + 1 ) ), 200 ),
 
 			// If-Modified-Since ignored when If-None-Match is given too
-			[ [ 'If-None-Match' => '""', 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ],
-				[ 'etag' => '"x"', 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ], 200 ],
-			[ [ 'If-None-Match' => '""', 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ], 304 ],
+			array( array( 'If-None-Match' => '""', 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ),
+				array( 'etag' => '"x"', 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ), 200 ),
+			array( array( 'If-None-Match' => '""', 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ), 304 ),
 
 			// Ignored for POST
-			[ [ 'If-None-Match' => '"foo", "bar"' ], [ 'etag' => '"bar"' ], 200, true ],
-			[ [ 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ], 200, true ],
+			array( array( 'If-None-Match' => '"foo", "bar"' ), array( 'etag' => '"bar"' ), 200, true ),
+			array( array( 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ), 200, true ),
 
 			// Other date formats allowed by the RFC
-			[ [ 'If-Modified-Since' => gmdate( 'l, d-M-y H:i:s', $now ) . ' GMT' ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ], 304 ],
-			[ [ 'If-Modified-Since' => gmdate( 'D M j H:i:s Y', $now ) ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ], 304 ],
+			array( array( 'If-Modified-Since' => gmdate( 'l, d-M-y H:i:s', $now ) . ' GMT' ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ), 304 ),
+			array( array( 'If-Modified-Since' => gmdate( 'D M j H:i:s Y', $now ) ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ), 304 ),
 
 			// Old browser extension to HTTP/1.0
-			[ [ 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) . '; length=123' ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ], 304 ],
+			array( array( 'If-Modified-Since' => wfTimestamp( TS_RFC2822, $now ) . '; length=123' ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ), 304 ),
 
 			// Invalid date formats should be ignored
-			[ [ 'If-Modified-Since' => gmdate( 'Y-m-d H:i:s', $now ) . ' GMT' ],
-				[ 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ], 200 ],
-		];
+			array( array( 'If-Modified-Since' => gmdate( 'Y-m-d H:i:s', $now ) . ' GMT' ),
+				array( 'last-modified' => wfTimestamp( TS_MW, $now - 1 ) ), 200 ),
+		);
 	}
 
 	/**
@@ -189,10 +186,8 @@ class ApiMainTest extends ApiTestCase {
 	 * @param bool $isError $isError flag
 	 * @param bool $post Request is a POST
 	 */
-	public function testConditionalRequestHeadersOutput(
-		$conditions, $headers, $isError = false, $post = false
-	) {
-		$request = new FauxRequest( [ 'action' => 'query', 'meta' => 'siteinfo' ], $post );
+	public function testConditionalRequestHeadersOutput( $conditions, $headers, $isError = false, $post = false ) {
+		$request = new FauxRequest( array( 'action' => 'query', 'meta' => 'siteinfo' ), $post );
 		$response = $request->response();
 
 		$api = new ApiMain( $request );
@@ -200,8 +195,8 @@ class ApiMainTest extends ApiTestCase {
 		$priv->mInternalMode = false;
 
 		$module = $this->getMockBuilder( 'ApiBase' )
-			->setConstructorArgs( [ $api, 'mock' ] )
-			->setMethods( [ 'getConditionalRequestData' ] )
+			->setConstructorArgs( array( $api, 'mock' ) )
+			->setMethods( array( 'getConditionalRequestData' ) )
 			->getMockForAbstractClass();
 		$module->expects( $this->any() )
 			->method( 'getConditionalRequestData' )
@@ -212,7 +207,7 @@ class ApiMainTest extends ApiTestCase {
 
 		$priv->sendCacheHeaders( $isError );
 
-		foreach ( [ 'Last-Modified', 'ETag' ] as $header ) {
+		foreach ( array( 'Last-Modified', 'ETag' ) as $header ) {
 			$this->assertEquals(
 				isset( $headers[$header] ) ? $headers[$header] : null,
 				$response->getHeader( $header ),
@@ -222,35 +217,35 @@ class ApiMainTest extends ApiTestCase {
 	}
 
 	public static function provideConditionalRequestHeadersOutput() {
-		return [
-			[
-				[],
-				[]
-			],
-			[
-				[ 'etag' => '"foo"' ],
-				[ 'ETag' => '"foo"' ]
-			],
-			[
-				[ 'last-modified' => '20150818000102' ],
-				[ 'Last-Modified' => 'Tue, 18 Aug 2015 00:01:02 GMT' ]
-			],
-			[
-				[ 'etag' => '"foo"', 'last-modified' => '20150818000102' ],
-				[ 'ETag' => '"foo"', 'Last-Modified' => 'Tue, 18 Aug 2015 00:01:02 GMT' ]
-			],
-			[
-				[ 'etag' => '"foo"', 'last-modified' => '20150818000102' ],
-				[],
+		return array(
+			array(
+				array(),
+				array()
+			),
+			array(
+				array( 'etag' => '"foo"' ),
+				array( 'ETag' => '"foo"' )
+			),
+			array(
+				array( 'last-modified' => '20150818000102' ),
+				array( 'Last-Modified' => 'Tue, 18 Aug 2015 00:01:02 GMT' )
+			),
+			array(
+				array( 'etag' => '"foo"', 'last-modified' => '20150818000102' ),
+				array( 'ETag' => '"foo"', 'Last-Modified' => 'Tue, 18 Aug 2015 00:01:02 GMT' )
+			),
+			array(
+				array( 'etag' => '"foo"', 'last-modified' => '20150818000102' ),
+				array(),
 				true,
-			],
-			[
-				[ 'etag' => '"foo"', 'last-modified' => '20150818000102' ],
-				[],
+			),
+			array(
+				array( 'etag' => '"foo"', 'last-modified' => '20150818000102' ),
+				array(),
 				false,
 				true,
-			],
-		];
+			),
+		);
 	}
 
 }

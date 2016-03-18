@@ -51,7 +51,7 @@ class APCBagOStuff extends BagOStuff {
 	 *
 	 * @param array $params
 	 */
-	public function __construct( array $params = [] ) {
+	public function __construct( array $params = array() ) {
 		parent::__construct( $params );
 
 		if ( isset( $params['nativeSerialize'] ) ) {
@@ -74,8 +74,10 @@ class APCBagOStuff extends BagOStuff {
 		}
 	}
 
-	protected function doGet( $key, $flags = 0 ) {
+	public function get( $key, &$casToken = null, $flags = 0 ) {
 		$val = apc_fetch( $key . self::KEY_SUFFIX );
+
+		$casToken = $val;
 
 		if ( is_string( $val ) && !$this->nativeSerialize ) {
 			$val = $this->isInteger( $val )
@@ -86,7 +88,7 @@ class APCBagOStuff extends BagOStuff {
 		return $val;
 	}
 
-	public function set( $key, $value, $exptime = 0, $flags = 0 ) {
+	public function set( $key, $value, $exptime = 0 ) {
 		if ( !$this->nativeSerialize && !$this->isInteger( $value ) ) {
 			$value = serialize( $value );
 		}

@@ -34,14 +34,14 @@ require_once __DIR__ . '/Benchmarker.php';
 class BenchWfIsWindows extends Benchmarker {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Benchmark for wfIsWindows.' );
+		$this->mDescription = "Benchmark for wfIsWindows.";
 	}
 
 	public function execute() {
-		$this->bench( [
-			[ 'function' => [ $this, 'wfIsWindows' ] ],
-			[ 'function' => [ $this, 'wfIsWindowsCached' ] ],
-		] );
+		$this->bench( array(
+			array( 'function' => array( $this, 'wfIsWindows' ) ),
+			array( 'function' => array( $this, 'wfIsWindowsCached' ) ),
+		) );
 		print $this->getFormattedResults();
 	}
 

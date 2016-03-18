@@ -22,32 +22,32 @@
 
 class UserPasswordPolicyTest extends MediaWikiTestCase {
 
-	protected $policies = [
-		'checkuser' => [
+	protected $policies = array(
+		'checkuser' => array(
 			'MinimalPasswordLength' => 10,
 			'MinimumPasswordLengthToLogin' => 6,
 			'PasswordCannotMatchUsername' => true,
-		],
-		'sysop' => [
+		),
+		'sysop' => array(
 			'MinimalPasswordLength' => 8,
 			'MinimumPasswordLengthToLogin' => 1,
 			'PasswordCannotMatchUsername' => true,
-		],
-		'default' => [
+		),
+		'default' => array(
 			'MinimalPasswordLength' => 4,
 			'MinimumPasswordLengthToLogin' => 1,
 			'PasswordCannotMatchBlacklist' => true,
 			'MaximalPasswordLength' => 4096,
-		],
-	];
+		),
+	);
 
-	protected $checks = [
+	protected $checks = array(
 		'MinimalPasswordLength' => 'PasswordPolicyChecks::checkMinimalPasswordLength',
 		'MinimumPasswordLengthToLogin' => 'PasswordPolicyChecks::checkMinimumPasswordLengthToLogin',
 		'PasswordCannotMatchUsername' => 'PasswordPolicyChecks::checkPasswordCannotMatchUsername',
 		'PasswordCannotMatchBlacklist' => 'PasswordPolicyChecks::checkPasswordCannotMatchBlacklist',
 		'MaximalPasswordLength' => 'PasswordPolicyChecks::checkMaximalPasswordLength',
-	];
+	);
 
 	private function getUserPasswordPolicy() {
 		return new UserPasswordPolicy( $this->policies, $this->checks );
@@ -64,13 +64,13 @@ class UserPasswordPolicyTest extends MediaWikiTestCase {
 		$user->addGroup( 'sysop' );
 
 		$this->assertArrayEquals(
-			[
+			array(
 				'MinimalPasswordLength' => 8,
 				'MinimumPasswordLengthToLogin' => 1,
 				'PasswordCannotMatchUsername' => 1,
 				'PasswordCannotMatchBlacklist' => true,
 				'MaximalPasswordLength' => 4096,
-			],
+			),
 			$upp->getPoliciesForUser( $user )
 		);
 	}
@@ -81,18 +81,18 @@ class UserPasswordPolicyTest extends MediaWikiTestCase {
 	public function testGetPoliciesForGroups() {
 		$effective = UserPasswordPolicy::getPoliciesForGroups(
 			$this->policies,
-			[ 'user', 'checkuser' ],
+			array( 'user', 'checkuser' ),
 			$this->policies['default']
 		);
 
 		$this->assertArrayEquals(
-			[
+			array(
 				'MinimalPasswordLength' => 10,
 				'MinimumPasswordLengthToLogin' => 6,
 				'PasswordCannotMatchUsername' => true,
 				'PasswordCannotMatchBlacklist' => true,
 				'MaximalPasswordLength' => 4096,
-			],
+			),
 			$effective
 		);
 	}
@@ -116,64 +116,64 @@ class UserPasswordPolicyTest extends MediaWikiTestCase {
 	}
 
 	public function provideCheckUserPassword() {
-		return [
-			[
+		return array(
+			array(
 				'PassPolicyUser',
-				[],
+				array(),
 				'',
 				false,
 				false,
 				'No groups, default policy, password too short to login'
-			],
-			[
+			),
+			array(
 				'PassPolicyUser',
-				[ 'user' ],
+				array( 'user' ),
 				'aaa',
 				false,
 				true,
 				'Default policy, short password'
-			],
-			[
+			),
+			array(
 				'PassPolicyUser',
-				[ 'sysop' ],
+				array( 'sysop' ),
 				'abcdabcdabcd',
 				true,
 				true,
 				'Sysop with good password'
-			],
-			[
+			),
+			array(
 				'PassPolicyUser',
-				[ 'sysop' ],
+				array( 'sysop' ),
 				'abcd',
 				false,
 				true,
 				'Sysop with short password'
-			],
-			[
+			),
+			array(
 				'PassPolicyUser',
-				[ 'sysop', 'checkuser' ],
+				array( 'sysop', 'checkuser' ),
 				'abcdabcd',
 				false,
 				true,
 				'Checkuser with short password'
-			],
-			[
+			),
+			array(
 				'PassPolicyUser',
-				[ 'sysop', 'checkuser' ],
+				array( 'sysop', 'checkuser' ),
 				'abcd',
 				false,
 				false,
 				'Checkuser with too short password to login'
-			],
-			[
+			),
+			array(
 				'Useruser',
-				[ 'user' ],
+				array( 'user' ),
 				'Passpass',
 				false,
 				true,
 				'Username & password on blacklist'
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -189,46 +189,46 @@ class UserPasswordPolicyTest extends MediaWikiTestCase {
 	}
 
 	public function provideMaxOfPolicies() {
-		return [
-			[
-				[ 'MinimalPasswordLength' => 8 ], // p1
-				[ 'MinimalPasswordLength' => 2 ], // p2
-				[ 'MinimalPasswordLength' => 8 ], // max
+		return array(
+			array(
+				array( 'MinimalPasswordLength' => 8 ), //p1
+				array( 'MinimalPasswordLength' => 2 ), //p2
+				array( 'MinimalPasswordLength' => 8 ), //max
 				'Basic max in p1'
-			],
-			[
-				[ 'MinimalPasswordLength' => 2 ], // p1
-				[ 'MinimalPasswordLength' => 8 ], // p2
-				[ 'MinimalPasswordLength' => 8 ], // max
+			),
+			array(
+				array( 'MinimalPasswordLength' => 2 ), //p1
+				array( 'MinimalPasswordLength' => 8 ), //p2
+				array( 'MinimalPasswordLength' => 8 ), //max
 				'Basic max in p2'
-			],
-			[
-				[ 'MinimalPasswordLength' => 8 ], // p1
-				[
+			),
+			array(
+				array( 'MinimalPasswordLength' => 8 ), //p1
+				array(
 					'MinimalPasswordLength' => 2,
 					'PasswordCannotMatchUsername' => 1,
-				], // p2
-				[
+				), //p2
+				array(
 					'MinimalPasswordLength' => 8,
 					'PasswordCannotMatchUsername' => 1,
-				], // max
+				), //max
 				'Missing items in p1'
-			],
-			[
-				[
+			),
+			array(
+				array(
 					'MinimalPasswordLength' => 8,
 					'PasswordCannotMatchUsername' => 1,
-				], // p1
-				[
+				), //p1
+				array(
 					'MinimalPasswordLength' => 2,
-				], // p2
-				[
+				), //p2
+				array(
 					'MinimalPasswordLength' => 8,
 					'PasswordCannotMatchUsername' => 1,
-				], // max
+				), //max
 				'Missing items in p2'
-			],
-		];
+			),
+		);
 	}
 
 }

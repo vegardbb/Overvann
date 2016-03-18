@@ -174,6 +174,7 @@
 		loadedScripts[ url ] = true;
 		var s = document.createElement( 'script' );
 		s.setAttribute( 'src', url );
+		s.setAttribute( 'type', 'text/javascript' );
 		document.getElementsByTagName( 'head' )[ 0 ].appendChild( s );
 		return s;
 	}

@@ -44,31 +44,31 @@ class MostlinkedPage extends QueryPage {
 	}
 
 	public function getQueryInfo() {
-		return [
-			'tables' => [ 'pagelinks', 'page' ],
-			'fields' => [
+		return array(
+			'tables' => array( 'pagelinks', 'page' ),
+			'fields' => array(
 				'namespace' => 'pl_namespace',
 				'title' => 'pl_title',
 				'value' => 'COUNT(*)',
 				'page_namespace'
-			],
-			'options' => [
+			),
+			'options' => array(
 				'HAVING' => 'COUNT(*) > 1',
-				'GROUP BY' => [
+				'GROUP BY' => array(
 					'pl_namespace', 'pl_title',
 					'page_namespace'
-				]
-			],
-			'join_conds' => [
-				'page' => [
+				)
+			),
+			'join_conds' => array(
+				'page' => array(
 					'LEFT JOIN',
-					[
+					array(
 						'page_namespace = pl_namespace',
 						'page_title = pl_title'
-					]
-				]
-			]
-		];
+					)
+				)
+			)
+		);
 	}
 
 	/**
@@ -116,7 +116,7 @@ class MostlinkedPage extends QueryPage {
 		if ( !$title ) {
 			return Html::element(
 				'span',
-				[ 'class' => 'mw-invalidtitle' ],
+				array( 'class' => 'mw-invalidtitle' ),
 				Linker::getInvalidTitleDescription(
 					$this->getContext(),
 					$result->namespace,

@@ -31,16 +31,16 @@ abstract class ImageHandler extends MediaHandler {
 	 * @param File $file
 	 * @return bool
 	 */
-	public function canRender( $file ) {
+	function canRender( $file ) {
 		return ( $file->getWidth() && $file->getHeight() );
 	}
 
-	public function getParamMap() {
-		return [ 'img_width' => 'width' ];
+	function getParamMap() {
+		return array( 'img_width' => 'width' );
 	}
 
-	public function validateParam( $name, $value ) {
-		if ( in_array( $name, [ 'width', 'height' ] ) ) {
+	function validateParam( $name, $value ) {
+		if ( in_array( $name, array( 'width', 'height' ) ) ) {
 			if ( $value <= 0 ) {
 				return false;
 			} else {
@@ -51,7 +51,7 @@ abstract class ImageHandler extends MediaHandler {
 		}
 	}
 
-	public function makeParamString( $params ) {
+	function makeParamString( $params ) {
 		if ( isset( $params['physicalWidth'] ) ) {
 			$width = $params['physicalWidth'];
 		} elseif ( isset( $params['width'] ) ) {
@@ -61,21 +61,21 @@ abstract class ImageHandler extends MediaHandler {
 		}
 
 		# Removed for ProofreadPage
-		# $width = intval( $width );
+		#$width = intval( $width );
 		return "{$width}px";
 	}
 
-	public function parseParamString( $str ) {
+	function parseParamString( $str ) {
 		$m = false;
 		if ( preg_match( '/^(\d+)px$/', $str, $m ) ) {
-			return [ 'width' => $m[1] ];
+			return array( 'width' => $m[1] );
 		} else {
 			return false;
 		}
 	}
 
 	function getScriptParams( $params ) {
-		return [ 'width' => $params['width'] ];
+		return array( 'width' => $params['width'] );
 	}
 
 	/**

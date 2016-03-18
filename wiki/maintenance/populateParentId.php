@@ -34,7 +34,7 @@ require_once __DIR__ . '/Maintenance.php';
 class PopulateParentId extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Populates rev_parent_id' );
+		$this->mDescription = "Populates rev_parent_id";
 	}
 
 	protected function getUpdateKey() {
@@ -46,7 +46,7 @@ class PopulateParentId extends LoggedUpdateMaintenance {
 	}
 
 	protected function doDBUpdates() {
-		$db = $this->getDB( DB_MASTER );
+		$db = wfGetDB( DB_MASTER );
 		if ( !$db->tableExists( 'revision' ) ) {
 			$this->error( "revision table does not exist" );
 
@@ -69,8 +69,8 @@ class PopulateParentId extends LoggedUpdateMaintenance {
 			$this->output( "...doing rev_id from $blockStart to $blockEnd\n" );
 			$cond = "rev_id BETWEEN $blockStart AND $blockEnd";
 			$res = $db->select( 'revision',
-				[ 'rev_id', 'rev_page', 'rev_timestamp', 'rev_parent_id' ],
-				[ $cond, 'rev_parent_id' => null ], __METHOD__ );
+				array( 'rev_id', 'rev_page', 'rev_timestamp', 'rev_parent_id' ),
+				array( $cond, 'rev_parent_id' => null ), __METHOD__ );
 			# Go through and update rev_parent_id from these rows.
 			# Assume that the previous revision of the title was
 			# the original previous revision of the title when the
@@ -80,29 +80,29 @@ class PopulateParentId extends LoggedUpdateMaintenance {
 				# with a smaller rev ID. The highest ID "wins". This avoids loops
 				# as timestamp can only decrease and never loops with IDs (from parent to parent)
 				$previousID = $db->selectField( 'revision', 'rev_id',
-					[ 'rev_page' => $row->rev_page, 'rev_timestamp' => $row->rev_timestamp,
-						"rev_id < " . intval( $row->rev_id ) ],
+					array( 'rev_page' => $row->rev_page, 'rev_timestamp' => $row->rev_timestamp,
+						"rev_id < " . intval( $row->rev_id ) ),
 					__METHOD__,
-					[ 'ORDER BY' => 'rev_id DESC' ] );
+					array( 'ORDER BY' => 'rev_id DESC' ) );
 				# If there are none, check the highest ID with a lower timestamp
 				if ( !$previousID ) {
 					# Get the highest older timestamp
 					$lastTimestamp = $db->selectField(
 						'revision',
 						'rev_timestamp',
-						[
+						array(
 							'rev_page' => $row->rev_page,
 							"rev_timestamp < " . $db->addQuotes( $row->rev_timestamp )
-						],
+						),
 						__METHOD__,
-						[ 'ORDER BY' => 'rev_timestamp DESC' ]
+						array( 'ORDER BY' => 'rev_timestamp DESC' )
 					);
 					# If there is one, let the highest rev ID win
 					if ( $lastTimestamp ) {
 						$previousID = $db->selectField( 'revision', 'rev_id',
-							[ 'rev_page' => $row->rev_page, 'rev_timestamp' => $lastTimestamp ],
+							array( 'rev_page' => $row->rev_page, 'rev_timestamp' => $lastTimestamp ),
 							__METHOD__,
-							[ 'ORDER BY' => 'rev_id DESC' ] );
+							array( 'ORDER BY' => 'rev_id DESC' ) );
 					}
 				}
 				$previousID = intval( $previousID );
@@ -111,8 +111,8 @@ class PopulateParentId extends LoggedUpdateMaintenance {
 				}
 				# Update the row...
 				$db->update( 'revision',
-					[ 'rev_parent_id' => $previousID ],
-					[ 'rev_id' => $row->rev_id ],
+					array( 'rev_parent_id' => $previousID ),
+					array( 'rev_id' => $row->rev_id ),
 					__METHOD__ );
 				$count++;
 			}

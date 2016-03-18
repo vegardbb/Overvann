@@ -71,14 +71,15 @@ class LanguageOs extends Language {
 		if ( preg_match( '/тæ$/u', $word ) ) {
 			$word = mb_substr( $word, 0, -1 );
 			$end_allative = 'æм';
-		} elseif ( preg_match( "/[аæеёиоыэюя]$/u", $word ) ) {
-			# Works if $word is in singular form.
-			# Checking if $word ends on one of the vowels: е, ё, и, о, ы, э, ю, я.
+		}
+		# Works if $word is in singular form.
+		# Checking if $word ends on one of the vowels: е, ё, и, о, ы, э, ю, я.
+		elseif ( preg_match( "/[аæеёиоыэюя]$/u", $word ) ) {
 			$jot = 'й';
-		} elseif ( preg_match( "/у$/u", $word ) ) {
-			# Checking if $word ends on 'у'. 'У'
-			# can be either consonant 'W' or vowel 'U' in cyrillic Ossetic.
-			# Examples: {{grammar:genitive|аунеу}} = аунеуы, {{grammar:genitive|лæппу}} = лæппуйы.
+		}
+		# Checking if $word ends on 'у'. 'У' can be either consonant 'W' or vowel 'U' in cyrillic Ossetic.
+		# Examples: {{grammar:genitive|аунеу}} = аунеуы, {{grammar:genitive|лæппу}} = лæппуйы.
+		elseif ( preg_match( "/у$/u", $word ) ) {
 			if ( !preg_match( "/[аæеёиоыэюя]$/u", mb_substr( $word, -2, 1 ) ) ) {
 				$jot = 'й';
 			}

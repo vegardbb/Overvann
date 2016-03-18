@@ -22,13 +22,13 @@
  *     - Optional CSS class used on tooltip container span. Defaults to mw-icon-question.
  */
 class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
-	static private $requiredParams = [
+	static private $requiredParams = array(
 		// Required by underlying HTMLFormField
 		'fieldname',
 		// Required by HTMLCheckMatrix
 		'rows',
 		'columns'
-	];
+	);
 
 	public function __construct( $params ) {
 		$missing = array_diff( self::$requiredParams, array_keys( $params ) );
@@ -55,7 +55,7 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 
 		// If all options are valid, array_intersect of the valid options
 		// and the provided options will return the provided options.
-		$validOptions = [];
+		$validOptions = array();
 		foreach ( $rows as $rowTag ) {
 			foreach ( $columns as $columnTag ) {
 				$validOptions[] = $columnTag . '-' . $rowTag;
@@ -85,20 +85,20 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 		$rows = $this->mParams['rows'];
 		$columns = $this->mParams['columns'];
 
-		$mappings = [];
+		$mappings = array();
 
 		if ( $this->mParent instanceof OOUIHTMLForm ) {
 			$mappings['tabindex'] = 'tabIndex';
 		}
 
-		$attribs = $this->getAttributes( [ 'disabled', 'tabindex' ], $mappings );
+		$attribs = $this->getAttributes( array( 'disabled', 'tabindex' ), $mappings );
 
 		// Build the column headers
-		$headerContents = Html::rawElement( 'td', [], '&#160;' );
+		$headerContents = Html::rawElement( 'td', array(), '&#160;' );
 		foreach ( $columns as $columnLabel => $columnTag ) {
-			$headerContents .= Html::rawElement( 'td', [], $columnLabel );
+			$headerContents .= Html::rawElement( 'td', array(), $columnLabel );
 		}
-		$tableContents .= Html::rawElement( 'tr', [], "\n$headerContents\n" );
+		$tableContents .= Html::rawElement( 'tr', array(), "\n$headerContents\n" );
 
 		$tooltipClass = 'mw-icon-question';
 		if ( isset( $this->mParams['tooltip-class'] ) ) {
@@ -109,20 +109,20 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 		foreach ( $rows as $rowLabel => $rowTag ) {
 			// Append tooltip if configured
 			if ( isset( $this->mParams['tooltips'][$rowLabel] ) ) {
-				$tooltipAttribs = [
+				$tooltipAttribs = array(
 					'class' => "mw-htmlform-tooltip $tooltipClass",
 					'title' => $this->mParams['tooltips'][$rowLabel],
-				];
+				);
 				$rowLabel .= ' ' . Html::element( 'span', $tooltipAttribs, '' );
 			}
-			$rowContents = Html::rawElement( 'td', [], $rowLabel );
+			$rowContents = Html::rawElement( 'td', array(), $rowLabel );
 			foreach ( $columns as $columnTag ) {
 				$thisTag = "$columnTag-$rowTag";
 				// Construct the checkbox
-				$thisAttribs = [
+				$thisAttribs = array(
 					'id' => "{$this->mID}-$thisTag",
 					'value' => $thisTag,
-				];
+				);
 				$checked = in_array( $thisTag, (array)$value, true );
 				if ( $this->isTagForcedOff( $thisTag ) ) {
 					$checked = false;
@@ -136,34 +136,34 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 
 				$rowContents .= Html::rawElement(
 					'td',
-					[],
+					array(),
 					$checkbox
 				);
 			}
-			$tableContents .= Html::rawElement( 'tr', [], "\n$rowContents\n" );
+			$tableContents .= Html::rawElement( 'tr', array(), "\n$rowContents\n" );
 		}
 
 		// Put it all in a table
 		$html .= Html::rawElement( 'table',
-				[ 'class' => 'mw-htmlform-matrix' ],
-				Html::rawElement( 'tbody', [], "\n$tableContents\n" ) ) . "\n";
+				array( 'class' => 'mw-htmlform-matrix' ),
+				Html::rawElement( 'tbody', array(), "\n$tableContents\n" ) ) . "\n";
 
 		return $html;
 	}
 
 	protected function getOneCheckbox( $checked, $attribs ) {
 		if ( $this->mParent instanceof OOUIHTMLForm ) {
-			return new OOUI\CheckboxInputWidget( [
+			return new OOUI\CheckboxInputWidget( array(
 				'name' => "{$this->mName}[]",
 				'selected' => $checked,
 				'value' => $attribs['value'],
-			] + $attribs );
+			) + $attribs );
 		} else {
 			$checkbox = Xml::check( "{$this->mName}[]", $checked, $attribs );
 			if ( $this->mParent->getConfig()->get( 'UseMediaWikiUIEverywhere' ) ) {
-				$checkbox = Html::openElement( 'div', [ 'class' => 'mw-ui-checkbox' ] ) .
+				$checkbox = Html::openElement( 'div', array( 'class' => 'mw-ui-checkbox' ) ) .
 					$checkbox .
-					Html::element( 'label', [ 'for' => $attribs['id'] ] ) .
+					Html::element( 'label', array( 'for' => $attribs['id'] ) ) .
 					Html::closeElement( 'div' );
 			}
 			return $checkbox;
@@ -196,10 +196,10 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 		$inputHtml = $this->getInputHTML( $value );
 		$fieldType = get_class( $this );
 		$helptext = $this->getHelpTextHtmlTable( $this->getHelpText() );
-		$cellAttributes = [ 'colspan' => 2 ];
+		$cellAttributes = array( 'colspan' => 2 );
 
 		$hideClass = '';
-		$hideAttributes = [];
+		$hideAttributes = array();
 		if ( $this->mHideIf ) {
 			$hideAttributes['data-hide-if'] = FormatJson::encode( $this->mHideIf );
 			$hideClass = 'mw-htmlform-hide-if';
@@ -209,15 +209,15 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 
 		$field = Html::rawElement(
 			'td',
-			[ 'class' => 'mw-input' ] + $cellAttributes,
+			array( 'class' => 'mw-input' ) + $cellAttributes,
 			$inputHtml . "\n$errors"
 		);
 
 		$html = Html::rawElement( 'tr',
-			[ 'class' => "mw-htmlform-vertical-label $hideClass" ] + $hideAttributes,
+			array( 'class' => "mw-htmlform-vertical-label $hideClass" ) + $hideAttributes,
 			$label );
 		$html .= Html::rawElement( 'tr',
-			[ 'class' => "mw-htmlform-field-$fieldType {$this->mClass} $errorClass $hideClass" ] +
+			array( 'class' => "mw-htmlform-field-$fieldType {$this->mClass} $errorClass $hideClass" ) +
 				$hideAttributes,
 			$field );
 
@@ -234,7 +234,7 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 			if ( $request->wasPosted() ) {
 				// Checkboxes are not added to the request arrays if they're not checked,
 				// so it's perfectly possible for there not to be an entry at all
-				return $request->getArray( $this->mName, [] );
+				return $request->getArray( $this->mName, array() );
 			} else {
 				// That's ok, the user has not yet submitted the form, so show the defaults
 				return $this->getDefault();
@@ -245,7 +245,7 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 			// have submitted it with all the options unchecked. We will have to assume the
 			// latter, which basically means that you can't specify 'positive' defaults
 			// for GET forms.
-			return $request->getArray( $this->mName, [] );
+			return $request->getArray( $this->mName, array() );
 		}
 	}
 
@@ -253,14 +253,14 @@ class HTMLCheckMatrix extends HTMLFormField implements HTMLNestedFilterable {
 		if ( isset( $this->mDefault ) ) {
 			return $this->mDefault;
 		} else {
-			return [];
+			return array();
 		}
 	}
 
 	function filterDataForSubmit( $data ) {
 		$columns = HTMLFormField::flattenOptions( $this->mParams['columns'] );
 		$rows = HTMLFormField::flattenOptions( $this->mParams['rows'] );
-		$res = [];
+		$res = array();
 		foreach ( $columns as $column ) {
 			foreach ( $rows as $row ) {
 				// Make sure option hasn't been forced

@@ -51,7 +51,7 @@ class SpecialProtectedpages extends SpecialPage {
 
 		$pager = new ProtectedPagesPager(
 			$this,
-			[],
+			array(),
 			$type,
 			$level,
 			$ns,
@@ -96,20 +96,21 @@ class SpecialProtectedpages extends SpecialPage {
 	) {
 		$title = $this->getPageTitle();
 
-		return Xml::openElement( 'form', [ 'method' => 'get', 'action' => wfScript() ] ) .
+		return Xml::openElement( 'form', array( 'method' => 'get', 'action' => wfScript() ) ) .
 			Xml::openElement( 'fieldset' ) .
-			Xml::element( 'legend', [], $this->msg( 'protectedpages' )->text() ) .
+			Xml::element( 'legend', array(), $this->msg( 'protectedpages' )->text() ) .
 			Html::hidden( 'title', $title->getPrefixedDBkey() ) . "\n" .
-			$this->getNamespaceMenu( $namespace ) . "\n" .
-			$this->getTypeMenu( $type ) . "\n" .
-			$this->getLevelMenu( $level ) . "\n" .
-			"<br />\n" .
-			$this->getExpiryCheck( $indefOnly ) . "\n" .
-			$this->getCascadeCheck( $cascadeOnly ) . "\n" .
-			$this->getRedirectCheck( $noRedirect ) . "\n" .
-			"<br />\n" .
-			$this->getSizeLimit( $sizetype, $size ) . "\n" .
-			Xml::submitButton( $this->msg( 'protectedpages-submit' )->text() ) . "\n" .
+			$this->getNamespaceMenu( $namespace ) . "&#160;\n" .
+			$this->getTypeMenu( $type ) . "&#160;\n" .
+			$this->getLevelMenu( $level ) . "&#160;\n" .
+			"<br /><span style='white-space: nowrap'>" .
+			$this->getExpiryCheck( $indefOnly ) . "&#160;\n" .
+			$this->getCascadeCheck( $cascadeOnly ) . "&#160;\n" .
+			$this->getRedirectCheck( $noRedirect ) . "&#160;\n" .
+			"</span><br /><span style='white-space: nowrap'>" .
+			$this->getSizeLimit( $sizetype, $size ) . "&#160;\n" .
+			"</span>" .
+			"&#160;" . Xml::submitButton( $this->msg( 'allpagessubmit' )->text() ) . "\n" .
 			Xml::closeElement( 'fieldset' ) .
 			Xml::closeElement( 'form' );
 	}
@@ -122,17 +123,17 @@ class SpecialProtectedpages extends SpecialPage {
 	 * @return string
 	 */
 	protected function getNamespaceMenu( $namespace = null ) {
-		return Html::rawElement( 'span', [ 'class' => 'mw-input-with-label' ],
+		return Html::rawElement( 'span', array( 'style' => 'white-space: nowrap;' ),
 			Html::namespaceSelector(
-				[
+				array(
 					'selected' => $namespace,
 					'all' => '',
 					'label' => $this->msg( 'namespace' )->text()
-				], [
+				), array(
 					'name' => 'namespace',
 					'id' => 'namespace',
 					'class' => 'namespaceselector',
-				]
+				)
 			)
 		);
 	}
@@ -142,12 +143,12 @@ class SpecialProtectedpages extends SpecialPage {
 	 * @return string Formatted HTML
 	 */
 	protected function getExpiryCheck( $indefOnly ) {
-		return '<span class="mw-input-with-label">' . Xml::checkLabel(
+		return Xml::checkLabel(
 			$this->msg( 'protectedpages-indef' )->text(),
 			'indefonly',
 			'indefonly',
 			$indefOnly
-		) . "</span>\n";
+		) . "\n";
 	}
 
 	/**
@@ -155,12 +156,12 @@ class SpecialProtectedpages extends SpecialPage {
 	 * @return string Formatted HTML
 	 */
 	protected function getCascadeCheck( $cascadeOnly ) {
-		return '<span class="mw-input-with-label">' . Xml::checkLabel(
+		return Xml::checkLabel(
 			$this->msg( 'protectedpages-cascade' )->text(),
 			'cascadeonly',
 			'cascadeonly',
 			$cascadeOnly
-		) . "</span>\n";
+		) . "\n";
 	}
 
 	/**
@@ -168,12 +169,12 @@ class SpecialProtectedpages extends SpecialPage {
 	 * @return string Formatted HTML
 	 */
 	protected function getRedirectCheck( $noRedirect ) {
-		return '<span class="mw-input-with-label">' . Xml::checkLabel(
+		return Xml::checkLabel(
 			$this->msg( 'protectedpages-noredirect' )->text(),
 			'noredirect',
 			'noredirect',
 			$noRedirect
-		) . "</span>\n";
+		) . "\n";
 	}
 
 	/**
@@ -184,14 +185,14 @@ class SpecialProtectedpages extends SpecialPage {
 	protected function getSizeLimit( $sizetype, $size ) {
 		$max = $sizetype === 'max';
 
-		return '<span class="mw-input-with-label">' . Xml::radioLabel(
+		return Xml::radioLabel(
 			$this->msg( 'minimum-size' )->text(),
 			'sizetype',
 			'min',
 			'wpmin',
 			!$max
 		) .
-			' ' .
+			'&#160;' .
 			Xml::radioLabel(
 				$this->msg( 'maximum-size' )->text(),
 				'sizetype',
@@ -199,10 +200,10 @@ class SpecialProtectedpages extends SpecialPage {
 				'wpmax',
 				$max
 			) .
-			' ' .
-			Xml::input( 'size', 9, $size, [ 'id' => 'wpsize' ] ) .
-			' ' .
-			Xml::label( $this->msg( 'pagesize' )->text(), 'wpsize' ) . "</span>\n";
+			'&#160;' .
+			Xml::input( 'size', 9, $size, array( 'id' => 'wpsize' ) ) .
+			'&#160;' .
+			Xml::label( $this->msg( 'pagesize' )->text(), 'wpsize' );
 	}
 
 	/**
@@ -211,8 +212,8 @@ class SpecialProtectedpages extends SpecialPage {
 	 * @return string Formatted HTML
 	 */
 	protected function getTypeMenu( $pr_type ) {
-		$m = []; // Temporary array
-		$options = [];
+		$m = array(); // Temporary array
+		$options = array();
 
 		// First pass to load the log names
 		foreach ( Title::getFilteredRestrictionTypes( true ) as $type ) {
@@ -227,10 +228,10 @@ class SpecialProtectedpages extends SpecialPage {
 			$options[] = Xml::option( $text, $type, $selected ) . "\n";
 		}
 
-		return '<span class="mw-input-with-label">' .
-			Xml::label( $this->msg( 'restriction-type' )->text(), $this->IdType ) . ' ' .
+		return "<span style='white-space: nowrap'>" .
+			Xml::label( $this->msg( 'restriction-type' )->text(), $this->IdType ) . '&#160;' .
 			Xml::tags( 'select',
-				[ 'id' => $this->IdType, 'name' => $this->IdType ],
+				array( 'id' => $this->IdType, 'name' => $this->IdType ),
 				implode( "\n", $options ) ) . "</span>";
 	}
 
@@ -241,8 +242,8 @@ class SpecialProtectedpages extends SpecialPage {
 	 */
 	protected function getLevelMenu( $pr_level ) {
 		// Temporary array
-		$m = [ $this->msg( 'restriction-level-all' )->text() => 0 ];
-		$options = [];
+		$m = array( $this->msg( 'restriction-level-all' )->text() => 0 );
+		$options = array();
 
 		// First pass to load the log names
 		foreach ( $this->getConfig()->get( 'RestrictionLevels' ) as $type ) {
@@ -259,10 +260,10 @@ class SpecialProtectedpages extends SpecialPage {
 			$options[] = Xml::option( $text, $type, $selected );
 		}
 
-		return '<span class="mw-input-with-label">' .
+		return "<span style='white-space: nowrap'>" .
 			Xml::label( $this->msg( 'restriction-level' )->text(), $this->IdLevel ) . ' ' .
 			Xml::tags( 'select',
-				[ 'id' => $this->IdLevel, 'name' => $this->IdLevel ],
+				array( 'id' => $this->IdLevel, 'name' => $this->IdLevel ),
 				implode( "\n", $options ) ) . "</span>";
 	}
 
@@ -279,7 +280,7 @@ class ProtectedPagesPager extends TablePager {
 	public $mForm, $mConds;
 	private $type, $level, $namespace, $sizetype, $size, $indefonly, $cascadeonly, $noredirect;
 
-	function __construct( $form, $conds = [], $type, $level, $namespace,
+	function __construct( $form, $conds = array(), $type, $level, $namespace,
 		$sizetype = '', $size = 0, $indefonly = false, $cascadeonly = false, $noredirect = false
 	) {
 		$this->mForm = $form;
@@ -298,7 +299,7 @@ class ProtectedPagesPager extends TablePager {
 	function preprocessResults( $result ) {
 		# Do a link batch query
 		$lb = new LinkBatch;
-		$userids = [];
+		$userids = array();
 
 		foreach ( $result as $row ) {
 			$lb->add( $row->page_namespace, $row->page_title );
@@ -311,7 +312,7 @@ class ProtectedPagesPager extends TablePager {
 		// fill LinkBatch with user page and user talk
 		if ( count( $userids ) ) {
 			$userCache = UserCache::singleton();
-			$userCache->doQuery( $userids, [], __METHOD__ );
+			$userCache->doQuery( $userids, array(), __METHOD__ );
 			foreach ( $userids as $userid ) {
 				$name = $userCache->getProp( $userid, 'name' );
 				if ( $name !== false ) {
@@ -327,15 +328,15 @@ class ProtectedPagesPager extends TablePager {
 	function getFieldNames() {
 		static $headers = null;
 
-		if ( $headers == [] ) {
-			$headers = [
+		if ( $headers == array() ) {
+			$headers = array(
 				'log_timestamp' => 'protectedpages-timestamp',
 				'pr_page' => 'protectedpages-page',
 				'pr_expiry' => 'protectedpages-expiry',
 				'log_user' => 'protectedpages-performer',
 				'pr_params' => 'protectedpages-params',
 				'log_comment' => 'protectedpages-reason',
-			];
+			);
 			foreach ( $headers as $key => $val ) {
 				$headers[$key] = $this->msg( $val )->text();
 			}
@@ -362,7 +363,7 @@ class ProtectedPagesPager extends TablePager {
 				if ( $value === null ) {
 					$formatted = Html::rawElement(
 						'span',
-						[ 'class' => 'mw-protectedpages-unknown' ],
+						array( 'class' => 'mw-protectedpages-unknown' ),
 						$this->msg( 'protectedpages-unknown-timestamp' )->escaped()
 					);
 				} else {
@@ -376,7 +377,7 @@ class ProtectedPagesPager extends TablePager {
 				if ( !$title ) {
 					$formatted = Html::element(
 						'span',
-						[ 'class' => 'mw-invalidtitle' ],
+						array( 'class' => 'mw-invalidtitle' ),
 						Linker::getInvalidTitleDescription(
 							$this->getContext(),
 							$row->page_namespace,
@@ -390,7 +391,7 @@ class ProtectedPagesPager extends TablePager {
 					$formatted .= $this->getLanguage()->getDirMark() .
 						' ' . Html::rawElement(
 						'span',
-						[ 'class' => 'mw-protectedpages-length' ],
+						array( 'class' => 'mw-protectedpages-length' ),
 						Linker::formatRevisionSize( $row->page_len )
 					);
 				}
@@ -404,12 +405,12 @@ class ProtectedPagesPager extends TablePager {
 					$changeProtection = Linker::linkKnown(
 						$title,
 						$this->msg( 'protect_change' )->escaped(),
-						[],
-						[ 'action' => 'unprotect' ]
+						array(),
+						array( 'action' => 'unprotect' )
 					);
 					$formatted .= ' ' . Html::rawElement(
 						'span',
-						[ 'class' => 'mw-protectedpages-actions' ],
+						array( 'class' => 'mw-protectedpages-actions' ),
 						$this->msg( 'parentheses' )->rawParams( $changeProtection )->escaped()
 					);
 				}
@@ -420,7 +421,7 @@ class ProtectedPagesPager extends TablePager {
 				if ( $row->log_timestamp === null ) {
 					$formatted = Html::rawElement(
 						'span',
-						[ 'class' => 'mw-protectedpages-unknown' ],
+						array( 'class' => 'mw-protectedpages-unknown' ),
 						$this->msg( 'protectedpages-unknown-performer' )->escaped()
 					);
 				} else {
@@ -446,7 +447,7 @@ class ProtectedPagesPager extends TablePager {
 				break;
 
 			case 'pr_params':
-				$params = [];
+				$params = array();
 				// Messages: restriction-level-sysop, restriction-level-autoconfirmed
 				$params[] = $this->msg( 'restriction-level-' . $row->pr_level )->escaped();
 				if ( $row->pr_cascade ) {
@@ -460,7 +461,7 @@ class ProtectedPagesPager extends TablePager {
 				if ( $row->log_timestamp === null ) {
 					$formatted = Html::rawElement(
 						'span',
-						[ 'class' => 'mw-protectedpages-unknown' ],
+						array( 'class' => 'mw-protectedpages-unknown' ),
 						$this->msg( 'protectedpages-unknown-reason' )->escaped()
 					);
 				} else {
@@ -517,9 +518,9 @@ class ProtectedPagesPager extends TablePager {
 			$conds[] = 'page_namespace=' . $this->mDb->addQuotes( $this->namespace );
 		}
 
-		return [
-			'tables' => [ 'page', 'page_restrictions', 'log_search', 'logging' ],
-			'fields' => [
+		return array(
+			'tables' => array( 'page', 'page_restrictions', 'log_search', 'logging' ),
+			'fields' => array(
 				'pr_id',
 				'page_namespace',
 				'page_title',
@@ -532,21 +533,21 @@ class ProtectedPagesPager extends TablePager {
 				'log_user',
 				'log_comment',
 				'log_deleted',
-			],
+			),
 			'conds' => $conds,
-			'join_conds' => [
-				'log_search' => [
-					'LEFT JOIN', [
+			'join_conds' => array(
+				'log_search' => array(
+					'LEFT JOIN', array(
 						'ls_field' => 'pr_id', 'ls_value = pr_id'
-					]
-				],
-				'logging' => [
-					'LEFT JOIN', [
+					)
+				),
+				'logging' => array(
+					'LEFT JOIN', array(
 						'ls_log_id = log_id'
-					]
-				]
-			]
-		];
+					)
+				)
+			)
+		);
 	}
 
 	public function getTableClass() {

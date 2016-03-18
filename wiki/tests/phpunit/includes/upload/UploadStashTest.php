@@ -23,20 +23,20 @@ class UploadStashTest extends MediaWikiTestCase {
 		$this->bug29408File = wfTempDir() . '/bug29408';
 		file_put_contents( $this->bug29408File, "\x00" );
 
-		self::$users = [
+		self::$users = array(
 			'sysop' => new TestUser(
 				'Uploadstashtestsysop',
 				'Upload Stash Test Sysop',
 				'upload_stash_test_sysop@example.com',
-				[ 'sysop' ]
+				array( 'sysop' )
 			),
 			'uploader' => new TestUser(
 				'Uploadstashtestuser',
 				'Upload Stash Test User',
 				'upload_stash_test_user@example.com',
-				[]
+				array()
 			)
-		];
+		);
 	}
 
 	protected function tearDown() {
@@ -69,12 +69,12 @@ class UploadStashTest extends MediaWikiTestCase {
 	}
 
 	public static function provideInvalidRequests() {
-		return [
+		return array(
 			'Check failure on bad wpFileKey' =>
-				[ new FauxRequest( [ 'wpFileKey' => 'foo' ] ) ],
+				array( new FauxRequest( array( 'wpFileKey' => 'foo' ) ) ),
 			'Check failure on bad wpSessionKey' =>
-				[ new FauxRequest( [ 'wpSessionKey' => 'foo' ] ) ],
-		];
+				array( new FauxRequest( array( 'wpSessionKey' => 'foo' ) ) ),
+		);
 	}
 
 	/**
@@ -85,17 +85,17 @@ class UploadStashTest extends MediaWikiTestCase {
 	}
 
 	public static function provideValidRequests() {
-		return [
+		return array(
 			'Check good wpFileKey' =>
-				[ new FauxRequest( [ 'wpFileKey' => 'testkey-test.test' ] ) ],
+				array( new FauxRequest( array( 'wpFileKey' => 'testkey-test.test' ) ) ),
 			'Check good wpSessionKey' =>
-				[ new FauxRequest( [ 'wpFileKey' => 'testkey-test.test' ] ) ],
+				array( new FauxRequest( array( 'wpFileKey' => 'testkey-test.test' ) ) ),
 			'Check key precedence' =>
-				[ new FauxRequest( [
+				array( new FauxRequest( array(
 					'wpFileKey' => 'testkey-test.test',
 					'wpSessionKey' => 'foo'
-				] ) ],
-		];
+				) ) ),
+		);
 	}
 	/**
 	 * @dataProvider provideValidRequests

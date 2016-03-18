@@ -50,7 +50,7 @@ class SiteExporterTest extends PHPUnit_Framework_TestCase {
 		$tmp = tmpfile();
 		$exporter = new SiteExporter( $tmp );
 
-		$exporter->exportSites( [ $foo, $acme ] );
+		$exporter->exportSites( array( $foo, $acme ) );
 
 		fseek( $tmp, 0 );
 		$xml = fread( $tmp, 16 * 1024 );
@@ -112,15 +112,15 @@ class SiteExporterTest extends PHPUnit_Framework_TestCase {
 		$dewiki->setPath( MediaWikiSite::PATH_PAGE, 'http://de.wikipedia.org/wiki/' );
 		$dewiki->setSource( 'meta.wikimedia.org' );
 
-		return [
-			'empty' => [
+		return array(
+			'empty' => array(
 				new SiteList()
-			],
+			),
 
-			'some' => [
-				new SiteList( [ $foo, $acme, $dewiki ] ),
-			],
-		];
+			'some' => array(
+				new SiteList( array( $foo, $acme, $dewiki ) ),
+			),
+		);
 	}
 
 	/**

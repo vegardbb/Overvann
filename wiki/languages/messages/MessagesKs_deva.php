@@ -10,7 +10,7 @@
  * @author VibhasKS
  */
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'मीडिया',
 	NS_SPECIAL          => 'खास',
 	NS_TALK             => 'बहज़',
@@ -27,9 +27,9 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'म॒दत_बहज़',
 	NS_CATEGORY         => 'ज़ॉज़',
 	NS_CATEGORY_TALK    => 'ज़ॉज़_बहज़',
-];
+);
 
-$digitTransformTable = [
+$digitTransformTable = array(
 	'0' => '०', # &#x0966;
 	'1' => '१', # &#x0967;
 	'2' => '२', # &#x0968;
@@ -40,5 +40,5 @@ $digitTransformTable = [
 	'7' => '७', # &#x096d;
 	'8' => '८', # &#x096e;
 	'9' => '९', # &#x096f;
-];
+);
 

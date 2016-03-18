@@ -71,9 +71,7 @@ class BatchRowUpdate {
 	 * @param RowUpdateGenerator $generator Generates single row updates
 	 *  based on the rows content
 	 */
-	public function __construct(
-		BatchRowIterator $reader, BatchRowWriter $writer, RowUpdateGenerator $generator
-	) {
+	public function __construct( BatchRowIterator $reader, BatchRowWriter $writer, RowUpdateGenerator $generator ) {
 		$this->reader = $reader;
 		$this->writer = $writer;
 		$this->generator = $generator;
@@ -86,14 +84,14 @@ class BatchRowUpdate {
 	 */
 	public function execute() {
 		foreach ( $this->reader as $rows ) {
-			$updates = [];
+			$updates = array();
 			foreach ( $rows as $row ) {
 				$update = $this->generator->update( $row );
 				if ( $update ) {
-					$updates[] = [
+					$updates[] = array(
 						'primaryKey' => $this->reader->extractPrimaryKeys( $row ),
 						'changes' => $update,
-					];
+					);
 				}
 			}
 

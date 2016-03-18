@@ -9,18 +9,19 @@ class LanguageConverterTest extends MediaWikiLangTestCase {
 	protected function setUp() {
 		parent::setUp();
 
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgContLang' => Language::factory( 'tg' ),
 			'wgLanguageCode' => 'tg',
 			'wgDefaultLanguageVariant' => false,
-			'wgRequest' => new FauxRequest( [] ),
+			'wgMemc' => new EmptyBagOStuff,
+			'wgRequest' => new FauxRequest( array() ),
 			'wgUser' => new User,
-		] );
+		) );
 
 		$this->lang = new LanguageToTest();
 		$this->lc = new TestConverter(
 			$this->lang, 'tg',
-			[ 'tg', 'tg-latn' ]
+			array( 'tg', 'tg-latn' )
 		);
 	}
 
@@ -163,24 +164,24 @@ class LanguageConverterTest extends MediaWikiLangTestCase {
  * Test converter (from Tajiki to latin orthography)
  */
 class TestConverter extends LanguageConverter {
-	private $table = [
+	private $table = array(
 		'б' => 'b',
 		'в' => 'v',
 		'г' => 'g',
-	];
+	);
 
 	function loadDefaultTables() {
-		$this->mTables = [
+		$this->mTables = array(
 			'tg-latn' => new ReplacementArray( $this->table ),
 			'tg' => new ReplacementArray()
-		];
+		);
 	}
 }
 
 class LanguageToTest extends Language {
 	function __construct() {
 		parent::__construct();
-		$variants = [ 'tg', 'tg-latn' ];
+		$variants = array( 'tg', 'tg-latn' );
 		$this->mConverter = new TestConverter( $this, 'tg', $variants );
 	}
 }

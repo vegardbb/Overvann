@@ -21,6 +21,8 @@
  * @ingroup Language
  */
 
+require_once __DIR__ . '/../LanguageConverter.php';
+
 /**
  * There are two levels of conversion for Serbian: the script level
  * (Cyrillics <-> Latin), and the variant level (ekavian
@@ -31,7 +33,7 @@
  * @ingroup Language
  */
 class SrConverter extends LanguageConverter {
-	public $mToLatin = [
+	public $mToLatin = array(
 		'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
 		'ђ' => 'đ', 'е' => 'e', 'ж' => 'ž', 'з' => 'z', 'и' => 'i',
 		'ј' => 'j', 'к' => 'k', 'л' => 'l', 'љ' => 'lj', 'м' => 'm',
@@ -45,9 +47,9 @@ class SrConverter extends LanguageConverter {
 		'Н' => 'N', 'Њ' => 'Nj', 'О' => 'O', 'П' => 'P', 'Р' => 'R',
 		'С' => 'S', 'Т' => 'T', 'Ћ' => 'Ć', 'У' => 'U', 'Ф' => 'F',
 		'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Č', 'Џ' => 'Dž', 'Ш' => 'Š',
-	];
+	);
 
-	public $mToCyrillics = [
+	public $mToCyrillics = array(
 		'a' => 'а', 'b' => 'б', 'c' => 'ц', 'č' => 'ч', 'ć' => 'ћ',
 		'd' => 'д', 'dž' => 'џ', 'đ' => 'ђ', 'e' => 'е', 'f' => 'ф',
 		'g' => 'г', 'h' => 'х', 'i' => 'и', 'j' => 'ј', 'k' => 'к',
@@ -65,14 +67,14 @@ class SrConverter extends LanguageConverter {
 		'DŽ' => 'Џ', 'd!ž' => 'дж', 'D!ž' => 'Дж', 'D!Ž' => 'ДЖ',
 		'Lj' => 'Љ', 'l!j' => 'лј', 'L!j' => 'Лј', 'L!J' => 'ЛЈ',
 		'Nj' => 'Њ', 'n!j' => 'нј', 'N!j' => 'Нј', 'N!J' => 'НЈ'
-	];
+	);
 
 	function loadDefaultTables() {
-		$this->mTables = [
+		$this->mTables = array(
 			'sr-ec' => new ReplacementArray( $this->mToCyrillics ),
 			'sr-el' => new ReplacementArray( $this->mToLatin ),
 			'sr' => new ReplacementArray()
-		];
+		);
 	}
 
 	/**
@@ -86,12 +88,12 @@ class SrConverter extends LanguageConverter {
 	 * @param array $flags
 	 * @return array
 	 */
-	function parseManualRule( $rule, $flags = [] ) {
+	function parseManualRule( $rule, $flags = array() ) {
 		if ( in_array( 'T', $flags ) ) {
 			return parent::parseManualRule( $rule, $flags );
 		}
 
-		$carray = [];
+		$carray = array();
 		// otherwise ignore all formatting
 		foreach ( $this->mVariants as $v ) {
 			$carray[$v] = $rule;
@@ -198,19 +200,22 @@ class SrConverter extends LanguageConverter {
  */
 class LanguageSr extends Language {
 	function __construct() {
+		global $wgHooks;
+
 		parent::__construct();
 
-		$variants = [ 'sr', 'sr-ec', 'sr-el' ];
-		$variantfallbacks = [
+		$variants = array( 'sr', 'sr-ec', 'sr-el' );
+		$variantfallbacks = array(
 			'sr' => 'sr-ec',
 			'sr-ec' => 'sr',
 			'sr-el' => 'sr',
-		];
+		);
 
-		$flags = [
+		$flags = array(
 			'S' => 'S', 'писмо' => 'S', 'pismo' => 'S',
 			'W' => 'W', 'реч' => 'W', 'reč' => 'W', 'ријеч' => 'W', 'riječ' => 'W'
-		];
+		);
 		$this->mConverter = new SrConverter( $this, 'sr', $variants, $variantfallbacks, $flags );
+		$wgHooks['PageContentSaveComplete'][] = $this->mConverter;
 	}
 }

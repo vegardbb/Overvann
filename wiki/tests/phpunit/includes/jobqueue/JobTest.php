@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author Addshore
+ * @author Adam Shorland
  */
 class JobTest extends MediaWikiTestCase {
 
@@ -18,47 +18,47 @@ class JobTest extends MediaWikiTestCase {
 	}
 
 	public function provideTestToString() {
-		$mockToStringObj = $this->getMock( 'stdClass', [ '__toString' ] );
+		$mockToStringObj = $this->getMock( 'stdClass', array( '__toString' ) );
 		$mockToStringObj->expects( $this->any() )
 			->method( '__toString' )
 			->will( $this->returnValue( '{STRING_OBJ_VAL}' ) );
 
-		return [
-			[
+		return array(
+			array(
 				$this->getMockJob( false ),
 				'someCommand '
-			],
-			[
-				$this->getMockJob( [ 'key' => 'val' ] ),
+			),
+			array(
+				$this->getMockJob( array( 'key' => 'val' ) ),
 				'someCommand  key=val'
-			],
-			[
-				$this->getMockJob( [ 'key' => [ 'inkey' => 'inval' ] ] ),
+			),
+			array(
+				$this->getMockJob( array( 'key' => array( 'inkey' => 'inval' ) ) ),
 				'someCommand  key={"inkey":"inval"}'
-			],
-			[
-				$this->getMockJob( [ 'val1' ] ),
+			),
+			array(
+				$this->getMockJob( array( 'val1' ) ),
 				'someCommand  0=val1'
-			],
-			[
-				$this->getMockJob( [ 'val1', 'val2' ] ),
+			),
+			array(
+				$this->getMockJob( array( 'val1', 'val2' ) ),
 				'someCommand  0=val1 1=val2'
-			],
-			[
-				$this->getMockJob( [ new stdClass() ] ),
+			),
+			array(
+				$this->getMockJob( array( new stdClass() ) ),
 				'someCommand  0=object(stdClass)'
-			],
-			[
-				$this->getMockJob( [ $mockToStringObj ] ),
+			),
+			array(
+				$this->getMockJob( array( $mockToStringObj ) ),
 				'someCommand  0={STRING_OBJ_VAL}'
-			],
-		];
+			),
+		);
 	}
 
 	public function getMockJob( $params ) {
 		$mock = $this->getMockForAbstractClass(
 			'Job',
-			[ 'someCommand', new Title(), $params ],
+			array( 'someCommand', new Title(), $params ),
 			'SomeJob'
 		);
 		return $mock;

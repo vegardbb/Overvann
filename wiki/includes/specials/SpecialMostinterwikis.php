@@ -43,29 +43,29 @@ class MostinterwikisPage extends QueryPage {
 	}
 
 	public function getQueryInfo() {
-		return [
-			'tables' => [
+		return array(
+			'tables' => array(
 				'langlinks',
 				'page'
-			], 'fields' => [
+			), 'fields' => array(
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
 				'value' => 'COUNT(*)'
-			], 'conds' => [
+			), 'conds' => array(
 				'page_namespace' => MWNamespace::getContentNamespaces()
-			], 'options' => [
+			), 'options' => array(
 				'HAVING' => 'COUNT(*) > 1',
-				'GROUP BY' => [
+				'GROUP BY' => array(
 					'page_namespace',
 					'page_title'
-				]
-			], 'join_conds' => [
-				'page' => [
+				)
+			), 'join_conds' => array(
+				'page' => array(
 					'LEFT JOIN',
 					'page_id = ll_from'
-				]
-			]
-		];
+				)
+			)
+		);
 	}
 
 	/**
@@ -101,7 +101,7 @@ class MostinterwikisPage extends QueryPage {
 		if ( !$title ) {
 			return Html::element(
 				'span',
-				[ 'class' => 'mw-invalidtitle' ],
+				array( 'class' => 'mw-invalidtitle' ),
 				Linker::getInvalidTitleDescription(
 					$this->getContext(),
 					$result->namespace,

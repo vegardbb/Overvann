@@ -34,7 +34,7 @@ class SiteList extends GenericArrayObject {
 	 *
 	 * @var array Array of integer
 	 */
-	protected $byInternalId = [];
+	protected $byInternalId = array();
 
 	/**
 	 * Global site identifiers pointing to their sites offset value.
@@ -43,7 +43,7 @@ class SiteList extends GenericArrayObject {
 	 *
 	 * @var array Array of string
 	 */
-	protected $byGlobalId = [];
+	protected $byGlobalId = array();
 
 	/**
 	 * Navigational site identifiers alias inter-language prefixes
@@ -53,7 +53,7 @@ class SiteList extends GenericArrayObject {
 	 *
 	 * @var array Array of string
 	 */
-	protected $byNavigationId = [];
+	protected $byNavigationId = array();
 
 	/**
 	 * @see GenericArrayObject::getObjectType
@@ -175,7 +175,7 @@ class SiteList extends GenericArrayObject {
 	 * @return bool
 	 */
 	public function isEmpty() {
-		return $this->byGlobalId === [];
+		return $this->byGlobalId === array();
 	}
 
 	/**
@@ -319,15 +319,15 @@ class SiteList extends GenericArrayObject {
 	 * @return array
 	 */
 	protected function getSerializationData() {
-		// NOTE: When changing the structure, either implement unserialize() to handle the
+		//NOTE: When changing the structure, either implement unserialize() to handle the
 		//      old structure too, or update SERIAL_VERSION_ID to kill any caches.
 		return array_merge(
 			parent::getSerializationData(),
-			[
+			array(
 				'internalIds' => $this->byInternalId,
 				'globalIds' => $this->byGlobalId,
 				'navigationIds' => $this->byNavigationId
-			]
+			)
 		);
 	}
 
@@ -349,4 +349,10 @@ class SiteList extends GenericArrayObject {
 
 		return $serializationData;
 	}
+}
+
+/**
+ * @deprecated since 1.21
+ */
+class SiteArray extends SiteList {
 }

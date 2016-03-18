@@ -22,7 +22,7 @@
  */
 class BatchRowWriter {
 	/**
-	 * @var IDatabase $db The database to write to
+	 * @var DatabaseBase $db The database to write to
 	 */
 	protected $db;
 
@@ -37,11 +37,11 @@ class BatchRowWriter {
 	protected $clusterName;
 
 	/**
-	 * @param IDatabase $db The database to write to
+	 * @param DatabaseBase $db          The database to write to
 	 * @param string       $table       The name of the table to update
 	 * @param string|bool  $clusterName A cluster name valid for use with LBFactory
 	 */
-	public function __construct( IDatabase $db, $table, $clusterName = false ) {
+	public function __construct( DatabaseBase $db, $table, $clusterName = false ) {
 		$this->db = $db;
 		$this->table = $table;
 		$this->clusterName = $clusterName;
@@ -66,6 +66,6 @@ class BatchRowWriter {
 		}
 
 		$this->db->commit();
-		wfGetLBFactory()->waitForReplication();
+		wfWaitForSlaves( false, false, $this->clusterName );
 	}
 }

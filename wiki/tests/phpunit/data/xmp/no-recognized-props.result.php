@@ -1,2 +1,2 @@
 <?php
-$result = [];
+$result = array();

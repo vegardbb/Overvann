@@ -20,70 +20,70 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 	}
 
 	private static function getModules() {
-		$base = [
-			'localBasePath' => realpath( __DIR__ ),
-		];
+		$base = array(
+			'localBasePath' => realpath( dirname( __FILE__ ) ),
+		);
 
-		return [
-			'noTemplateModule' => [],
+		return array(
+			'noTemplateModule' => array(),
 
-			'htmlTemplateModule' => $base + [
-				'templates' => [
+			'htmlTemplateModule' => $base + array(
+				'templates' => array(
 					'templates/template.html',
 					'templates/template2.html',
-				]
-			],
+				)
+			),
 
-			'aliasedHtmlTemplateModule' => $base + [
-				'templates' => [
+			'aliasedHtmlTemplateModule' => $base + array(
+				'templates' => array(
 					'foo.html' => 'templates/template.html',
 					'bar.html' => 'templates/template2.html',
-				]
-			],
+				)
+			),
 
-			'templateModuleHandlebars' => $base + [
-				'templates' => [
+			'templateModuleHandlebars' => $base + array(
+				'templates' => array(
 					'templates/template_awesome.handlebars',
-				],
-			],
+				),
+			),
 
-			'aliasFooFromBar' => $base + [
-				'templates' => [
+			'aliasFooFromBar' => $base + array(
+				'templates' => array(
 					'foo.foo' => 'templates/template.bar',
-				],
-			],
-		];
+				),
+			),
+		);
 	}
 
 	public static function providerTemplateDependencies() {
 		$modules = self::getModules();
 
-		return [
-			[
+		return array(
+			array(
 				$modules['noTemplateModule'],
-				[],
-			],
-			[
+				array(),
+			),
+			array(
 				$modules['htmlTemplateModule'],
-				[
+				array(
 					'mediawiki.template',
-				],
-			],
-			[
+				),
+			),
+			array(
 				$modules['templateModuleHandlebars'],
-				[
+				array(
 					'mediawiki.template',
 					'mediawiki.template.handlebars',
-				],
-			],
-			[
+				),
+			),
+			array(
 				$modules['aliasFooFromBar'],
-				[
+				array(
 					'mediawiki.template',
 					'mediawiki.template.foo',
-				],
-			],
-		];
+				),
+			),
+		);
 	}
 
 	/**
@@ -102,34 +102,34 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 	 * @covers ResourceLoaderFileModule::getSkinStyleFiles
 	 */
 	public function testGetAllSkinStyleFiles() {
-		$baseParams = [
-			'scripts' => [
+		$baseParams = array(
+			'scripts' => array(
 				'foo.js',
 				'bar.js',
-			],
-			'styles' => [
+			),
+			'styles' => array(
 				'foo.css',
-				'bar.css' => [ 'media' => 'print' ],
-				'screen.less' => [ 'media' => 'screen' ],
-				'screen-query.css' => [ 'media' => 'screen and (min-width: 400px)' ],
-			],
-			'skinStyles' => [
+				'bar.css' => array( 'media' => 'print' ),
+				'screen.less' => array( 'media' => 'screen' ),
+				'screen-query.css' => array( 'media' => 'screen and (min-width: 400px)' ),
+			),
+			'skinStyles' => array(
 				'default' => 'quux-fallback.less',
-				'fakeskin' => [
+				'fakeskin' => array(
 					'baz-vector.css',
 					'quux-vector.less',
-				],
-			],
-			'messages' => [
+				),
+			),
+			'messages' => array(
 				'hello',
 				'world',
-			],
-		];
+			),
+		);
 
 		$module = new ResourceLoaderFileModule( $baseParams );
 
 		$this->assertEquals(
-			[
+			array(
 				'foo.css',
 				'baz-vector.css',
 				'quux-vector.less',
@@ -137,7 +137,7 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 				'bar.css',
 				'screen.less',
 				'screen-query.css',
-			],
+			),
 			array_map( 'basename', $module->getAllStyleFiles() )
 		);
 	}
@@ -160,14 +160,14 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 	 */
 	public function testMixedCssAnnotations() {
 		$basePath = __DIR__ . '/../../data/css';
-		$testModule = new ResourceLoaderFileModule( [
+		$testModule = new ResourceLoaderFileModule( array(
 			'localBasePath' => $basePath,
-			'styles' => [ 'test.css' ],
-		] );
-		$expectedModule = new ResourceLoaderFileModule( [
+			'styles' => array( 'test.css' ),
+		) );
+		$expectedModule = new ResourceLoaderFileModule( array(
 			'localBasePath' => $basePath,
-			'styles' => [ 'expected.css' ],
-		] );
+			'styles' => array( 'expected.css' ),
+		) );
 
 		$contextLtr = $this->getResourceLoaderContext( 'en', 'ltr' );
 		$contextRtl = $this->getResourceLoaderContext( 'he', 'rtl' );
@@ -189,32 +189,32 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 	public static function providerGetTemplates() {
 		$modules = self::getModules();
 
-		return [
-			[
+		return array(
+			array(
 				$modules['noTemplateModule'],
-				[],
-			],
-			[
+				array(),
+			),
+			array(
 				$modules['templateModuleHandlebars'],
-				[
+				array(
 					'templates/template_awesome.handlebars' => "wow\n",
-				],
-			],
-			[
+				),
+			),
+			array(
 				$modules['htmlTemplateModule'],
-				[
+				array(
 					'templates/template.html' => "<strong>hello</strong>\n",
 					'templates/template2.html' => "<div>goodbye</div>\n",
-				],
-			],
-			[
+				),
+			),
+			array(
 				$modules['aliasedHtmlTemplateModule'],
-				[
+				array(
 					'foo.html' => "<strong>hello</strong>\n",
 					'bar.html' => "<div>goodbye</div>\n",
-				],
-			],
-		];
+				),
+			),
+		);
 	}
 
 	/**

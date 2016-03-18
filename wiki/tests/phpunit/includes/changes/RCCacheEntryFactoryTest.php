@@ -14,7 +14,7 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 	 */
 	private $testRecentChangesHelper;
 
-	public function __construct( $name = null, array $data = [], $dataName = '' ) {
+	public function __construct( $name = null, array $data = array(), $dataName = '' ) {
 		parent::__construct( $name, $data, $dataName );
 
 		$this->testRecentChangesHelper = new TestRecentChangesHelper();
@@ -23,9 +23,9 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 	protected function setUp() {
 		parent::setUp();
 
-		$this->setMwGlobals( [
+		$this->setMwGlobals( array(
 			'wgArticlePath' => '/wiki/$1'
-		] );
+		) );
 	}
 
 	/**
@@ -56,17 +56,17 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 	}
 
 	public function editChangeProvider() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'title' => 'Xyz',
 					'user' => 'TestRecentChangesUser',
-					'diff' => [ 'curid' => 5, 'diff' => 191, 'oldid' => 190 ],
-					'cur' => [ 'curid' => 5, 'diff' => 0, 'oldid' => 191 ],
+					'diff' => array( 'curid' => 5, 'diff' => 191, 'oldid' => 190 ),
+					'cur' => array( 'curid' => 5, 'diff' => 0, 'oldid' => 191 ),
 					'timestamp' => '21:21',
 					'numberofWatchingusers' => 0,
 					'unpatrolled' => false
-				],
+				),
 				$this->getContext(),
 				$this->getMessages(),
 				$this->testRecentChangesHelper->makeEditRecentChange(
@@ -80,8 +80,8 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 					0 // number of watching users
 				),
 				false
-			]
-		];
+			)
+		);
 	}
 
 	/**
@@ -110,15 +110,15 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 	}
 
 	public function deleteChangeProvider() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'title' => 'Abc',
 					'user' => 'TestRecentChangesUser',
 					'timestamp' => '21:21',
 					'numberofWatchingusers' => 0,
 					'unpatrolled' => false
-				],
+				),
 				$this->getContext(),
 				$this->getMessages(),
 				$this->testRecentChangesHelper->makeLogRecentChange(
@@ -131,8 +131,8 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 					0 // number of watching users
 				),
 				false
-			]
-		];
+			)
+		);
 	}
 
 	/**
@@ -163,9 +163,9 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 	}
 
 	public function revUserDeleteProvider() {
-		return [
-			[
-				[
+		return array(
+			array(
+				array(
 					'title' => 'Zzz',
 					'user' => 'TestRecentChangesUser',
 					'diff' => '',
@@ -173,7 +173,7 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 					'timestamp' => '21:21',
 					'numberofWatchingusers' => 0,
 					'unpatrolled' => false
-				],
+				),
 				$this->getContext(),
 				$this->getMessages(),
 				$this->testRecentChangesHelper->makeDeletedEditRecentChange(
@@ -187,49 +187,49 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 					0 // number of watching users
 				),
 				false
-			]
-		];
+			)
+		);
 	}
 
 	private function assertUserLinks( $user, $cacheEntry ) {
 		$this->assertTag(
-			[
+			array(
 				'tag' => 'a',
-				'attributes' => [
+				'attributes' => array(
 					'class' => 'new mw-userlink'
-				],
+				),
 				'content' => $user
-			],
+			),
 			$cacheEntry->userlink,
 			'verify user link'
 		);
 
 		$this->assertTag(
-			[
+			array(
 				'tag' => 'span',
-				'attributes' => [
+				'attributes' => array(
 					'class' => 'mw-usertoollinks'
-				],
-				'child' => [
+				),
+				'child' => array(
 					'tag' => 'a',
-					'content' => 'talk',
-				]
-			],
+					'content' => 'Talk',
+				)
+			),
 			$cacheEntry->usertalklink,
 			'verify user talk link'
 		);
 
 		$this->assertTag(
-			[
+			array(
 				'tag' => 'span',
-				'attributes' => [
+				'attributes' => array(
 					'class' => 'mw-usertoollinks'
-				],
-				'child' => [
+				),
+				'child' => array(
 					'tag' => 'a',
 					'content' => 'contribs',
-				]
-			],
+				)
+			),
 			$cacheEntry->usertalklink,
 			'verify user tool links'
 		);
@@ -237,14 +237,14 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 
 	private function assertDeleteLogLink( $cacheEntry ) {
 		$this->assertTag(
-			[
+			array(
 				'tag' => 'a',
-				'attributes' => [
+				'attributes' => array(
 					'href' => '/wiki/Special:Log/delete',
 					'title' => 'Special:Log/delete'
-				],
+				),
 				'content' => 'Deletion log'
-			],
+			),
 			$cacheEntry->link,
 			'verify deletion log link'
 		);
@@ -252,13 +252,13 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 
 	private function assertRevDel( $cacheEntry ) {
 		$this->assertTag(
-			[
+			array(
 				'tag' => 'span',
-				'attributes' => [
+				'attributes' => array(
 					'class' => 'history-deleted'
-				],
+				),
 				'content' => '(username removed)'
-			],
+			),
 			$cacheEntry->userlink,
 			'verify user link for change with deleted revision and user'
 		);
@@ -266,14 +266,14 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 
 	private function assertTitleLink( $title, $cacheEntry ) {
 		$this->assertTag(
-			[
+			array(
 				'tag' => 'a',
-				'attributes' => [
+				'attributes' => array(
 					'href' => '/wiki/' . $title,
 					'title' => $title
-				],
+				),
 				'content' => $title
-			],
+			),
 			$cacheEntry->link,
 			'verify title link'
 		);
@@ -281,10 +281,10 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 
 	private function assertQueryLink( $content, $params, $link ) {
 		$this->assertTag(
-			[
+			array(
 				'tag' => 'a',
 				'content' => $content
-			],
+			),
 			$link,
 			'assert query link element'
 		);
@@ -295,7 +295,7 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 	}
 
 	private function getMessages() {
-		return [
+		return array(
 			'cur' => 'cur',
 			'diff' => 'diff',
 			'hist' => 'hist',
@@ -305,7 +305,7 @@ class RCCacheEntryFactoryTest extends MediaWikiLangTestCase {
 			'history' => 'Page history',
 			'semicolon-separator' => '; ',
 			'pipe-separator' => ' | '
-		];
+		);
 	}
 
 	private function getTestUser() {

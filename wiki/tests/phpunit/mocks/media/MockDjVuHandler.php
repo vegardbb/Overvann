@@ -38,11 +38,11 @@ class MockDjVuHandler extends DjVuHandler {
 			);
 		}
 
-		$params = [
+		$params = array(
 			'width' => $width,
 			'height' => $height,
 			'page' => $page
-		];
+		);
 
 		return new ThumbnailImage( $image, $dstUrl, $dstPath, $params );
 	}

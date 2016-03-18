@@ -29,7 +29,7 @@
  * @since 1.21
  */
 class RightsLogFormatter extends LogFormatter {
-	protected function makePageLink( Title $title = null, $parameters = [], $html = null ) {
+	protected function makePageLink( Title $title = null, $parameters = array() ) {
 		global $wgContLang, $wgUserrightsInterwikiDelimiter;
 
 		if ( !$this->plaintext ) {
@@ -38,7 +38,7 @@ class RightsLogFormatter extends LogFormatter {
 
 			if ( count( $parts ) === 2 ) {
 				$titleLink = WikiMap::foreignUserLink( $parts[1], $parts[0],
-					htmlspecialchars( $title->getText() ) );
+					htmlspecialchars( $title->getPrefixedText() ) );
 
 				if ( $titleLink !== false ) {
 					return $titleLink;
@@ -46,14 +46,13 @@ class RightsLogFormatter extends LogFormatter {
 			}
 		}
 
-		return parent::makePageLink( $title, $parameters, $title ? $title->getText() : null );
+		return parent::makePageLink( $title, $parameters );
 	}
 
 	protected function getMessageKey() {
 		$key = parent::getMessageKey();
 		$params = $this->getMessageParameters();
 		if ( !isset( $params[3] ) && !isset( $params[4] ) ) {
-			// Messages: logentry-rights-rights-legacy
 			$key .= '-legacy';
 		}
 
@@ -104,12 +103,12 @@ class RightsLogFormatter extends LogFormatter {
 		$entry = $this->entry;
 		$params = $entry->getParameters();
 
-		static $map = [
+		static $map = array(
 			'4:array:oldgroups',
 			'5:array:newgroups',
 			'4::oldgroups' => '4:array:oldgroups',
 			'5::newgroups' => '5:array:newgroups',
-		];
+		);
 		foreach ( $map as $index => $key ) {
 			if ( isset( $params[$index] ) ) {
 				$params[$key] = $params[$index];
@@ -142,7 +141,7 @@ class RightsLogFormatter extends LogFormatter {
 	private function makeGroupArray( $group ) {
 		// Migrate old group params from string to array
 		if ( $group === '' ) {
-			$group = [];
+			$group = array();
 		} elseif ( is_string( $group ) ) {
 			$group = array_map( 'trim', explode( ',', $group ) );
 		}

@@ -28,10 +28,10 @@ class MWCryptHKDFTest extends MediaWikiTestCase {
 	 * @dataProvider providerRfc5869
 	 */
 	public function testRfc5869( $hash, $ikm, $salt, $info, $L, $prk, $okm ) {
-		$ikm = hex2bin( $ikm );
-		$salt = hex2bin( $salt );
-		$info = hex2bin( $info );
-		$okm = hex2bin( $okm );
+		$ikm = pack( 'H*', $ikm );
+		$salt = pack( 'H*', $salt );
+		$info = pack( 'H*', $info );
+		$okm = pack( 'H*', $okm );
 		$result = MWCryptHKDF::HKDF( $hash, $ikm, $salt, $info, $L );
 		$this->assertEquals( $okm, $result );
 	}
@@ -41,7 +41,6 @@ class MWCryptHKDFTest extends MediaWikiTestCase {
 	 */
 	public static function providerRfc5869() {
 
-		// @codingStandardsIgnoreStart Generic.Files.LineLength
 		return array(
 			// A.1
 			array( 'sha256',
@@ -89,6 +88,8 @@ class MWCryptHKDFTest extends MediaWikiTestCase {
 				'0bd770a74d1160f7c9f12cd5912a06ebff6adcae899d92191fe4305673ba2ffe8fa3f1a4e5ad79f3f334b3b202b2173c486ea37ce3d397ed034c7f9dfeb15c5e927336d0441f4c4300e2cff0d0900b52d3b4' // okm
 			),
 		);
-		// @codingStandardsIgnoreEnd
+
 	}
+
+
 }

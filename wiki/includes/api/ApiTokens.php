@@ -32,14 +32,14 @@ class ApiTokens extends ApiBase {
 
 	public function execute() {
 		$this->setWarning(
-			'action=tokens has been deprecated. Please use action=query&meta=tokens instead.'
+			"action=tokens has been deprecated. Please use action=query&meta=tokens instead."
 		);
-		$this->logFeatureUsage( 'action=tokens' );
+		$this->logFeatureUsage( "action=tokens" );
 
 		$params = $this->extractRequestParams();
-		$res = [
+		$res = array(
 			ApiResult::META_TYPE => 'assoc',
-		];
+		);
 
 		$types = $this->getTokenTypes();
 		foreach ( $params['type'] as $type ) {
@@ -59,33 +59,20 @@ class ApiTokens extends ApiBase {
 		// If we're in a mode that breaks the same-origin policy, no tokens can
 		// be obtained
 		if ( $this->lacksSameOriginSecurity() ) {
-			return [];
+			return array();
 		}
 
 		static $types = null;
 		if ( $types ) {
 			return $types;
 		}
-		$types = [ 'patrol' => [ 'ApiQueryRecentChanges', 'getPatrolToken' ] ];
-		$names = [ 'edit', 'delete', 'protect', 'move', 'block', 'unblock',
-			'email', 'import', 'watch', 'options' ];
+		$types = array( 'patrol' => array( 'ApiQueryRecentChanges', 'getPatrolToken' ) );
+		$names = array( 'edit', 'delete', 'protect', 'move', 'block', 'unblock',
+			'email', 'import', 'watch', 'options' );
 		foreach ( $names as $name ) {
-			$types[$name] = [ 'ApiQueryInfo', 'get' . ucfirst( $name ) . 'Token' ];
+			$types[$name] = array( 'ApiQueryInfo', 'get' . ucfirst( $name ) . 'Token' );
 		}
-		Hooks::run( 'ApiTokensGetTokenTypes', [ &$types ] );
-
-		// For forwards-compat, copy any token types from ApiQueryTokens that
-		// we don't already have something for.
-		$user = $this->getUser();
-		$request = $this->getRequest();
-		foreach ( ApiQueryTokens::getTokenTypeSalts() as $name => $salt ) {
-			if ( !isset( $types[$name] ) ) {
-				$types[$name] = function () use ( $salt, $user, $request ) {
-					return ApiQueryTokens::getToken( $user, $request->getSession(), $salt )->toString();
-				};
-			}
-		}
-
+		Hooks::run( 'ApiTokensGetTokenTypes', array( &$types ) );
 		ksort( $types );
 
 		return $types;
@@ -96,21 +83,21 @@ class ApiTokens extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [
-			'type' => [
+		return array(
+			'type' => array(
 				ApiBase::PARAM_DFLT => 'edit',
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_TYPE => array_keys( $this->getTokenTypes() ),
-			],
-		];
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=tokens'
 				=> 'apihelp-tokens-example-edit',
 			'action=tokens&type=email|move'
 				=> 'apihelp-tokens-example-emailmove',
-		];
+		);
 	}
 }

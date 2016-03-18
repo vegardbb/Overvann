@@ -2,12 +2,12 @@
 
 /* Modules registered when $wgEnableJavaScriptTest is true */
 
-return [
+return array(
 
 	/* Utilities */
 
-	'test.sinonjs' => [
-		'scripts' => [
+	'test.sinonjs' => array(
+		'scripts' => array(
 			'resources/lib/sinonjs/sinon-1.15.4.js',
 			// We want tests to work in IE, but can't include this as it
 			// will break the placeholders in Sinon because the hack it uses
@@ -16,15 +16,15 @@ return [
 			// Including it results (among other things) in sandboxed timers
 			// being broken due to Date inheritance being undefined.
 			// 'resources/lib/sinonjs/sinon-ie-1.15.4.js',
-		],
-		'targets' => [ 'desktop', 'mobile' ],
-	],
+		),
+		'targets' => array( 'desktop', 'mobile' ),
+	),
 
-	'test.mediawiki.qunit.testrunner' => [
-		'scripts' => [
+	'test.mediawiki.qunit.testrunner' => array(
+		'scripts' => array(
 			'tests/qunit/data/testrunner.js',
-		],
-		'dependencies' => [
+		),
+		'dependencies' => array(
 			// Test runner configures QUnit but can't have it as dependency,
 			// see SpecialJavaScriptTest::viewQUnit.
 			'jquery.getAttrs',
@@ -32,18 +32,18 @@ return [
 			'mediawiki.page.startup',
 			'test.sinonjs',
 			'dom-level2-shim',
-		],
+		),
 		'position' => 'top',
-		'targets' => [ 'desktop', 'mobile' ],
-	],
+		'targets' => array( 'desktop', 'mobile' ),
+	),
 
 	/*
 		Test suites for MediaWiki core modules
 		These must have a dependency on test.mediawiki.qunit.testrunner!
 	*/
 
-	'test.mediawiki.qunit.suites' => [
-		'scripts' => [
+	'test.mediawiki.qunit.suites' => array(
+		'scripts' => array(
 			'tests/qunit/suites/resources/startup.test.js',
 			'tests/qunit/suites/resources/jquery/jquery.accessKeyLabel.test.js',
 			'tests/qunit/suites/resources/jquery/jquery.autoEllipsis.test.js',
@@ -63,7 +63,6 @@ return [
 			'tests/qunit/suites/resources/jquery/jquery.tablesorter.parsers.test.js',
 			'tests/qunit/suites/resources/jquery/jquery.textSelection.test.js',
 			'tests/qunit/data/mediawiki.jqueryMsg.data.js',
-			'tests/qunit/suites/resources/mediawiki/mediawiki.requestIdleCallback.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.errorLogger.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.jqueryMsg.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.jscompat.test.js',
@@ -71,19 +70,15 @@ return [
 			'tests/qunit/suites/resources/mediawiki/mediawiki.RegExp.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.storage.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.template.test.js',
-			'tests/qunit/suites/resources/mediawiki/mediawiki.template.mustache.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.test.js',
-			'tests/qunit/suites/resources/mediawiki/mediawiki.html.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.Title.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.toc.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.track.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.Uri.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.user.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.util.test.js',
-			'tests/qunit/suites/resources/mediawiki/mediawiki.viewport.test.js',
 			'tests/qunit/suites/resources/mediawiki.api/mediawiki.api.test.js',
 			'tests/qunit/suites/resources/mediawiki.api/mediawiki.api.category.test.js',
-			'tests/qunit/suites/resources/mediawiki.api/mediawiki.api.messages.test.js',
 			'tests/qunit/suites/resources/mediawiki.api/mediawiki.api.options.test.js',
 			'tests/qunit/suites/resources/mediawiki.api/mediawiki.api.parse.test.js',
 			'tests/qunit/suites/resources/mediawiki.api/mediawiki.api.upload.test.js',
@@ -94,8 +89,8 @@ return [
 			'tests/qunit/suites/resources/mediawiki/mediawiki.cldr.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.cookie.test.js',
 			'tests/qunit/suites/resources/mediawiki/mediawiki.experiments.test.js',
-		],
-		'dependencies' => [
+		),
+		'dependencies' => array(
 			'jquery.accessKeyLabel',
 			'jquery.autoEllipsis',
 			'jquery.byteLength',
@@ -114,7 +109,6 @@ return [
 			'jquery.textSelection',
 			'mediawiki.api',
 			'mediawiki.api.category',
-			'mediawiki.api.messages',
 			'mediawiki.api.options',
 			'mediawiki.api.parse',
 			'mediawiki.api.upload',
@@ -128,16 +122,14 @@ return [
 			'mediawiki.toc',
 			'mediawiki.Uri',
 			'mediawiki.user',
-			'mediawiki.template.mustache',
 			'mediawiki.template',
 			'mediawiki.util',
-			'mediawiki.viewport',
 			'mediawiki.special.recentchanges',
 			'mediawiki.language',
 			'mediawiki.cldr',
 			'mediawiki.cookie',
 			'mediawiki.experiments',
 			'test.mediawiki.qunit.testrunner',
-		],
-	]
-];
+		),
+	)
+);

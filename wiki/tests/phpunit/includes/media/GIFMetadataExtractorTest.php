@@ -74,38 +74,38 @@ class GIFMetadataExtractorTest extends MediaWikiTestCase {
 EOF;
 		$xmpNugget = str_replace( "\r", '', $xmpNugget ); // Windows compat
 
-		return [
-			[
+		return array(
+			array(
 				'nonanimated.gif',
-				[
-					'comment' => [ 'GIF test file ⁕ Created with GIMP' ],
+				array(
+					'comment' => array( 'GIF test file ⁕ Created with GIMP' ),
 					'duration' => 0.1,
 					'frameCount' => 1,
 					'looped' => false,
 					'xmp' => '',
-				]
-			],
-			[
+				)
+			),
+			array(
 				'animated.gif',
-				[
-					'comment' => [ 'GIF test file . Created with GIMP' ],
+				array(
+					'comment' => array( 'GIF test file . Created with GIMP' ),
 					'duration' => 2.4,
 					'frameCount' => 4,
 					'looped' => true,
 					'xmp' => '',
-				]
-			],
+				)
+			),
 
-			[
+			array(
 				'animated-xmp.gif',
-				[
+				array(
 					'xmp' => $xmpNugget,
 					'duration' => 2.4,
 					'frameCount' => 4,
 					'looped' => true,
-					'comment' => [ 'GIƒ·test·file' ],
-				]
-			],
-		];
+					'comment' => array( 'GIƒ·test·file' ),
+				)
+			),
+		);
 	}
 }

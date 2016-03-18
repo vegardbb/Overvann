@@ -40,7 +40,7 @@ class SpecialContributions extends IncludableSpecialPage {
 		$out->addModuleStyles( 'mediawiki.special' );
 		$this->addHelpLink( 'Help:User contributions' );
 
-		$this->opts = [];
+		$this->opts = array();
 		$request = $this->getRequest();
 
 		if ( $par !== null ) {
@@ -49,7 +49,11 @@ class SpecialContributions extends IncludableSpecialPage {
 			$target = $request->getVal( 'target' );
 		}
 
-		if ( $request->getVal( 'contribs' ) == 'newbie' || $par === 'newbies' ) {
+		// check for radiobox
+		if ( $request->getVal( 'contribs' ) == 'newbie' ) {
+			$target = 'newbies';
+			$this->opts['contribs'] = 'newbie';
+		} elseif ( $par === 'newbies' ) { // b/c for WMF
 			$target = 'newbies';
 			$this->opts['contribs'] = 'newbie';
 		} else {
@@ -103,8 +107,7 @@ class SpecialContributions extends IncludableSpecialPage {
 			)->inContentLanguage() );
 		}
 
-		$ns = $request->getVal( 'namespace', null );
-		if ( $ns !== null && $ns !== '' ) {
+		if ( ( $ns = $request->getVal( 'namespace', null ) ) !== null && $ns !== '' ) {
 			$this->opts['namespace'] = intval( $ns );
 		} else {
 			$this->opts['namespace'] = '';
@@ -132,10 +135,10 @@ class SpecialContributions extends IncludableSpecialPage {
 
 		$feedType = $request->getVal( 'feed' );
 
-		$feedParams = [
+		$feedParams = array(
 			'action' => 'feedcontributions',
 			'user' => $target,
-		];
+		);
 		if ( $this->opts['topOnly'] ) {
 			$feedParams['toponly'] = true;
 		}
@@ -174,11 +177,11 @@ class SpecialContributions extends IncludableSpecialPage {
 		// Add RSS/atom links
 		$this->addFeedLinks( $feedParams );
 
-		if ( Hooks::run( 'SpecialContributionsBeforeMainOutput', [ $id, $userObj, $this ] ) ) {
+		if ( Hooks::run( 'SpecialContributionsBeforeMainOutput', array( $id, $userObj, $this ) ) ) {
 			if ( !$this->including() ) {
 				$out->addHTML( $this->getForm() );
 			}
-			$pager = new ContribsPager( $this->getContext(), [
+			$pager = new ContribsPager( $this->getContext(), array(
 				'target' => $target,
 				'contribs' => $this->opts['contribs'],
 				'namespace' => $this->opts['namespace'],
@@ -190,7 +193,7 @@ class SpecialContributions extends IncludableSpecialPage {
 				'newOnly' => $this->opts['newOnly'],
 				'nsInvert' => $this->opts['nsInvert'],
 				'associated' => $this->opts['associated'],
-			] );
+			) );
 
 			if ( !$pager->getNumRows() ) {
 				$out->addWikiMsg( 'nocontribs', $target );
@@ -228,7 +231,7 @@ class SpecialContributions extends IncludableSpecialPage {
 					if ( !$this->msg( $message, $target )->isDisabled() ) {
 						$out->wrapWikiMsg(
 							"<div class='mw-contributions-footer'>\n$1\n</div>",
-							[ $message, $target ] );
+							array( $message, $target ) );
 					}
 				}
 			}
@@ -248,10 +251,10 @@ class SpecialContributions extends IncludableSpecialPage {
 			if ( !User::isIP( $userObj->getName() ) ) {
 				$this->getOutput()->wrapWikiMsg(
 					"<div class=\"mw-userpage-userdoesnotexist error\">\n\$1\n</div>",
-					[
+					array(
 						'contributions-userdoesnotexist',
 						wfEscapeWikiText( $userObj->getName() ),
-					]
+					)
 				);
 				if ( !$this->including() ) {
 					$this->getOutput()->setStatusCode( 404 );
@@ -284,17 +287,17 @@ class SpecialContributions extends IncludableSpecialPage {
 						'block',
 						$nt,
 						'',
-						[
+						array(
 							'lim' => 1,
 							'showIfEmpty' => false,
-							'msgKey' => [
+							'msgKey' => array(
 								$userObj->isAnon() ?
 									'sp-contributions-blocked-notice-anon' :
 									'sp-contributions-blocked-notice',
 								$userObj->getName() # Support GENDER in 'sp-contributions-blocked-notice'
-							],
+							),
 							'offset' => '' # don't use WebRequest parameter offset
-						]
+						)
 					);
 				}
 			}
@@ -340,8 +343,8 @@ class SpecialContributions extends IncludableSpecialPage {
 			$tools[] = Linker::linkKnown(
 				SpecialPage::getTitleFor( 'Log', 'block' ),
 				$this->msg( 'sp-contributions-blocklog' )->escaped(),
-				[],
-				[ 'page' => $userpage->getPrefixedText() ]
+				array(),
+				array( 'page' => $userpage->getPrefixedText() )
 			);
 
 			# Suppression log link (bug 59120)
@@ -349,8 +352,8 @@ class SpecialContributions extends IncludableSpecialPage {
 				$tools[] = Linker::linkKnown(
 					SpecialPage::getTitleFor( 'Log', 'suppress' ),
 					$this->msg( 'sp-contributions-suppresslog' )->escaped(),
-					[],
-					[ 'offender' => $username ]
+					array(),
+					array( 'offender' => $username )
 				);
 			}
 		}
@@ -384,7 +387,7 @@ class SpecialContributions extends IncludableSpecialPage {
 			);
 		}
 
-		Hooks::run( 'ContributionsToolLinks', [ $id, $userpage, &$tools ] );
+		Hooks::run( 'ContributionsToolLinks', array( $id, $userpage, &$tools ) );
 
 		return $tools;
 	}
@@ -443,15 +446,15 @@ class SpecialContributions extends IncludableSpecialPage {
 
 		$form = Html::openElement(
 			'form',
-			[
+			array(
 				'method' => 'get',
 				'action' => wfScript(),
 				'class' => 'mw-contributions-form'
-			]
+			)
 		);
 
 		# Add hidden params for tracking except for parameters in $skipParameters
-		$skipParameters = [
+		$skipParameters = array(
 			'namespace',
 			'nsInvert',
 			'deletedOnly',
@@ -461,9 +464,8 @@ class SpecialContributions extends IncludableSpecialPage {
 			'month',
 			'topOnly',
 			'newOnly',
-			'associated',
-			'tagfilter'
-		];
+			'associated'
+		);
 
 		foreach ( $this->opts as $name => $value ) {
 			if ( in_array( $name, $skipParameters ) ) {
@@ -477,11 +479,11 @@ class SpecialContributions extends IncludableSpecialPage {
 		if ( $tagFilter ) {
 			$filterSelection = Html::rawElement(
 				'td',
-				[],
-				implode( '&#160;', $tagFilter )
+				array(),
+				array_shift( $tagFilter ) . implode( '&#160', $tagFilter )
 			);
 		} else {
-			$filterSelection = Html::rawElement( 'td', [ 'colspan' => 2 ], '' );
+			$filterSelection = Html::rawElement( 'td', array( 'colspan' => 2 ), '' );
 		}
 
 		$this->getOutput()->addModules( 'mediawiki.userSuggest' );
@@ -492,7 +494,7 @@ class SpecialContributions extends IncludableSpecialPage {
 			'newbie',
 			'newbie',
 			$this->opts['contribs'] == 'newbie',
-			[ 'class' => 'mw-input' ]
+			array( 'class' => 'mw-input' )
 		);
 		$labelUsername = Xml::radioLabel(
 			$this->msg( 'sp-contributions-username' )->text(),
@@ -500,145 +502,134 @@ class SpecialContributions extends IncludableSpecialPage {
 			'user',
 			'user',
 			$this->opts['contribs'] == 'user',
-			[ 'class' => 'mw-input' ]
+			array( 'class' => 'mw-input' )
 		);
 		$input = Html::input(
 			'target',
 			$this->opts['target'],
 			'text',
-			[
+			array(
 				'size' => '40',
 				'required' => '',
-				'class' => [
+				'class' => array(
 					'mw-input',
 					'mw-ui-input-inline',
 					'mw-autocomplete-user', // used by mediawiki.userSuggest
-				],
-			] + (
-				// Only autofocus if target hasn't been specified or in non-newbies mode
-				( $this->opts['contribs'] === 'newbie' || $this->opts['target'] )
-					? [] : [ 'autofocus' => true ]
-				)
+				),
+			) + ( $this->opts['target'] ? array() : array( 'autofocus' ) )
 		);
-
 		$targetSelection = Html::rawElement(
 			'td',
-			[ 'colspan' => 2 ],
+			array( 'colspan' => 2 ),
 			$labelNewbies . '<br />' . $labelUsername . ' ' . $input . ' '
 		);
 
 		$namespaceSelection = Xml::tags(
 			'td',
-			[],
+			array(),
 			Xml::label(
 				$this->msg( 'namespace' )->text(),
 				'namespace',
 				''
 			) .
 			Html::namespaceSelector(
-				[ 'selected' => $this->opts['namespace'], 'all' => '' ],
-				[
+				array( 'selected' => $this->opts['namespace'], 'all' => '' ),
+				array(
 					'name' => 'namespace',
 					'id' => 'namespace',
 					'class' => 'namespaceselector',
-				]
+				)
 			) . '&#160;' .
 				Html::rawElement(
 					'span',
-					[ 'class' => 'mw-input-with-label' ],
+					array( 'style' => 'white-space: nowrap' ),
 					Xml::checkLabel(
 						$this->msg( 'invert' )->text(),
 						'nsInvert',
 						'nsInvert',
 						$this->opts['nsInvert'],
-						[
+						array(
 							'title' => $this->msg( 'tooltip-invert' )->text(),
 							'class' => 'mw-input'
-						]
+						)
 					) . '&#160;'
 				) .
-				Html::rawElement( 'span', [ 'class' => 'mw-input-with-label' ],
+				Html::rawElement( 'span', array( 'style' => 'white-space: nowrap' ),
 					Xml::checkLabel(
 						$this->msg( 'namespace_association' )->text(),
 						'associated',
 						'associated',
 						$this->opts['associated'],
-						[
+						array(
 							'title' => $this->msg( 'tooltip-namespace_association' )->text(),
 							'class' => 'mw-input'
-						]
+						)
 					) . '&#160;'
 				)
 		);
 
-		$filters = [];
-
 		if ( $this->getUser()->isAllowed( 'deletedhistory' ) ) {
-			$filters[] = Html::rawElement(
+			$deletedOnlyCheck = Html::rawElement(
 				'span',
-				[ 'class' => 'mw-input-with-label' ],
+				array( 'style' => 'white-space: nowrap' ),
 				Xml::checkLabel(
 					$this->msg( 'history-show-deleted' )->text(),
 					'deletedOnly',
 					'mw-show-deleted-only',
 					$this->opts['deletedOnly'],
-					[ 'class' => 'mw-input' ]
+					array( 'class' => 'mw-input' )
 				)
 			);
+		} else {
+			$deletedOnlyCheck = '';
 		}
 
-		$filters[] = Html::rawElement(
+		$checkLabelTopOnly = Html::rawElement(
 			'span',
-			[ 'class' => 'mw-input-with-label' ],
+			array( 'style' => 'white-space: nowrap' ),
 			Xml::checkLabel(
 				$this->msg( 'sp-contributions-toponly' )->text(),
 				'topOnly',
 				'mw-show-top-only',
 				$this->opts['topOnly'],
-				[ 'class' => 'mw-input' ]
+				array( 'class' => 'mw-input' )
 			)
 		);
-		$filters[] = Html::rawElement(
+		$checkLabelNewOnly = Html::rawElement(
 			'span',
-			[ 'class' => 'mw-input-with-label' ],
+			array( 'style' => 'white-space: nowrap' ),
 			Xml::checkLabel(
 				$this->msg( 'sp-contributions-newonly' )->text(),
 				'newOnly',
 				'mw-show-new-only',
 				$this->opts['newOnly'],
-				[ 'class' => 'mw-input' ]
+				array( 'class' => 'mw-input' )
 			)
 		);
-
-		Hooks::run(
-			'SpecialContributions::getForm::filters',
-			[ $this, &$filters ]
-		);
-
 		$extraOptions = Html::rawElement(
 			'td',
-			[ 'colspan' => 2 ],
-			implode( '', $filters )
+			array( 'colspan' => 2 ),
+			$deletedOnlyCheck . $checkLabelTopOnly . $checkLabelNewOnly
 		);
 
-		$dateSelectionAndSubmit = Xml::tags( 'td', [ 'colspan' => 2 ],
+		$dateSelectionAndSubmit = Xml::tags( 'td', array( 'colspan' => 2 ),
 			Xml::dateMenu(
 				$this->opts['year'] === '' ? MWTimestamp::getInstance()->format( 'Y' ) : $this->opts['year'],
 				$this->opts['month']
 			) . ' ' .
 				Html::submitButton(
 					$this->msg( 'sp-contributions-submit' )->text(),
-					[ 'class' => 'mw-submit' ], [ 'mw-ui-progressive' ]
+					array( 'class' => 'mw-submit' ), array( 'mw-ui-progressive' )
 				)
 		);
 
 		$form .= Xml::fieldset( $this->msg( 'sp-contributions-search' )->text() );
-		$form .= Html::rawElement( 'table', [ 'class' => 'mw-contributions-table' ], "\n" .
-			Html::rawElement( 'tr', [], $targetSelection ) . "\n" .
-			Html::rawElement( 'tr', [], $namespaceSelection ) . "\n" .
-			Html::rawElement( 'tr', [], $filterSelection ) . "\n" .
-			Html::rawElement( 'tr', [], $extraOptions ) . "\n" .
-			Html::rawElement( 'tr', [], $dateSelectionAndSubmit ) . "\n"
+		$form .= Html::rawElement( 'table', array( 'class' => 'mw-contributions-table' ), "\n" .
+			Html::rawElement( 'tr', array(), $targetSelection ) . "\n" .
+			Html::rawElement( 'tr', array(), $namespaceSelection ) . "\n" .
+			Html::rawElement( 'tr', array(), $filterSelection ) . "\n" .
+			Html::rawElement( 'tr', array(), $extraOptions ) . "\n" .
+			Html::rawElement( 'tr', array(), $dateSelectionAndSubmit ) . "\n"
 		);
 
 		$explain = $this->msg( 'sp-contributions-explain' );
@@ -649,24 +640,6 @@ class SpecialContributions extends IncludableSpecialPage {
 		$form .= Xml::closeElement( 'fieldset' ) . Xml::closeElement( 'form' );
 
 		return $form;
-	}
-
-	/**
-	 * Return an array of subpages beginning with $search that this special page will accept.
-	 *
-	 * @param string $search Prefix to search for
-	 * @param int $limit Maximum number of results to return (usually 10)
-	 * @param int $offset Number of results to skip (usually 0)
-	 * @return string[] Matching subpages
-	 */
-	public function prefixSearchSubpages( $search, $limit, $offset ) {
-		$user = User::newFromName( $search );
-		if ( !$user ) {
-			// No prefix suggestion for invalid user
-			return [];
-		}
-		// Autocomplete subpage as user list - public to allow caching
-		return UserNamePrefixSearch::search( 'public', $search, $limit, $offset );
 	}
 
 	protected function getGroupName() {
@@ -697,12 +670,12 @@ class ContribsPager extends ReverseChronologicalPager {
 	function __construct( IContextSource $context, array $options ) {
 		parent::__construct( $context );
 
-		$msgs = [
+		$msgs = array(
 			'diff',
 			'hist',
 			'pipe-separator',
 			'uctop'
-		];
+		);
 
 		foreach ( $msgs as $msg ) {
 			$this->messages[$msg] = $this->msg( $msg )->escaped();
@@ -771,15 +744,15 @@ class ContribsPager extends ReverseChronologicalPager {
 		 * $limit: see phpdoc above
 		 * $descending: see phpdoc above
 		 */
-		$data = [ $this->mDb->select(
+		$data = array( $this->mDb->select(
 			$tables, $fields, $conds, $fname, $options, $join_conds
-		) ];
+		) );
 		Hooks::run(
 			'ContribsPager::reallyDoQuery',
-			[ &$data, $this, $offset, $limit, $descending ]
+			array( &$data, $this, $offset, $limit, $descending )
 		);
 
-		$result = [];
+		$result = array();
 
 		// loop all results and collect them in an array
 		foreach ( $data as $query ) {
@@ -824,23 +797,23 @@ class ContribsPager extends ReverseChronologicalPager {
 		# Get the current user name for accounts
 		$join_cond['user'] = Revision::userJoinCond();
 
-		$options = [];
+		$options = array();
 		if ( $index ) {
-			$options['USE INDEX'] = [ 'revision' => $index ];
+			$options['USE INDEX'] = array( 'revision' => $index );
 		}
 
-		$queryInfo = [
+		$queryInfo = array(
 			'tables' => $tables,
 			'fields' => array_merge(
 				Revision::selectFields(),
 				Revision::selectUserFields(),
-				[ 'page_namespace', 'page_title', 'page_is_new',
-					'page_latest', 'page_is_redirect', 'page_len' ]
+				array( 'page_namespace', 'page_title', 'page_is_new',
+					'page_latest', 'page_is_redirect', 'page_len' )
 			),
 			'conds' => $conds,
 			'options' => $options,
 			'join_conds' => $join_cond
-		];
+		);
 
 		ChangeTags::modifyDisplayQuery(
 			$queryInfo['tables'],
@@ -851,15 +824,15 @@ class ContribsPager extends ReverseChronologicalPager {
 			$this->tagFilter
 		);
 
-		Hooks::run( 'ContribsPager::getQueryInfo', [ &$this, &$queryInfo ] );
+		Hooks::run( 'ContribsPager::getQueryInfo', array( &$this, &$queryInfo ) );
 
 		return $queryInfo;
 	}
 
 	function getUserCond() {
-		$condition = [];
-		$join_conds = [];
-		$tables = [ 'revision', 'page', 'user' ];
+		$condition = array();
+		$join_conds = array();
+		$tables = array( 'revision', 'page', 'user' );
 		$index = false;
 		if ( $this->contribs == 'newbie' ) {
 			$max = $this->mDb->selectField( 'user', 'max(user_id)', false, __METHOD__ );
@@ -870,12 +843,12 @@ class ContribsPager extends ReverseChronologicalPager {
 			if ( count( $groupsWithBotPermission ) ) {
 				$tables[] = 'user_groups';
 				$condition[] = 'ug_group IS NULL';
-				$join_conds['user_groups'] = [
-					'LEFT JOIN', [
+				$join_conds['user_groups'] = array(
+					'LEFT JOIN', array(
 						'ug_user = rev_user',
 						'ug_group' => $groupsWithBotPermission
-					]
-				];
+					)
+				);
 			}
 		} else {
 			$uid = User::idFromName( $this->target );
@@ -900,7 +873,7 @@ class ContribsPager extends ReverseChronologicalPager {
 			$condition[] = 'rev_parent_id = 0';
 		}
 
-		return [ $tables, $index, $condition, $join_conds ];
+		return array( $tables, $index, $condition, $join_conds );
 	}
 
 	function getNamespaceCond() {
@@ -910,21 +883,21 @@ class ContribsPager extends ReverseChronologicalPager {
 			$bool_op = $this->nsInvert ? 'AND' : 'OR';
 
 			if ( !$this->associated ) {
-				return [ "page_namespace $eq_op $selectedNS" ];
+				return array( "page_namespace $eq_op $selectedNS" );
 			}
 
 			$associatedNS = $this->mDb->addQuotes(
 				MWNamespace::getAssociated( $this->namespace )
 			);
 
-			return [
+			return array(
 				"page_namespace $eq_op $selectedNS " .
 					$bool_op .
 					" page_namespace $eq_op $associatedNS"
-			];
+			);
 		}
 
-		return [];
+		return array();
 	}
 
 	function getIndexField() {
@@ -934,16 +907,14 @@ class ContribsPager extends ReverseChronologicalPager {
 	function doBatchLookups() {
 		# Do a link batch query
 		$this->mResult->seek( 0 );
-		$parentRevIds = [];
-		$this->mParentLens = [];
+		$revIds = array();
 		$batch = new LinkBatch();
 		# Give some pointers to make (last) links
 		foreach ( $this->mResult as $row ) {
 			if ( isset( $row->rev_parent_id ) && $row->rev_parent_id ) {
-				$parentRevIds[] = $row->rev_parent_id;
+				$revIds[] = $row->rev_parent_id;
 			}
 			if ( isset( $row->rev_id ) ) {
-				$this->mParentLens[$row->rev_id] = $row->rev_len;
 				if ( $this->contribs === 'newbie' ) { // multiple users
 					$batch->add( NS_USER, $row->user_name );
 					$batch->add( NS_USER_TALK, $row->user_name );
@@ -951,11 +922,7 @@ class ContribsPager extends ReverseChronologicalPager {
 				$batch->add( $row->page_namespace, $row->page_title );
 			}
 		}
-		# Fetch rev_len for revisions not already scanned above
-		$this->mParentLens += Revision::getParentLengths(
-			$this->mDbSecondary,
-			array_diff( $parentRevIds, array_keys( $this->mParentLens ) )
-		);
+		$this->mParentLens = Revision::getParentLengths( $this->mDbSecondary, $revIds );
 		$batch->execute();
 		$this->mResult->seek( 0 );
 	}
@@ -989,7 +956,7 @@ class ContribsPager extends ReverseChronologicalPager {
 	function formatRow( $row ) {
 
 		$ret = '';
-		$classes = [];
+		$classes = array();
 
 		/*
 		 * There may be more than just revision rows. To make sure that we'll only be processing
@@ -1008,14 +975,14 @@ class ContribsPager extends ReverseChronologicalPager {
 		MediaWiki\restoreWarnings();
 
 		if ( $validRevision ) {
-			$classes = [];
+			$classes = array();
 
 			$page = Title::newFromRow( $row );
 			$link = Linker::link(
 				$page,
 				htmlspecialchars( $page->getPrefixedText() ),
-				[ 'class' => 'mw-contributions-title' ],
-				$page->isRedirect() ? [ 'redirect' => 'no' ] : []
+				array( 'class' => 'mw-contributions-title' ),
+				$page->isRedirect() ? array( 'redirect' => 'no' ) : array()
 			);
 			# Mark current revisions
 			$topmarktext = '';
@@ -1035,11 +1002,11 @@ class ContribsPager extends ReverseChronologicalPager {
 				$difftext = Linker::linkKnown(
 					$page,
 					$this->messages['diff'],
-					[],
-					[
+					array(),
+					array(
 						'diff' => 'prev',
 						'oldid' => $row->rev_id
-					]
+					)
 				);
 			} else {
 				$difftext = $this->messages['diff'];
@@ -1047,8 +1014,8 @@ class ContribsPager extends ReverseChronologicalPager {
 			$histlink = Linker::linkKnown(
 				$page,
 				$this->messages['hist'],
-				[],
-				[ 'action' => 'history' ]
+				array(),
+				array( 'action' => 'history' )
 			);
 
 			if ( $row->rev_parent_id === null ) {
@@ -1080,8 +1047,8 @@ class ContribsPager extends ReverseChronologicalPager {
 				$d = Linker::linkKnown(
 					$page,
 					htmlspecialchars( $date ),
-					[ 'class' => 'mw-changeslist-date' ],
-					[ 'oldid' => intval( $row->rev_id ) ]
+					array( 'class' => 'mw-changeslist-date' ),
+					array( 'oldid' => intval( $row->rev_id ) )
 				);
 			} else {
 				$d = htmlspecialchars( $date );
@@ -1134,21 +1101,20 @@ class ContribsPager extends ReverseChronologicalPager {
 			# Tags, if any.
 			list( $tagSummary, $newClasses ) = ChangeTags::formatSummaryRow(
 				$row->ts_tags,
-				'contributions',
-				$this->getContext()
+				'contributions'
 			);
 			$classes = array_merge( $classes, $newClasses );
 			$ret .= " $tagSummary";
 		}
 
 		// Let extensions add data
-		Hooks::run( 'ContributionsLineEnding', [ $this, &$ret, $row, &$classes ] );
+		Hooks::run( 'ContributionsLineEnding', array( $this, &$ret, $row, &$classes ) );
 
-		if ( $classes === [] && $ret === '' ) {
+		if ( $classes === array() && $ret === '' ) {
 			wfDebug( "Dropping Special:Contribution row that could not be formatted\n" );
 			$ret = "<!-- Could not format Special:Contribution row. -->\n";
 		} else {
-			$ret = Html::rawElement( 'li', [ 'class' => $classes ], $ret ) . "\n";
+			$ret = Html::rawElement( 'li', array( 'class' => $classes ), $ret ) . "\n";
 		}
 
 		return $ret;

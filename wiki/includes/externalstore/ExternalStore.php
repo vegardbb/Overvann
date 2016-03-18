@@ -51,7 +51,7 @@ class ExternalStore {
 	 * @param array $params Associative array of ExternalStoreMedium parameters
 	 * @return ExternalStoreMedium|bool The store class or false on error
 	 */
-	public static function getStoreObject( $proto, array $params = [] ) {
+	public static function getStoreObject( $proto, array $params = array() ) {
 		global $wgExternalStores;
 
 		if ( !$wgExternalStores || !in_array( $proto, $wgExternalStores ) ) {
@@ -72,7 +72,7 @@ class ExternalStore {
 	 * @return string|bool The text stored or false on error
 	 * @throws MWException
 	 */
-	public static function fetchFromURL( $url, array $params = [] ) {
+	public static function fetchFromURL( $url, array $params = array() ) {
 		$parts = explode( '://', $url, 2 );
 		if ( count( $parts ) != 2 ) {
 			return false; // invalid URL
@@ -99,14 +99,14 @@ class ExternalStore {
 	 *     or false on failure.
 	 */
 	public static function batchFetchFromURLs( array $urls ) {
-		$batches = [];
+		$batches = array();
 		foreach ( $urls as $url ) {
 			$scheme = parse_url( $url, PHP_URL_SCHEME );
 			if ( $scheme ) {
 				$batches[$scheme][] = $url;
 			}
 		}
-		$retval = [];
+		$retval = array();
 		foreach ( $batches as $proto => $batchedUrls ) {
 			$store = self::getStoreObject( $proto );
 			if ( $store === false ) {
@@ -136,7 +136,7 @@ class ExternalStore {
 	 * @return string|bool The URL of the stored data item, or false on error
 	 * @throws MWException
 	 */
-	public static function insert( $url, $data, array $params = [] ) {
+	public static function insert( $url, $data, array $params = array() ) {
 		$parts = explode( '://', $url, 2 );
 		if ( count( $parts ) != 2 ) {
 			return false; // invalid URL
@@ -166,7 +166,7 @@ class ExternalStore {
 	 * @return string|bool The URL of the stored data item, or false on error
 	 * @throws MWException
 	 */
-	public static function insertToDefault( $data, array $params = [] ) {
+	public static function insertToDefault( $data, array $params = array() ) {
 		global $wgDefaultExternalStore;
 
 		return self::insertWithFallback( (array)$wgDefaultExternalStore, $data, $params );
@@ -184,7 +184,7 @@ class ExternalStore {
 	 * @return string|bool The URL of the stored data item, or false on error
 	 * @throws MWException
 	 */
-	public static function insertWithFallback( array $tryStores, $data, array $params = [] ) {
+	public static function insertWithFallback( array $tryStores, $data, array $params = array() ) {
 		$error = false;
 		while ( count( $tryStores ) > 0 ) {
 			$index = mt_rand( 0, count( $tryStores ) - 1 );
@@ -224,6 +224,6 @@ class ExternalStore {
 	 * @throws MWException
 	 */
 	public static function insertToForeignDefault( $data, $wiki ) {
-		return self::insertToDefault( $data, [ 'wiki' => $wiki ] );
+		return self::insertToDefault( $data, array( 'wiki' => $wiki ) );
 	}
 }

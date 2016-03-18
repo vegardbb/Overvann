@@ -1,6 +1,6 @@
 <?php
 /**
- * ResourceLoader module for populating language specific data.
+ * Resource loader module for populating language specific data.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
  */
 class ResourceLoaderLanguageDataModule extends ResourceLoaderModule {
 
-	protected $targets = [ 'desktop', 'mobile' ];
+	protected $targets = array( 'desktop', 'mobile' );
 
 	/**
 	 * Get all the dynamic data for the content language to an array.
@@ -37,14 +37,14 @@ class ResourceLoaderLanguageDataModule extends ResourceLoaderModule {
 	 */
 	protected function getData( ResourceLoaderContext $context ) {
 		$language = Language::factory( $context->getLanguage() );
-		return [
+		return array(
 			'digitTransformTable' => $language->digitTransformTable(),
 			'separatorTransformTable' => $language->separatorTransformTable(),
 			'grammarForms' => $language->getGrammarForms(),
 			'pluralRules' => $language->getPluralRules(),
 			'digitGroupingPattern' => $language->digitGroupingPattern(),
 			'fallbackLanguages' => $language->getFallbackLanguages(),
-		];
+		);
 	}
 
 	/**
@@ -54,10 +54,10 @@ class ResourceLoaderLanguageDataModule extends ResourceLoaderModule {
 	public function getScript( ResourceLoaderContext $context ) {
 		return Xml::encodeJsCall(
 			'mw.language.setData',
-			[
+			array(
 				$context->getLanguage(),
 				$this->getData( $context )
-			],
+			),
 			ResourceLoader::inDebugMode()
 		);
 	}
@@ -74,6 +74,6 @@ class ResourceLoaderLanguageDataModule extends ResourceLoaderModule {
 	 * @return array
 	 */
 	public function getDependencies( ResourceLoaderContext $context = null ) {
-		return [ 'mediawiki.language.init' ];
+		return array( 'mediawiki.language.init' );
 	}
 }

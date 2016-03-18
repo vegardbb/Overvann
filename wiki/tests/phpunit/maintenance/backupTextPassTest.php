@@ -1,14 +1,9 @@
 <?php
 
-require_once __DIR__ . "/../../../maintenance/dumpTextPass.php";
+require_once __DIR__ . "/../../../maintenance/backupTextPass.inc";
 
 /**
  * Tests for TextPassDumper that rely on the database
- *
- * Some of these tests use the old constuctor for TextPassDumper
- * and the dump() function, while others use the new loadWithArgv( $args )
- * function and execute(). This is to ensure both the old and new methods
- * work properly.
  *
  * @group Database
  * @group Dump
@@ -32,9 +27,9 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		$this->tablesUsed[] = 'revision';
 		$this->tablesUsed[] = 'text';
 
-		$this->mergeMwGlobalArrayValue( 'wgContentHandlers', [
+		$this->mergeMwGlobalArrayValue( 'wgContentHandlers', array(
 			"BackupTextPassTestModel" => "BackupTextPassTestModelHandler"
-		] );
+		) );
 
 		$ns = $this->getDefaultWikitextNS();
 
@@ -102,8 +97,8 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		// class), we have to assert, that the page id are consecutively
 		// increasing
 		$this->assertEquals(
-			[ $this->pageId2, $this->pageId3, $this->pageId4 ],
-			[ $this->pageId1 + 1, $this->pageId2 + 1, $this->pageId3 + 1 ],
+			array( $this->pageId2, $this->pageId3, $this->pageId4 ),
+			array( $this->pageId1 + 1, $this->pageId2 + 1, $this->pageId3 + 1 ),
 			"Page ids increasing without holes" );
 	}
 
@@ -111,8 +106,8 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		// Setting up the dump
 		$nameStub = $this->setUpStub();
 		$nameFull = $this->getNewTempFile();
-		$dumper = new TextPassDumper( [ "--stub=file:" . $nameStub,
-			"--output=file:" . $nameFull ] );
+		$dumper = new TextPassDumper( array( "--stub=file:" . $nameStub,
+			"--output=file:" . $nameFull ) );
 		$dumper->reporting = false;
 		$dumper->setDb( $this->db );
 
@@ -163,13 +158,13 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 
 	function testPrefetchPlain() {
 		// The mapping between ids and text, for the hits of the prefetch mock
-		$prefetchMap = [
-			[ $this->pageId1, $this->revId1_1, "Prefetch_________1Text1" ],
-			[ $this->pageId2, $this->revId2_3, "Prefetch_________2Text3" ]
-		];
+		$prefetchMap = array(
+			array( $this->pageId1, $this->revId1_1, "Prefetch_________1Text1" ),
+			array( $this->pageId2, $this->revId2_3, "Prefetch_________2Text3" )
+		);
 
 		// The mock itself
-		$prefetchMock = $this->getMock( 'BaseDump', [ 'prefetch' ], [], '', false );
+		$prefetchMock = $this->getMock( 'BaseDump', array( 'prefetch' ), array(), '', false );
 		$prefetchMock->expects( $this->exactly( 6 ) )
 			->method( 'prefetch' )
 			->will( $this->returnValueMap( $prefetchMap ) );
@@ -177,10 +172,8 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		// Setting up of the dump
 		$nameStub = $this->setUpStub();
 		$nameFull = $this->getNewTempFile();
-
-		$dumper = new TextPassDumper( [ "--stub=file:" . $nameStub,
-			"--output=file:" . $nameFull ] );
-
+		$dumper = new TextPassDumper( array( "--stub=file:"
+			. $nameStub, "--output=file:" . $nameFull ) );
 		$dumper->prefetch = $prefetchMock;
 		$dumper->reporting = false;
 		$dumper->setDb( $this->db );
@@ -268,19 +261,18 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 			$this->assertTrue( wfMkdirParents( $nameOutputDir ),
 				"Creating temporary output directory " );
 			$this->setUpStub( $nameStub, $iterations );
-			$dumper = new TextPassDumper();
-			$dumper->loadWithArgv( [ "--stub=file:" . $nameStub,
+			$dumper = new TextPassDumper( array( "--stub=file:" . $nameStub,
 				"--output=" . $checkpointFormat . ":" . $nameOutputDir . "/full",
 				"--maxtime=1" /*This is in minutes. Fixup is below*/,
 				"--buffersize=32768", // The default of 32 iterations fill up 32KB about twice
-				"--checkpointfile=checkpoint-%s-%s.xml.gz" ] );
+				"--checkpointfile=checkpoint-%s-%s.xml.gz" ) );
 			$dumper->setDb( $this->db );
 			$dumper->maxTimeAllowed = $checkpointAfter; // Patching maxTime from 1 minute
 			$dumper->stderr = $stderr;
 
 			// The actual dump and taking time
 			$ts_before = microtime( true );
-			$dumper->execute();
+			$dumper->dump( WikiExporter::FULL, WikiExporter::TEXT );
 			$ts_after = microtime( true );
 			$lastDuration = $ts_after - $ts_before;
 
@@ -309,6 +301,7 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 
 		// The dump (hopefully) did take long enough to produce more than one
 		// checkpoint file.
+		//
 		// We now check all the checkpoint files for validity.
 
 		$files = scandir( $nameOutputDir );
@@ -642,9 +635,7 @@ class TextPassDumperDatabaselessTest extends MediaWikiLangTestCase {
 	 * @dataProvider bufferSizeProvider
 	 */
 	function testBufferSizeSetting( $expected, $size, $msg ) {
-		$dumper = new TextPassDumperAccessor();
-		$dumper->loadWithArgv( [ "--buffersize=" . $size ] );
-		$dumper->execute();
+		$dumper = new TextPassDumperAccessor( array( "--buffersize=" . $size ) );
 		$this->assertEquals( $expected, $dumper->getBufferSize(), $msg );
 	}
 
@@ -655,11 +646,11 @@ class TextPassDumperDatabaselessTest extends MediaWikiLangTestCase {
 	 */
 	function bufferSizeProvider() {
 		// expected, bufferSize to initialize with, message
-		return [
-			[ 512 * 1024, 512 * 1024, "Setting 512KB is not effective" ],
-			[ 8192, 8192, "Setting 8KB is not effective" ],
-			[ 4096, 2048, "Could set buffer size below lower bound" ]
-		];
+		return array(
+			array( 512 * 1024, 512 * 1024, "Setting 512KB is not effective" ),
+			array( 8192, 8192, "Setting 8KB is not effective" ),
+			array( 4096, 2048, "Could set buffer size below lower bound" )
+		);
 	}
 }
 
@@ -683,9 +674,5 @@ class TextPassDumperAccessor extends TextPassDumper {
 	 */
 	public function getBufferSize() {
 		return $this->bufferSize;
-	}
-
-	function dump( $history, $text = null ) {
-		return true;
 	}
 }

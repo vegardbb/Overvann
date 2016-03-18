@@ -36,7 +36,7 @@ class ButtonWidget extends Widget {
 	 * @param string $config['target'] Target to open hyperlink in
 	 * @param boolean $config['noFollow'] Search engine traversal hint (default: true)
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Parent constructor
 		parent::__construct( $config );
 
@@ -46,17 +46,17 @@ class ButtonWidget extends Widget {
 		$this->mixin( new IndicatorElement( $this, $config ) );
 		$this->mixin( new LabelElement( $this, $config ) );
 		$this->mixin( new TitledElement( $this,
-			array_merge( $config, [ 'titled' => $this->button ] ) ) );
+			array_merge( $config, array( 'titled' => $this->button ) ) ) );
 		$this->mixin( new FlaggedElement( $this, $config ) );
 		$this->mixin( new TabIndexedElement( $this,
-			array_merge( $config, [ 'tabIndexed' => $this->button ] ) ) );
+			array_merge( $config, array( 'tabIndexed' => $this->button ) ) ) );
 		$this->mixin( new AccessKeyedElement( $this,
-			array_merge( $config, [ 'accessKeyed' => $this->button ] ) ) );
+			array_merge( $config, array( 'accessKeyed' => $this->button ) ) ) );
 
 		// Initialization
 		$this->button->appendContent( $this->icon, $this->label, $this->indicator );
 		$this
-			->addClasses( [ 'oo-ui-buttonWidget' ] )
+			->addClasses( array( 'oo-ui-buttonWidget' ) )
 			->appendContent( $this->button );
 
 		$this->setHref( isset( $config['href'] ) ? $config['href'] : null );
@@ -95,7 +95,6 @@ class ButtonWidget extends Widget {
 	 * Set hyperlink location.
 	 *
 	 * @param string|null $href Hyperlink location, null to remove
-	 * @return $this
 	 */
 	public function setHref( $href ) {
 		$this->href = is_string( $href ) ? $href : null;
@@ -109,13 +108,13 @@ class ButtonWidget extends Widget {
 	 * Update the href attribute, in case of changes to href or disabled
 	 * state.
 	 *
-	 * @return $this
+	 * @chainable
 	 */
 	public function updateHref() {
 		if ( $this->href !== null && !$this->isDisabled() ) {
-			$this->button->setAttributes( [ 'href' => $this->href ] );
+			$this->button->setAttributes( array( 'href' => $this->href ) );
 		} else {
-			$this->button->removeAttributes( [ 'href' ] );
+			$this->button->removeAttributes( array( 'href' ) );
 		}
 		return $this;
 	}
@@ -124,15 +123,14 @@ class ButtonWidget extends Widget {
 	 * Set hyperlink target.
 	 *
 	 * @param string|null $target Hyperlink target, null to remove
-	 * @return $this
 	 */
 	public function setTarget( $target ) {
 		$this->target = is_string( $target ) ? $target : null;
 
 		if ( $this->target !== null ) {
-			$this->button->setAttributes( [ 'target' => $target ] );
+			$this->button->setAttributes( array( 'target' => $target ) );
 		} else {
-			$this->button->removeAttributes( [ 'target' ] );
+			$this->button->removeAttributes( array( 'target' ) );
 		}
 
 		return $this;
@@ -142,15 +140,14 @@ class ButtonWidget extends Widget {
 	 * Set search engine traversal hint.
 	 *
 	 * @param boolean $noFollow True if search engines should avoid traversing this hyperlink
-	 * @return $this
 	 */
 	public function setNoFollow( $noFollow ) {
 		$this->noFollow = is_bool( $noFollow ) ? $noFollow : true;
 
 		if ( $this->noFollow ) {
-			$this->button->setAttributes( [ 'rel' => 'nofollow' ] );
+			$this->button->setAttributes( array( 'rel' => 'nofollow' ) );
 		} else {
-			$this->button->removeAttributes( [ 'rel' ] );
+			$this->button->removeAttributes( array( 'rel' ) );
 		}
 
 		return $this;

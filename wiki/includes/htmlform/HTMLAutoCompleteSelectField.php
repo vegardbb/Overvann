@@ -5,9 +5,6 @@
  * auto-completion and optionally with a select dropdown for selecting common
  * options.
  *
- * HTMLComboboxField implements most of the same functionality and should be
- * used instead, if possible.
- *
  * If one of 'options-messages', 'options', or 'options-message' is provided
  * and non-empty, the select dropdown will be shown. An 'other' key will be
  * appended using message 'htmlform-selectorother-other' if not already
@@ -25,14 +22,15 @@
  *   other-message - Message to use instead of htmlform-selectorother-other for
  *      the 'other' message.
  *   other - Raw text to use for the 'other' message
+ *
  */
 class HTMLAutoCompleteSelectField extends HTMLTextField {
-	protected $autocomplete = [];
+	protected $autocomplete = array();
 
 	function __construct( $params ) {
-		$params += [
+		$params += array(
 			'require-match' => false,
-		];
+		);
 
 		parent::__construct( $params );
 
@@ -102,14 +100,14 @@ class HTMLAutoCompleteSelectField extends HTMLTextField {
 
 	// FIXME Ewww, this shouldn't be adding any attributes not requested in $list :(
 	public function getAttributes( array $list, array $mappings = null ) {
-		$attribs = [
+		$attribs = array(
 			'type' => 'text',
 			'data-autocomplete' => FormatJson::encode( array_keys( $this->autocomplete ) ),
-		] + parent::getAttributes( $list, $mappings );
+		) + parent::getAttributes( $list, $mappings );
 
 		if ( $this->getOptions() ) {
 			$attribs['data-hide-if'] = FormatJson::encode(
-				[ '!==', $this->mName . '-select', 'other' ]
+				array( '!==', $this->mName . '-select', 'other' )
 			);
 		}
 

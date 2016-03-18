@@ -42,15 +42,11 @@ use Psr\Log\NullLogger;
  *
  * @ingroup Cache
  */
-abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
+abstract class BagOStuff implements LoggerAwareInterface {
 	/** @var array[] Lock tracking */
-	protected $locks = [];
-
+	protected $locks = array();
 	/** @var integer */
 	protected $lastError = self::ERR_NONE;
-
-	/** @var string */
-	protected $keyspace = 'local';
 
 	/** @var LoggerInterface */
 	protected $logger;
@@ -66,20 +62,12 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 
 	/** Bitfield constants for get()/getMulti() */
 	const READ_LATEST = 1; // use latest data for replicated stores
-	const READ_VERIFIED = 2; // promise that caller can tell when keys are stale
-	/** Bitfield constants for set()/merge() */
-	const WRITE_SYNC = 1; // synchronously write to all locations for replicated stores
-	const WRITE_CACHE_ONLY = 2; // Only change state of the in-memory cache
 
-	public function __construct( array $params = [] ) {
+	public function __construct( array $params = array() ) {
 		if ( isset( $params['logger'] ) ) {
 			$this->setLogger( $params['logger'] );
 		} else {
 			$this->setLogger( new NullLogger() );
-		}
-
-		if ( isset( $params['keyspace'] ) ) {
-			$this->keyspace = $params['keyspace'];
 		}
 	}
 
@@ -99,88 +87,25 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	}
 
 	/**
-	 * Get an item with the given key, regenerating and setting it if not found
-	 *
-	 * If the callback returns false, then nothing is stored.
-	 *
+	 * Get an item with the given key. Returns false if it does not exist.
 	 * @param string $key
-	 * @param int $ttl Time-to-live (seconds)
-	 * @param callable $callback Callback that derives the new value
-	 * @param integer $flags Bitfield of BagOStuff::READ_* constants [optional]
-	 * @return mixed The cached value if found or the result of $callback otherwise
-	 * @since 1.27
+	 * @param mixed $casToken [optional]
+	 * @param integer $flags Bitfield; supports READ_LATEST [optional]
+	 * @return mixed Returns false on failure
 	 */
-	final public function getWithSetCallback( $key, $ttl, $callback, $flags = 0 ) {
-		$value = $this->get( $key, $flags );
-
-		if ( $value === false ) {
-			if ( !is_callable( $callback ) ) {
-				throw new InvalidArgumentException( "Invalid cache miss callback provided." );
-			}
-			$value = call_user_func( $callback );
-			if ( $value !== false ) {
-				$this->set( $key, $value, $ttl );
-			}
-		}
-
-		return $value;
-	}
+	abstract public function get( $key, &$casToken = null, $flags = 0 );
 
 	/**
-	 * Get an item with the given key
-	 *
-	 * If the key includes a determistic input hash (e.g. the key can only have
-	 * the correct value) or complete staleness checks are handled by the caller
-	 * (e.g. nothing relies on the TTL), then the READ_VERIFIED flag should be set.
-	 * This lets tiered backends know they can safely upgrade a cached value to
-	 * higher tiers using standard TTLs.
-	 *
-	 * @param string $key
-	 * @param integer $flags Bitfield of BagOStuff::READ_* constants [optional]
-	 * @param integer $oldFlags [unused]
-	 * @return mixed Returns false on failure and if the item does not exist
-	 */
-	public function get( $key, $flags = 0, $oldFlags = null ) {
-		// B/C for ( $key, &$casToken = null, $flags = 0 )
-		$flags = is_int( $oldFlags ) ? $oldFlags : $flags;
-
-		return $this->doGet( $key, $flags );
-	}
-
-	/**
-	 * @param string $key
-	 * @param integer $flags Bitfield of BagOStuff::READ_* constants [optional]
-	 * @return mixed Returns false on failure and if the item does not exist
-	 */
-	abstract protected function doGet( $key, $flags = 0 );
-
-	/**
-	 * @note: This method is only needed if merge() uses mergeViaCas()
-	 *
-	 * @param string $key
-	 * @param mixed $casToken
-	 * @param integer $flags Bitfield of BagOStuff::READ_* constants [optional]
-	 * @return mixed Returns false on failure and if the item does not exist
-	 * @throws Exception
-	 */
-	protected function getWithToken( $key, &$casToken, $flags = 0 ) {
-		throw new Exception( __METHOD__ . ' not implemented.' );
-	}
-
-	/**
-	 * Set an item
-	 *
+	 * Set an item.
 	 * @param string $key
 	 * @param mixed $value
 	 * @param int $exptime Either an interval in seconds or a unix timestamp for expiry
-	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants
 	 * @return bool Success
 	 */
-	abstract public function set( $key, $value, $exptime = 0, $flags = 0 );
+	abstract public function set( $key, $value, $exptime = 0 );
 
 	/**
-	 * Delete an item
-	 *
+	 * Delete an item.
 	 * @param string $key
 	 * @return bool True if the item was deleted or not found, false on failure
 	 */
@@ -196,16 +121,15 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	 * @param callable $callback Callback method to be executed
 	 * @param int $exptime Either an interval in seconds or a unix timestamp for expiry
 	 * @param int $attempts The amount of times to attempt a merge in case of failure
-	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants
 	 * @return bool Success
 	 * @throws InvalidArgumentException
 	 */
-	public function merge( $key, $callback, $exptime = 0, $attempts = 10, $flags = 0 ) {
+	public function merge( $key, $callback, $exptime = 0, $attempts = 10 ) {
 		if ( !is_callable( $callback ) ) {
 			throw new InvalidArgumentException( "Got invalid callback." );
 		}
 
-		return $this->mergeViaLock( $key, $callback, $exptime, $attempts, $flags );
+		return $this->mergeViaLock( $key, $callback, $exptime, $attempts );
 	}
 
 	/**
@@ -221,7 +145,7 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 		do {
 			$this->clearLastError();
 			$casToken = null; // passed by reference
-			$currentValue = $this->getWithToken( $key, $casToken, self::READ_LATEST );
+			$currentValue = $this->get( $key, $casToken );
 			if ( $this->getLastError() ) {
 				return false; // don't spam retries (retry only on races)
 			}
@@ -268,16 +192,15 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	 * @param callable $callback Callback method to be executed
 	 * @param int $exptime Either an interval in seconds or a unix timestamp for expiry
 	 * @param int $attempts The amount of times to attempt a merge in case of failure
-	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants
 	 * @return bool Success
 	 */
-	protected function mergeViaLock( $key, $callback, $exptime = 0, $attempts = 10, $flags = 0 ) {
+	protected function mergeViaLock( $key, $callback, $exptime = 0, $attempts = 10 ) {
 		if ( !$this->lock( $key, 6 ) ) {
 			return false;
 		}
 
 		$this->clearLastError();
-		$currentValue = $this->get( $key, self::READ_LATEST );
+		$currentValue = $this->get( $key );
 		if ( $this->getLastError() ) {
 			$success = false;
 		} else {
@@ -286,7 +209,7 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 			if ( $value === false ) {
 				$success = true; // do nothing
 			} else {
-				$success = $this->set( $key, $value, $exptime, $flags ); // set the new value
+				$success = $this->set( $key, $value, $exptime ); // set the new value
 			}
 		}
 
@@ -320,7 +243,7 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 			}
 		}
 
-		$expiry = min( $expiry ?: INF, self::TTL_DAY );
+		$expiry = min( $expiry ?: INF, 86400 );
 
 		$this->clearLastError();
 		$timestamp = microtime( true ); // starting UNIX timestamp
@@ -329,8 +252,7 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 		} elseif ( $this->getLastError() || $timeout <= 0 ) {
 			$locked = false; // network partition or non-blocking
 		} else {
-			// Estimate the RTT (us); use 1ms minimum for sanity
-			$uRTT = max( 1e3, ceil( 1e6 * ( microtime( true ) - $timestamp ) ) );
+			$uRTT = ceil( 1e6 * ( microtime( true ) - $timestamp ) ); // estimate RTT (us)
 			$sleep = 2 * $uRTT; // rough time to do get()+set()
 
 			$attempts = 0; // failed attempts
@@ -351,7 +273,7 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 		}
 
 		if ( $locked ) {
-			$this->locks[$key] = [ 'class' => $rclass, 'depth' => 1 ];
+			$this->locks[$key] = array( 'class' => $rclass, 'depth' => 1 );
 		}
 
 		return $locked;
@@ -390,22 +312,25 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	 * @since 1.26
 	 */
 	final public function getScopedLock( $key, $timeout = 6, $expiry = 30, $rclass = '' ) {
-		$expiry = min( $expiry ?: INF, self::TTL_DAY );
+		$expiry = min( $expiry ?: INF, 86400 );
 
 		if ( !$this->lock( $key, $timeout, $expiry, $rclass ) ) {
 			return null;
 		}
 
 		$lSince = microtime( true ); // lock timestamp
+		// PHP 5.3: Can't use $this in a closure
+		$that = $this;
+		$logger = $this->logger;
 
-		return new ScopedCallback( function() use ( $key, $lSince, $expiry ) {
+		return new ScopedCallback( function() use ( $that, $logger, $key, $lSince, $expiry ) {
 			$latency = .050; // latency skew (err towards keeping lock present)
 			$age = ( microtime( true ) - $lSince + $latency );
 			if ( ( $age + $latency ) >= $expiry ) {
-				$this->logger->warning( "Lock for $key held too long ($age sec)." );
+				$logger->warning( "Lock for $key held too long ($age sec)." );
 				return; // expired; it's not "safe" to delete the key
 			}
-			$this->unlock( $key );
+			$that->unlock( $key );
 		} );
 	}
 
@@ -430,7 +355,7 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	 * @return array
 	 */
 	public function getMulti( array $keys, $flags = 0 ) {
-		$res = [];
+		$res = array();
 		foreach ( $keys as $key ) {
 			$val = $this->get( $key );
 			if ( $val !== false ) {
@@ -505,27 +430,18 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	/**
 	 * Increase stored value of $key by $value while preserving its TTL
 	 *
-	 * This will create the key with value $init and TTL $ttl instead if not present
+	 * This will create the key with value $init and TTL $ttl if not present
 	 *
 	 * @param string $key
 	 * @param int $ttl
 	 * @param int $value
 	 * @param int $init
-	 * @return int|bool New value or false on failure
+	 * @return bool
 	 * @since 1.24
 	 */
 	public function incrWithInit( $key, $ttl, $value = 1, $init = 1 ) {
-		$newValue = $this->incr( $key, $value );
-		if ( $newValue === false ) {
-			// No key set; initialize
-			$newValue = $this->add( $key, (int)$init, $ttl ) ? $init : false;
-		}
-		if ( $newValue === false ) {
-			// Raced out initializing; increment
-			$newValue = $this->incr( $key, $value );
-		}
-
-		return $newValue;
+		return $this->incr( $key, $value ) ||
+			$this->add( $key, (int)$init, $ttl ) || $this->incr( $key, $value );
 	}
 
 	/**
@@ -577,9 +493,9 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	 */
 	protected function debug( $text ) {
 		if ( $this->debugMode ) {
-			$this->logger->debug( "{class} debug: $text", [
+			$this->logger->debug( "{class} debug: $text", array(
 				'class' => get_class( $this ),
-			] );
+			) );
 		}
 	}
 
@@ -589,7 +505,7 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	 * @return int
 	 */
 	protected function convertExpiry( $exptime ) {
-		if ( $exptime != 0 && $exptime < ( 10 * self::TTL_YEAR ) ) {
+		if ( ( $exptime != 0 ) && ( $exptime < 86400 * 3650 /* 10 years */ ) ) {
 			return time() + $exptime;
 		} else {
 			return $exptime;
@@ -604,7 +520,7 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	 * @return int
 	 */
 	protected function convertToRelative( $exptime ) {
-		if ( $exptime >= ( 10 * self::TTL_YEAR ) ) {
+		if ( $exptime >= 86400 * 3650 /* 10 years */ ) {
 			$exptime -= time();
 			if ( $exptime <= 0 ) {
 				$exptime = 1;
@@ -623,44 +539,5 @@ abstract class BagOStuff implements IExpiringStore, LoggerAwareInterface {
 	 */
 	protected function isInteger( $value ) {
 		return ( is_int( $value ) || ctype_digit( $value ) );
-	}
-
-	/**
-	 * Construct a cache key.
-	 *
-	 * @since 1.27
-	 * @param string $keyspace
-	 * @param array $args
-	 * @return string
-	 */
-	public function makeKeyInternal( $keyspace, $args ) {
-		$key = $keyspace;
-		foreach ( $args as $arg ) {
-			$arg = str_replace( ':', '%3A', $arg );
-			$key = $key . ':' . $arg;
-		}
-		return strtr( $key, ' ', '_' );
-	}
-
-	/**
-	 * Make a global cache key.
-	 *
-	 * @since 1.27
-	 * @param string ... Key component (variadic)
-	 * @return string
-	 */
-	public function makeGlobalKey() {
-		return $this->makeKeyInternal( 'global', func_get_args() );
-	}
-
-	/**
-	 * Make a cache key, scoped to this instance's keyspace.
-	 *
-	 * @since 1.27
-	 * @param string ... Key component (variadic)
-	 * @return string
-	 */
-	public function makeKey() {
-		return $this->makeKeyInternal( $this->keyspace, func_get_args() );
 	}
 }

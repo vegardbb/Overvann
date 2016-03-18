@@ -27,11 +27,11 @@
  * @ingroup Cache
  */
 class EmptyBagOStuff extends BagOStuff {
-	protected function doGet( $key, $flags = 0 ) {
+	public function get( $key, &$casToken = null, $flags = 0 ) {
 		return false;
 	}
 
-	public function set( $key, $value, $exp = 0, $flags = 0 ) {
+	public function set( $key, $value, $exp = 0 ) {
 		return true;
 	}
 
@@ -39,7 +39,7 @@ class EmptyBagOStuff extends BagOStuff {
 		return true;
 	}
 
-	public function merge( $key, $callback, $exptime = 0, $attempts = 10, $flags = 0 ) {
+	public function merge( $key, $callback, $exptime = 0, $attempts = 10 ) {
 		return true; // faster
 	}
 }

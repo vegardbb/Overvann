@@ -26,8 +26,6 @@
 	"ooui-dialog-process-dismiss": "Dispensar",
 	"ooui-dialog-process-retry": "Tentar novamente",
 	"ooui-dialog-process-continue": "Continuar",
-	"ooui-selectfile-button-select": "Selecionar um arquivo",
 	"ooui-selectfile-not-supported": "O selecionamento de arquivos não é suportado",
-	"ooui-selectfile-placeholder": "Nenhum arquivo selecionado",
-	"ooui-selectfile-dragdrop-placeholder": "Arraste o arquivo para cá"
+	"ooui-selectfile-placeholder": "Nenhum arquivo selecionado"
 }

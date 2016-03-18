@@ -10,7 +10,7 @@
 
 $fallback = 'pl';
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Media',
 	NS_SPECIAL          => 'Specjalnô',
 	NS_TALK             => 'Diskùsëjô',
@@ -27,5 +27,5 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Diskùsëjô_Pòmòcë',
 	NS_CATEGORY         => 'Kategòrëjô',
 	NS_CATEGORY_TALK    => 'Diskùsëjô_Kategòrëji',
-];
+);
 

@@ -26,7 +26,7 @@
  * Output is posted from time to time on:
  * https://www.mediawiki.org/wiki/Localisation_statistics
  */
-$optionsWithArgs = [ 'output' ];
+$optionsWithArgs = array( 'output' );
 
 require_once __DIR__ . '/../commandLine.inc';
 require_once 'languages.inc';
@@ -72,7 +72,7 @@ switch ( $options['output'] ) {
 }
 
 # Languages
-$languages = new Languages();
+$wgLanguages = new Languages();
 
 # Header
 $output->heading();
@@ -88,10 +88,10 @@ $output->element( 'Problematic', true );
 $output->element( '%', true );
 $output->blockend();
 
-$wgGeneralMessages = $languages->getGeneralMessages();
+$wgGeneralMessages = $wgLanguages->getGeneralMessages();
 $wgRequiredMessagesNumber = count( $wgGeneralMessages['required'] );
 
-foreach ( $languages->getLanguages() as $code ) {
+foreach ( $wgLanguages->getLanguages() as $code ) {
 	# Don't check English, RTL English or dummy language codes
 	if ( $code == 'en' || $code == 'enRTL' || ( is_array( $wgDummyLanguageCodes ) &&
 			isset( $wgDummyLanguageCodes[$code] ) )
@@ -101,8 +101,8 @@ foreach ( $languages->getLanguages() as $code ) {
 
 	# Calculate the numbers
 	$language = Language::fetchLanguageName( $code );
-	$fallback = $languages->getFallback( $code );
-	$messages = $languages->getMessages( $code );
+	$fallback = $wgLanguages->getFallback( $code );
+	$messages = $wgLanguages->getMessages( $code );
 	$messagesNumber = count( $messages['translated'] );
 	$requiredMessagesNumber = count( $messages['required'] );
 	$requiredMessagesPercent = $output->formatPercent(
@@ -115,11 +115,11 @@ foreach ( $languages->getLanguages() as $code ) {
 		$messagesNumber,
 		true
 	);
-	$messagesWithMismatchVariables = $languages->getMessagesWithMismatchVariables( $code );
-	$emptyMessages = $languages->getEmptyMessages( $code );
-	$messagesWithWhitespace = $languages->getMessagesWithWhitespace( $code );
-	$nonXHTMLMessages = $languages->getNonXHTMLMessages( $code );
-	$messagesWithWrongChars = $languages->getMessagesWithWrongChars( $code );
+	$messagesWithMismatchVariables = $wgLanguages->getMessagesWithMismatchVariables( $code );
+	$emptyMessages = $wgLanguages->getEmptyMessages( $code );
+	$messagesWithWhitespace = $wgLanguages->getMessagesWithWhitespace( $code );
+	$nonXHTMLMessages = $wgLanguages->getNonXHTMLMessages( $code );
+	$messagesWithWrongChars = $wgLanguages->getMessagesWithWrongChars( $code );
 	$problematicMessagesNumber = count( array_unique( array_merge(
 		$messagesWithMismatchVariables,
 		$emptyMessages,

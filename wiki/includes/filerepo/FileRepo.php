@@ -52,14 +52,11 @@ class FileRepo {
 	/** @var bool */
 	protected $hasSha1Storage = false;
 
-	/** @var bool */
-	protected $supportsSha1URLs = false;
-
 	/** @var FileBackend */
 	protected $backend;
 
 	/** @var array Map of zones to config */
-	protected $zones = [];
+	protected $zones = array();
 
 	/** @var string URL of thumb.php */
 	protected $thumbScriptUrl;
@@ -79,7 +76,7 @@ class FileRepo {
 	protected $scriptDirUrl;
 
 	/** @var string Script extension of the MediaWiki installation, equivalent
-	 *    to the old $wgScriptExtension, e.g. .php5 defaults to .php */
+	 *    to $wgScriptExtension, e.g. .php5 defaults to .php */
 	protected $scriptExtension;
 
 	/** @var string Equivalent to $wgArticlePath, e.g. https://en.wikipedia.org/wiki/$1 */
@@ -123,13 +120,13 @@ class FileRepo {
 	/** @var bool Whether all zones should be private (e.g. private wiki repo) */
 	protected $isPrivate;
 
-	/** @var array callable Override these in the base class */
-	protected $fileFactory = [ 'UnregisteredLocalFile', 'newFromTitle' ];
-	/** @var array callable|bool Override these in the base class */
+	/**
+	 * Factory functions for creating new files
+	 * Override these in the base class
+	 */
+	protected $fileFactory = array( 'UnregisteredLocalFile', 'newFromTitle' );
 	protected $oldFileFactory = false;
-	/** @var array callable|bool Override these in the base class */
 	protected $fileFactoryKey = false;
-	/** @var array callable|bool Override these in the base class */
 	protected $oldFileFactoryKey = false;
 
 	/**
@@ -156,11 +153,11 @@ class FileRepo {
 		}
 
 		// Optional settings that can have no value
-		$optionalSettings = [
+		$optionalSettings = array(
 			'descBaseUrl', 'scriptDirUrl', 'articleUrl', 'fetchDescription',
 			'thumbScriptUrl', 'pathDisclosureProtection', 'descriptionCacheExpiry',
 			'scriptExtension', 'favicon'
-		];
+		);
 		foreach ( $optionalSettings as $var ) {
 			if ( isset( $info[$var] ) ) {
 				$this->$var = $info[$var];
@@ -191,8 +188,8 @@ class FileRepo {
 			: 255;
 		$this->isPrivate = !empty( $info['isPrivate'] );
 		// Give defaults for the basic zones...
-		$this->zones = isset( $info['zones'] ) ? $info['zones'] : [];
-		foreach ( [ 'public', 'thumb', 'transcoded', 'temp', 'deleted' ] as $zone ) {
+		$this->zones = isset( $info['zones'] ) ? $info['zones'] : array();
+		foreach ( array( 'public', 'thumb', 'transcoded', 'temp', 'deleted' ) as $zone ) {
 			if ( !isset( $this->zones[$zone]['container'] ) ) {
 				$this->zones[$zone]['container'] = "{$this->name}-{$zone}";
 			}
@@ -200,11 +197,9 @@ class FileRepo {
 				$this->zones[$zone]['directory'] = '';
 			}
 			if ( !isset( $this->zones[$zone]['urlsByExt'] ) ) {
-				$this->zones[$zone]['urlsByExt'] = [];
+				$this->zones[$zone]['urlsByExt'] = array();
 			}
 		}
-
-		$this->supportsSha1URLs = !empty( $info['supportsSha1URLs'] );
 	}
 
 	/**
@@ -233,7 +228,7 @@ class FileRepo {
 	 * @throws MWException
 	 * @return Status
 	 */
-	protected function initZones( $doZones = [] ) {
+	protected function initZones( $doZones = array() ) {
 		$status = $this->newGood();
 		foreach ( (array)$doZones as $zone ) {
 			$root = $this->getZonePath( $zone );
@@ -280,7 +275,7 @@ class FileRepo {
 	 * @return string|bool
 	 */
 	public function getZoneUrl( $zone, $ext = null ) {
-		if ( in_array( $zone, [ 'public', 'thumb', 'transcoded' ] ) ) {
+		if ( in_array( $zone, array( 'public', 'thumb', 'transcoded' ) ) ) {
 			// standard public zones
 			if ( $ext !== null && isset( $this->zones[$zone]['urlsByExt'][$ext] ) ) {
 				// custom URL for extension/zone
@@ -348,10 +343,10 @@ class FileRepo {
 	 */
 	protected function getZoneLocation( $zone ) {
 		if ( !isset( $this->zones[$zone] ) ) {
-			return [ null, null ]; // bogus
+			return array( null, null ); // bogus
 		}
 
-		return [ $this->zones[$zone]['container'], $this->zones[$zone]['directory'] ];
+		return array( $this->zones[$zone]['container'], $this->zones[$zone]['directory'] );
 	}
 
 	/**
@@ -417,7 +412,7 @@ class FileRepo {
 	 *   latest:         If true, load from the latest available data into File objects
 	 * @return File|bool False on failure
 	 */
-	public function findFile( $title, $options = [] ) {
+	public function findFile( $title, $options = array() ) {
 		$title = File::normalizeTitle( $title );
 		if ( !$title ) {
 			return false;
@@ -494,7 +489,7 @@ class FileRepo {
 	 * @return array Map of (file name => File objects) for matches
 	 */
 	public function findFiles( array $items, $flags = 0 ) {
-		$result = [];
+		$result = array();
 		foreach ( $items as $item ) {
 			if ( is_array( $item ) ) {
 				$title = $item['title'];
@@ -502,16 +497,16 @@ class FileRepo {
 				unset( $options['title'] );
 			} else {
 				$title = $item;
-				$options = [];
+				$options = array();
 			}
 			$file = $this->findFile( $title, $options );
 			if ( $file ) {
 				$searchName = File::normalizeTitle( $title )->getDBkey(); // must be valid
 				if ( $flags & self::NAME_AND_TIME_ONLY ) {
-					$result[$searchName] = [
+					$result[$searchName] = array(
 						'title' => $file->getTitle()->getDBkey(),
 						'timestamp' => $file->getTimestamp()
-					];
+					);
 				} else {
 					$result[$searchName] = $file;
 				}
@@ -530,7 +525,7 @@ class FileRepo {
 	 * @param array $options Option array, same as findFile().
 	 * @return File|bool False on failure
 	 */
-	public function findFileFromKey( $sha1, $options = [] ) {
+	public function findFileFromKey( $sha1, $options = array() ) {
 		$time = isset( $options['time'] ) ? $options['time'] : false;
 		# First try to find a matching current version of a file...
 		if ( $this->fileFactoryKey ) {
@@ -569,7 +564,7 @@ class FileRepo {
 	 * @return File[]
 	 */
 	public function findBySha1( $hash ) {
-		return [];
+		return array();
 	}
 
 	/**
@@ -580,7 +575,7 @@ class FileRepo {
 	 * @return array An Array of arrays or iterators of file objects and the hash as key
 	 */
 	public function findBySha1s( array $hashes ) {
-		$result = [];
+		$result = array();
 		foreach ( $hashes as $hash ) {
 			$files = $this->findBySha1( $hash );
 			if ( count( $files ) ) {
@@ -600,7 +595,17 @@ class FileRepo {
 	 * @return array
 	 */
 	public function findFilesByPrefix( $prefix, $limit ) {
-		return [];
+		return array();
+	}
+
+	/**
+	 * Get the public root URL of the repository
+	 *
+	 * @deprecated since 1.20
+	 * @return string
+	 */
+	public function getRootUrl() {
+		return $this->getZoneUrl( 'public' );
 	}
 
 	/**
@@ -748,6 +753,7 @@ class FileRepo {
 		}
 		if ( !is_null( $this->articleUrl ) ) {
 			# "http://example.com/wiki/$1"
+			#
 			# We use "Image:" as the canonical namespace for
 			# compatibility across all MediaWiki versions.
 			return str_replace( '$1',
@@ -755,6 +761,7 @@ class FileRepo {
 		}
 		if ( !is_null( $this->scriptDirUrl ) ) {
 			# "http://example.com/w"
+			#
 			# We use "Image:" as the canonical namespace for
 			# compatibility across all MediaWiki versions,
 			# and just sort of hope index.php is right. ;)
@@ -825,7 +832,7 @@ class FileRepo {
 	public function store( $srcPath, $dstZone, $dstRel, $flags = 0 ) {
 		$this->assertWritableRepo(); // fail out if read-only
 
-		$status = $this->storeBatch( [ [ $srcPath, $dstZone, $dstRel ] ], $flags );
+		$status = $this->storeBatch( array( array( $srcPath, $dstZone, $dstRel ) ), $flags );
 		if ( $status->successCount == 0 ) {
 			$status->ok = false;
 		}
@@ -852,8 +859,8 @@ class FileRepo {
 		$status = $this->newGood();
 		$backend = $this->backend; // convenience
 
-		$operations = [];
-		$sourceFSFilesToDelete = []; // cleanup for disk source files
+		$operations = array();
+		$sourceFSFilesToDelete = array(); // cleanup for disk source files
 		// Validate each triplet and get the store operation...
 		foreach ( $triplets as $triplet ) {
 			list( $srcPath, $dstZone, $dstRel ) = $triplet;
@@ -888,17 +895,17 @@ class FileRepo {
 					$sourceFSFilesToDelete[] = $srcPath;
 				}
 			}
-			$operations[] = [
+			$operations[] = array(
 				'op' => $opName,
 				'src' => $srcPath,
 				'dst' => $dstPath,
 				'overwrite' => $flags & self::OVERWRITE,
 				'overwriteSame' => $flags & self::OVERWRITE_SAME,
-			];
+			);
 		}
 
 		// Execute the store operation for each triplet
-		$opts = [ 'force' => true ];
+		$opts = array( 'force' => true );
 		if ( $flags & self::SKIP_LOCKING ) {
 			$opts['nonLocking'] = true;
 		}
@@ -928,7 +935,7 @@ class FileRepo {
 
 		$status = $this->newGood();
 
-		$operations = [];
+		$operations = array();
 		foreach ( $files as $path ) {
 			if ( is_array( $path ) ) {
 				// This is a pair, extract it
@@ -938,10 +945,10 @@ class FileRepo {
 				// Resolve source to a storage path if virtual
 				$path = $this->resolveToStoragePath( $path );
 			}
-			$operations[] = [ 'op' => 'delete', 'src' => $path ];
+			$operations[] = array( 'op' => 'delete', 'src' => $path );
 		}
 		// Actually delete files from storage...
-		$opts = [ 'force' => true ];
+		$opts = array( 'force' => true );
 		if ( $flags & self::SKIP_LOCKING ) {
 			$opts['nonLocking'] = true;
 		}
@@ -956,7 +963,7 @@ class FileRepo {
 	 * This function can be used to write to otherwise read-only foreign repos.
 	 * This is intended for copying generated thumbnails into the repo.
 	 *
-	 * @param string|FSFile $src Source file system path, storage path, or virtual URL
+	 * @param string $src Source file system path, storage path, or virtual URL
 	 * @param string $dst Virtual URL or storage path
 	 * @param array|string|null $options An array consisting of a key named headers
 	 *   listing extra headers. If a string, taken as content-disposition header.
@@ -964,7 +971,7 @@ class FileRepo {
 	 * @return FileRepoStatus
 	 */
 	final public function quickImport( $src, $dst, $options = null ) {
-		return $this->quickImportBatch( [ [ $src, $dst, $options ] ] );
+		return $this->quickImportBatch( array( array( $src, $dst, $options ) ) );
 	}
 
 	/**
@@ -976,7 +983,7 @@ class FileRepo {
 	 * @return FileRepoStatus
 	 */
 	final public function quickPurge( $path ) {
-		return $this->quickPurgeBatch( [ $path ] );
+		return $this->quickPurgeBatch( array( $path ) );
 	}
 
 	/**
@@ -989,7 +996,7 @@ class FileRepo {
 	public function quickCleanDir( $dir ) {
 		$status = $this->newGood();
 		$status->merge( $this->backend->clean(
-			[ 'dir' => $this->resolveToStoragePath( $dir ) ] ) );
+			array( 'dir' => $this->resolveToStoragePath( $dir ) ) ) );
 
 		return $status;
 	}
@@ -1003,39 +1010,32 @@ class FileRepo {
 	 * All path parameters may be a file system path, storage path, or virtual URL.
 	 * When "headers" are given they are used as HTTP headers if supported.
 	 *
-	 * @param array $triples List of (source path or FSFile, destination path, disposition)
+	 * @param array $triples List of (source path, destination path, disposition)
 	 * @return FileRepoStatus
 	 */
 	public function quickImportBatch( array $triples ) {
 		$status = $this->newGood();
-		$operations = [];
+		$operations = array();
 		foreach ( $triples as $triple ) {
 			list( $src, $dst ) = $triple;
-			if ( $src instanceof FSFile ) {
-				$op = 'store';
-			} else {
-				$src = $this->resolveToStoragePath( $src );
-				$op = FileBackend::isStoragePath( $src ) ? 'copy' : 'store';
-			}
+			$src = $this->resolveToStoragePath( $src );
 			$dst = $this->resolveToStoragePath( $dst );
 
 			if ( !isset( $triple[2] ) ) {
-				$headers = [];
+				$headers = array();
 			} elseif ( is_string( $triple[2] ) ) {
 				// back-compat
-				$headers = [ 'Content-Disposition' => $triple[2] ];
+				$headers = array( 'Content-Disposition' => $triple[2] );
 			} elseif ( is_array( $triple[2] ) && isset( $triple[2]['headers'] ) ) {
 				$headers = $triple[2]['headers'];
-			} else {
-				$headers = [];
 			}
-
-			$operations[] = [
-				'op' => $op,
+			// @fixme: $headers might not be defined
+			$operations[] = array(
+				'op' => FileBackend::isStoragePath( $src ) ? 'copy' : 'store',
 				'src' => $src,
 				'dst' => $dst,
 				'headers' => $headers
-			];
+			);
 			$status->merge( $this->initDirectory( dirname( $dst ) ) );
 		}
 		$status->merge( $this->backend->doQuickOperations( $operations ) );
@@ -1053,13 +1053,13 @@ class FileRepo {
 	 */
 	public function quickPurgeBatch( array $paths ) {
 		$status = $this->newGood();
-		$operations = [];
+		$operations = array();
 		foreach ( $paths as $path ) {
-			$operations[] = [
+			$operations[] = array(
 				'op' => 'delete',
 				'src' => $this->resolveToStoragePath( $path ),
 				'ignoreMissingSource' => true
-			];
+			);
 		}
 		$status->merge( $this->backend->doQuickOperations( $operations ) );
 
@@ -1115,7 +1115,7 @@ class FileRepo {
 	 * @param array $srcPaths Ordered list of source virtual URLs/storage paths
 	 * @param string $dstPath Target file system path
 	 * @param int $flags Bitwise combination of the following flags:
-	 *   self::DELETE_SOURCE     Delete the source files on success
+	 *   self::DELETE_SOURCE     Delete the source files
 	 * @return FileRepoStatus
 	 */
 	public function concatenate( array $srcPaths, $dstPath, $flags = 0 ) {
@@ -1123,7 +1123,7 @@ class FileRepo {
 
 		$status = $this->newGood();
 
-		$sources = [];
+		$sources = array();
 		foreach ( $srcPaths as $srcPath ) {
 			// Resolve source to a storage path if virtual
 			$source = $this->resolveToStoragePath( $srcPath );
@@ -1131,7 +1131,7 @@ class FileRepo {
 		}
 
 		// Concatenate the chunks into one FS file
-		$params = [ 'srcs' => $sources, 'dst' => $dstPath ];
+		$params = array( 'srcs' => $sources, 'dst' => $dstPath );
 		$status->merge( $this->backend->concatenate( $params ) );
 		if ( !$status->isOK() ) {
 			return $status;
@@ -1168,12 +1168,12 @@ class FileRepo {
 	 * @return FileRepoStatus
 	 */
 	public function publish(
-		$srcPath, $dstRel, $archiveRel, $flags = 0, array $options = []
+		$srcPath, $dstRel, $archiveRel, $flags = 0, array $options = array()
 	) {
 		$this->assertWritableRepo(); // fail out if read-only
 
 		$status = $this->publishBatch(
-			[ [ $srcPath, $dstRel, $archiveRel, $options ] ], $flags );
+			array( array( $srcPath, $dstRel, $archiveRel, $options ) ), $flags );
 		if ( $status->successCount == 0 ) {
 			$status->ok = false;
 		}
@@ -1206,14 +1206,14 @@ class FileRepo {
 			return $status;
 		}
 
-		$status = $this->newGood( [] );
+		$status = $this->newGood( array() );
 
-		$operations = [];
-		$sourceFSFilesToDelete = []; // cleanup for disk source files
+		$operations = array();
+		$sourceFSFilesToDelete = array(); // cleanup for disk source files
 		// Validate each triplet and get the store operation...
 		foreach ( $ntuples as $ntuple ) {
 			list( $srcPath, $dstRel, $archiveRel ) = $ntuple;
-			$options = isset( $ntuple[3] ) ? $ntuple[3] : [];
+			$options = isset( $ntuple[3] ) ? $ntuple[3] : array();
 			// Resolve source to a storage path if virtual
 			$srcPath = $this->resolveToStoragePath( $srcPath );
 			if ( !$this->validateFilename( $dstRel ) ) {
@@ -1238,7 +1238,7 @@ class FileRepo {
 			}
 
 			// Set any desired headers to be use in GET/HEAD responses
-			$headers = isset( $options['headers'] ) ? $options['headers'] : [];
+			$headers = isset( $options['headers'] ) ? $options['headers'] : array();
 
 			// Archive destination file if it exists.
 			// This will check if the archive file also exists and fail if does.
@@ -1246,40 +1246,40 @@ class FileRepo {
 			// copy() will overwrite, so the existence check is vulnerable to
 			// race conditions unless a functioning LockManager is used.
 			// LocalFile also uses SELECT FOR UPDATE for synchronization.
-			$operations[] = [
+			$operations[] = array(
 				'op' => 'copy',
 				'src' => $dstPath,
 				'dst' => $archivePath,
 				'ignoreMissingSource' => true
-			];
+			);
 
 			// Copy (or move) the source file to the destination
 			if ( FileBackend::isStoragePath( $srcPath ) ) {
 				if ( $flags & self::DELETE_SOURCE ) {
-					$operations[] = [
+					$operations[] = array(
 						'op' => 'move',
 						'src' => $srcPath,
 						'dst' => $dstPath,
 						'overwrite' => true, // replace current
 						'headers' => $headers
-					];
+					);
 				} else {
-					$operations[] = [
+					$operations[] = array(
 						'op' => 'copy',
 						'src' => $srcPath,
 						'dst' => $dstPath,
 						'overwrite' => true, // replace current
 						'headers' => $headers
-					];
+					);
 				}
 			} else { // FS source path
-				$operations[] = [
+				$operations[] = array(
 					'op' => 'store',
 					'src' => $srcPath,
 					'dst' => $dstPath,
 					'overwrite' => true, // replace current
 					'headers' => $headers
-				];
+				);
 				if ( $flags & self::DELETE_SOURCE ) {
 					$sourceFSFilesToDelete[] = $srcPath;
 				}
@@ -1319,14 +1319,14 @@ class FileRepo {
 		$path = $this->resolveToStoragePath( $dir );
 		list( , $container, ) = FileBackend::splitStoragePath( $path );
 
-		$params = [ 'dir' => $path ];
+		$params = array( 'dir' => $path );
 		if ( $this->isPrivate
 			|| $container === $this->zones['deleted']['container']
 			|| $container === $this->zones['temp']['container']
 		) {
 			# Take all available measures to prevent web accessibility of new deleted
 			# directories, in case the user has not configured offline storage
-			$params = [ 'noAccess' => true, 'noListing' => true ] + $params;
+			$params = array( 'noAccess' => true, 'noListing' => true ) + $params;
 		}
 
 		return $this->backend->prepare( $params );
@@ -1343,7 +1343,7 @@ class FileRepo {
 
 		$status = $this->newGood();
 		$status->merge( $this->backend->clean(
-			[ 'dir' => $this->resolveToStoragePath( $dir ) ] ) );
+			array( 'dir' => $this->resolveToStoragePath( $dir ) ) ) );
 
 		return $status;
 	}
@@ -1355,7 +1355,7 @@ class FileRepo {
 	 * @return bool
 	 */
 	public function fileExists( $file ) {
-		$result = $this->fileExistsBatch( [ $file ] );
+		$result = $this->fileExistsBatch( array( $file ) );
 
 		return $result[0];
 	}
@@ -1367,13 +1367,13 @@ class FileRepo {
 	 * @return array Map of files and existence flags, or false
 	 */
 	public function fileExistsBatch( array $files ) {
-		$paths = array_map( [ $this, 'resolveToStoragePath' ], $files );
-		$this->backend->preloadFileStat( [ 'srcs' => $paths ] );
+		$paths = array_map( array( $this, 'resolveToStoragePath' ), $files );
+		$this->backend->preloadFileStat( array( 'srcs' => $paths ) );
 
-		$result = [];
+		$result = array();
 		foreach ( $files as $key => $file ) {
 			$path = $this->resolveToStoragePath( $file );
-			$result[$key] = $this->backend->fileExists( [ 'src' => $path ] );
+			$result[$key] = $this->backend->fileExists( array( 'src' => $path ) );
 		}
 
 		return $result;
@@ -1392,7 +1392,7 @@ class FileRepo {
 	public function delete( $srcRel, $archiveRel ) {
 		$this->assertWritableRepo(); // fail out if read-only
 
-		return $this->deleteBatch( [ [ $srcRel, $archiveRel ] ] );
+		return $this->deleteBatch( array( array( $srcRel, $archiveRel ) ) );
 	}
 
 	/**
@@ -1416,7 +1416,7 @@ class FileRepo {
 		$this->assertWritableRepo(); // fail out if read-only
 
 		// Try creating directories
-		$status = $this->initZones( [ 'public', 'deleted' ] );
+		$status = $this->initZones( array( 'public', 'deleted' ) );
 		if ( !$status->isOK() ) {
 			return $status;
 		}
@@ -1424,7 +1424,7 @@ class FileRepo {
 		$status = $this->newGood();
 
 		$backend = $this->backend; // convenience
-		$operations = [];
+		$operations = array();
 		// Validate filenames and create archive directories
 		foreach ( $sourceDestPairs as $pair ) {
 			list( $srcRel, $archiveRel ) = $pair;
@@ -1446,20 +1446,20 @@ class FileRepo {
 				return $this->newFatal( 'directorycreateerror', $archiveDir );
 			}
 
-			$operations[] = [
+			$operations[] = array(
 				'op' => 'move',
 				'src' => $srcPath,
 				'dst' => $archivePath,
 				// We may have 2+ identical files being deleted,
 				// all of which will map to the same destination file
 				'overwriteSame' => true // also see bug 31792
-			];
+			);
 		}
 
 		// Move the files by execute the operations for each pair.
 		// We're now committed to returning an OK result, which will
 		// lead to the files being moved in the DB also.
-		$opts = [ 'force' => true ];
+		$opts = array( 'force' => true );
 		$status->merge( $backend->doOperations( $operations, $opts ) );
 
 		return $status;
@@ -1521,7 +1521,7 @@ class FileRepo {
 	public function getLocalCopy( $virtualUrl ) {
 		$path = $this->resolveToStoragePath( $virtualUrl );
 
-		return $this->backend->getLocalCopy( [ 'src' => $path ] );
+		return $this->backend->getLocalCopy( array( 'src' => $path ) );
 	}
 
 	/**
@@ -1535,7 +1535,7 @@ class FileRepo {
 	public function getLocalReference( $virtualUrl ) {
 		$path = $this->resolveToStoragePath( $virtualUrl );
 
-		return $this->backend->getLocalReference( [ 'src' => $path ] );
+		return $this->backend->getLocalReference( array( 'src' => $path ) );
 	}
 
 	/**
@@ -1548,7 +1548,7 @@ class FileRepo {
 	public function getFileProps( $virtualUrl ) {
 		$path = $this->resolveToStoragePath( $virtualUrl );
 
-		return $this->backend->getFileProps( [ 'src' => $path ] );
+		return $this->backend->getFileProps( array( 'src' => $path ) );
 	}
 
 	/**
@@ -1560,7 +1560,7 @@ class FileRepo {
 	public function getFileTimestamp( $virtualUrl ) {
 		$path = $this->resolveToStoragePath( $virtualUrl );
 
-		return $this->backend->getFileTimestamp( [ 'src' => $path ] );
+		return $this->backend->getFileTimestamp( array( 'src' => $path ) );
 	}
 
 	/**
@@ -1572,7 +1572,7 @@ class FileRepo {
 	public function getFileSize( $virtualUrl ) {
 		$path = $this->resolveToStoragePath( $virtualUrl );
 
-		return $this->backend->getFileSize( [ 'src' => $path ] );
+		return $this->backend->getFileSize( array( 'src' => $path ) );
 	}
 
 	/**
@@ -1584,34 +1584,21 @@ class FileRepo {
 	public function getFileSha1( $virtualUrl ) {
 		$path = $this->resolveToStoragePath( $virtualUrl );
 
-		return $this->backend->getFileSha1Base36( [ 'src' => $path ] );
+		return $this->backend->getFileSha1Base36( array( 'src' => $path ) );
 	}
 
 	/**
 	 * Attempt to stream a file with the given virtual URL/storage path
 	 *
-	 * @param string $virtualUrl
-	 * @param array $headers Additional HTTP headers to send on success
-	 * @return Status
-	 * @since 1.27
-	 */
-	public function streamFileWithStatus( $virtualUrl, $headers = [] ) {
-		$path = $this->resolveToStoragePath( $virtualUrl );
-		$params = [ 'src' => $path, 'headers' => $headers ];
-
-		return $this->backend->streamFile( $params );
-	}
-
-	/**
-	 * Attempt to stream a file with the given virtual URL/storage path
-	 *
-	 * @deprecated since 1.26, use streamFileWithStatus
 	 * @param string $virtualUrl
 	 * @param array $headers Additional HTTP headers to send on success
 	 * @return bool Success
 	 */
-	public function streamFile( $virtualUrl, $headers = [] ) {
-		return $this->streamFileWithStatus( $virtualUrl, $headers )->isOK();
+	public function streamFile( $virtualUrl, $headers = array() ) {
+		$path = $this->resolveToStoragePath( $virtualUrl );
+		$params = array( 'src' => $path, 'headers' => $headers );
+
+		return $this->backend->streamFile( $params )->isOK();
 	}
 
 	/**
@@ -1644,7 +1631,7 @@ class FileRepo {
 			for ( $hexPos = 0; $hexPos < $this->hashLevels; $hexPos++ ) {
 				$path .= '/' . substr( $hexString, 0, $hexPos + 1 );
 			}
-			$iterator = $this->backend->getFileList( [ 'dir' => $path ] );
+			$iterator = $this->backend->getFileList( array( 'dir' => $path ) );
 			foreach ( $iterator as $name ) {
 				// Each item returned is a public file
 				call_user_func( $callback, "{$path}/{$name}" );
@@ -1675,10 +1662,10 @@ class FileRepo {
 		switch ( $this->pathDisclosureProtection ) {
 			case 'none':
 			case 'simple': // b/c
-				$callback = [ $this, 'passThrough' ];
+				$callback = array( $this, 'passThrough' );
 				break;
 			default: // 'paranoid'
-				$callback = [ $this, 'paranoidClean' ];
+				$callback = array( $this, 'paranoidClean' );
 		}
 		return $callback;
 	}
@@ -1710,7 +1697,7 @@ class FileRepo {
 	 * @return Status
 	 */
 	public function newFatal( $message /*, parameters...*/ ) {
-		$status = call_user_func_array( [ 'Status', 'newFatal' ], func_get_args() );
+		$status = call_user_func_array( array( 'Status', 'newFatal' ), func_get_args() );
 		$status->cleanCallback = $this->getErrorCleanupFunction();
 
 		return $status;
@@ -1827,32 +1814,32 @@ class FileRepo {
 	 * @return TempFileRepo
 	 */
 	public function getTempRepo() {
-		return new TempFileRepo( [
+		return new TempFileRepo( array(
 			'name' => "{$this->name}-temp",
 			'backend' => $this->backend,
-			'zones' => [
-				'public' => [
+			'zones' => array(
+				'public' => array(
 					// Same place storeTemp() uses in the base repo, though
 					// the path hashing is mismatched, which is annoying.
 					'container' => $this->zones['temp']['container'],
 					'directory' => $this->zones['temp']['directory']
-				],
-				'thumb' => [
+				),
+				'thumb' => array(
 					'container' => $this->zones['temp']['container'],
 					'directory' => $this->zones['temp']['directory'] == ''
 						? 'thumb'
 						: $this->zones['temp']['directory'] . '/thumb'
-				],
-				'transcoded' => [
+				),
+				'transcoded' => array(
 					'container' => $this->zones['temp']['container'],
 					'directory' => $this->zones['temp']['directory'] == ''
 						? 'transcoded'
 						: $this->zones['temp']['directory'] . '/transcoded'
-				]
-			],
+				)
+			),
 			'hashLevels' => $this->hashLevels, // performance
 			'isPrivate' => true // all in temp zone
-		] );
+		) );
 	}
 
 	/**
@@ -1882,17 +1869,17 @@ class FileRepo {
 	 * @since 1.22
 	 */
 	public function getInfo() {
-		$ret = [
+		$ret = array(
 			'name' => $this->getName(),
 			'displayname' => $this->getDisplayName(),
 			'rootUrl' => $this->getZoneUrl( 'public' ),
 			'local' => $this->isLocal(),
-		];
+		);
 
-		$optionalSettings = [
+		$optionalSettings = array(
 			'url', 'thumbUrl', 'initialCapital', 'descBaseUrl', 'scriptDirUrl', 'articleUrl',
 			'fetchDescription', 'descriptionCacheExpiry', 'scriptExtension', 'favicon'
-		];
+		);
 		foreach ( $optionalSettings as $k ) {
 			if ( isset( $this->$k ) ) {
 				$ret[$k] = $this->$k;
@@ -1908,14 +1895,6 @@ class FileRepo {
 	 */
 	public function hasSha1Storage() {
 		return $this->hasSha1Storage;
-	}
-
-	/**
-	 * Returns whether or not repo supports having originals SHA-1s in the thumb URLs
-	 * @return boolean
-	 */
-	public function supportsSha1URLs() {
-		return $this->supportsSha1URLs;
 	}
 }
 

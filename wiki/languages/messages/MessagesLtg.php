@@ -12,7 +12,7 @@
  * @author Reedy
  */
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'Medeja',
 	NS_SPECIAL          => 'Seviškuo',
 	NS_TALK             => 'Sprīža',
@@ -29,7 +29,7 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'Sprīža_ap_paleigu',
 	NS_CATEGORY         => 'Kategoreja',
 	NS_CATEGORY_TALK    => 'Sprīža_ap_kategoreju',
-];
+);
 
 $fallback = 'lv';
 

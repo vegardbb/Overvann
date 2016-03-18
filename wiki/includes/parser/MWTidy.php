@@ -45,28 +45,10 @@ class MWTidy {
 	public static function tidy( $text ) {
 		$driver = self::singleton();
 		if ( !$driver ) {
-			throw new MWException( __METHOD__ .
+			throw new MWException( __METHOD__.
 				': tidy is disabled, caller should have checked MWTidy::isEnabled()' );
 		}
 		return $driver->tidy( $text );
-	}
-
-	/**
-	 * Get CSS modules needed if HTML from the current driver is to be displayed.
-	 *
-	 * This is just a migration tool to allow some changes expected as part of
-	 * Tidy replacement (T89331) to be exposed on the client side via user
-	 * scripts, without actually replacing tidy. See T49673.
-	 *
-	 * @return array
-	 */
-	public static function getModuleStyles() {
-		$driver = self::singleton();
-		if ( $driver && $driver instanceof MediaWiki\Tidy\RaggettBase ) {
-			return [ 'mediawiki.raggett' ];
-		} else {
-			return [];
-		}
 	}
 
 	/**
@@ -79,7 +61,7 @@ class MWTidy {
 	public static function checkErrors( $text, &$errorStr = null ) {
 		$driver = self::singleton();
 		if ( !$driver ) {
-			throw new MWException( __METHOD__ .
+			throw new MWException( __METHOD__.
 				': tidy is disabled, caller should have checked MWTidy::isEnabled()' );
 		}
 		if ( $driver->supportsValidate() ) {
@@ -102,11 +84,11 @@ class MWTidy {
 				$config = $wgTidyConfig;
 			} elseif ( $wgUseTidy ) {
 				// b/c configuration
-				$config = [
+				$config = array(
 					'tidyConfigFile' => $wgTidyConf,
 					'debugComment' => $wgDebugTidy,
 					'tidyBin' => $wgTidyBin,
-					'tidyCommandLine' => $wgTidyOpts ];
+					'tidyCommandLine' => $wgTidyOpts );
 				if ( $wgTidyInternal ) {
 					if ( wfIsHHVM() ) {
 						$config['driver'] = 'RaggettInternalHHVM';

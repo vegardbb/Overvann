@@ -34,14 +34,14 @@ require_once __DIR__ . '/Benchmarker.php';
 class BenchIfSwitch extends Benchmarker {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Benchmark if elseif... versus switch case.' );
+		$this->mDescription = "Benchmark if elseif... versus switch case.";
 	}
 
 	public function execute() {
-		$this->bench( [
-			[ 'function' => [ $this, 'doElseIf' ] ],
-			[ 'function' => [ $this, 'doSwitch' ] ],
-		] );
+		$this->bench( array(
+			array( 'function' => array( $this, 'doElseIf' ) ),
+			array( 'function' => array( $this, 'doSwitch' ) ),
+		) );
 		print $this->getFormattedResults();
 	}
 

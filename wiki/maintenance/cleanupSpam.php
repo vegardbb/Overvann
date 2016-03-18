@@ -32,7 +32,7 @@ class CleanupSpam extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Cleanup all spam from a given hostname' );
+		$this->mDescription = "Cleanup all spam from a given hostname";
 		$this->addOption( 'all', 'Check all wikis in $wgLocalDatabases' );
 		$this->addOption( 'delete', 'Delete pages containing only spam instead of blanking them' );
 		$this->addArg(
@@ -45,7 +45,7 @@ class CleanupSpam extends Maintenance {
 		global $IP, $wgLocalDatabases, $wgUser;
 
 		$username = wfMessage( 'spambot_username' )->text();
-		$wgUser = User::newSystemUser( $username );
+		$wgUser = User::newFromName( $username );
 		if ( !$wgUser ) {
 			$this->error( "Invalid username specified in 'spambot_username' message: $username", true );
 		}
@@ -64,14 +64,14 @@ class CleanupSpam extends Maintenance {
 			$this->output( "Finding spam on " . count( $wgLocalDatabases ) . " wikis\n" );
 			$found = false;
 			foreach ( $wgLocalDatabases as $wikiID ) {
-				$dbr = $this->getDB( DB_SLAVE, [], $wikiID );
+				$dbr = wfGetDB( DB_SLAVE, array(), $wikiID );
 
 				$count = $dbr->selectField( 'externallinks', 'COUNT(*)',
-					[ 'el_index' . $dbr->buildLike( $like ) ], __METHOD__ );
+					array( 'el_index' . $dbr->buildLike( $like ) ), __METHOD__ );
 				if ( $count ) {
 					$found = true;
 					$cmd = wfShellWikiCmd( "$IP/maintenance/cleanupSpam.php",
-						[ '--wiki', $wikiID, $spec ] );
+						array( '--wiki', $wikiID, $spec ) );
 					passthru( "$cmd | sed 's/^/$wikiID:  /'" );
 				}
 			}
@@ -83,9 +83,9 @@ class CleanupSpam extends Maintenance {
 		} else {
 			// Clean up spam on this wiki
 
-			$dbr = $this->getDB( DB_SLAVE );
-			$res = $dbr->select( 'externallinks', [ 'DISTINCT el_from' ],
-				[ 'el_index' . $dbr->buildLike( $like ) ], __METHOD__ );
+			$dbr = wfGetDB( DB_SLAVE );
+			$res = $dbr->select( 'externallinks', array( 'DISTINCT el_from' ),
+				array( 'el_index' . $dbr->buildLike( $like ) ), __METHOD__ );
 			$count = $dbr->numRows( $res );
 			$this->output( "Found $count articles containing $spec\n" );
 			foreach ( $res as $row ) {
@@ -120,8 +120,8 @@ class CleanupSpam extends Maintenance {
 			// This happens e.g. when a link comes from a template rather than the page itself
 			$this->output( "False match\n" );
 		} else {
-			$dbw = $this->getDB( DB_MASTER );
-			$this->beginTransaction( $dbw, __METHOD__ );
+			$dbw = wfGetDB( DB_MASTER );
+			$dbw->begin( __METHOD__ );
 			$page = WikiPage::factory( $title );
 			if ( $rev ) {
 				// Revert to this revision
@@ -151,7 +151,7 @@ class CleanupSpam extends Maintenance {
 					wfMessage( 'spam_blanking', $domain )->inContentLanguage()->text()
 				);
 			}
-			$this->commitTransaction( $dbw, __METHOD__ );
+			$dbw->commit( __METHOD__ );
 		}
 	}
 }

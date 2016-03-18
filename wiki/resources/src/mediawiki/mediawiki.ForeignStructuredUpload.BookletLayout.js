@@ -39,28 +39,15 @@
 	 * @inheritdoc
 	 */
 	mw.ForeignStructuredUpload.BookletLayout.prototype.initialize = function () {
-		var booklet = this;
-		return mw.ForeignStructuredUpload.BookletLayout.parent.prototype.initialize.call( this ).then(
-			function () {
-				// Point the CategorySelector to the right wiki
-				return booklet.upload.getApi().then(
-					function ( api ) {
-						// If this is a ForeignApi, it will have a apiUrl, otherwise we don't need to do anything
-						if ( api.apiUrl ) {
-							// Can't reuse the same object, CategorySelector calls #abort on its mw.Api instance
-							booklet.categoriesWidget.api = new mw.ForeignApi( api.apiUrl );
-						}
-						return $.Deferred().resolve();
-					},
-					function () {
-						return $.Deferred().resolve();
-					}
-				);
-			},
-			function () {
-				return $.Deferred().resolve();
+		mw.ForeignStructuredUpload.BookletLayout.parent.prototype.initialize.call( this );
+		// Point the CategorySelector to the right wiki as soon as we know what the right wiki is
+		this.upload.apiPromise.done( function ( api ) {
+			// If this is a ForeignApi, it will have a apiUrl, otherwise we don't need to do anything
+			if ( api.apiUrl ) {
+				// Can't reuse the same object, CategorySelector calls #abort on its mw.Api instance
+				this.categoriesWidget.api = new mw.ForeignApi( api.apiUrl );
 			}
-		);
+		}.bind( this ) );
 	};
 
 	/**
@@ -106,17 +93,15 @@
 			notOwnWorkLocal = mw.message( 'foreign-structured-upload-form-label-not-own-work-local-default' );
 		}
 
-		$ownWorkMessage = $( '<p>' ).append( ownWorkMessage.parseDom() )
+		$ownWorkMessage = $( '<p>' ).html( ownWorkMessage.parse() )
 			.addClass( 'mw-foreignStructuredUpload-bookletLayout-license' );
 		$notOwnWorkMessage = $( '<div>' ).append(
-			$( '<p>' ).append( notOwnWorkMessage.parseDom() ),
-			$( '<p>' ).append( notOwnWorkLocal.parseDom() )
+			$( '<p>' ).html( notOwnWorkMessage.parse() ),
+			$( '<p>' ).html( notOwnWorkLocal.parse() )
 		);
 		$ownWorkMessage.add( $notOwnWorkMessage ).find( 'a' ).attr( 'target', '_blank' );
 
-		this.selectFileWidget = new OO.ui.SelectFileWidget( {
-			showDropTarget: true
-		} );
+		this.selectFileWidget = new OO.ui.SelectFileWidget();
 		this.messageLabel = new OO.ui.LabelWidget( {
 			label: $notOwnWorkMessage
 		} );
@@ -127,7 +112,8 @@
 		fieldset = new OO.ui.FieldsetLayout();
 		fieldset.addItems( [
 			new OO.ui.FieldLayout( this.selectFileWidget, {
-				align: 'top'
+				align: 'top',
+				label: mw.msg( 'upload-form-label-select-file' )
 			} ),
 			new OO.ui.FieldLayout( this.ownWorkCheckbox, {
 				align: 'inline',
@@ -145,22 +131,6 @@
 		// Validation
 		this.selectFileWidget.on( 'change', this.onUploadFormChange.bind( this ) );
 		this.ownWorkCheckbox.on( 'change', this.onUploadFormChange.bind( this ) );
-
-		this.selectFileWidget.on( 'change', function () {
-			var file = layout.getFile();
-
-			// Set the date to lastModified once we have the file
-			if ( layout.getDateFromLastModified( file ) !== undefined ) {
-				layout.dateWidget.setValue( layout.getDateFromLastModified( file ) );
-			}
-
-			// Check if we have EXIF data and set to that where available
-			layout.getDateFromExif( file ).done( function ( date ) {
-				layout.dateWidget.setValue( date );
-			} );
-
-			layout.updateFilePreview();
-		} );
 
 		return this.uploadForm;
 	};
@@ -181,33 +151,25 @@
 	mw.ForeignStructuredUpload.BookletLayout.prototype.renderInfoForm = function () {
 		var fieldset;
 
-		this.filePreview = new OO.ui.Widget( {
-			classes: [ 'mw-upload-bookletLayout-filePreview' ]
-		} );
-		this.progressBarWidget = new OO.ui.ProgressBarWidget( {
-			progress: 0
-		} );
-		this.filePreview.$element.append( this.progressBarWidget.$element );
-
 		this.filenameWidget = new OO.ui.TextInputWidget( {
 			required: true,
 			validate: /.+/
 		} );
 		this.descriptionWidget = new OO.ui.TextInputWidget( {
 			required: true,
-			validate: /\S+/,
+			validate: /.+/,
 			multiline: true,
 			autosize: true
-		} );
-		this.categoriesWidget = new mw.widgets.CategorySelector( {
-			// Can't be done here because we don't know the target wiki yet... done in #initialize.
-			// api: new mw.ForeignApi( ... ),
-			$overlay: this.$overlay
 		} );
 		this.dateWidget = new mw.widgets.DateInputWidget( {
 			$overlay: this.$overlay,
 			required: true,
 			mustBeBefore: moment().add( 1, 'day' ).locale( 'en' ).format( 'YYYY-MM-DD' ) // Tomorrow
+		} );
+		this.categoriesWidget = new mw.widgets.CategorySelector( {
+			// Can't be done here because we don't know the target wiki yet... done in #initialize.
+			// api: new mw.ForeignApi( ... ),
+			$overlay: this.$overlay
 		} );
 
 		fieldset = new OO.ui.FieldsetLayout( {
@@ -216,15 +178,11 @@
 		fieldset.addItems( [
 			new OO.ui.FieldLayout( this.filenameWidget, {
 				label: mw.msg( 'upload-form-label-infoform-name' ),
-				align: 'top',
-				classes: [ 'mw-foreignStructuredUploa-bookletLayout-small-notice' ],
-				notices: [ mw.msg( 'upload-form-label-infoform-name-tooltip' ) ]
+				align: 'top'
 			} ),
 			new OO.ui.FieldLayout( this.descriptionWidget, {
 				label: mw.msg( 'upload-form-label-infoform-description' ),
-				align: 'top',
-				classes: [ 'mw-foreignStructuredUploa-bookletLayout-small-notice' ],
-				notices: [ mw.msg( 'upload-form-label-infoform-description-tooltip' ) ]
+				align: 'top'
 			} ),
 			new OO.ui.FieldLayout( this.categoriesWidget, {
 				label: mw.msg( 'foreign-structured-upload-form-label-infoform-categories' ),
@@ -235,19 +193,12 @@
 				align: 'top'
 			} )
 		] );
-		this.infoForm = new OO.ui.FormLayout( {
-			classes: [ 'mw-upload-bookletLayout-infoForm' ],
-			items: [ this.filePreview, fieldset ]
-		} );
+		this.infoForm = new OO.ui.FormLayout( { items: [ fieldset ] } );
 
 		// Validation
 		this.filenameWidget.on( 'change', this.onInfoFormChange.bind( this ) );
 		this.descriptionWidget.on( 'change', this.onInfoFormChange.bind( this ) );
 		this.dateWidget.on( 'change', this.onInfoFormChange.bind( this ) );
-
-		this.on( 'fileUploadProgress', function ( progress ) {
-			this.progressBarWidget.setProgress( progress * 100 );
-		}.bind( this ) );
 
 		return this.infoForm;
 	};
@@ -274,78 +225,10 @@
 	 * @inheritdoc
 	 */
 	mw.ForeignStructuredUpload.BookletLayout.prototype.getText = function () {
-		var language = mw.config.get( 'wgContentLanguage' );
-		this.upload.clearDescriptions();
-		this.upload.addDescription( language, this.descriptionWidget.getValue() );
+		this.upload.addDescription( 'en', this.descriptionWidget.getValue() );
 		this.upload.setDate( this.dateWidget.getValue() );
-		this.upload.clearCategories();
 		this.upload.addCategories( this.categoriesWidget.getItemsData() );
 		return this.upload.getText();
-	};
-
-	/**
-	 * Get original date from EXIF data
-	 *
-	 * @param {Object} file
-	 * @return {jQuery.Promise} Promise resolved with the EXIF date
-	 */
-	mw.ForeignStructuredUpload.BookletLayout.prototype.getDateFromExif = function ( file ) {
-		var fileReader,
-			deferred = $.Deferred();
-
-		if ( file && file.type === 'image/jpeg' ) {
-			fileReader = new FileReader();
-			fileReader.onload = function () {
-				var fileStr, arr, i, metadata;
-
-				if ( typeof fileReader.result === 'string' ) {
-					fileStr = fileReader.result;
-				} else {
-					// Array buffer; convert to binary string for the library.
-					arr = new Uint8Array( fileReader.result );
-					fileStr = '';
-					for ( i = 0; i < arr.byteLength; i++ ) {
-						fileStr += String.fromCharCode( arr[ i ] );
-					}
-				}
-
-				try {
-					metadata = mw.libs.jpegmeta( this.result, file.name );
-				} catch ( e ) {
-					metadata = null;
-				}
-
-				if ( metadata !== null && metadata.exif !== undefined && metadata.exif.DateTimeOriginal ) {
-					deferred.resolve( moment( metadata.exif.DateTimeOriginal, 'YYYY:MM:DD' ).format( 'YYYY-MM-DD' ) );
-				} else {
-					deferred.reject();
-				}
-			};
-
-			if ( 'readAsBinaryString' in fileReader ) {
-				fileReader.readAsBinaryString( file );
-			} else if ( 'readAsArrayBuffer' in fileReader ) {
-				fileReader.readAsArrayBuffer( file );
-			} else {
-				// We should never get here
-				deferred.reject();
-				throw new Error( 'Cannot read thumbnail as binary string or array buffer.' );
-			}
-		}
-
-		return deferred.promise();
-	};
-
-	/**
-	 * Get last modified date from file
-	 *
-	 * @param {Object} file
-	 * @return {Object} Last modified date from file
-	 */
-	mw.ForeignStructuredUpload.BookletLayout.prototype.getDateFromLastModified = function ( file ) {
-		if ( file && file.lastModified ) {
-			return moment( file.lastModified ).format( 'YYYY-MM-DD' );
-		}
 	};
 
 	/* Setters */

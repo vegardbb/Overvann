@@ -6,7 +6,7 @@
  * @author Moriel Schottlender, 2015
  * @since 1.19
  */
-/*jshint esversion:5 */
+/*jshint es3:false */
 /*global OO*/
 ( function ( mw, $ ) {
 	/**
@@ -38,10 +38,9 @@
 	 * @param {Object} [config] Configuration object
 	 * @cfg {mw.Title} [title="Feedback"] The title of the page where you collect
 	 *  feedback.
-	 * @cfg {string} [apiUrl] api.php URL if the feedback page is on another wiki
 	 * @cfg {string} [dialogTitleMessageKey="feedback-dialog-title"] Message key for the
 	 *  title of the dialog box
-	 * @cfg {mw.Uri|string} [bugsLink="//phabricator.wikimedia.org/maniphest/task/edit/form/1/"] URL where
+	 * @cfg {mw.Uri|string} [bugsLink="//phabricator.wikimedia.org/maniphest/task/create/"] URL where
 	 *  bugs can be posted
 	 * @cfg {mw.Uri|string} [bugsListLink="//phabricator.wikimedia.org/maniphest/query/advanced"] URL
 	 *  where bugs can be listed
@@ -58,10 +57,10 @@
 		// Feedback page title
 		this.feedbackPageTitle = config.title || new mw.Title( 'Feedback' );
 
-		this.messagePosterPromise = mw.messagePoster.factory.create( this.feedbackPageTitle, config.apiUrl );
+		this.messagePosterPromise = mw.messagePoster.factory.create( this.feedbackPageTitle );
 
 		// Links
-		this.bugsTaskSubmissionLink = config.bugsLink || '//phabricator.wikimedia.org/maniphest/task/edit/form/1/';
+		this.bugsTaskSubmissionLink = config.bugsLink || '//phabricator.wikimedia.org/maniphest/task/create/';
 		this.bugsTaskListLink = config.bugsListLink || '//phabricator.wikimedia.org/maniphest/query/advanced';
 
 		// Terms of use
@@ -99,13 +98,16 @@
 			case 'submitted':
 				dialogConfig = {
 					title: mw.msg( 'feedback-thanks-title' ),
-					message: $( '<span>' ).msg(
-						'feedback-thanks',
-						this.feedbackPageTitle.getNameText(),
-						$( '<a>' ).attr( {
-							target: '_blank',
-							href: this.feedbackPageTitle.getUrl()
-						} )
+					message: $( '<span>' ).append(
+						mw.message(
+							'feedback-thanks',
+							this.feedbackPageTitle.getNameText(),
+							$( '<a>' )
+								.attr( {
+									target: '_blank',
+									href: this.feedbackPageTitle.getUrl()
+								} )
+						).parse()
 					),
 					actions: [
 						{
@@ -254,7 +256,6 @@
 			classes: [ 'mw-feedbackDialog-welcome-message' ]
 		} );
 		this.feedbackSubjectInput = new OO.ui.TextInputWidget( {
-			indicator: 'required',
 			multiline: false
 		} );
 		this.feedbackMessageInput = new OO.ui.TextInputWidget( {
@@ -309,7 +310,10 @@
 					!this.useragentMandatory ||
 					this.useragentCheckbox.isSelected()
 				) &&
-				this.feedbackSubjectInput.getValue()
+				(
+					!!this.feedbackMessageInput.getValue() ||
+					!!this.feedbackSubjectInput.getValue()
+				)
 			);
 
 		this.actions.setAbilities( { submit:  isValid } );
@@ -493,7 +497,7 @@
 	/**
 	 * Get the bug report link
 	 *
-	 * @return {string} Link to the external bug report form
+	 * @returns {string} Link to the external bug report form
 	 */
 	mw.Feedback.Dialog.prototype.getBugReportLink = function () {
 		return this.bugReportLink;

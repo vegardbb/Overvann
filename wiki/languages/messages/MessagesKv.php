@@ -13,7 +13,7 @@
 
 $fallback = 'ru';
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_SPECIAL          => 'Отсасян',
 	NS_TALK             => 'Сёрнитанiн',
 	NS_USER             => 'Пырысь',
@@ -24,9 +24,9 @@ $namespaceNames = [
 	NS_MEDIAWIKI_TALK   => 'МедиаВики_донъялӧм',
 	NS_TEMPLATE         => 'Шаблон',
 	NS_TEMPLATE_TALK    => 'Шаблон_донъялӧм',
-];
+);
 
-$namespaceAliases = [
+$namespaceAliases = array(
 	// Backward compat. Fallbacks from 'ru'.
 	'Медиа'                              => NS_MEDIA,
 	'Служебная'                          => NS_SPECIAL,
@@ -43,5 +43,5 @@ $namespaceAliases = [
 	'Обсуждение_справки'                 => NS_HELP_TALK,
 	'Категория'                          => NS_CATEGORY,
 	'Обсуждение_категории'               => NS_CATEGORY_TALK
-];
+);
 

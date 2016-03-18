@@ -43,7 +43,7 @@ class MemcachedPeclBagOStuff extends MemcachedBagOStuff {
 	 *                          values, but serialization is much slower unless the php.ini option
 	 *                          igbinary.compact_strings is off.
 	 * @param array $params
-	 * @throws InvalidArgumentException
+	 * @throws MWException
 	 */
 	function __construct( $params ) {
 		parent::__construct( $params );
@@ -89,7 +89,7 @@ class MemcachedPeclBagOStuff extends MemcachedBagOStuff {
 		// is as good as any. There's no way to configure libmemcached to use
 		// hashes identical to the ones currently in use by the PHP client, and
 		// even implementing one of the libmemcached hashes in pure PHP for
-		// forwards compatibility would require MemcachedClient::get_sock() to be
+		// forwards compatibility would require MWMemcached::get_sock() to be
 		// rewritten.
 		$this->client->setOption( Memcached::OPT_LIBKETAMA_COMPATIBLE, true );
 
@@ -100,42 +100,55 @@ class MemcachedPeclBagOStuff extends MemcachedBagOStuff {
 				break;
 			case 'igbinary':
 				if ( !Memcached::HAVE_IGBINARY ) {
-					throw new InvalidArgumentException(
-						__CLASS__ . ': the igbinary extension is not available ' .
-						'but igbinary serialization was requested.'
-					);
+					throw new MWException( __CLASS__ . ': the igbinary extension is not available ' .
+						'but igbinary serialization was requested.' );
 				}
 				$this->client->setOption( Memcached::OPT_SERIALIZER, Memcached::SERIALIZER_IGBINARY );
 				break;
 			default:
-				throw new InvalidArgumentException(
-					__CLASS__ . ': invalid value for serializer parameter'
-				);
+				throw new MWException( __CLASS__ . ': invalid value for serializer parameter' );
 		}
-		$servers = [];
+		$servers = array();
 		foreach ( $params['servers'] as $host ) {
 			$servers[] = IP::splitHostAndPort( $host ); // (ip, port)
 		}
 		$this->client->addServers( $servers );
 	}
 
-	protected function getWithToken( $key, &$casToken, $flags = 0 ) {
+	public function get( $key, &$casToken = null, $flags = 0 ) {
 		$this->debugLog( "get($key)" );
-		$result = $this->client->get( $this->validateKeyEncoding( $key ), null, $casToken );
+		$result = $this->client->get( $this->encodeKey( $key ), null, $casToken );
 		$result = $this->checkResult( $key, $result );
 		return $result;
 	}
 
-	public function set( $key, $value, $exptime = 0, $flags = 0 ) {
+	/**
+	 * @param string $key
+	 * @param mixed $value
+	 * @param int $exptime
+	 * @return bool
+	 */
+	public function set( $key, $value, $exptime = 0 ) {
 		$this->debugLog( "set($key)" );
 		return $this->checkResult( $key, parent::set( $key, $value, $exptime ) );
 	}
 
+	/**
+	 * @param float $casToken
+	 * @param string $key
+	 * @param mixed $value
+	 * @param int $exptime
+	 * @return bool
+	 */
 	protected function cas( $casToken, $key, $value, $exptime = 0 ) {
 		$this->debugLog( "cas($key)" );
 		return $this->checkResult( $key, parent::cas( $casToken, $key, $value, $exptime ) );
 	}
 
+	/**
+	 * @param string $key
+	 * @return bool
+	 */
 	public function delete( $key ) {
 		$this->debugLog( "delete($key)" );
 		$result = parent::delete( $key );
@@ -147,17 +160,33 @@ class MemcachedPeclBagOStuff extends MemcachedBagOStuff {
 		}
 	}
 
+	/**
+	 * @param string $key
+	 * @param int $value
+	 * @param int $exptime
+	 * @return mixed
+	 */
 	public function add( $key, $value, $exptime = 0 ) {
 		$this->debugLog( "add($key)" );
 		return $this->checkResult( $key, parent::add( $key, $value, $exptime ) );
 	}
 
+	/**
+	 * @param string $key
+	 * @param int $value
+	 * @return mixed
+	 */
 	public function incr( $key, $value = 1 ) {
 		$this->debugLog( "incr($key)" );
 		$result = $this->client->increment( $key, $value );
 		return $this->checkResult( $key, $result );
 	}
 
+	/**
+	 * @param string $key
+	 * @param int $value
+	 * @return mixed
+	 */
 	public function decr( $key, $value = 1 ) {
 		$this->debugLog( "decr($key)" );
 		$result = $this->client->decrement( $key, $value );
@@ -189,7 +218,7 @@ class MemcachedPeclBagOStuff extends MemcachedBagOStuff {
 				break;
 			default:
 				$msg = $this->client->getResultMessage();
-				$logCtx = [];
+				$logCtx = array();
 				if ( $key !== false ) {
 					$server = $this->client->getServerByKey( $key );
 					$logCtx['memcached-server'] = "{$server['host']}:{$server['port']}";
@@ -206,10 +235,14 @@ class MemcachedPeclBagOStuff extends MemcachedBagOStuff {
 
 	public function getMulti( array $keys, $flags = 0 ) {
 		$this->debugLog( 'getMulti(' . implode( ', ', $keys ) . ')' );
-		foreach ( $keys as $key ) {
-			$this->validateKeyEncoding( $key );
+		$callback = array( $this, 'encodeKey' );
+		$encodedResult = $this->client->getMulti( array_map( $callback, $keys ) );
+		$encodedResult = $encodedResult ?: array(); // must be an array
+		$result = array();
+		foreach ( $encodedResult as $key => $value ) {
+			$key = $this->decodeKey( $key );
+			$result[$key] = $value;
 		}
-		$result = $this->client->getMulti( $keys ) ?: [];
 		return $this->checkResult( false, $result );
 	}
 
@@ -219,10 +252,14 @@ class MemcachedPeclBagOStuff extends MemcachedBagOStuff {
 	 * @return bool
 	 */
 	public function setMulti( array $data, $exptime = 0 ) {
-		$this->debugLog( 'setMulti(' . implode( ', ', array_keys( $data ) ) . ')' );
-		foreach ( array_keys( $data ) as $key ) {
-			$this->validateKeyEncoding( $key );
+		foreach ( $data as $key => $value ) {
+			$encKey = $this->encodeKey( $key );
+			if ( $encKey !== $key ) {
+				$data[$encKey] = $value;
+				unset( $data[$key] );
+			}
 		}
+		$this->debugLog( 'setMulti(' . implode( ', ', array_keys( $data ) ) . ')' );
 		$result = $this->client->setMulti( $data, $this->fixExpiry( $exptime ) );
 		return $this->checkResult( false, $result );
 	}

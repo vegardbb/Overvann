@@ -59,16 +59,16 @@ class KafkaHandler extends AbstractProcessingHandler {
 	/**
 	 * @var array Map from topic name to partition this request produces to
 	 */
-	protected $partitions = [];
+	protected $partitions = array();
 
 	/**
 	 * @var array defaults for constructor options
 	 */
-	private static $defaultOptions = [
-		'alias' => [], // map from monolog channel to kafka topic
+	private static $defaultOptions = array(
+		'alias' => array(), // map from monolog channel to kafka topic
 		'swallowExceptions' => false, // swallow exceptions sending records
 		'logExceptions' => null, // A PSR3 logger to inform about errors
-	];
+	);
 
 	/**
 	 * @param Produce $produce Kafka instance to produce through
@@ -76,9 +76,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 	 * @param int $level The minimum logging level at which this handler will be triggered
 	 * @param bool $bubble Whether the messages that are handled can bubble up the stack or not
 	 */
-	public function __construct(
-		Produce $produce, array $options, $level = Logger::DEBUG, $bubble = true
-	) {
+	public function __construct( Produce $produce, array $options, $level = Logger::DEBUG, $bubble = true ) {
 		parent::__construct( $level, $bubble );
 		$this->produce = $produce;
 		$this->options = array_merge( self::$defaultOptions, $options );
@@ -94,30 +92,12 @@ class KafkaHandler extends AbstractProcessingHandler {
 	 * @param bool $bubble Whether the messages that are handled can bubble the stack or not
 	 * @return KafkaHandler
 	 */
-	public static function factory(
-		$kafkaServers, array $options = [], $level = Logger::DEBUG, $bubble = true
-	) {
+	public static function factory( $kafkaServers, array $options = array(), $level = Logger::DEBUG, $bubble = true ) {
 		$metadata = new MetaDataFromKafka( $kafkaServers );
 		$produce = new Produce( $metadata );
-
-		if ( isset( $options['sendTimeout'] ) ) {
-			$timeOut = $options['sendTimeout'];
-			$produce->getClient()->setStreamOption( 'SendTimeoutSec', 0 );
-			$produce->getClient()->setStreamOption( 'SendTimeoutUSec',
-				intval( $timeOut * 1000000 )
-			);
-		}
-		if ( isset( $options['recvTimeout'] ) ) {
-			$timeOut = $options['recvTimeout'];
-			$produce->getClient()->setStreamOption( 'RecvTimeoutSec', 0 );
-			$produce->getClient()->setStreamOption( 'RecvTimeoutUSec',
-				intval( $timeOut * 1000000 )
-			);
-		}
 		if ( isset( $options['logExceptions'] ) && is_string( $options['logExceptions'] ) ) {
 			$options['logExceptions'] = LoggerFactory::getInstance( $options['logExceptions'] );
 		}
-
 		return new self( $produce, $options, $level, $bubble );
 	}
 
@@ -126,7 +106,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 	 */
 	protected function write( array $record ) {
 		if ( $record['formatted'] !== null ) {
-			$this->addMessages( $record['channel'], [ $record['formatted'] ] );
+			$this->addMessages( $record['channel'], array( $record['formatted'] ) );
 			$this->send();
 		}
 	}
@@ -135,7 +115,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 	 * {@inheritDoc}
 	 */
 	public function handleBatch( array $batch ) {
-		$channels = [];
+		$channels = array();
 		foreach ( $batch as $record ) {
 			if ( $record['level'] < $this->level ) {
 				continue;
@@ -145,7 +125,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 
 		$formatter = $this->getFormatter();
 		foreach ( $channels as $channel => $records ) {
-			$messages = [];
+			$messages = array();
 			foreach ( $records as $idx => $record ) {
 				$message = $formatter->format( $record );
 				if ( $message !== null ) {
@@ -153,7 +133,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 				}
 			}
 			if ( $messages ) {
-				$this->addMessages( $channel, $messages );
+				$this->addMessages($channel, $messages);
 			}
 		}
 
@@ -169,7 +149,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 		} catch ( \Kafka\Exception $e ) {
 			$ignore = $this->warning(
 				'Error sending records to kafka: {exception}',
-				[ 'exception' => $e ] );
+				array( 'exception' => $e ) );
 			if ( !$ignore ) {
 				throw $e;
 			}
@@ -188,7 +168,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 			} catch ( \Kafka\Exception $e ) {
 				$ignore = $this->warning(
 					'Error getting metadata for kafka topic {topic}: {exception}',
-					[ 'topic' => $topic, 'exception' => $e ] );
+					array( 'topic' => $topic, 'exception' => $e ) );
 				if ( $ignore ) {
 					return null;
 				}
@@ -201,7 +181,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 				$details = $this->produce->getClient()->getTopicDetail( $topic );
 				$ignore = $this->warning(
 					'No partitions available for kafka topic {topic}',
-					[ 'topic' => $topic, 'kafka' => $details ]
+					array( 'topic' => $topic, 'kafka' => $details )
 				);
 				if ( !$ignore ) {
 					throw new \RuntimeException( "No partitions available for kafka topic $topic" );
@@ -235,7 +215,7 @@ class KafkaHandler extends AbstractProcessingHandler {
 	 * @param array $context PSR3 compatible log context
 	 * @return bool true if caller should ignore warning
 	 */
-	protected function warning( $message, array $context = [] ) {
+	protected function warning( $message, array $context = array() ) {
 		if ( $this->options['logExceptions'] instanceof LoggerInterface ) {
 			$this->options['logExceptions']->warning( $message, $context );
 		}

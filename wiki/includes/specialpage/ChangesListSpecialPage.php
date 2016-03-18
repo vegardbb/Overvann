@@ -136,7 +136,6 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 	 * @return FormOptions
 	 */
 	public function getDefaultOptions() {
-		$config = $this->getConfig();
 		$opts = new FormOptions();
 
 		$opts->add( 'hideminor', false );
@@ -145,10 +144,6 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 		$opts->add( 'hideliu', false );
 		$opts->add( 'hidepatrolled', false );
 		$opts->add( 'hidemyself', false );
-
-		if ( $config->get( 'RCWatchCategoryMembership' ) ) {
-			$opts->add( 'hidecategorization', false );
-		}
 
 		$opts->add( 'namespace', '', FormOptions::INTNULL );
 		$opts->add( 'invert', false );
@@ -164,8 +159,8 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 	 */
 	protected function getCustomFilters() {
 		if ( $this->customFilters === null ) {
-			$this->customFilters = [];
-			Hooks::run( 'ChangesListSpecialPageFilters', [ $this, &$this->customFilters ] );
+			$this->customFilters = array();
+			Hooks::run( 'ChangesListSpecialPageFilters', array( $this, &$this->customFilters ) );
 		}
 
 		return $this->customFilters;
@@ -213,7 +208,7 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 	public function buildMainQueryConds( FormOptions $opts ) {
 		$dbr = $this->getDB();
 		$user = $this->getUser();
-		$conds = [];
+		$conds = array();
 
 		// It makes no sense to hide both anons and logged-in users. When this occurs, try a guess on
 		// what the user meant and either show only bots or force anons to be shown.
@@ -254,11 +249,6 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 				$conds[] = 'rc_user_text != ' . $dbr->addQuotes( $user->getName() );
 			}
 		}
-		if ( $this->getConfig()->get( 'RCWatchCategoryMembership' )
-			&& $opts['hidecategorization'] === true
-		) {
-			$conds[] = 'rc_type != ' . $dbr->addQuotes( RC_CATEGORIZE );
-		}
 
 		// Namespace filtering
 		if ( $opts['namespace'] !== '' ) {
@@ -293,10 +283,10 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 	 * @return bool|ResultWrapper Result or false
 	 */
 	public function doMainQuery( $conds, $opts ) {
-		$tables = [ 'recentchanges' ];
+		$tables = array( 'recentchanges' );
 		$fields = RecentChange::selectFields();
-		$query_options = [];
-		$join_conds = [];
+		$query_options = array();
+		$join_conds = array();
 
 		ChangeTags::modifyDisplayQuery(
 			$tables,
@@ -330,7 +320,7 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 	) {
 		return Hooks::run(
 			'ChangesListSpecialPageQuery',
-			[ $this->getName(), &$tables, &$fields, &$conds, &$query_options, &$join_conds, $opts ]
+			array( $this->getName(), &$tables, &$fields, &$conds, &$query_options, &$join_conds, $opts )
 		);
 	}
 
@@ -393,7 +383,7 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 	 *
 	 * @param FormOptions $opts
 	 */
-	public function setTopText( FormOptions $opts ) {
+	function setTopText( FormOptions $opts ) {
 		// nothing by default
 	}
 
@@ -403,7 +393,7 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 	 *
 	 * @param FormOptions $opts
 	 */
-	public function setBottomText( FormOptions $opts ) {
+	function setBottomText( FormOptions $opts ) {
 		// nothing by default
 	}
 
@@ -415,17 +405,19 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 	 * @param FormOptions $opts
 	 * @return array
 	 */
-	public function getExtraOptions( $opts ) {
-		return [];
+	function getExtraOptions( $opts ) {
+		return array();
 	}
 
 	/**
 	 * Return the legend displayed within the fieldset
+	 * @todo This should not be static, then we can drop the parameter
+	 * @todo Not called by anything, should be called by doHeader()
 	 *
+	 * @param IContextSource $context The object available as $this in non-static functions
 	 * @return string
 	 */
-	public function makeLegend() {
-		$context = $this->getContext();
+	public static function makeLegend( IContextSource $context ) {
 		$user = $context->getUser();
 		# The legend showing what the letters and stuff mean
 		$legend = Html::openElement( 'dl' ) . "\n";
@@ -440,21 +432,21 @@ abstract class ChangesListSpecialPage extends SpecialPage {
 			$cssClass = isset( $item['class'] ) ? $item['class'] : $key;
 
 			$legend .= Html::element( 'dt',
-				[ 'class' => $cssClass ], $context->msg( $letter )->text()
+				array( 'class' => $cssClass ), $context->msg( $letter )->text()
 			) . "\n" .
 			Html::rawElement( 'dd',
-				[ 'class' => Sanitizer::escapeClass( 'mw-changeslist-legend-' . $key ) ],
+				array( 'class' => Sanitizer::escapeClass( 'mw-changeslist-legend-' . $key ) ),
 				$context->msg( $label )->parse()
 			) . "\n";
 		}
 		# (+-123)
 		$legend .= Html::rawElement( 'dt',
-			[ 'class' => 'mw-plusminus-pos' ],
+			array( 'class' => 'mw-plusminus-pos' ),
 			$context->msg( 'recentchanges-legend-plusminus' )->parse()
 		) . "\n";
 		$legend .= Html::element(
 			'dd',
-			[ 'class' => 'mw-changeslist-legend-plusminus' ],
+			array( 'class' => 'mw-changeslist-legend-plusminus' ),
 			$context->msg( 'recentchanges-label-plusminus' )->text()
 		) . "\n";
 		$legend .= Html::closeElement( 'dl' ) . "\n";

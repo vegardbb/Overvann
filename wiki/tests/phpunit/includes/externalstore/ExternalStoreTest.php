@@ -16,7 +16,7 @@ class ExternalStoreTest extends MediaWikiTestCase {
 			'Deny if wgExternalStores is not set to a non-empty array'
 		);
 
-		$this->setMwGlobals( 'wgExternalStores', [ 'FOO' ] );
+		$this->setMwGlobals( 'wgExternalStores', array( 'FOO' ) );
 
 		$this->assertEquals(
 			ExternalStore::fetchFromURL( 'FOO://cluster1/200' ),
@@ -46,14 +46,14 @@ class ExternalStoreTest extends MediaWikiTestCase {
 
 class ExternalStoreFOO {
 
-	protected $data = [
-		'cluster1' => [
+	protected $data = array(
+		'cluster1' => array(
 			'200' => 'Hello',
-			'300' => [
+			'300' => array(
 				'Hello', 'World',
-			],
-		],
-	];
+			),
+		),
+	);
 
 	/**
 	 * Fetch data from given URL

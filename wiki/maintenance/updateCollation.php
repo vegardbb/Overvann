@@ -36,19 +36,18 @@ class UpdateCollation extends Maintenance {
 	const BATCH_SIZE = 10000; // Number of rows to process in one batch
 	const SYNC_INTERVAL = 20; // Wait for slaves after this many batches
 
-	public $sizeHistogram = [];
+	public $sizeHistogram = array();
 
 	public function __construct() {
 		parent::__construct();
 
 		global $wgCategoryCollation;
-		$this->addDescription( <<<TEXT
+		$this->mDescription = <<<TEXT
 This script will find all rows in the categorylinks table whose collation is
 out-of-date (cl_collation != '$wgCategoryCollation') and repopulate cl_sortkey
 using the page title and cl_sortkey_prefix.  If all collations are
 up-to-date, it will do nothing.
-TEXT
-		);
+TEXT;
 
 		$this->addOption( 'force', 'Run on all rows, even if the collation is ' .
 			'supposed to be up-to-date.' );
@@ -85,21 +84,21 @@ TEXT
 		// but this will raise an exception, breaking all category pages
 		$collation->getFirstLetter( 'MediaWiki' );
 
-		$options = [
+		$options = array(
 			'LIMIT' => self::BATCH_SIZE,
-			'ORDER BY' => 'cl_from, cl_to',
+			'ORDER BY' => 'cl_to, cl_type, cl_from',
 			'STRAIGHT_JOIN',
-		];
+		);
 
 		if ( $force || $dryRun ) {
-			$collationConds = [];
+			$collationConds = array();
 		} else {
 			if ( $this->hasOption( 'previous-collation' ) ) {
 				$collationConds['cl_collation'] = $this->getOption( 'previous-collation' );
 			} else {
-				$collationConds = [ 0 =>
+				$collationConds = array( 0 =>
 					'cl_collation != ' . $dbw->addQuotes( $collationName )
-				];
+				);
 			}
 
 			$count = $dbw->estimateRowCount(
@@ -127,22 +126,22 @@ TEXT
 
 		$count = 0;
 		$batchCount = 0;
-		$batchConds = [];
+		$batchConds = array();
 		do {
 			$this->output( "Selecting next " . self::BATCH_SIZE . " rows..." );
 			$res = $dbw->select(
-				[ 'categorylinks', 'page' ],
-				[ 'cl_from', 'cl_to', 'cl_sortkey_prefix', 'cl_collation',
-					'cl_sortkey', 'page_namespace', 'page_title'
-				],
-				array_merge( $collationConds, $batchConds, [ 'cl_from = page_id' ] ),
+				array( 'categorylinks', 'page' ),
+				array( 'cl_from', 'cl_to', 'cl_sortkey_prefix', 'cl_collation',
+					'cl_sortkey', 'cl_type', 'page_namespace', 'page_title'
+				),
+				array_merge( $collationConds, $batchConds, array( 'cl_from = page_id' ) ),
 				__METHOD__,
 				$options
 			);
 			$this->output( " processing..." );
 
 			if ( !$dryRun ) {
-				$this->beginTransaction( $dbw, __METHOD__ );
+				$dbw->begin( __METHOD__ );
 			}
 			foreach ( $res as $row ) {
 				$title = Title::newFromRow( $row );
@@ -178,23 +177,23 @@ TEXT
 				if ( !$dryRun ) {
 					$dbw->update(
 						'categorylinks',
-						[
+						array(
 							'cl_sortkey' => $newSortKey,
 							'cl_sortkey_prefix' => $prefix,
 							'cl_collation' => $collationName,
 							'cl_type' => $type,
 							'cl_timestamp = cl_timestamp',
-						],
-						[ 'cl_from' => $row->cl_from, 'cl_to' => $row->cl_to ],
+						),
+						array( 'cl_from' => $row->cl_from, 'cl_to' => $row->cl_to ),
 						__METHOD__
 					);
 				}
 				if ( $row ) {
-					$batchConds = [ $this->getBatchCondition( $row, $dbw ) ];
+					$batchConds = array( $this->getBatchCondition( $row, $dbw ) );
 				}
 			}
 			if ( !$dryRun ) {
-				$this->commitTransaction( $dbw, __METHOD__ );
+				$dbw->commit( __METHOD__ );
 			}
 
 			$count += $res->numRows();
@@ -217,13 +216,13 @@ TEXT
 
 	/**
 	 * Return an SQL expression selecting rows which sort above the given row,
-	 * assuming an ordering of cl_from, cl_to
+	 * assuming an ordering of cl_to, cl_type, cl_from
 	 * @param stdClass $row
 	 * @param DatabaseBase $dbw
 	 * @return string
 	 */
 	function getBatchCondition( $row, $dbw ) {
-		$fields = [ 'cl_from', 'cl_to' ];
+		$fields = array( 'cl_to', 'cl_type', 'cl_from' );
 		$first = true;
 		$cond = false;
 		$prefix = false;
@@ -259,7 +258,7 @@ TEXT
 		}
 		$numBins = 20;
 		$coarseHistogram = array_fill( 0, $numBins, 0 );
-		$coarseBoundaries = [];
+		$coarseBoundaries = array();
 		$boundary = 0;
 		for ( $i = 0; $i < $numBins - 1; $i++ ) {
 			$boundary += $maxLength / $numBins;

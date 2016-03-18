@@ -1,6 +1,6 @@
 <?php
 /**
- * ResourceLoader module for generated and embedded images.
+ * Resource loader module for generated and embedded images.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  */
 
 /**
- * ResourceLoader module for generated and embedded images.
+ * Resource loader module for generated and embedded images.
  *
  * @since 1.25
  */
@@ -38,12 +38,12 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 
 	protected $origin = self::ORIGIN_CORE_SITEWIDE;
 
-	protected $images = [];
-	protected $variants = [];
+	protected $images = array();
+	protected $variants = array();
 	protected $prefix = null;
 	protected $selectorWithoutVariant = '.{prefix}-{name}';
 	protected $selectorWithVariant = '.{prefix}-{name}-{variant}';
-	protected $targets = [ 'desktop', 'mobile' ];
+	protected $targets = array( 'desktop', 'mobile' );
 
 	/** @var string Position on the page to load this module at */
 	protected $position = 'bottom';
@@ -102,7 +102,7 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 	 * @endcode
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct( $options = [], $localBasePath = null ) {
+	public function __construct( $options = array(), $localBasePath = null ) {
 		$this->localBasePath = self::extractLocalBasePath( $options, $localBasePath );
 
 		$this->definition = $options;
@@ -171,7 +171,7 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 					}
 					if ( !isset( $option['default'] ) ) {
 						// Backwards compatibility
-						$option = [ 'default' => $option ];
+						$option = array( 'default' => $option );
 					}
 					foreach ( $option as $skin => $data ) {
 						if ( !is_array( $option ) ) {
@@ -184,6 +184,7 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 					break;
 
 				case 'position':
+					$this->isPositionDefined = true;
 				case 'prefix':
 				case 'selectorWithoutVariant':
 				case 'selectorWithVariant':
@@ -211,10 +212,10 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 	 */
 	public function getSelectors() {
 		$this->loadFromDefinition();
-		return [
+		return array(
 			'selectorWithoutVariant' => $this->selectorWithoutVariant,
 			'selectorWithVariant' => $this->selectorWithVariant,
-		];
+		);
 	}
 
 	/**
@@ -238,20 +239,20 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 		$skin = $context->getSkin();
 		if ( !isset( $this->imageObjects ) ) {
 			$this->loadFromDefinition();
-			$this->imageObjects = [];
+			$this->imageObjects = array();
 		}
 		if ( !isset( $this->imageObjects[$skin] ) ) {
-			$this->imageObjects[$skin] = [];
+			$this->imageObjects[$skin] = array();
 			if ( !isset( $this->images[$skin] ) ) {
 				$this->images[$skin] = isset( $this->images['default'] ) ?
 					$this->images['default'] :
-					[];
+					array();
 			}
 			foreach ( $this->images[$skin] as $name => $options ) {
 				$fileDescriptor = is_string( $options ) ? $options : $options['file'];
 
 				$allowedVariants = array_merge(
-					is_array( $options ) && isset( $options['variants'] ) ? $options['variants'] : [],
+					is_array( $options ) && isset( $options['variants'] ) ? $options['variants'] : array(),
 					$this->getGlobalVariants( $context )
 				);
 				if ( isset( $this->variants[$skin] ) ) {
@@ -260,7 +261,7 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 						array_fill_keys( $allowedVariants, true )
 					);
 				} else {
-					$variantConfig = [];
+					$variantConfig = array();
 				}
 
 				$image = new ResourceLoaderImage(
@@ -287,14 +288,14 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 		$skin = $context->getSkin();
 		if ( !isset( $this->globalVariants ) ) {
 			$this->loadFromDefinition();
-			$this->globalVariants = [];
+			$this->globalVariants = array();
 		}
 		if ( !isset( $this->globalVariants[$skin] ) ) {
-			$this->globalVariants[$skin] = [];
+			$this->globalVariants[$skin] = array();
 			if ( !isset( $this->variants[$skin] ) ) {
 				$this->variants[$skin] = isset( $this->variants['default'] ) ?
 					$this->variants['default'] :
-					[];
+					array();
 			}
 			foreach ( $this->variants[$skin] as $name => $config ) {
 				if ( isset( $config['global'] ) && $config['global'] ) {
@@ -314,7 +315,7 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 		$this->loadFromDefinition();
 
 		// Build CSS rules
-		$rules = [];
+		$rules = array();
 		$script = $context->getResourceLoader()->getLoadScript( $this->getSource() );
 		$selectors = $this->getSelectors();
 
@@ -326,11 +327,11 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 			$declarations = implode( "\n\t", $declarations );
 			$selector = strtr(
 				$selectors['selectorWithoutVariant'],
-				[
+				array(
 					'{prefix}' => $this->getPrefix(),
 					'{name}' => $name,
 					'{variant}' => '',
-				]
+				)
 			);
 			$rules[] = "$selector {\n\t$declarations\n}";
 
@@ -342,18 +343,18 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 				$declarations = implode( "\n\t", $declarations );
 				$selector = strtr(
 					$selectors['selectorWithVariant'],
-					[
+					array(
 						'{prefix}' => $this->getPrefix(),
 						'{name}' => $name,
 						'{variant}' => $variant,
-					]
+					)
 				);
 				$rules[] = "$selector {\n\t$declarations\n}";
 			}
 		}
 
 		$style = implode( "\n", $rules );
-		return [ 'all' => $style ];
+		return array( 'all' => $style );
 	}
 
 	/**
@@ -369,12 +370,12 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 	 * @return string[] CSS declarations to use given URIs as background-image
 	 */
 	protected function getCssDeclarations( $primary, $fallback ) {
-		return [
+		return array(
 			"background-image: url($fallback);",
+			"background-image: -webkit-linear-gradient(transparent, transparent), url($primary);",
 			"background-image: linear-gradient(transparent, transparent), url($primary);",
-			// Do not serve SVG to Opera 12, bad rendering with border-radius or background-size (T87504)
 			"background-image: -o-linear-gradient(transparent, transparent), url($fallback);",
-		];
+		);
 	}
 
 	/**
@@ -393,14 +394,14 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 	public function getDefinitionSummary( ResourceLoaderContext $context ) {
 		$this->loadFromDefinition();
 		$summary = parent::getDefinitionSummary( $context );
-		foreach ( [
+		foreach ( array(
 			'localBasePath',
 			'images',
 			'variants',
 			'prefix',
 			'selectorWithoutVariant',
 			'selectorWithVariant',
-		] as $member ) {
+		) as $member ) {
 			$summary[$member] = $this->{$member};
 		};
 		return $summary;
@@ -415,13 +416,13 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 	 */
 	public function getModifiedTime( ResourceLoaderContext $context ) {
 		$this->loadFromDefinition();
-		$files = [];
+		$files = array();
 		foreach ( $this->getImages( $context ) as $name => $image ) {
 			$files[] = $image->getPath( $context );
 		}
 
 		$files = array_values( array_unique( $files ) );
-		$filesMtime = max( array_map( [ __CLASS__, 'safeFilemtime' ], $files ) );
+		$filesMtime = max( array_map( array( __CLASS__, 'safeFilemtime' ), $files ) );
 
 		return $filesMtime;
 	}
@@ -454,5 +455,10 @@ class ResourceLoaderImageModule extends ResourceLoaderModule {
 	public function getPosition() {
 		$this->loadFromDefinition();
 		return $this->position;
+	}
+
+	public function isPositionDefault() {
+		$this->loadFromDefinition();
+		return parent::isPositionDefault();
 	}
 }

@@ -44,20 +44,21 @@ class ApiQueryLangLinks extends ApiQueryBase {
 		$prop = array_flip( (array)$params['prop'] );
 
 		if ( isset( $params['title'] ) && !isset( $params['lang'] ) ) {
-			$this->dieUsageMsg( [ 'missingparam', 'lang' ] );
+			$this->dieUsageMsg( array( 'missingparam', 'lang' ) );
 		}
 
 		// Handle deprecated param
 		$this->requireMaxOneParameter( $params, 'url', 'prop' );
 		if ( $params['url'] ) {
-			$prop = [ 'url' => 1 ];
+			$this->logFeatureUsage( 'prop=langlinks&llurl' );
+			$prop = array( 'url' => 1 );
 		}
 
-		$this->addFields( [
+		$this->addFields( array(
 			'll_from',
 			'll_lang',
 			'll_title'
-		] );
+		) );
 
 		$this->addTables( 'langlinks' );
 		$this->addWhereFld( 'll_from', array_keys( $this->getPageSet()->getGoodTitles() ) );
@@ -74,7 +75,7 @@ class ApiQueryLangLinks extends ApiQueryBase {
 			);
 		}
 
-		// FIXME: (follow-up) To allow extensions to add to the language links, we need
+		//FIXME: (follow-up) To allow extensions to add to the language links, we need
 		//       to load them all, add the extra links, then apply paging.
 		//       Should not be terrible, it's not going to be more than a few hundred links.
 
@@ -92,10 +93,10 @@ class ApiQueryLangLinks extends ApiQueryBase {
 			if ( count( $this->getPageSet()->getGoodTitles() ) == 1 ) {
 				$this->addOption( 'ORDER BY', 'll_lang' . $sort );
 			} else {
-				$this->addOption( 'ORDER BY', [
+				$this->addOption( 'ORDER BY', array(
 					'll_from' . $sort,
 					'll_lang' . $sort
-				] );
+				) );
 			}
 		}
 
@@ -110,7 +111,7 @@ class ApiQueryLangLinks extends ApiQueryBase {
 				$this->setContinueEnumParameter( 'continue', "{$row->ll_from}|{$row->ll_lang}" );
 				break;
 			}
-			$entry = [ 'lang' => $row->ll_lang ];
+			$entry = array( 'lang' => $row->ll_lang );
 			if ( isset( $prop['url'] ) ) {
 				$title = Title::newFromText( "{$row->ll_lang}:{$row->ll_title}" );
 				if ( $title ) {
@@ -138,48 +139,48 @@ class ApiQueryLangLinks extends ApiQueryBase {
 
 	public function getAllowedParams() {
 		global $wgContLang;
-		return [
-			'prop' => [
+		return array(
+			'prop' => array(
 				ApiBase::PARAM_ISMULTI => true,
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'url',
 					'langname',
 					'autonym',
-				],
-				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
-			],
+				),
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => array(),
+			),
 			'lang' => null,
 			'title' => null,
-			'dir' => [
+			'dir' => array(
 				ApiBase::PARAM_DFLT => 'ascending',
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'ascending',
 					'descending'
-				]
-			],
+				)
+			),
 			'inlanguagecode' => $wgContLang->getCode(),
-			'limit' => [
+			'limit' => array(
 				ApiBase::PARAM_DFLT => 10,
 				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => ApiBase::LIMIT_BIG1,
 				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_BIG2
-			],
-			'continue' => [
+			),
+			'continue' => array(
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			],
-			'url' => [
+			),
+			'url' => array(
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_DEPRECATED => true,
-			],
-		];
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=query&prop=langlinks&titles=Main%20Page&redirects='
 				=> 'apihelp-query+langlinks-example-simple',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

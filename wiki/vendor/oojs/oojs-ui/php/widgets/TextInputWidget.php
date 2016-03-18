@@ -32,8 +32,8 @@ class TextInputWidget extends InputWidget {
 
 	/**
 	 * @param array $config Configuration options
-	 * @param string $config['type'] HTML tag `type` attribute: 'text', 'password', 'search', 'email',
-	 *   'url' or 'date'. Ignored if `multiline` is true. (default: 'text')
+	 * @param string $config['type'] HTML tag `type` attribute: 'text', 'password', 'search', 'email'
+	 *   or 'url'. Ignored if `multiline` is true. (default: 'text')
 	 *
 	 *   Some values of `type` result in additional behaviors:
 	 *   - `search`: implies `icon: 'search'` and `indicator: 'clear'`; when clicked, the indicator
@@ -50,15 +50,15 @@ class TextInputWidget extends InputWidget {
 	 * @param boolean $config['autocomplete'] If the field should support autocomplete
 	 *   or not (default: true)
 	 */
-	public function __construct( array $config = [] ) {
+	public function __construct( array $config = array() ) {
 		// Config initialization
-		$config = array_merge( [
+		$config = array_merge( array(
 			'type' => 'text',
 			'readOnly' => false,
 			'autofocus' => false,
 			'required' => false,
 			'autocomplete' => true,
-		], $config );
+		), $config );
 		if ( $config['type'] === 'search' ) {
 			if ( !array_key_exists( 'icon', $config ) ) {
 				$config['icon'] = 'search';
@@ -83,26 +83,26 @@ class TextInputWidget extends InputWidget {
 
 		// Initialization
 		$this
-			->addClasses( [ 'oo-ui-textInputWidget', 'oo-ui-textInputWidget-type-' . $this->type ] )
+			->addClasses( array( 'oo-ui-textInputWidget', 'oo-ui-textInputWidget-type-' . $this->type ) )
 			->appendContent( $this->icon, $this->indicator );
 		$this->setReadOnly( $config['readOnly'] );
 		if ( isset( $config['placeholder'] ) ) {
-			$this->input->setAttributes( [ 'placeholder' => $config['placeholder'] ] );
+			$this->input->setAttributes( array( 'placeholder' => $config['placeholder'] ) );
 		}
 		if ( isset( $config['maxLength'] ) ) {
-			$this->input->setAttributes( [ 'maxlength' => $config['maxLength'] ] );
+			$this->input->setAttributes( array( 'maxlength' => $config['maxLength'] ) );
 		}
 		if ( $config['autofocus'] ) {
-			$this->input->setAttributes( [ 'autofocus' => 'autofocus' ] );
+			$this->input->setAttributes( array( 'autofocus' => 'autofocus' ) );
 		}
 		if ( $config['required'] ) {
-			$this->input->setAttributes( [ 'required' => 'required', 'aria-required' => 'true' ] );
+			$this->input->setAttributes( array( 'required' => 'required', 'aria-required' => 'true' ) );
 		}
 		if ( !$config['autocomplete'] ) {
-			$this->input->setAttributes( [ 'autocomplete' => 'off' ] );
+			$this->input->setAttributes( array( 'autocomplete' => 'off' ) );
 		}
 		if ( $this->multiline && isset( $config['rows'] ) ) {
-			$this->input->setAttributes( [ 'rows' => $config['rows'] ] );
+			$this->input->setAttributes( array( 'rows' => $config['rows'] ) );
 		}
 	}
 
@@ -120,14 +120,14 @@ class TextInputWidget extends InputWidget {
 	 * prevent it from being used.
 	 *
 	 * @param boolean $state Make input read-only
-	 * @return $this
+	 * @chainable
 	 */
 	public function setReadOnly( $state ) {
 		$this->readOnly = (bool)$state;
 		if ( $this->readOnly ) {
-			$this->input->setAttributes( [ 'readonly' => 'readonly' ] );
+			$this->input->setAttributes( array( 'readonly' => 'readonly' ) );
 		} else {
-			$this->input->removeAttributes( [ 'readonly' ] );
+			$this->input->removeAttributes( array( 'readonly' ) );
 		}
 		return $this;
 	}
@@ -136,7 +136,9 @@ class TextInputWidget extends InputWidget {
 		if ( isset( $config['multiline'] ) && $config['multiline'] ) {
 			return new Tag( 'textarea' );
 		} else {
-			return ( new Tag( 'input' ) )->setAttributes( [ 'type' => $this->getSaneType( $config ) ] );
+			$input = new Tag( 'input' );
+			$input->setAttributes( array( 'type' => $this->getSaneType( $config ) ) );
+			return $input;
 		}
 	}
 
@@ -144,7 +146,7 @@ class TextInputWidget extends InputWidget {
 		if ( isset( $config['multiline'] ) && $config['multiline'] ) {
 			return 'multiline';
 		} else {
-			$type = in_array( $config['type'], [ 'text', 'password', 'search', 'email', 'url', 'date' ] ) ?
+			$type = in_array( $config['type'], array( 'text', 'password', 'search', 'email', 'url' ) ) ?
 				$config['type'] :
 				'text';
 			return $type;

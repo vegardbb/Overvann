@@ -53,26 +53,20 @@ class MarkpatrolledAction extends FormlessAction {
 
 		$errors = $rc->doMarkPatrolled( $user );
 
-		if ( in_array( [ 'rcpatroldisabled' ], $errors ) ) {
+		if ( in_array( array( 'rcpatroldisabled' ), $errors ) ) {
 			throw new ErrorPageError( 'rcpatroldisabled', 'rcpatroldisabledtext' );
 		}
 
-		if ( in_array( [ 'hookaborted' ], $errors ) ) {
+		if ( in_array( array( 'hookaborted' ), $errors ) ) {
 			// The hook itself has handled any output
 			return;
 		}
 
 		# It would be nice to see where the user had actually come from, but for now just guess
-		if ( $rc->getAttribute( 'rc_type' ) == RC_NEW ) {
-			$returnTo = 'Newpages';
-		} elseif ( $rc->getAttribute( 'rc_log_type' ) == 'upload' ) {
-			$returnTo = 'Newfiles';
-		} else {
-			$returnTo = 'Recentchanges';
-		}
-		$return = SpecialPage::getTitleFor( $returnTo );
+		$returnto = $rc->getAttribute( 'rc_type' ) == RC_NEW ? 'Newpages' : 'Recentchanges';
+		$return = SpecialPage::getTitleFor( $returnto );
 
-		if ( in_array( [ 'markedaspatrollederror-noautopatrol' ], $errors ) ) {
+		if ( in_array( array( 'markedaspatrollederror-noautopatrol' ), $errors ) ) {
 			$this->getOutput()->setPageTitle( $this->msg( 'markedaspatrollederror' ) );
 			$this->getOutput()->addWikiMsg( 'markedaspatrollederror-noautopatrol' );
 			$this->getOutput()->returnToMain( null, $return );
@@ -88,9 +82,5 @@ class MarkpatrolledAction extends FormlessAction {
 		$this->getOutput()->setPageTitle( $this->msg( 'markedaspatrolled' ) );
 		$this->getOutput()->addWikiMsg( 'markedaspatrolledtext', $rc->getTitle()->getPrefixedText() );
 		$this->getOutput()->returnToMain( null, $return );
-	}
-
-	public function doesWrites() {
-		return true;
 	}
 }

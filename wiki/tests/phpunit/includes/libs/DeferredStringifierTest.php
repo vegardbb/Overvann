@@ -13,27 +13,27 @@ class DeferredStringifierTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public static function provideToString() {
-		return [
+		return array(
 			// No args
-			[
-				[
+			array(
+				array(
 					function() {
 						return 'foo';
 					}
-				],
+				),
 				'foo'
-			],
+			),
 			// Has args
-			[
-				[
+			array(
+				array(
 					function( $i ) {
 						return $i;
 					},
 					'bar'
-				],
+				),
 				'bar'
-			],
-		];
+			),
+		);
 	}
 
 	/**

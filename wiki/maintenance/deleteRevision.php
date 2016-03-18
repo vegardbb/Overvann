@@ -33,7 +33,7 @@ class DeleteRevision extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Delete one or more revisions by moving them to the archive table' );
+		$this->mDescription = "Delete one or more revisions by moving them to the archive table";
 	}
 
 	public function execute() {
@@ -43,12 +43,12 @@ class DeleteRevision extends Maintenance {
 
 		$this->output( "Deleting revision(s) " . implode( ',', $this->mArgs ) .
 			" from " . wfWikiID() . "...\n" );
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 
 		$affected = 0;
 		foreach ( $this->mArgs as $revID ) {
-			$dbw->insertSelect( 'archive', [ 'page', 'revision' ],
-				[
+			$dbw->insertSelect( 'archive', array( 'page', 'revision' ),
+				array(
 					'ar_namespace' => 'page_namespace',
 					'ar_title' => 'page_title',
 					'ar_page_id' => 'page_id',
@@ -61,11 +61,11 @@ class DeleteRevision extends Maintenance {
 					'ar_text_id' => 'rev_text_id',
 					'ar_deleted' => 'rev_deleted',
 					'ar_len' => 'rev_len',
-				],
-				[
+				),
+				array(
 					'rev_id' => $revID,
 					'page_id = rev_page'
-				],
+				),
 				__METHOD__
 			);
 			if ( !$dbw->affectedRows() ) {
@@ -75,29 +75,29 @@ class DeleteRevision extends Maintenance {
 				$pageID = $dbw->selectField(
 					'revision',
 					'rev_page',
-					[ 'rev_id' => $revID ],
+					array( 'rev_id' => $revID ),
 					__METHOD__
 				);
 				$pageLatest = $dbw->selectField(
 					'page',
 					'page_latest',
-					[ 'page_id' => $pageID ],
+					array( 'page_id' => $pageID ),
 					__METHOD__
 				);
-				$dbw->delete( 'revision', [ 'rev_id' => $revID ] );
+				$dbw->delete( 'revision', array( 'rev_id' => $revID ) );
 				if ( $pageLatest == $revID ) {
 					// Database integrity
 					$newLatest = $dbw->selectField(
 						'revision',
 						'rev_id',
-						[ 'rev_page' => $pageID ],
+						array( 'rev_page' => $pageID ),
 						__METHOD__,
-						[ 'ORDER BY' => 'rev_timestamp DESC' ]
+						array( 'ORDER BY' => 'rev_timestamp DESC' )
 					);
 					$dbw->update(
 						'page',
-						[ 'page_latest' => $newLatest ],
-						[ 'page_id' => $pageID ],
+						array( 'page_latest' => $newLatest ),
+						array( 'page_id' => $pageID ),
 						__METHOD__
 					);
 				}

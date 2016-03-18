@@ -25,13 +25,14 @@
  * @since 1.25
  */
 class SpecialPageAction extends FormlessAction {
+
 	/**
 	 * @var array A mapping of action names to special page names.
 	 */
-	public static $actionToSpecialPageMapping = [
+	public static $actionToSpecialPageMapping = array(
 		'revisiondelete' => 'Revisiondelete',
 		'editchangetags' => 'EditTags',
-	];
+	);
 
 	public function getName() {
 		$request = $this->getRequest();
@@ -48,7 +49,6 @@ class SpecialPageAction extends FormlessAction {
 		if ( isset( self::$actionToSpecialPageMapping[$actionName] ) ) {
 			return $actionName;
 		}
-
 		return 'nosuchaction';
 	}
 
@@ -65,33 +65,15 @@ class SpecialPageAction extends FormlessAction {
 	}
 
 	public function show() {
-		$special = $this->getSpecialPage();
-		if ( !$special ) {
-			throw new ErrorPageError(
-				$this->msg( 'nosuchaction' ), $this->msg( 'nosuchactiontext' ) );
-		}
-
-		$special->setContext( $this->getContext() );
-		$special->getContext()->setTitle( $special->getPageTitle() );
-		$special->run( '' );
-	}
-
-	public function doesWrites() {
-		$special = $this->getSpecialPage();
-
-		return $special ? $special->doesWrites() : false;
-	}
-
-	/**
-	 * @return SpecialPage|null
-	 */
-	protected function getSpecialPage() {
-		$action = $this->getName();
+		$action = self::getName();
 		if ( $action === 'nosuchaction' ) {
-			return null;
+			throw new ErrorPageError( $this->msg( 'nosuchaction' ), $this->msg( 'nosuchactiontext' ) );
 		}
 
 		// map actions to (whitelisted) special pages
-		return SpecialPageFactory::getPage( self::$actionToSpecialPageMapping[$action] );
+		$special = SpecialPageFactory::getPage( self::$actionToSpecialPageMapping[$action] );
+		$special->setContext( $this->getContext() );
+		$special->getContext()->setTitle( $special->getPageTitle() );
+		$special->run( '' );
 	}
 }

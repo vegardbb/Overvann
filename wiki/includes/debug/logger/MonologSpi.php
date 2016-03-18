@@ -126,13 +126,15 @@ class MonologSpi implements Spi {
 	 */
 	protected $config;
 
+
 	/**
 	 * @param array $config Configuration data.
 	 */
 	public function __construct( array $config ) {
-		$this->config = [];
+		$this->config = array();
 		$this->mergeConfig( $config );
 	}
+
 
 	/**
 	 * Merge additional configuration data into the configuration.
@@ -151,6 +153,7 @@ class MonologSpi implements Spi {
 		$this->reset();
 	}
 
+
 	/**
 	 * Reset internal caches.
 	 *
@@ -158,13 +161,14 @@ class MonologSpi implements Spi {
 	 * be no need to flush the caches.
 	 */
 	public function reset() {
-		$this->singletons = [
-			'loggers'    => [],
-			'handlers'   => [],
-			'formatters' => [],
-			'processors' => [],
-		];
+		$this->singletons = array(
+			'loggers'    => array(),
+			'handlers'   => array(),
+			'formatters' => array(),
+			'processors' => array(),
+		);
 	}
+
 
 	/**
 	 * Get a logger instance.
@@ -174,7 +178,7 @@ class MonologSpi implements Spi {
 	 * name will return the cached instance.
 	 *
 	 * @param string $channel Logging channel
-	 * @return \Psr\Log\LoggerInterface Logger instance
+	 * @return \\Psr\\Log\\LoggerInterface Logger instance
 	 */
 	public function getLogger( $channel ) {
 		if ( !isset( $this->singletons['loggers'][$channel] ) ) {
@@ -191,20 +195,15 @@ class MonologSpi implements Spi {
 		return $this->singletons['loggers'][$channel];
 	}
 
+
 	/**
 	 * Create a logger.
 	 * @param string $channel Logger channel
 	 * @param array $spec Configuration
-	 * @return \Monolog\Logger
+	 * @return \\Monolog\\Logger
 	 */
 	protected function createLogger( $channel, $spec ) {
 		$obj = new Logger( $channel );
-
-		if ( isset( $spec['calls'] ) ) {
-			foreach ( $spec['calls'] as $method => $margs ) {
-				call_user_func_array( [ $obj, $method ], $margs );
-			}
-		}
 
 		if ( isset( $spec['processors'] ) ) {
 			foreach ( $spec['processors'] as $processor ) {
@@ -220,6 +219,7 @@ class MonologSpi implements Spi {
 		return $obj;
 	}
 
+
 	/**
 	 * Create or return cached processor.
 	 * @param string $name Processor name
@@ -234,10 +234,11 @@ class MonologSpi implements Spi {
 		return $this->singletons['processors'][$name];
 	}
 
+
 	/**
 	 * Create or return cached handler.
 	 * @param string $name Processor name
-	 * @return \Monolog\Handler\HandlerInterface
+	 * @return \\Monolog\\Handler\\HandlerInterface
 	 */
 	public function getHandler( $name ) {
 		if ( !isset( $this->singletons['handlers'][$name] ) ) {
@@ -256,10 +257,11 @@ class MonologSpi implements Spi {
 		return $this->singletons['handlers'][$name];
 	}
 
+
 	/**
 	 * Create or return cached formatter.
 	 * @param string $name Formatter name
-	 * @return \Monolog\Formatter\FormatterInterface
+	 * @return \\Monolog\\Formatter\\FormatterInterface
 	 */
 	public function getFormatter( $name ) {
 		if ( !isset( $this->singletons['formatters'][$name] ) ) {

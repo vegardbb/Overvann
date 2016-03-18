@@ -27,7 +27,7 @@ class IndicatorElement extends ElementMixin {
 	 * @param array $config Configuration options
 	 * @param string $config['indicator'] Symbolic indicator name
 	 */
-	public function __construct( Element $element, array $config = [] ) {
+	public function __construct( Element $element, array $config = array() ) {
 		// Parent constructor
 		// FIXME 'indicatorElement' is a very stupid way to call '$indicator'
 		$target = isset( $config['indicatorElement'] )
@@ -36,7 +36,7 @@ class IndicatorElement extends ElementMixin {
 		parent::__construct( $element, $target, $config );
 
 		// Initialization
-		$this->target->addClasses( [ 'oo-ui-indicatorElement-indicator' ] );
+		$this->target->addClasses( array( 'oo-ui-indicatorElement-indicator' ) );
 		$this->setIndicator( isset( $config['indicator'] ) ? $config['indicator'] : null );
 	}
 
@@ -44,18 +44,18 @@ class IndicatorElement extends ElementMixin {
 	 * Set indicator name.
 	 *
 	 * @param string|null $indicator Symbolic name of indicator to use or null for no indicator
-	 * @return $this
+	 * @chainable
 	 */
 	public function setIndicator( $indicator = null ) {
 		if ( $this->indicator !== null ) {
-			$this->target->removeClasses( [ 'oo-ui-indicator-' . $this->indicator ] );
+			$this->target->removeClasses( array( 'oo-ui-indicator-' . $this->indicator ) );
 		}
 		if ( $indicator !== null ) {
-			$this->target->addClasses( [ 'oo-ui-indicator-' . $indicator ] );
+			$this->target->addClasses( array( 'oo-ui-indicator-' . $indicator ) );
 		}
 
 		$this->indicator = $indicator;
-		$this->element->toggleClasses( [ 'oo-ui-indicatorElement' ], (bool)$this->indicator );
+		$this->element->toggleClasses( array( 'oo-ui-indicatorElement' ), (bool)$this->indicator );
 
 		return $this;
 	}

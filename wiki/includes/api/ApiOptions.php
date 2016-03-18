@@ -35,23 +35,29 @@ class ApiOptions extends ApiBase {
 	 * Changes preferences of the current user.
 	 */
 	public function execute() {
-		if ( $this->getUser()->isAnon() ) {
+		$user = $this->getUser();
+
+		if ( $user->isAnon() ) {
 			$this->dieUsage( 'Anonymous users cannot change preferences', 'notloggedin' );
-		} elseif ( !$this->getUser()->isAllowed( 'editmyoptions' ) ) {
-			$this->dieUsage( "You don't have permission to edit your options", 'permissiondenied' );
+		}
+
+		if ( !$user->isAllowed( 'editmyoptions' ) ) {
+			$this->dieUsage( 'You don\'t have permission to edit your options', 'permissiondenied' );
 		}
 
 		$params = $this->extractRequestParams();
 		$changed = false;
 
 		if ( isset( $params['optionvalue'] ) && !isset( $params['optionname'] ) ) {
-			$this->dieUsageMsg( [ 'missingparam', 'optionname' ] );
+			$this->dieUsageMsg( array( 'missingparam', 'optionname' ) );
 		}
 
 		// Load the user from the master to reduce CAS errors on double post (T95839)
-		$user = $this->getUser()->getInstanceForUpdate();
-		if ( !$user ) {
-			$this->dieUsage( 'Anonymous users cannot change preferences', 'notloggedin' );
+		if ( wfGetLB()->getServerCount() > 1 ) {
+			$user = User::newFromId( $user->getId() );
+			if ( !$user->loadFromId( User::READ_LATEST ) ) {
+				$this->dieUsage( 'Anonymous users cannot change preferences', 'notloggedin' );
+			}
 		}
 
 		if ( $params['reset'] ) {
@@ -59,7 +65,7 @@ class ApiOptions extends ApiBase {
 			$changed = true;
 		}
 
-		$changes = [];
+		$changes = array();
 		if ( count( $params['change'] ) ) {
 			foreach ( $params['change'] as $entry ) {
 				$array = explode( '=', $entry, 2 );
@@ -84,7 +90,7 @@ class ApiOptions extends ApiBase {
 					// Regular option.
 					if ( $htmlForm === null ) {
 						// We need a dummy HTMLForm for the validate callback...
-						$htmlForm = new HTMLForm( [], $this );
+						$htmlForm = new HTMLForm( array(), $this );
 					}
 					$field = HTMLForm::loadInputFromParameters( $key, $prefs[$key] );
 					$field->mParent = $htmlForm;
@@ -99,19 +105,19 @@ class ApiOptions extends ApiBase {
 				case 'userjs':
 					// Allow non-default preferences prefixed with 'userjs-', to be set by user scripts
 					if ( strlen( $key ) > 255 ) {
-						$validation = 'key too long (no more than 255 bytes allowed)';
-					} elseif ( preg_match( '/[^a-zA-Z0-9_-]/', $key ) !== 0 ) {
-						$validation = 'invalid key (only a-z, A-Z, 0-9, _, - allowed)';
+						$validation = "key too long (no more than 255 bytes allowed)";
+					} elseif ( preg_match( "/[^a-zA-Z0-9_-]/", $key ) !== 0 ) {
+						$validation = "invalid key (only a-z, A-Z, 0-9, _, - allowed)";
 					} else {
 						$validation = true;
 					}
 					break;
 				case 'special':
-					$validation = 'cannot be set by this module';
+					$validation = "cannot be set by this module";
 					break;
 				case 'unused':
 				default:
-					$validation = 'not a valid preference';
+					$validation = "not a valid preference";
 					break;
 			}
 			if ( $validation === true ) {
@@ -142,23 +148,23 @@ class ApiOptions extends ApiBase {
 		$optionKinds = User::listOptionKinds();
 		$optionKinds[] = 'all';
 
-		return [
+		return array(
 			'reset' => false,
-			'resetkinds' => [
+			'resetkinds' => array(
 				ApiBase::PARAM_TYPE => $optionKinds,
 				ApiBase::PARAM_DFLT => 'all',
 				ApiBase::PARAM_ISMULTI => true
-			],
-			'change' => [
+			),
+			'change' => array(
 				ApiBase::PARAM_ISMULTI => true,
-			],
-			'optionname' => [
+			),
+			'optionname' => array(
 				ApiBase::PARAM_TYPE => 'string',
-			],
-			'optionvalue' => [
+			),
+			'optionvalue' => array(
 				ApiBase::PARAM_TYPE => 'string',
-			],
-		];
+			),
+		);
 	}
 
 	public function needsToken() {
@@ -170,7 +176,7 @@ class ApiOptions extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=options&reset=&token=123ABC'
 				=> 'apihelp-options-example-reset',
 			'action=options&change=skin=vector|hideminor=1&token=123ABC'
@@ -178,6 +184,6 @@ class ApiOptions extends ApiBase {
 			'action=options&reset=&change=skin=monobook&optionname=nickname&' .
 				'optionvalue=[[User:Beau|Beau]]%20([[User_talk:Beau|talk]])&token=123ABC'
 				=> 'apihelp-options-example-complex',
-		];
+		);
 	}
 }

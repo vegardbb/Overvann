@@ -19,7 +19,7 @@ class StoreBatchTest extends MediaWikiTestCase {
 		$tmpPrefix = $this->getNewTempDirectory();
 		if ( $this->getCliArg( 'use-filebackend' ) ) {
 			$name = $this->getCliArg( 'use-filebackend' );
-			$useConfig = [];
+			$useConfig = array();
 			foreach ( $wgFileBackends as $conf ) {
 				if ( $conf['name'] == $name ) {
 					$useConfig = $conf;
@@ -31,24 +31,24 @@ class StoreBatchTest extends MediaWikiTestCase {
 			$class = $useConfig['class'];
 			$backend = new $class( $useConfig );
 		} else {
-			$backend = new FSFileBackend( [
+			$backend = new FSFileBackend( array(
 				'name' => 'local-testing',
 				'wikiId' => wfWikiID(),
-				'containerPaths' => [
+				'containerPaths' => array(
 					'unittests-public' => "{$tmpPrefix}/public",
 					'unittests-thumb' => "{$tmpPrefix}/thumb",
 					'unittests-temp' => "{$tmpPrefix}/temp",
 					'unittests-deleted' => "{$tmpPrefix}/deleted",
-				]
-			] );
+				)
+			) );
 		}
-		$this->repo = new FileRepo( [
+		$this->repo = new FileRepo( array(
 			'name' => 'unittests',
 			'backend' => $backend
-		] );
+		) );
 
 		$this->date = gmdate( "YmdHis" );
-		$this->createdFiles = [];
+		$this->createdFiles = array();
 	}
 
 	protected function tearDown() {

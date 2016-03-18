@@ -7,5 +7,5 @@
 class HTMLSubmitField extends HTMLButtonField {
 	protected $buttonType = 'submit';
 
-	protected $mFlags = [ 'primary', 'constructive' ];
+	protected $mFlags = array( 'primary', 'constructive' );
 }

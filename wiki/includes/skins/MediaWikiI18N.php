@@ -26,7 +26,7 @@
  * @ingroup Skins
  */
 class MediaWikiI18N {
-	private $context = [];
+	private $context = array();
 
 	function set( $varName, $value ) {
 		$this->context[$varName] = $value;
@@ -39,7 +39,7 @@ class MediaWikiI18N {
 
 		$value = wfMessage( $value )->text();
 		// interpolate variables
-		$m = [];
+		$m = array();
 		while ( preg_match( '/\$([0-9]*?)/sm', $value, $m ) ) {
 			list( $src, $var ) = $m;
 			MediaWiki\suppressWarnings();

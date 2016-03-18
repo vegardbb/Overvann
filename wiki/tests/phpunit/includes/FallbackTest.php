@@ -13,16 +13,16 @@ class FallbackTest extends MediaWikiTestCase {
 
 		$sampleUTF = "Östergötland_coat_of_arms.png";
 
-		// mb_substr
-		$substr_params = [
-			[ 0, 0 ],
-			[ 5, -4 ],
-			[ 33 ],
-			[ 100, -5 ],
-			[ -8, 10 ],
-			[ 1, 1 ],
-			[ 2, -1 ]
-		];
+		//mb_substr
+		$substr_params = array(
+			array( 0, 0 ),
+			array( 5, -4 ),
+			array( 33 ),
+			array( 100, -5 ),
+			array( -8, 10 ),
+			array( 1, 1 ),
+			array( 2, -1 )
+		);
 
 		foreach ( $substr_params as $param_set ) {
 			$old_param_set = $param_set;
@@ -35,22 +35,22 @@ class FallbackTest extends MediaWikiTestCase {
 			);
 		}
 
-		// mb_strlen
+		//mb_strlen
 		$this->assertEquals(
 			mb_strlen( $sampleUTF ),
 			Fallback::mb_strlen( $sampleUTF ),
 			'Fallback mb_strlen'
 		);
 
-		// mb_str(r?)pos
-		$strpos_params = [
-			// array( 'ter' ),
-			// array( 'Ö' ),
-			// array( 'Ö', 3 ),
-			// array( 'oat_', 100 ),
-			// array( 'c', -10 ),
-			// Broken for now
-		];
+		//mb_str(r?)pos
+		$strpos_params = array(
+			//array( 'ter' ),
+			//array( 'Ö' ),
+			//array( 'Ö', 3 ),
+			//array( 'oat_', 100 ),
+			//array( 'c', -10 ),
+			//Broken for now
+		);
 
 		foreach ( $strpos_params as $param_set ) {
 			$old_param_set = $param_set;

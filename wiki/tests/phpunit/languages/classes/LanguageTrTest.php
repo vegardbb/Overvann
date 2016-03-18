@@ -34,28 +34,28 @@ class LanguageTrTest extends LanguageClassesTestCase {
 	}
 
 	public static function provideDottedAndDotlessI() {
-		return [
+		return array(
 			# function, input, input case, expected
 			# Case changed:
-			[ 'ucfirst', 'ı', 'lower', 'I' ],
-			[ 'ucfirst', 'i', 'lower', 'İ' ],
-			[ 'lcfirst', 'I', 'upper', 'ı' ],
-			[ 'lcfirst', 'İ', 'upper', 'i' ],
+			array( 'ucfirst', 'ı', 'lower', 'I' ),
+			array( 'ucfirst', 'i', 'lower', 'İ' ),
+			array( 'lcfirst', 'I', 'upper', 'ı' ),
+			array( 'lcfirst', 'İ', 'upper', 'i' ),
 
 			# Already using the correct case
-			[ 'ucfirst', 'I', 'upper', 'I' ],
-			[ 'ucfirst', 'İ', 'upper', 'İ' ],
-			[ 'lcfirst', 'ı', 'lower', 'ı' ],
-			[ 'lcfirst', 'i', 'lower', 'i' ],
+			array( 'ucfirst', 'I', 'upper', 'I' ),
+			array( 'ucfirst', 'İ', 'upper', 'İ' ),
+			array( 'lcfirst', 'ı', 'lower', 'ı' ),
+			array( 'lcfirst', 'i', 'lower', 'i' ),
 
 			# A real example taken from bug 28040 using
 			# http://tr.wikipedia.org/wiki/%C4%B0Phone
-			[ 'lcfirst', 'iPhone', 'lower', 'iPhone' ],
+			array( 'lcfirst', 'iPhone', 'lower', 'iPhone' ),
 
 			# next case is valid in Turkish but are different words if we
 			# consider IPhone is English!
-			[ 'lcfirst', 'IPhone', 'upper', 'ıPhone' ],
+			array( 'lcfirst', 'IPhone', 'upper', 'ıPhone' ),
 
-		];
+		);
 	}
 }

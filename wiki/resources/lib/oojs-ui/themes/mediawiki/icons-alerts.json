@@ -1,10 +1,9 @@
 {
-	"selectorWithoutVariant": ".oo-ui-icon-{name}",
-	"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-icon-{name}",
+	"prefix": "oo-ui-icon",
 	"intro": "@import '../../../../src/styles/common';",
 	"variants": {
 		"invert": {
-			"color": "#ffffff",
+			"color": "#FFFFFF",
 			"global": true
 		}
 	},

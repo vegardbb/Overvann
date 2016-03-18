@@ -35,12 +35,12 @@ class SpecialPageFactoryTest extends MediaWikiTestCase {
 
 	public function testHookNotCalledTwice() {
 		$count = 0;
-		$this->mergeMwGlobalArrayValue( 'wgHooks', [
-			'SpecialPage_initList' => [
+		$this->mergeMwGlobalArrayValue( 'wgHooks', array(
+			'SpecialPage_initList' => array(
 				function () use ( &$count ) {
 					$count++;
 				}
-		] ] );
+		) ) );
 		SpecialPageFactory::resetList();
 		SpecialPageFactory::getNames();
 		SpecialPageFactory::getNames();
@@ -54,22 +54,22 @@ class SpecialPageFactoryTest extends MediaWikiTestCase {
 	public function specialPageProvider() {
 		$specialPageTestHelper = new SpecialPageTestHelper();
 
-		return [
-			'class name' => [ 'SpecialAllPages', false ],
-			'closure' => [ function () {
+		return array(
+			'class name' => array( 'SpecialAllPages', false ),
+			'closure' => array( function () {
 				return new SpecialAllPages();
-			}, false ],
-			'function' => [ [ $this, 'newSpecialAllPages' ], false ],
-			'callback string' => [ 'SpecialPageTestHelper::newSpecialAllPages', false ],
-			'callback with object' => [
-				[ $specialPageTestHelper, 'newSpecialAllPages' ],
+			}, false ),
+			'function' => array( array( $this, 'newSpecialAllPages' ), false ),
+			'callback string' => array( 'SpecialPageTestHelper::newSpecialAllPages', false ),
+			'callback with object' => array(
+				array( $specialPageTestHelper, 'newSpecialAllPages' ),
 				false
-			],
-			'callback array' => [
-				[ 'SpecialPageTestHelper', 'newSpecialAllPages' ],
+			),
+			'callback array' => array(
+				array( 'SpecialPageTestHelper', 'newSpecialAllPages' ),
 				false
-			]
-		];
+			)
+		);
 	}
 
 	/**
@@ -77,7 +77,7 @@ class SpecialPageFactoryTest extends MediaWikiTestCase {
 	 * @dataProvider specialPageProvider
 	 */
 	public function testGetPage( $spec, $shouldReuseInstance ) {
-		$this->mergeMwGlobalArrayValue( 'wgSpecialPages', [ 'testdummy' => $spec ] );
+		$this->mergeMwGlobalArrayValue( 'wgSpecialPages', array( 'testdummy' => $spec ) );
 		SpecialPageFactory::resetList();
 
 		$page = SpecialPageFactory::getPage( 'testdummy' );
@@ -91,7 +91,7 @@ class SpecialPageFactoryTest extends MediaWikiTestCase {
 	 * @covers SpecialPageFactory::getNames
 	 */
 	public function testGetNames() {
-		$this->mergeMwGlobalArrayValue( 'wgSpecialPages', [ 'testdummy' => 'SpecialAllPages' ] );
+		$this->mergeMwGlobalArrayValue( 'wgSpecialPages', array( 'testdummy' => 'SpecialAllPages' ) );
 		SpecialPageFactory::resetList();
 
 		$names = SpecialPageFactory::getNames();
@@ -150,7 +150,7 @@ class SpecialPageFactoryTest extends MediaWikiTestCase {
 		SpecialPageFactory::resetList();
 
 		// Catch the warnings we expect to be raised
-		$warnings = [];
+		$warnings = array();
 		$this->setMwGlobals( 'wgDevelopmentWarnings', true );
 		set_error_handler( function ( $errno, $errstr ) use ( &$warnings ) {
 			if ( preg_match( '/First alias \'[^\']*\' for .*/', $errstr ) ||
@@ -171,7 +171,7 @@ class SpecialPageFactoryTest extends MediaWikiTestCase {
 		$gotWarnings = count( $warnings );
 		if ( $gotWarnings !== $expectWarnings ) {
 			$this->fail( "Expected $expectWarnings warning(s), but got $gotWarnings:\n" .
-				implode( "\n", $warnings )
+				join( "\n", $warnings )
 			);
 		}
 	}
@@ -190,91 +190,91 @@ class SpecialPageFactoryTest extends MediaWikiTestCase {
 	}
 
 	public function provideTestConflictResolution() {
-		return [
-			[
+		return array(
+			array(
 				'Canonical name wins',
-				[ 'Foo' => [ 'Foo', 'Bar' ], 'Baz' => [ 'Foo', 'BazPage', 'Baz2' ] ],
+				array( 'Foo' => array( 'Foo', 'Bar' ), 'Baz' => array( 'Foo', 'BazPage', 'Baz2' ) ),
 				'Foo',
 				'Foo',
 				'Foo',
 				1,
-			],
+			),
 
-			[
+			array(
 				'Doesn\'t redirect to a different special page\'s canonical name',
-				[ 'Foo' => [ 'Foo', 'Bar' ], 'Baz' => [ 'Foo', 'BazPage', 'Baz2' ] ],
+				array( 'Foo' => array( 'Foo', 'Bar' ), 'Baz' => array( 'Foo', 'BazPage', 'Baz2' ) ),
 				'Baz',
 				'Baz',
 				'BazPage',
 				1,
-			],
+			),
 
-			[
+			array(
 				'Canonical name wins even if not aliased',
-				[ 'Foo' => [ 'FooPage' ], 'Baz' => [ 'Foo', 'BazPage', 'Baz2' ] ],
+				array( 'Foo' => array( 'FooPage' ), 'Baz' => array( 'Foo', 'BazPage', 'Baz2' ) ),
 				'Foo',
 				'Foo',
 				'FooPage',
 				1,
-			],
+			),
 
-			[
+			array(
 				'Doesn\'t redirect to a different special page\'s canonical name even if not aliased',
-				[ 'Foo' => [ 'FooPage' ], 'Baz' => [ 'Foo', 'BazPage', 'Baz2' ] ],
+				array( 'Foo' => array( 'FooPage' ), 'Baz' => array( 'Foo', 'BazPage', 'Baz2' ) ),
 				'Baz',
 				'Baz',
 				'BazPage',
 				1,
-			],
+			),
 
-			[
+			array(
 				'First local name beats non-first',
-				[ 'First' => [ 'Foo' ], 'NonFirst' => [ 'Bar', 'Foo' ] ],
+				array( 'First' => array( 'Foo' ), 'NonFirst' => array( 'Bar', 'Foo' ) ),
 				'Foo',
 				'First',
 				'Foo',
 				0,
-			],
+			),
 
-			[
+			array(
 				'Doesn\'t redirect to a different special page\'s first alias',
-				[
-					'Foo' => [ 'Foo' ],
-					'First' => [ 'Bar' ],
-					'Baz' => [ 'Foo', 'Bar', 'BazPage', 'Baz2' ]
-				],
+				array(
+					'Foo' => array( 'Foo' ),
+					'First' => array( 'Bar' ),
+					'Baz' => array( 'Foo', 'Bar', 'BazPage', 'Baz2' )
+				),
 				'Baz',
 				'Baz',
 				'BazPage',
 				1,
-			],
+			),
 
-			[
+			array(
 				'Doesn\'t redirect wrong even if all aliases conflict',
-				[
-					'Foo' => [ 'Foo' ],
-					'First' => [ 'Bar' ],
-					'Baz' => [ 'Foo', 'Bar' ]
-				],
+				array(
+					'Foo' => array( 'Foo' ),
+					'First' => array( 'Bar' ),
+					'Baz' => array( 'Foo', 'Bar' )
+				),
 				'Baz',
 				'Baz',
 				'Baz',
 				2,
-			],
+			),
 
-		];
+		);
 	}
 
 	public function testGetAliasListRecursion() {
 		$called = false;
-		$this->mergeMwGlobalArrayValue( 'wgHooks', [
-			'SpecialPage_initList' => [
+		$this->mergeMwGlobalArrayValue( 'wgHooks', array(
+			'SpecialPage_initList' => array(
 				function () use ( &$called ) {
 					SpecialPageFactory::getLocalNameFor( 'Specialpages' );
 					$called = true;
 				}
-			],
-		] );
+			),
+		) );
 		SpecialPageFactory::resetList();
 		SpecialPageFactory::getLocalNameFor( 'Specialpages' );
 		$this->assertTrue( $called, 'Recursive call succeeded' );

@@ -89,21 +89,21 @@ class GenerateSitemap extends Maintenance {
 	 *
 	 * @var array
 	 */
-	public $limit = [];
+	public $limit = array();
 
 	/**
 	 * Key => value entries of namespaces and their priorities
 	 *
 	 * @var array
 	 */
-	public $priorities = [];
+	public $priorities = array();
 
 	/**
 	 * A one-dimensional array of namespaces in the wiki
 	 *
 	 * @var array
 	 */
-	public $namespaces = [];
+	public $namespaces = array();
 
 	/**
 	 * When this sitemap batch was generated
@@ -145,7 +145,7 @@ class GenerateSitemap extends Maintenance {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Creates a sitemap for the site' );
+		$this->mDescription = "Creates a sitemap for the site";
 		$this->addOption(
 			'fspath',
 			'The file system path to save to, e.g. /tmp/sitemap; defaults to current directory',
@@ -196,7 +196,7 @@ class GenerateSitemap extends Maintenance {
 		$this->identifier = $this->getOption( 'identifier', wfWikiID() );
 		$this->compress = $this->getOption( 'compress', 'yes' ) !== 'no';
 		$this->skipRedirects = $this->getOption( 'skip-redirects', false ) !== false;
-		$this->dbr = $this->getDB( DB_SLAVE );
+		$this->dbr = wfGetDB( DB_SLAVE );
 		$this->generateNamespaces();
 		$this->timestamp = wfTimestamp( TS_ISO_8601, wfTimestampNow() );
 		$this->findex = fopen( "{$this->fspath}sitemap-index-{$this->identifier}.xml", 'wb' );
@@ -258,13 +258,13 @@ class GenerateSitemap extends Maintenance {
 		}
 
 		$res = $this->dbr->select( 'page',
-			[ 'page_namespace' ],
-			[],
+			array( 'page_namespace' ),
+			array(),
 			__METHOD__,
-			[
+			array(
 				'GROUP BY' => 'page_namespace',
 				'ORDER BY' => 'page_namespace',
-			]
+			)
 		);
 
 		foreach ( $res as $row ) {
@@ -306,13 +306,13 @@ class GenerateSitemap extends Maintenance {
 	 */
 	function getPageRes( $namespace ) {
 		return $this->dbr->select( 'page',
-			[
+			array(
 				'page_namespace',
 				'page_title',
 				'page_touched',
 				'page_is_redirect'
-			],
-			[ 'page_namespace' => $namespace ],
+			),
+			array( 'page_namespace' => $namespace ),
 			__METHOD__
 		);
 	}
@@ -548,7 +548,7 @@ class GenerateSitemap extends Maintenance {
 		// bug 17961: make a title with the longest possible URL in this namespace
 		$title = Title::makeTitle( $namespace, str_repeat( "\xf0\xa8\xae\x81", 63 ) . "\xe5\x96\x83" );
 
-		$this->limit = [
+		$this->limit = array(
 			strlen( $this->openFile() ),
 			strlen( $this->fileEntry(
 				$title->getCanonicalURL(),
@@ -556,7 +556,7 @@ class GenerateSitemap extends Maintenance {
 				$this->priority( $namespace )
 			) ),
 			strlen( $this->closeFile() )
-		];
+		);
 	}
 }
 

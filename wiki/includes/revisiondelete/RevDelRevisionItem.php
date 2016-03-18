@@ -63,12 +63,12 @@ class RevDelRevisionItem extends RevDelItem {
 		$dbw = wfGetDB( DB_MASTER );
 		// Update revision table
 		$dbw->update( 'revision',
-			[ 'rev_deleted' => $bits ],
-			[
+			array( 'rev_deleted' => $bits ),
+			array(
 				'rev_id' => $this->revision->getId(),
 				'rev_page' => $this->revision->getPage(),
 				'rev_deleted' => $this->getBits() // cas
-			],
+			),
 			__METHOD__
 		);
 		if ( !$dbw->affectedRows() ) {
@@ -77,15 +77,15 @@ class RevDelRevisionItem extends RevDelItem {
 		}
 		// Update recentchanges table
 		$dbw->update( 'recentchanges',
-			[
+			array(
 				'rc_deleted' => $bits,
 				'rc_patrolled' => 1
-			],
-			[
+			),
+			array(
 				'rc_this_oldid' => $this->revision->getId(), // condition
 				// non-unique timestamp index
 				'rc_timestamp' => $dbw->timestamp( $this->revision->getTimestamp() ),
-			],
+			),
 			__METHOD__
 		);
 
@@ -117,11 +117,11 @@ class RevDelRevisionItem extends RevDelItem {
 		return Linker::linkKnown(
 			$this->list->title,
 			$date,
-			[],
-			[
+			array(),
+			array(
 				'oldid' => $this->revision->getId(),
 				'unhide' => 1
-			]
+			)
 		);
 	}
 
@@ -137,20 +137,16 @@ class RevDelRevisionItem extends RevDelItem {
 			return Linker::linkKnown(
 					$this->list->title,
 					$this->list->msg( 'diff' )->escaped(),
-					[],
-					[
+					array(),
+					array(
 						'diff' => $this->revision->getId(),
 						'oldid' => 'prev',
 						'unhide' => 1
-					]
+					)
 				);
 		}
 	}
 
-	/**
-	 * @return string A HTML <li> element representing this revision, showing
-	 * change tags and everything
-	 */
 	public function getHTML() {
 		$difflink = $this->list->msg( 'parentheses' )
 			->rawParams( $this->getDiffLink() )->escaped();
@@ -160,48 +156,30 @@ class RevDelRevisionItem extends RevDelItem {
 		if ( $this->isDeleted() ) {
 			$revlink = "<span class=\"history-deleted\">$revlink</span>";
 		}
-		$content = "$difflink $revlink $userlink $comment";
-		$attribs = [];
-		$tags = $this->getTags();
-		if ( $tags ) {
-			list( $tagSummary, $classes ) = ChangeTags::formatSummaryRow(
-				$tags,
-				'revisiondelete',
-				$this->list->getContext()
-			);
-			$content .= " $tagSummary";
-			$attribs['class'] = implode( ' ', $classes );
-		}
-		return Xml::tags( 'li', $attribs, $content );
-	}
 
-	/**
-	 * @return string Comma-separated list of tags
-	 */
-	public function getTags() {
-		return $this->row->ts_tags;
+		return "<li>$difflink $revlink $userlink $comment</li>";
 	}
 
 	public function getApiData( ApiResult $result ) {
 		$rev = $this->revision;
 		$user = $this->list->getUser();
-		$ret = [
+		$ret = array(
 			'id' => $rev->getId(),
 			'timestamp' => wfTimestamp( TS_ISO_8601, $rev->getTimestamp() ),
-		];
-		$ret += $rev->isDeleted( Revision::DELETED_USER ) ? [ 'userhidden' => '' ] : [];
-		$ret += $rev->isDeleted( Revision::DELETED_COMMENT ) ? [ 'commenthidden' => '' ] : [];
-		$ret += $rev->isDeleted( Revision::DELETED_TEXT ) ? [ 'texthidden' => '' ] : [];
+		);
+		$ret += $rev->isDeleted( Revision::DELETED_USER ) ? array( 'userhidden' => '' ) : array();
+		$ret += $rev->isDeleted( Revision::DELETED_COMMENT ) ? array( 'commenthidden' => '' ) : array();
+		$ret += $rev->isDeleted( Revision::DELETED_TEXT ) ? array( 'texthidden' => '' ) : array();
 		if ( $rev->userCan( Revision::DELETED_USER, $user ) ) {
-			$ret += [
+			$ret += array(
 				'userid' => $rev->getUser( Revision::FOR_THIS_USER ),
 				'user' => $rev->getUserText( Revision::FOR_THIS_USER ),
-			];
+			);
 		}
 		if ( $rev->userCan( Revision::DELETED_COMMENT, $user ) ) {
-			$ret += [
+			$ret += array(
 				'comment' => $rev->getComment( Revision::FOR_THIS_USER ),
-			];
+			);
 		}
 
 		return $ret;

@@ -8,7 +8,7 @@
  *
  */
 
-$dateFormats = [
+$dateFormats = array(
 	'mdy time' => 'H:i',
 	'mdy date' => 'xg j, Y',
 	'mdy both' => 'H:i, xg j, Y',
@@ -20,5 +20,5 @@ $dateFormats = [
 	'ymd time' => 'H:i',
 	'ymd date' => 'Y xg j',
 	'ymd both' => 'H:i, Y xg j',
-];
+);
 

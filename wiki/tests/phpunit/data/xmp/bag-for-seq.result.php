@@ -1,10 +1,10 @@
 <?php
 
-$result = [
-	'xmp-general' => [
-		'Artist' => [
+$result = array(
+	'xmp-general' => array(
+		'Artist' => array(
 			'_type' => 'ul',
 			0 => 'The author',
-		]
-	]
-];
+		)
+	)
+);

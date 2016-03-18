@@ -9,11 +9,11 @@ namespace OOUI;
  */
 class GroupElement extends ElementMixin {
 	/**
-	 * List of items in the group as Elements.
+	 * List of items in the group.
 	 *
-	 * @var array
+	 * @var Element[]
 	 */
-	protected $items = [];
+	protected $items = array();
 
 	public static $targetPropertyName = 'group';
 
@@ -21,7 +21,7 @@ class GroupElement extends ElementMixin {
 	 * @param Element $element Element being mixed into
 	 * @param array $config Configuration options
 	 */
-	public function __construct( Element $element, array $config = [] ) {
+	public function __construct( Element $element, array $config = array() ) {
 		// Parent constructor
 		$target = isset( $config['group'] ) ? $config['group'] : new Tag( 'div' );
 		parent::__construct( $element, $target, $config );
@@ -52,14 +52,14 @@ class GroupElement extends ElementMixin {
 	 *
 	 * @param Element[] $items Items
 	 * @param number $index Index to insert items at
-	 * @return $this
+	 * @chainable
 	 */
 	public function addItems( array $items, $index = null ) {
 		foreach ( $items as $item ) {
 			// Check if item exists then remove it first, effectively "moving" it
 			$currentIndex = array_search( $item, $this->items );
 			if ( $currentIndex !== false ) {
-				$this->removeItems( [ $item ] );
+				$this->removeItems( array( $item ) );
 				// Adjust index to compensate for removal
 				if ( $currentIndex < $index ) {
 					$index--;
@@ -77,7 +77,7 @@ class GroupElement extends ElementMixin {
 
 		// Update actual target element contents to reflect our list
 		$this->target->clearContent();
-		call_user_func_array( [ $this->target, 'appendContent' ], $this->items );
+		call_user_func_array( array( $this->target, 'appendContent' ), $this->items );
 
 		return $this;
 	}
@@ -86,7 +86,7 @@ class GroupElement extends ElementMixin {
 	 * Remove items.
 	 *
 	 * @param Element[] $items Items to remove
-	 * @return $this
+	 * @chainable
 	 */
 	public function removeItems( $items ) {
 		foreach ( $items as $item ) {
@@ -99,7 +99,7 @@ class GroupElement extends ElementMixin {
 
 		// Update actual target element contents to reflect our list
 		$this->target->clearContent();
-		call_user_func_array( [ $this->target, 'appendContent' ], $this->items );
+		call_user_func_array( array( $this->target, 'appendContent' ), $this->items );
 
 		return $this;
 	}
@@ -109,14 +109,14 @@ class GroupElement extends ElementMixin {
 	 *
 	 * Items will be detached, not removed, so they can be used later.
 	 *
-	 * @return $this
+	 * @chainable
 	 */
 	public function clearItems() {
 		foreach ( $this->items as $item ) {
 			$item->setElementGroup( null );
 		}
 
-		$this->items = [];
+		$this->items = array();
 		$this->target->clearContent();
 
 		return $this;

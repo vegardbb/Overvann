@@ -18,7 +18,7 @@
 
 $rtl = true;
 
-$namespaceNames = [
+$namespaceNames = array(
 	NS_MEDIA            => 'ۋاسىتە',
 	NS_SPECIAL          => 'ئالاھىدە',
 	NS_TALK             => 'مۇنازىرە',
@@ -34,15 +34,15 @@ $namespaceNames = [
 	NS_HELP_TALK        => 'ياردەم_مۇنازىرىسى',
 	NS_CATEGORY         => 'تۈر',
 	NS_CATEGORY_TALK    => 'تۈر_مۇنازىرىسى',
-];
+);
 
-$namespaceAliases = [
+$namespaceAliases = array(
 	'مۇنازىرىسى$1' => NS_PROJECT_TALK,
-];
+);
 
-$specialPageAliases = [
-	'Allmessages'               => [ 'بارلىق_خەۋەرلەر' ],
-	'Allpages'                  => [ 'بارلىق_بەتلەر' ],
-	'Ancientpages'              => [ 'كونا_بەتلەر' ],
-];
+$specialPageAliases = array(
+	'Allmessages'               => array( 'بارلىق_خەۋەرلەر' ),
+	'Allpages'                  => array( 'بارلىق_بەتلەر' ),
+	'Ancientpages'              => array( 'كونا_بەتلەر' ),
+);
 

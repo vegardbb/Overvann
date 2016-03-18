@@ -51,7 +51,7 @@ class ApiQueryIWBacklinks extends ApiQueryGeneratorBase {
 		$params = $this->extractRequestParams();
 
 		if ( isset( $params['title'] ) && !isset( $params['prefix'] ) ) {
-			$this->dieUsageMsg( [ 'missingparam', 'prefix' ] );
+			$this->dieUsageMsg( array( 'missingparam', 'prefix' ) );
 		}
 
 		if ( !is_null( $params['continue'] ) ) {
@@ -76,11 +76,11 @@ class ApiQueryIWBacklinks extends ApiQueryGeneratorBase {
 		$iwprefix = isset( $prop['iwprefix'] );
 		$iwtitle = isset( $prop['iwtitle'] );
 
-		$this->addTables( [ 'iwlinks', 'page' ] );
+		$this->addTables( array( 'iwlinks', 'page' ) );
 		$this->addWhere( 'iwl_from = page_id' );
 
-		$this->addFields( [ 'page_id', 'page_title', 'page_namespace', 'page_is_redirect',
-			'iwl_from', 'iwl_prefix', 'iwl_title' ] );
+		$this->addFields( array( 'page_id', 'page_title', 'page_namespace', 'page_is_redirect',
+			'iwl_from', 'iwl_prefix', 'iwl_title' ) );
 
 		$sort = ( $params['dir'] == 'descending' ? ' DESC' : '' );
 		if ( isset( $params['prefix'] ) ) {
@@ -89,24 +89,24 @@ class ApiQueryIWBacklinks extends ApiQueryGeneratorBase {
 				$this->addWhereFld( 'iwl_title', $params['title'] );
 				$this->addOption( 'ORDER BY', 'iwl_from' . $sort );
 			} else {
-				$this->addOption( 'ORDER BY', [
+				$this->addOption( 'ORDER BY', array(
 					'iwl_title' . $sort,
 					'iwl_from' . $sort
-				] );
+				) );
 			}
 		} else {
-			$this->addOption( 'ORDER BY', [
+			$this->addOption( 'ORDER BY', array(
 				'iwl_prefix' . $sort,
 				'iwl_title' . $sort,
 				'iwl_from' . $sort
-			] );
+			) );
 		}
 
 		$this->addOption( 'LIMIT', $params['limit'] + 1 );
 
 		$res = $this->select( __METHOD__ );
 
-		$pages = [];
+		$pages = array();
 
 		$count = 0;
 		$result = $this->getResult();
@@ -126,7 +126,7 @@ class ApiQueryIWBacklinks extends ApiQueryGeneratorBase {
 			if ( !is_null( $resultPageSet ) ) {
 				$pages[] = Title::newFromRow( $row );
 			} else {
-				$entry = [ 'pageid' => $row->page_id ];
+				$entry = array( 'pageid' => $row->page_id );
 
 				$title = Title::makeTitle( $row->page_namespace, $row->page_title );
 				ApiQueryBase::addTitleInfo( $entry, $title );
@@ -143,7 +143,7 @@ class ApiQueryIWBacklinks extends ApiQueryGeneratorBase {
 					$entry['iwtitle'] = $row->iwl_title;
 				}
 
-				$fit = $result->addValue( [ 'query', $this->getModuleName() ], null, $entry );
+				$fit = $result->addValue( array( 'query', $this->getModuleName() ), null, $entry );
 				if ( !$fit ) {
 					$this->setContinueEnumParameter(
 						'continue',
@@ -155,7 +155,7 @@ class ApiQueryIWBacklinks extends ApiQueryGeneratorBase {
 		}
 
 		if ( is_null( $resultPageSet ) ) {
-			$result->addIndexedTagName( [ 'query', $this->getModuleName() ], 'iw' );
+			$result->addIndexedTagName( array( 'query', $this->getModuleName() ), 'iw' );
 		} else {
 			$resultPageSet->populateFromTitles( $pages );
 		}
@@ -166,45 +166,45 @@ class ApiQueryIWBacklinks extends ApiQueryGeneratorBase {
 	}
 
 	public function getAllowedParams() {
-		return [
+		return array(
 			'prefix' => null,
 			'title' => null,
-			'continue' => [
+			'continue' => array(
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			],
-			'limit' => [
+			),
+			'limit' => array(
 				ApiBase::PARAM_DFLT => 10,
 				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => ApiBase::LIMIT_BIG1,
 				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_BIG2
-			],
-			'prop' => [
+			),
+			'prop' => array(
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_DFLT => '',
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'iwprefix',
 					'iwtitle',
-				],
-				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
-			],
-			'dir' => [
+				),
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => array(),
+			),
+			'dir' => array(
 				ApiBase::PARAM_DFLT => 'ascending',
-				ApiBase::PARAM_TYPE => [
+				ApiBase::PARAM_TYPE => array(
 					'ascending',
 					'descending'
-				]
-			],
-		];
+				)
+			),
+		);
 	}
 
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=query&list=iwbacklinks&iwbltitle=Test&iwblprefix=wikibooks'
 				=> 'apihelp-query+iwbacklinks-example-simple',
 			'action=query&generator=iwbacklinks&giwbltitle=Test&giwblprefix=wikibooks&prop=info'
 				=> 'apihelp-query+iwbacklinks-example-generator',
-		];
+		);
 	}
 
 	public function getHelpUrls() {

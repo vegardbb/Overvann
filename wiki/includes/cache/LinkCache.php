@@ -27,12 +27,16 @@
  * @ingroup Cache
  */
 class LinkCache {
+	// Increment $mClassVer whenever old serialized versions of this class
+	// becomes incompatible with the new version.
+	private $mClassVer = 5;
+
 	/**
-	 * @var HashBagOStuff
+	 * @var MapCacheLRU
 	 */
 	private $mGoodLinks;
 	/**
-	 * @var HashBagOStuff
+	 * @var MapCacheLRU
 	 */
 	private $mBadLinks;
 	private $mForUpdate = false;
@@ -49,8 +53,8 @@ class LinkCache {
 	protected static $instance;
 
 	public function __construct() {
-		$this->mGoodLinks = new HashBagOStuff( [ 'maxKeys' => self::MAX_SIZE ] );
-		$this->mBadLinks = new HashBagOStuff( [ 'maxKeys' => self::MAX_SIZE ] );
+		$this->mGoodLinks = new MapCacheLRU( self::MAX_SIZE );
+		$this->mBadLinks = new MapCacheLRU( self::MAX_SIZE );
 	}
 
 	/**
@@ -58,44 +62,37 @@ class LinkCache {
 	 *
 	 * @return LinkCache
 	 */
-	public static function &singleton() {
-		if ( !self::$instance ) {
-			self::$instance = new LinkCache;
+	static function &singleton() {
+		if ( self::$instance ) {
+			return self::$instance;
 		}
+		self::$instance = new LinkCache;
 
 		return self::$instance;
 	}
 
 	/**
-	 * Destroy the singleton instance
-	 *
-	 * A new one will be created next time singleton() is called.
-	 *
+	 * Destroy the singleton instance, a new one will be created next time
+	 * singleton() is called.
 	 * @since 1.22
 	 */
-	public static function destroySingleton() {
+	static function destroySingleton() {
 		self::$instance = null;
 	}
 
 	/**
 	 * Set the singleton instance to a given object.
-	 *
 	 * Since we do not have an interface for LinkCache, you have to be sure the
 	 * given object implements all the LinkCache public methods.
-	 *
 	 * @param LinkCache $instance
 	 * @since 1.22
 	 */
-	public static function setSingleton( LinkCache $instance ) {
+	static function setSingleton( LinkCache $instance ) {
 		self::$instance = $instance;
 	}
 
 	/**
-	 * General accessor to get/set whether the master DB should be used
-	 *
-	 * This used to also set the FOR UPDATE option (locking the rows read
-	 * in order to avoid link table inconsistency), which was later removed
-	 * for performance on wikis with a high edit rate.
+	 * General accessor to get/set whether SELECT FOR UPDATE should be used
 	 *
 	 * @param bool $update
 	 * @return bool
@@ -106,30 +103,32 @@ class LinkCache {
 
 	/**
 	 * @param string $title
-	 * @return int Page ID or zero
+	 * @return int
 	 */
 	public function getGoodLinkID( $title ) {
-		$info = $this->mGoodLinks->get( $title );
-		if ( !$info ) {
+		if ( $this->mGoodLinks->has( $title ) ) {
+			$info = $this->mGoodLinks->get( $title );
+			return $info['id'];
+		} else {
 			return 0;
 		}
-		return $info['id'];
 	}
 
 	/**
 	 * Get a field of a title object from cache.
-	 * If this link is not a cached good title, it will return NULL.
+	 * If this link is not good, it will return NULL.
 	 * @param Title $title
 	 * @param string $field ('length','redirect','revision','model')
-	 * @return string|int|null
+	 * @return string|null
 	 */
 	public function getGoodLinkFieldObj( $title, $field ) {
 		$dbkey = $title->getPrefixedDBkey();
-		$info = $this->mGoodLinks->get( $dbkey );
-		if ( !$info ) {
+		if ( $this->mGoodLinks->has( $dbkey ) ) {
+			$info = $this->mGoodLinks->get( $dbkey );
+			return $info[$field];
+		} else {
 			return null;
 		}
-		return $info[$field];
 	}
 
 	/**
@@ -137,8 +136,8 @@ class LinkCache {
 	 * @return bool
 	 */
 	public function isBadLink( $title ) {
-		// Use get() to ensure it records as used for LRU.
-		return $this->mBadLinks->get( $title ) !== false;
+		// We need to use get here since has will not call ping.
+		return $this->mBadLinks->get( $title ) !== null;
 	}
 
 	/**
@@ -150,20 +149,18 @@ class LinkCache {
 	 * @param int $redir Whether the page is a redirect
 	 * @param int $revision Latest revision's ID
 	 * @param string|null $model Latest revision's content model ID
-	 * @param string|null $lang Language code of the page, if not the content language
 	 */
-	public function addGoodLinkObj( $id, Title $title, $len = -1, $redir = null,
-		$revision = 0, $model = null, $lang = null
+	public function addGoodLinkObj( $id, $title, $len = -1, $redir = null,
+		$revision = 0, $model = null
 	) {
 		$dbkey = $title->getPrefixedDBkey();
-		$this->mGoodLinks->set( $dbkey, [
+		$this->mGoodLinks->set( $dbkey, array(
 			'id' => (int)$id,
 			'length' => (int)$len,
 			'redirect' => (int)$redir,
 			'revision' => (int)$revision,
 			'model' => $model ? (string)$model : null,
-			'lang' => $lang ? (string)$lang : null,
-		] );
+		) );
 	}
 
 	/**
@@ -173,22 +170,21 @@ class LinkCache {
 	 * @param stdClass $row Object which has the fields page_id, page_is_redirect,
 	 *  page_latest and page_content_model
 	 */
-	public function addGoodLinkObjFromRow( Title $title, $row ) {
+	public function addGoodLinkObjFromRow( $title, $row ) {
 		$dbkey = $title->getPrefixedDBkey();
-		$this->mGoodLinks->set( $dbkey, [
+		$this->mGoodLinks->set( $dbkey, array(
 			'id' => intval( $row->page_id ),
 			'length' => intval( $row->page_len ),
 			'redirect' => intval( $row->page_is_redirect ),
 			'revision' => intval( $row->page_latest ),
 			'model' => !empty( $row->page_content_model ) ? strval( $row->page_content_model ) : null,
-			'lang' => !empty( $row->page_lang ) ? strval( $row->page_lang ) : null,
-		] );
+		) );
 	}
 
 	/**
 	 * @param Title $title
 	 */
-	public function addBadLinkObj( Title $title ) {
+	public function addBadLinkObj( $title ) {
 		$dbkey = $title->getPrefixedDBkey();
 		if ( !$this->isBadLink( $dbkey ) ) {
 			$this->mBadLinks->set( $dbkey, 1 );
@@ -196,7 +192,7 @@ class LinkCache {
 	}
 
 	public function clearBadLink( $title ) {
-		$this->mBadLinks->clear( [ $title ] );
+		$this->mBadLinks->clear( array( $title ) );
 	}
 
 	/**
@@ -204,32 +200,58 @@ class LinkCache {
 	 */
 	public function clearLink( $title ) {
 		$dbkey = $title->getPrefixedDBkey();
-		$this->mBadLinks->delete( $dbkey );
-		$this->mGoodLinks->delete( $dbkey );
+		$this->mBadLinks->clear( array( $dbkey ) );
+		$this->mGoodLinks->clear( array( $dbkey ) );
+	}
+
+
+	/**
+	 * @deprecated since 1.26
+	 * @return array
+	 */
+	public function getGoodLinks() {
+		wfDeprecated( __METHOD__, '1.26' );
+		$links = array();
+		foreach ( $this->mGoodLinks->getAllKeys() as $key ) {
+			$info = $this->mGoodLinks->get( $key );
+			$links[$key] = $info['id'];
+		}
+
+		return $links;
+	}
+
+	/**
+	 * @deprecated since 1.26
+	 * @return array
+	 */
+	public function getBadLinks() {
+		wfDeprecated( __METHOD__, '1.26' );
+		return $this->mBadLinks->getAllKeys();
 	}
 
 	/**
 	 * Add a title to the link cache, return the page_id or zero if non-existent
 	 *
 	 * @param string $title Title to add
-	 * @return int Page ID or zero
+	 * @return int
 	 */
 	public function addLink( $title ) {
 		$nt = Title::newFromDBkey( $title );
-		if ( !$nt ) {
+		if ( $nt ) {
+			return $this->addLinkObj( $nt );
+		} else {
 			return 0;
 		}
-		return $this->addLinkObj( $nt );
 	}
 
 	/**
 	 * Add a title to the link cache, return the page_id or zero if non-existent
 	 *
 	 * @param Title $nt Title object to add
-	 * @return int Page ID or zero
+	 * @return int
 	 */
-	public function addLinkObj( Title $nt ) {
-		global $wgContentHandlerUseDB, $wgPageLanguageUseDB;
+	public function addLinkObj( $nt ) {
+		global $wgContentHandlerUseDB;
 
 		$key = $nt->getPrefixedDBkey();
 		if ( $this->isBadLink( $key ) || $nt->isExternal() ) {
@@ -244,25 +266,25 @@ class LinkCache {
 			return 0;
 		}
 
-		// Some fields heavily used for linking...
-		$db = $this->mForUpdate ? wfGetDB( DB_MASTER ) : wfGetDB( DB_SLAVE );
+		# Some fields heavily used for linking...
+		if ( $this->mForUpdate ) {
+			$db = wfGetDB( DB_MASTER );
+		} else {
+			$db = wfGetDB( DB_SLAVE );
+		}
 
-		$fields = [ 'page_id', 'page_len', 'page_is_redirect', 'page_latest' ];
+		$f = array( 'page_id', 'page_len', 'page_is_redirect', 'page_latest' );
 		if ( $wgContentHandlerUseDB ) {
-			$fields[] = 'page_content_model';
-		}
-		if ( $wgPageLanguageUseDB ) {
-			$fields[] = 'page_lang';
+			$f[] = 'page_content_model';
 		}
 
-		$row = $db->selectRow( 'page', $fields,
-			[ 'page_namespace' => $nt->getNamespace(), 'page_title' => $nt->getDBkey() ],
-			__METHOD__
-		);
-
-		if ( $row !== false ) {
-			$this->addGoodLinkObjFromRow( $nt, $row );
-			$id = intval( $row->page_id );
+		$s = $db->selectRow( 'page', $f,
+			array( 'page_namespace' => $nt->getNamespace(), 'page_title' => $nt->getDBkey() ),
+			__METHOD__ );
+		# Set fields...
+		if ( $s !== false ) {
+			$this->addGoodLinkObjFromRow( $nt, $s );
+			$id = intval( $s->page_id );
 		} else {
 			$this->addBadLinkObj( $nt );
 			$id = 0;

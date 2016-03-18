@@ -40,8 +40,13 @@ class WantedPagesPage extends WantedQueryPage {
 		$inc = $this->including();
 
 		if ( $inc ) {
-			$this->limit = (int)$par;
+			$parts = explode( '/', $par, 2 );
+			$this->limit = (int)$parts[0];
+			// @todo FIXME: nlinks is ignored
+			//$nlinks = isset( $parts[1] ) && $parts[1] === 'nlinks';
 			$this->offset = 0;
+		} else {
+			//$nlinks = true;
 		}
 		$this->setListoutput( $inc );
 		$this->shownavigation = !$inc;
@@ -50,41 +55,41 @@ class WantedPagesPage extends WantedQueryPage {
 
 	function getQueryInfo() {
 		$count = $this->getConfig()->get( 'WantedPagesThreshold' ) - 1;
-		$query = [
-			'tables' => [
+		$query = array(
+			'tables' => array(
 				'pagelinks',
 				'pg1' => 'page',
 				'pg2' => 'page'
-			],
-			'fields' => [
+			),
+			'fields' => array(
 				'namespace' => 'pl_namespace',
 				'title' => 'pl_title',
 				'value' => 'COUNT(*)'
-			],
-			'conds' => [
+			),
+			'conds' => array(
 				'pg1.page_namespace IS NULL',
 				"pl_namespace NOT IN ( '" . NS_USER . "', '" . NS_USER_TALK . "' )",
 				"pg2.page_namespace != '" . NS_MEDIAWIKI . "'"
-			],
-			'options' => [
-				'HAVING' => [
+			),
+			'options' => array(
+				'HAVING' => array(
 					"COUNT(*) > $count",
 					"COUNT(*) > SUM(pg2.page_is_redirect)"
-				],
-				'GROUP BY' => [ 'pl_namespace', 'pl_title' ]
-			],
-			'join_conds' => [
-				'pg1' => [
-					'LEFT JOIN', [
+				),
+				'GROUP BY' => array( 'pl_namespace', 'pl_title' )
+			),
+			'join_conds' => array(
+				'pg1' => array(
+					'LEFT JOIN', array(
 						'pg1.page_namespace = pl_namespace',
 						'pg1.page_title = pl_title'
-					]
-				],
-				'pg2' => [ 'LEFT JOIN', 'pg2.page_id = pl_from' ]
-			]
-		];
+					)
+				),
+				'pg2' => array( 'LEFT JOIN', 'pg2.page_id = pl_from' )
+			)
+		);
 		// Replacement for the WantedPages::getSQL hook
-		Hooks::run( 'WantedPages::getQueryInfo', [ &$this, &$query ] );
+		Hooks::run( 'WantedPages::getQueryInfo', array( &$this, &$query ) );
 
 		return $query;
 	}

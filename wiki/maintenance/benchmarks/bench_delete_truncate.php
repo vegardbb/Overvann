@@ -31,11 +31,11 @@ require_once __DIR__ . '/Benchmarker.php';
 class BenchmarkDeleteTruncate extends Benchmarker {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Benchmarks SQL DELETE vs SQL TRUNCATE.' );
+		$this->mDescription = "Benchmarks SQL DELETE vs SQL TRUNCATE.";
 	}
 
 	public function execute() {
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 
 		$test = $dbw->tableName( 'test' );
 		$dbw->query( "CREATE TABLE IF NOT EXISTS /*_*/$test (
@@ -74,9 +74,9 @@ class BenchmarkDeleteTruncate extends Benchmarker {
 	 */
 	private function insertData( $dbw ) {
 		$range = range( 0, 1024 );
-		$data = [];
+		$data = array();
 		foreach ( $range as $r ) {
-			$data[] = [ 'text' => $r ];
+			$data[] = array( 'text' => $r );
 		}
 		$dbw->insert( 'test', $data, __METHOD__ );
 	}

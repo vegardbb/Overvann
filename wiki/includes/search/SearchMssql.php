@@ -137,11 +137,11 @@ class SearchMssql extends SearchDatabase {
 	function parseQuery( $filteredText, $fulltext ) {
 		global $wgContLang;
 		$lc = $this->legalSearchChars();
-		$this->searchTerms = [];
+		$this->searchTerms = array();
 
 		# @todo FIXME: This doesn't handle parenthetical expressions.
-		$m = [];
-		$q = [];
+		$m = array();
+		$q = array();
 
 		if ( preg_match_all( '/([-+<>~]?)(([' . $lc . ']+)(\*?)|"[^"]*")/',
 			$filteredText, $m, PREG_SET_ORDER ) ) {
@@ -160,7 +160,7 @@ class SearchMssql extends SearchDatabase {
 			}
 		}
 
-		$searchon = $this->db->addQuotes( implode( ',', $q ) );
+		$searchon = $this->db->addQuotes( join( ',', $q ) );
 		$field = $this->getIndexField( $fulltext );
 		return "$field, $searchon";
 	}

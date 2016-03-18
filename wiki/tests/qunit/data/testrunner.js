@@ -8,9 +8,9 @@
 	/**
 	 * Add bogus to url to prevent IE crazy caching
 	 *
-	 * @param {string} value a relative path (eg. 'data/foo.js'
+	 * @param {String} value a relative path (eg. 'data/foo.js'
 	 * or 'data/test.php?foo=bar').
-	 * @return {string} Such as 'data/foo.js?131031765087663960'
+	 * @return {String} Such as 'data/foo.js?131031765087663960'
 	 */
 	QUnit.fixurl = function ( value ) {
 		return value + ( /\?/.test( value ) ? '&' : '?' )
@@ -22,9 +22,12 @@
 	 * Configuration
 	 */
 
-	// For each test() that is asynchronous, allow this time to pass before
-	// killing the test and assuming timeout failure.
-	QUnit.config.testTimeout = 60 * 1000;
+	// When a test() indicates asynchronicity with stop(),
+	// allow 30 seconds to pass before killing the test(),
+	// and assuming failure.
+	QUnit.config.testTimeout = 30 * 1000;
+
+	QUnit.config.requireExpects = true;
 
 	// Add a checkbox to QUnit header to toggle MediaWiki ResourceLoader debug mode.
 	QUnit.config.urlConfig.push( {

@@ -27,7 +27,7 @@ require_once __DIR__ . '/Maintenance.php';
 class PageExists extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Report whether a specific page exists' );
+		$this->mDescription = "Report whether a specific page exists";
 		$this->addArg( 'title', 'Page title to check whether it exists' );
 	}
 
@@ -51,3 +51,4 @@ class PageExists extends Maintenance {
 
 $maintClass = "PageExists";
 require_once RUN_MAINTENANCE_IF_MAIN;
+

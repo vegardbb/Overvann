@@ -33,12 +33,12 @@ class SectionProfiler {
 	/** @var array Map of (mem,real,cpu) */
 	protected $end;
 	/** @var array List of resolved profile calls with start/end data */
-	protected $stack = [];
+	protected $stack = array();
 	/** @var array Queue of open profile calls with start data */
-	protected $workStack = [];
+	protected $workStack = array();
 
 	/** @var array Map of (function name => aggregate data array) */
-	protected $collated = [];
+	protected $collated = array();
 	/** @var bool */
 	protected $collateDone = false;
 
@@ -52,7 +52,7 @@ class SectionProfiler {
 	/**
 	 * @param array $params
 	 */
-	public function __construct( array $params = [] ) {
+	public function __construct( array $params = array() ) {
 		$this->errorEntry = $this->getErrorEntry();
 		$this->collateOnly = empty( $params['trace'] );
 		$this->profileOutCallback = function ( $profiler, $section ) {
@@ -105,9 +105,9 @@ class SectionProfiler {
 		$totalReal = max( $this->end['real'] - $this->start['real'], 0 );
 		$totalMem = max( $this->end['memory'] - $this->start['memory'], 0 );
 
-		$profile = [];
+		$profile = array();
 		foreach ( $this->collated as $fname => $data ) {
-			$profile[] = [
+			$profile[] = array(
 				'name' => $fname,
 				'calls' => $data['count'],
 				'real' => $data['real'] * 1000,
@@ -118,10 +118,10 @@ class SectionProfiler {
 				'%memory' => $totalMem ? 100 * $data['memory'] / $totalMem : 0,
 				'min_real' => 1000 * $data['min_real'],
 				'max_real' => 1000 * $data['max_real']
-			];
+			);
 		}
 
-		$profile[] = [
+		$profile[] = array(
 			'name' => '-total',
 			'calls' => 1,
 			'real' => 1000 * $totalReal,
@@ -132,7 +132,7 @@ class SectionProfiler {
 			'%memory' => 100,
 			'min_real' => 1000 * $totalReal,
 			'max_real' => 1000 * $totalReal
-		];
+		);
 
 		return $profile;
 	}
@@ -143,9 +143,9 @@ class SectionProfiler {
 	public function reset() {
 		$this->start = null;
 		$this->end = null;
-		$this->stack = [];
-		$this->workStack = [];
-		$this->collated = [];
+		$this->stack = array();
+		$this->workStack = array();
+		$this->collated = array();
 		$this->collateDone = false;
 	}
 
@@ -153,14 +153,14 @@ class SectionProfiler {
 	 * @return array Initial collation entry
 	 */
 	protected function getZeroEntry() {
-		return [
+		return array(
 			'cpu'      => 0.0,
 			'real'     => 0.0,
 			'memory'   => 0,
 			'count'    => 0,
 			'min_real' => 0.0,
 			'max_real' => 0.0
-		];
+		);
 	}
 
 	/**
@@ -210,16 +210,16 @@ class SectionProfiler {
 		$memory = memory_get_usage();
 
 		if ( $this->start === null ) {
-			$this->start = [ 'cpu' => $cpu, 'real' => $real, 'memory' => $memory ];
+			$this->start = array( 'cpu' => $cpu, 'real' => $real, 'memory' => $memory );
 		}
 
-		$this->workStack[] = [
+		$this->workStack[] = array(
 			$functionname,
 			count( $this->workStack ),
 			$real,
 			$cpu,
 			$memory
-		];
+		);
 	}
 
 	/**
@@ -241,7 +241,7 @@ class SectionProfiler {
 			if ( $this->collateOnly ) {
 				$this->collated[$message] = $this->errorEntry;
 			} else {
-				$this->stack[] = [ $message, 0, 0.0, 0.0, 0, 0.0, 0.0, 0 ];
+				$this->stack[] = array( $message, 0, 0.0, 0.0, 0, 0.0, 0.0, 0 );
 			}
 			$functionname = $ofname;
 		} elseif ( $ofname !== $functionname ) {
@@ -250,7 +250,7 @@ class SectionProfiler {
 			if ( $this->collateOnly ) {
 				$this->collated[$message] = $this->errorEntry;
 			} else {
-				$this->stack[] = [ $message, 0, 0.0, 0.0, 0, 0.0, 0.0, 0 ];
+				$this->stack[] = array( $message, 0, 0.0, 0.0, 0, 0.0, 0.0, 0 );
 			}
 		}
 
@@ -264,14 +264,14 @@ class SectionProfiler {
 			$memchange = $memUsage - $omem;
 			$this->updateEntry( $functionname, $elapsedcpu, $elapsedreal, $memchange );
 		} else {
-			$this->stack[] = array_merge( $item, [ $realTime, $cpuTime, $memUsage ] );
+			$this->stack[] = array_merge( $item, array( $realTime, $cpuTime, $memUsage ) );
 		}
 
-		$this->end = [
+		$this->end = array(
 			'cpu'      => $cpuTime,
 			'real'     => $realTime,
 			'memory'   => $memUsage
-		];
+		);
 	}
 
 	/**
@@ -284,7 +284,7 @@ class SectionProfiler {
 			throw new Exception( "Tree is only available for trace profiling." );
 		}
 		return implode( '', array_map(
-			[ $this, 'getCallTreeLine' ], $this->remapCallTree( $this->stack )
+			array( $this, 'getCallTreeLine' ), $this->remapCallTree( $this->stack )
 		) );
 	}
 
@@ -298,11 +298,11 @@ class SectionProfiler {
 		if ( count( $stack ) < 2 ) {
 			return $stack;
 		}
-		$outputs = [];
+		$outputs = array();
 		for ( $max = count( $stack ) - 1; $max > 0; ) {
 			/* Find all items under this entry */
 			$level = $stack[$max][1];
-			$working = [];
+			$working = array();
 			for ( $i = $max -1; $i >= 0; $i-- ) {
 				if ( $stack[$i][1] > $level ) {
 					$working[] = $stack[$i];
@@ -311,7 +311,7 @@ class SectionProfiler {
 				}
 			}
 			$working = $this->remapCallTree( array_reverse( $working ) );
-			$output = [];
+			$output = array();
 			foreach ( $working as $item ) {
 				array_push( $output, $item );
 			}
@@ -320,7 +320,7 @@ class SectionProfiler {
 
 			array_unshift( $outputs, $output );
 		}
-		$final = [];
+		$final = array();
 		foreach ( $outputs as $output ) {
 			foreach ( $output as $item ) {
 				$final[] = $item;
@@ -362,7 +362,7 @@ class SectionProfiler {
 			return; // already collated as methods exited
 		}
 
-		$this->collated = [];
+		$this->collated = array();
 
 		# Estimate profiling overhead
 		$oldEnd = $this->end;
@@ -370,7 +370,7 @@ class SectionProfiler {
 		$this->calculateOverhead( $profileCount );
 
 		# First, subtract the overhead!
-		$overheadTotal = $overheadMemory = $overheadInternal = [];
+		$overheadTotal = $overheadMemory = $overheadInternal = array();
 		foreach ( $this->stack as $entry ) {
 			// $entry is (name,pos,rtime0,cputime0,mem0,rtime1,cputime1,mem1)
 			$fname = $entry[0];
