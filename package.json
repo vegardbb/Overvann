@@ -31,10 +31,8 @@
     "express": "^4.13.4",
     "express-session": "*",
     "knex": "^0.10.0",
-    "mediawiki": "0.0.14",
     "mysql": "^2.10.2",
     "passport": "*",
-    "passport-local": "*",
-    "request": "^2.69.0"
+    "passport-local": "*"
   }
 }
