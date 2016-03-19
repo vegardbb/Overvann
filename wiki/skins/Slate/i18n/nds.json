@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Slomox",
+			"Zylbath"
+		]
+	},
+	"slate-action-addsection": "Thema tofögen",
+	"slate-action-delete": "Wegdoon",
+	"slate-action-move": "Schuven",
+	"slate-action-protect": "Schulen",
+	"slate-action-undelete": "Wedderhalen",
+	"slate-action-unprotect": "Siedenschuul ännern",
+	"slate-view-create": "Opstellen",
+	"slate-view-edit": "Ännern",
+	"slate-view-history": "Historie bekieken",
+	"slate-view-view": "Lesen",
+	"slate-view-viewsource": "Borntext bekieken"
+}

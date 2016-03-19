@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Arslan",
+			"Khalid Mahmood"
+		]
+	},
+	"slate-action-addsection": "مضمون پاؤ",
+	"slate-action-delete": "مکاؤ",
+	"slate-action-move": "ٹرو",
+	"slate-action-protect": "بچاؤ",
+	"slate-action-undelete": "واپس لیاؤ",
+	"slate-action-unprotect": "تبدیلی بچاؤ",
+	"slate-view-create": "بناؤ",
+	"slate-view-edit": "لکھو",
+	"slate-view-history": "تریخ وکھاؤ",
+	"slate-view-view": "پڑھو",
+	"slate-view-viewsource": "ویکھو"
+}

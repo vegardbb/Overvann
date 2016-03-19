@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Britscher",
+			"Gaj777",
+			"Przemub"
+		]
+	},
+	"slate-action-addsection": "Nowo tajla",
+	"slate-action-delete": "Wyćepej",
+	"slate-action-move": "Przećep",
+	"slate-action-protect": "Zawrzij",
+	"slate-action-undelete": "Wćep",
+	"slate-action-unprotect": "Uodymkńij",
+	"slate-view-create": "Stwůrz",
+	"slate-view-edit": "Sprowjej",
+	"slate-view-history": "Uobocz gyszichta",
+	"slate-view-view": "Czytej",
+	"slate-view-viewsource": "Zdrzůdłowy tekst"
+}

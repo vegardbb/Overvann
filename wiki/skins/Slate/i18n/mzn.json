@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mjbmr",
+			"محک"
+		]
+	},
+	"slate-action-addsection": "ترنه گپ بزوئن",
+	"slate-action-delete": "پاک هاکردن",
+	"slate-action-move": "دکش هاکردن",
+	"slate-action-protect": "زلفن بزوئن",
+	"slate-action-undelete": "دباره بنویشته بیّن",
+	"slate-action-unprotect": "زلفن عوض هاکردن",
+	"slate-view-create": "بساتن",
+	"slate-view-edit": "دچی‌ین",
+	"slate-view-history": "تاریخچه ره بَدی‌ین",
+	"slate-view-view": "بخوندستن",
+	"slate-view-viewsource": "ونه منبع ره هارشائن"
+}

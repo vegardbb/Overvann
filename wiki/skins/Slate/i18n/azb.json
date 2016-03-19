@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"E THP",
+			"Ebrahimi-amir",
+			"Mousa"
+		]
+	},
+	"slate-action-addsection": "قوْنو آرتیر",
+	"slate-action-delete": "سیل",
+	"slate-action-move": "داشی",
+	"slate-action-protect": "قوْرو",
+	"slate-action-undelete": "سیلمگی قایتار",
+	"slate-action-unprotect": "قوْروماغی دَییشدیر",
+	"slate-view-create": "یارات",
+	"slate-view-edit": "دَییشدیر",
+	"slate-view-history": "گئچمیشه باخ",
+	"slate-view-view": "اوْخو",
+	"slate-view-viewsource": "قایناغا باخ"
+}

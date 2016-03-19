@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"KuboF",
+			"Objectivesea",
+			"Yekrats"
+		]
+	},
+	"skinname-slate": "Vektoro",
+	"slate.css": "/* La jena CSS influos la paĝaspekton por uzantoj de la Vektora temo. */",
+	"slate.js": "/* La jena Ĝavaskripto ŝargiĝos por uzantoj de la Vektora temo. */",
+	"slate-action-addsection": "Aldoni temon",
+	"slate-action-delete": "Forigi",
+	"slate-action-move": "Alinomi",
+	"slate-action-protect": "Protekti",
+	"slate-action-undelete": "Malforigi",
+	"slate-action-unprotect": "Ŝanĝi protektadon",
+	"slate-view-create": "Krei",
+	"slate-view-edit": "Redakti",
+	"slate-view-history": "Vidi historion",
+	"slate-view-view": "Legi",
+	"slate-view-viewsource": "Vidi fonton",
+	"slate-more-actions": "Pli"
+}

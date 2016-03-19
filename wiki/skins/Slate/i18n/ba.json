@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Assele",
+			"Haqmar"
+		]
+	},
+	"skinname-slate": "Векторлы",
+	"slate-action-addsection": "Тема өҫтәргә",
+	"slate-action-delete": "Юйырға",
+	"slate-action-move": "Исемен үҙгәртергә",
+	"slate-action-protect": "Һаҡларға",
+	"slate-action-undelete": "Тергеҙергә",
+	"slate-action-unprotect": "Һаҡлауҙы үҙгәртергә",
+	"slate-view-create": "Яһау",
+	"slate-view-edit": "Үҙгәртергә",
+	"slate-view-history": "Тарихты ҡарау",
+	"slate-view-view": "Уҡыу",
+	"slate-view-viewsource": "Сығанаҡты ҡарарға"
+}

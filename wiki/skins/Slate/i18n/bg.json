@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Borislav",
+			"DCLXVI",
+			"Spiritia",
+			"StanProg"
+		]
+	},
+	"slate-action-addsection": "Добавяне на тема",
+	"slate-action-delete": "Изтриване",
+	"slate-action-move": "Преместване",
+	"slate-action-protect": "Защита",
+	"slate-action-undelete": "Възстановяване",
+	"slate-action-unprotect": "Промяна на защитата",
+	"slate-view-create": "Създаване",
+	"slate-view-edit": "Редактиране",
+	"slate-view-history": "История",
+	"slate-view-view": "Преглед",
+	"slate-view-viewsource": "Преглед на кода",
+	"slate-more-actions": "Още"
+}

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"AS",
+			"Ahonc",
+			"Base",
+			"Calak",
+			"Dim Grits",
+			"NickK",
+			"Prima klasy4na",
+			"Тест",
+			"Ата"
+		]
+	},
+	"skinname-slate": "Векторне",
+	"slate-skin-desc": "Сучасна версія MonoBook зі свіжим виглядом і багатьма зручними покращеннями",
+	"slate.css": "/* Розміщений тут CSS-код буде використаний в темі оформлення Векторне */",
+	"slate.js": "/* Розміщений тут код JavaScript буде завантажений для всіх користувачів, що використовують векторну тему оформлення */",
+	"slate-action-addsection": "Додати тему",
+	"slate-action-delete": "Вилучити",
+	"slate-action-move": "Перейменувати",
+	"slate-action-protect": "Захистити",
+	"slate-action-undelete": "Відновити",
+	"slate-action-unprotect": "Зміна захисту",
+	"slate-view-create": "Створити",
+	"slate-view-edit": "Редагувати",
+	"slate-view-history": "Переглянути історію",
+	"slate-view-view": "Читати",
+	"slate-view-viewsource": "Переглянути код",
+	"slate-more-actions": "Ще"
+}

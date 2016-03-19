@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dbc334",
+			"Smihael",
+			"Yerpo"
+		]
+	},
+	"slate-skin-desc": "Sodobna različica MonoBook s svežim videzom in mnogimi izboljšavami uporabnosti",
+	"slate-action-addsection": "Dodaj temo",
+	"slate-action-delete": "Izbriši",
+	"slate-action-move": "Prestavi",
+	"slate-action-protect": "Zaščiti",
+	"slate-action-undelete": "Vrni",
+	"slate-action-unprotect": "Spremeni zaščito",
+	"slate-view-create": "Ustvari",
+	"slate-view-edit": "Uredi",
+	"slate-view-history": "Zgodovina",
+	"slate-view-view": "Preberi",
+	"slate-view-viewsource": "Izvorno besedilo",
+	"slate-more-actions": "Več"
+}

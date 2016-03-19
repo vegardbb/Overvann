@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bachounda",
+			"Oldstoneage"
+		]
+	},
+	"slate-action-addsection": "زيد موضوع",
+	"slate-action-delete": "امحي",
+	"slate-action-move": "حول",
+	"slate-action-protect": "بروجي",
+	"slate-action-undelete": "ردّ كيما كان",
+	"slate-action-unprotect": "بدّل الـحماية",
+	"slate-view-create": "أصنع",
+	"slate-view-edit": "بدل",
+	"slate-view-history": "روح للتاريخي",
+	"slate-view-view": "أقرى",
+	"slate-view-viewsource": "شوف المصدر"
+}

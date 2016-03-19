@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xqt"
+		]
+	},
+	"slate-action-delete": "Verwische",
+	"slate-action-move": "Ziehe",
+	"slate-action-protect": "Schitze",
+	"slate-view-create": "Schtaerte",
+	"slate-view-edit": "Ennere",
+	"slate-view-history": "Gschicht zeige",
+	"slate-view-view": "Lese"
+}

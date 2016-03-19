@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Garas",
+			"Homo",
+			"Matasg",
+			"Perkunas",
+			"Hugo.arg"
+		]
+	},
+	"skinname-slate": "Vektorinė",
+	"slate-action-addsection": "Pridėti temą",
+	"slate-action-delete": "Ištrinti",
+	"slate-action-move": "Pervardyti",
+	"slate-action-protect": "Užrakinti",
+	"slate-action-undelete": "Atkurti",
+	"slate-action-unprotect": "Keisti apsaugą",
+	"slate-view-create": "Kurti",
+	"slate-view-edit": "Redaguoti",
+	"slate-view-history": "Istorija",
+	"slate-view-view": "Skaityti",
+	"slate-view-viewsource": "Žiūrėti kodą",
+	"slate-more-actions": "Daugiau"
+}

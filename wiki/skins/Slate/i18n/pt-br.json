@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cainamarques",
+			"Diego Queiroz",
+			"Giro720",
+			"Helder.wiki",
+			555,
+			"He7d3r"
+		]
+	},
+	"slate.js": "/* Qualquer JavaScript aqui colocado afetará os usuários do skin Slate */",
+	"slate-action-addsection": "Adicionar tópico",
+	"slate-action-delete": "Eliminar",
+	"slate-action-move": "Mover",
+	"slate-action-protect": "Proteger",
+	"slate-action-undelete": "Restaurar",
+	"slate-action-unprotect": "Alterar a proteção",
+	"slate-view-create": "Criar",
+	"slate-view-edit": "Editar",
+	"slate-view-history": "Ver histórico",
+	"slate-view-view": "Ler",
+	"slate-view-viewsource": "Ver código-fonte",
+	"slate-more-actions": "Mais"
+}

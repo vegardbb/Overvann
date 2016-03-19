@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Imdadb"
+		]
+	},
+	"slate-action-addsection": "Púskun sarhál",
+	"slate-action-delete": "Mesa",
+	"slate-action-move": "Surif",
+	"slate-action-protect": "Rakk",
+	"slate-view-create": "Biná",
+	"slate-view-edit": "Radbadal",
+	"slate-view-history": "Lekav e ur",
+	"slate-view-view": "Xuán",
+	"slate-view-viewsource": "Bumpad e ur"
+}

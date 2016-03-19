@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Arlin",
+			"Sahran",
+			"Tel'et"
+		]
+	},
+	"skinname-slate": "Slate",
+	"slate.css": "/* CSS placed here will affect users of the Slate skin */",
+	"slate.js": "/* Any JavaScript here will be loaded for users using the Slate skin */",
+	"slate-action-addsection": "يېڭى تېما قوش",
+	"slate-action-delete": "ئۆچۈر",
+	"slate-action-move": "يۆتكە",
+	"slate-action-protect": "قوغدا",
+	"slate-action-undelete": "ئەسلىگە قايتۇر",
+	"slate-action-unprotect": "قوغداش ئۆزگەرت",
+	"slate-view-create": "قۇر",
+	"slate-view-edit": "تەھرىر",
+	"slate-view-history": "تارىخ كۆرسەت",
+	"slate-view-view": "ئوقۇ",
+	"slate-view-viewsource": "مەنبەنى كۆرسەت"
+}

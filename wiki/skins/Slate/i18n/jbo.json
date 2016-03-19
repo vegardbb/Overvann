@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gleki"
+		]
+	},
+	"skinname-slate": "la vektor",
+	"slate-skin-desc": "lo cabna versio be la monobuk i vifne tarmi i so'i da nu xamgu zenba",
+	"slate-action-addsection": "jmina la'e se casnu",
+	"slate-action-delete": "vimcu",
+	"slate-action-move": "stika lo cmene",
+	"slate-action-protect": "bandu",
+	"slate-action-undelete": "volvygau",
+	"slate-action-unprotect": "cnegau lo bandu",
+	"slate-view-create": "zbasu",
+	"slate-view-edit": "stika",
+	"slate-view-history": "lo ckupau citri",
+	"slate-view-view": "tcidu",
+	"slate-view-viewsource": "cpacu lo krasi",
+	"slate-more-actions": "ji'a"
+}

@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mehtab ahmed"
+		]
+	},
+	"slate-action-addsection": "عنوان وجهو",
+	"slate-action-delete": "ڊاھيو",
+	"slate-action-move": "چوريو",
+	"slate-action-protect": "تحفظيو",
+	"slate-action-undelete": "واپس آڻيو",
+	"slate-action-unprotect": "اڻتحفظيو",
+	"slate-view-create": "سرجيو",
+	"slate-view-edit": "سنواريو",
+	"slate-view-history": "تاريخ ڏيکاريو",
+	"slate-view-view": "پڙهو",
+	"slate-view-viewsource": "ڪوڊ ڏسو",
+	"slate-more-actions": "وڌيڪ"
+}

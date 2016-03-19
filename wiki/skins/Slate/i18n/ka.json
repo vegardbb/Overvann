@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Alsandro",
+			"David1010",
+			"გიორგიმელა"
+		]
+	},
+	"skinname-slate": "ვექტორული",
+	"slate.css": "/* აქ ჩასმული CSS გამოყენებული იქნება ვექტორული გაფორმების თემაში */",
+	"slate-action-addsection": "თემის ჩამატება",
+	"slate-action-delete": "წაშლა",
+	"slate-action-move": "გადატანა",
+	"slate-action-protect": "დაცვა",
+	"slate-action-undelete": "აღდგენა",
+	"slate-action-unprotect": "დაცვის შეცვლა",
+	"slate-view-create": "შექმნა",
+	"slate-view-edit": "რედაქტირება",
+	"slate-view-history": "ისტორია",
+	"slate-view-view": "შემოწმებული სტატია",
+	"slate-view-viewsource": "წყაროს ხილვა",
+	"slate-more-actions": "მეტი"
+}

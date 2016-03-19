@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andria",
+			"Marzedu",
+			"Via maxima",
+			"Uharteko",
+			"Taxandru"
+		]
+	},
+	"slate-action-addsection": "Giunghe cuntierra",
+	"slate-action-delete": "Burra",
+	"slate-action-move": "Move",
+	"slate-action-protect": "Barda",
+	"slate-action-undelete": "Recùpera",
+	"slate-view-create": "Crea",
+	"slate-view-edit": "Càmbia",
+	"slate-view-history": "Càstia istòria",
+	"slate-view-view": "Leghe",
+	"slate-view-viewsource": "Càstia mitza",
+	"slate-more-actions": "Prus"
+}

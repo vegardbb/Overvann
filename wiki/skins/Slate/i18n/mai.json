@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ggajendra",
+			"Umeshberma"
+		]
+	},
+	"skinname-slate": "सदिश",
+	"slate-action-addsection": "विचार-बिन्दु जोड़ू",
+	"slate-action-delete": "मेटाउ",
+	"slate-action-move": "घसकाउ",
+	"slate-action-protect": "रक्षण करू",
+	"slate-action-undelete": "आपस लाउ",
+	"slate-action-unprotect": "सुरक्षा बदलू",
+	"slate-view-create": "बनाउ",
+	"slate-view-edit": "सम्पादन करू",
+	"slate-view-history": "इतिहास देखू",
+	"slate-view-view": "पढ़ू",
+	"slate-view-viewsource": "जड़ि देखू"
+}

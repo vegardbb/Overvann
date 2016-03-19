@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jnanaranjan Sahu",
+			"Psubhashish"
+		]
+	},
+	"slate-action-addsection": "ନୂଆ ଯୋଡ଼ନ୍ତୁ",
+	"slate-action-delete": "ଲିଭାଇବେ",
+	"slate-action-move": "ଘୁଞ୍ଚାଇବେ",
+	"slate-action-protect": "କିଳିବେ",
+	"slate-action-undelete": "ଲିଭାଇବେ ନାହିଁ",
+	"slate-action-unprotect": "କିଳିବେ ନାହିଁ",
+	"slate-view-create": "ତିଆରି କରନ୍ତୁ",
+	"slate-view-edit": "ସମ୍ପାଦନା (Edit)",
+	"slate-view-history": "ଇତିହାସ",
+	"slate-view-view": "ପଢ଼ନ୍ତୁ",
+	"slate-view-viewsource": "ସୋର୍ସ ଦେଖନ୍ତୁ"
+}

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ebe123",
+			"Hangmanwa7id"
+		]
+	},
+	"slate-action-delete": "Supprimer",
+	"slate-action-move": "Renommer",
+	"slate-action-protect": "Protéger",
+	"slate-view-create": "Créer",
+	"slate-view-edit": "Changer",
+	"slate-view-view": "Lire",
+	"slate-view-viewsource": "Regarder la source",
+	"slate-more-actions": "Plus"
+}

@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gmelfi",
+			"Melos",
+			"Pippinu"
+		]
+	},
+	"slate-skin-desc": "Virsioni muderna di MonoBook cu' n'aspettu novu e tanti migghiuramenti nta l'usabbilità",
+	"slate-action-addsection": "Agghiunci argumentu",
+	"slate-action-delete": "Cancella",
+	"slate-action-move": "Sposta",
+	"slate-action-protect": "Pruteggi",
+	"slate-action-undelete": "Annulla la cancillazzioni",
+	"slate-action-unprotect": "Cancia la prutizzioni",
+	"slate-view-create": "Crea",
+	"slate-view-edit": "Cancia",
+	"slate-view-history": "Talìa la crunuluggìa",
+	"slate-view-view": "Leggi",
+	"slate-view-viewsource": "Talìa lu surgenti",
+	"slate-more-actions": "Àutri cosi"
+}

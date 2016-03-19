@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lionslayer",
+			"Myanmars"
+		]
+	},
+	"slate-action-addsection": "အကြောင်းအရာအသစ် ထပ်ထည့်ရန်",
+	"slate-action-delete": "ဖျက်​ပါ​",
+	"slate-action-move": "ရွှေ့ပါ",
+	"slate-action-protect": "ထိမ်း​သိမ်း​ပါ​",
+	"slate-action-undelete": "မဖျက်တော့ရန်",
+	"slate-action-unprotect": "ကာကွယ်ခြင်းကို ပြောင်းလဲရန်",
+	"slate-view-create": "စတင်ရေးသားရန်",
+	"slate-view-edit": "ပြင်ရန်",
+	"slate-view-history": "ရာဇဝင်ကြည့်ရန်",
+	"slate-view-view": "ဖတ်ရန်",
+	"slate-view-viewsource": "ရင်းမြစ်ကို ကြည့်ရန်"
+}

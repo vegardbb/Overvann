@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Enzoreg",
+			"Zanatos"
+		]
+	},
+	"slate-action-addsection": "Zid topic",
+	"slate-action-delete": "Suprimi",
+	"slate-action-move": "Neqel",
+	"slate-action-protect": "Ḫami",
+	"slate-action-undelete": "rja lhadf",
+	"slate-action-unprotect": "Ḫiyed l-ḫimaya",
+	"slate-view-create": "Ĥṫareĝ",
+	"slate-view-edit": "Ĝedel",
+	"slate-view-history": "Ṫariĥ l-fiċyé",
+	"slate-view-view": "Qra",
+	"slate-view-viewsource": "Ċof l-masdar"
+}

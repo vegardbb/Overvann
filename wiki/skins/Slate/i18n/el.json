@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Calak",
+			"Crazymadlover",
+			"Evropi",
+			"Omnipaedista",
+			"Protnet",
+			"ZaDiak",
+			"Geraki"
+		]
+	},
+	"slate-skin-desc": "Σύγχρονη έκδοση του MonoBook με φρέσκια ματιά και πολλές βελτιώσεις χρηστικότητας",
+	"slate.css": "/* Το τοποθετημένο εδώ CSS θα επηρεάσει χρήστες του Slate skin */",
+	"slate.js": "/* Οποιοσδήποτε κώδικας JavaScript εδώ θα φορτωθεί για χρήστες που χρησιμοποιούν το Slate skin */",
+	"slate-action-addsection": "Προσθήκη θέματος",
+	"slate-action-delete": "Διαγραφή",
+	"slate-action-move": "Μετακίνηση",
+	"slate-action-protect": "Προστασία",
+	"slate-action-undelete": "Επαναφορά",
+	"slate-action-unprotect": "Αλλαγή προστασίας",
+	"slate-view-create": "Δημιουργία",
+	"slate-view-edit": "Επεξεργασία",
+	"slate-view-history": "Προβολή ιστορικού",
+	"slate-view-view": "Ανάγνωση",
+	"slate-view-viewsource": "Προβολή κώδικα",
+	"slate-more-actions": "Περισσότερα"
+}

@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Azim",
+			"Sergey Ivanov",
+			"Сай",
+			"Санюн Вадик"
+		]
+	},
+	"slate-action-addsection": "У ӱжашым тӱҥалаш",
+	"slate-action-delete": "Шӧраш",
+	"slate-action-move": "Лӱмым вашталташ",
+	"slate-action-protect": "Тӧрлатымаш деч аралаш",
+	"slate-action-undelete": "Шӧрымым пӧртылаш",
+	"slate-action-unprotect": "Оролым вашталташ",
+	"slate-view-create": "Ышташ",
+	"slate-view-edit": "Тӧрлаташ",
+	"slate-view-history": "Эртымгорным ончалаш",
+	"slate-view-view": "Лудаш",
+	"slate-view-viewsource": "Тӱҥалтыш текстым ончалаш"
+}

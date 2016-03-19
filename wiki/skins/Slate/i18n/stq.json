@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pyt"
+		]
+	},
+	"slate-action-addsection": "Ousnit bietouföigje",
+	"slate-action-delete": "Läskje",
+	"slate-action-move": "Ferskuuwe",
+	"slate-action-protect": "Skutsje",
+	"slate-action-undelete": "Wierhäärstaale",
+	"slate-action-unprotect": "Siedenskuts annerje",
+	"slate-view-create": "Moakje",
+	"slate-view-edit": "Beoarbaidje",
+	"slate-view-history": "Versionsgeskichte",
+	"slate-view-view": "Leese",
+	"slate-view-viewsource": "Wältext bekiekje"
+}

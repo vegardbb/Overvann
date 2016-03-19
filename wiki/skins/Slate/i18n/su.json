@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kandar"
+		]
+	},
+	"slate-skin-desc": "MonoBook vérsi modéren dina pidangan anu leuwih anyar jeung leuwih hadé",
+	"slate-action-addsection": "Jejer anyar",
+	"slate-action-delete": "Hapus",
+	"slate-action-move": "Pindahkeun",
+	"slate-action-protect": "Konci",
+	"slate-action-undelete": "Bolaykeun ngahapus",
+	"slate-action-unprotect": "Robah protéksi",
+	"slate-view-create": "Jieun",
+	"slate-view-edit": "Édit",
+	"slate-view-history": "Témbongkeun jujutan",
+	"slate-view-view": "Baca",
+	"slate-view-viewsource": "Témbongkeun sumber",
+	"slate-more-actions": "Lianna"
+}

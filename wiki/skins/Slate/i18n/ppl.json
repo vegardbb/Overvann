@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"A R King"
+		]
+	},
+	"slate-action-addsection": "Yankwik temaj",
+	"slate-action-delete": "Shikishti",
+	"slate-action-move": "Shikijkwani",
+	"slate-action-undelete": "Shalkwepa",
+	"slate-view-create": "Shikchiwa",
+	"slate-view-edit": "Shikpata",
+	"slate-view-history": "Ken mupatak",
+	"slate-view-view": "Shiamatachia",
+	"slate-view-viewsource": "Shikita ne codigoj"
+}

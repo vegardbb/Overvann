@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Warbola"
+		]
+	},
+	"slate-action-addsection": "Pangid jūrõ tēma",
+	"slate-action-delete": "Kištāntõgid jarā",
+	"slate-action-move": "Vīž jarā",
+	"slate-action-protect": "Kaitsõmi",
+	"slate-view-create": "Lūo",
+	"slate-view-edit": "Redigīer",
+	"slate-view-history": "Nägţ istōrijõ",
+	"slate-view-view": "Vaņ",
+	"slate-view-viewsource": "Vaņ ovāt tekstõ"
+}

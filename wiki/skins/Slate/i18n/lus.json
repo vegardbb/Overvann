@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"RMizo"
+		]
+	},
+	"slate-action-addsection": "Thupui belhna",
+	"slate-action-delete": "Paihna",
+	"slate-action-move": "Sawnna",
+	"slate-action-protect": "Venhimna",
+	"slate-action-undelete": "Lak kir lehna",
+	"slate-action-unprotect": "Venhimna dinhmun tidanglam rawh",
+	"slate-view-create": "Siamna",
+	"slate-view-edit": "Siamţhatna",
+	"slate-view-history": "Hunhlui-chanchin",
+	"slate-view-view": "Chhiarna",
+	"slate-view-viewsource": "A hnar enna"
+}

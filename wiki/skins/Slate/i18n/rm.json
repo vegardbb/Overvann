@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gion-andri"
+		]
+	},
+	"slate-action-addsection": "Agiuntar chapitel",
+	"slate-action-delete": "Stizzar",
+	"slate-action-move": "Spustar",
+	"slate-action-protect": "Bloccar",
+	"slate-action-undelete": "Restituir",
+	"slate-action-unprotect": "Midar la protecziun",
+	"slate-view-create": "Crear",
+	"slate-view-edit": "Modifitgar",
+	"slate-view-history": "Cronologia",
+	"slate-view-view": "Leger",
+	"slate-view-viewsource": "Mussar il code"
+}

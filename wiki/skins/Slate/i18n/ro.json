@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"AdiJapan",
+			"Danutz",
+			"Firilacroco",
+			"Minisarm",
+			"Strainu"
+		]
+	},
+	"skinname-slate": "Slate",
+	"slate-skin-desc": "Versiunea modernă pentru MonoBook cu o înfățișare reîmprospătată și multe îmbunătățiri de uzabilitate",
+	"slate.css": "/* CSS plasate aici vor afecta utilizatorii stilului Slate */",
+	"slate-action-addsection": "Mesaj nou",
+	"slate-action-delete": "Ștergere",
+	"slate-action-move": "Redenumire",
+	"slate-action-protect": "Protejare",
+	"slate-action-undelete": "Recuperare",
+	"slate-action-unprotect": "Modificare protecție",
+	"slate-view-create": "Creare",
+	"slate-view-edit": "Modificare",
+	"slate-view-history": "Istoric",
+	"slate-view-view": "Lectură",
+	"slate-view-viewsource": "Sursă pagină",
+	"slate-more-actions": "Mai mult"
+}

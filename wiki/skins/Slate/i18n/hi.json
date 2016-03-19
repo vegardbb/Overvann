@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siddhartha Ghai",
+			"आलोक",
+			"रोहित रावत"
+		]
+	},
+	"slate-action-addsection": "विषय जोड़ें",
+	"slate-action-delete": "हटाएँ",
+	"slate-action-move": "स्थानांतरण करें",
+	"slate-action-protect": "सुरक्षित करें",
+	"slate-action-undelete": "हटाना वापस लें",
+	"slate-action-unprotect": "सुरक्षा बदलें",
+	"slate-view-create": "बनाएँ",
+	"slate-view-edit": "सम्पादन",
+	"slate-view-history": "इतिहास देखें",
+	"slate-view-view": "पढ़ें",
+	"slate-view-viewsource": "स्रोत देखें",
+	"slate-more-actions": "अधिक"
+}

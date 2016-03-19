@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Milicevic01",
+			"Rancher",
+			"Жељко Тодоровић",
+			"Михајло Анђелковић"
+		]
+	},
+	"skinname-slate": "Slate",
+	"slate.css": "/* CSS постављен овде ће утицати на све кориснике теме „Slate“ */",
+	"slate.js": "/* Јаваскрипт постављен овде ће се учитати за све оне који користе тему „Slate“ */",
+	"slate-action-addsection": "Додај тему",
+	"slate-action-delete": "Обриши",
+	"slate-action-move": "Премести",
+	"slate-action-protect": "Заштити",
+	"slate-action-undelete": "Врати",
+	"slate-action-unprotect": "Промени заштиту",
+	"slate-view-create": "Направи",
+	"slate-view-edit": "Уреди",
+	"slate-view-history": "Историја",
+	"slate-view-view": "Читај",
+	"slate-view-viewsource": "Изворни код",
+	"slate-more-actions": "Више"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Maor X"
+		]
+	},
+	"slate-action-delete": "Ojuichajaa",
+	"slate-action-move": "Ansülaa",
+	"slate-action-protect": "Eisalajaa",
+	"slate-view-create": "Akumajaa",
+	"slate-view-edit": "Anaataa",
+	"slate-view-history": "Achikii a'wanajaayamaajatü",
+	"slate-view-view": "Aashaje'eraa",
+	"slate-view-viewsource": "Anüliaa eejeetülee"
+}

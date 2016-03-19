@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ganesh",
+			"Nepaboy"
+		]
+	},
+	"slate-action-addsection": "विषय जोड़ीं",
+	"slate-action-delete": "मिटाईं",
+	"slate-action-move": "स्थांतरण",
+	"slate-action-protect": "संरक्षित करीं",
+	"slate-action-undelete": "मत मिटाईं",
+	"slate-action-unprotect": "सुरक्षा बदलीं",
+	"slate-view-create": "बनाईं",
+	"slate-view-edit": "सम्पादन",
+	"slate-view-history": "इतिहास देखीं",
+	"slate-view-view": "पढ़ीं",
+	"slate-view-viewsource": "स्त्रोत देखीं"
+}

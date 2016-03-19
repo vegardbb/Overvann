@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Albinus",
+			"Samar88",
+			"Srabony90"
+		]
+	},
+	"slate-action-addsection": "Asol katha joṛaome",
+	"slate-action-delete": "Giḍi",
+	"slate-action-move": "Ocoḱ́me",
+	"slate-action-protect": "Bańcao",
+	"slate-action-undelete": "Bań getgiḍi",
+	"slate-action-unprotect": "Bodol rukhiyạ",
+	"slate-view-create": "Tearme",
+	"slate-view-edit": "So̠mpado̠n",
+	"slate-view-history": "Jạṛ ńelme",
+	"slate-view-view": "Paṛhaḱme",
+	"slate-view-viewsource": "Ńamoḱaḱ ńelme"
+}

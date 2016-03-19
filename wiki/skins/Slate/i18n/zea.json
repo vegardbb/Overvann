@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ooswesthoesbes"
+		]
+	},
+	"slate-action-addsection": "Voeg kopje toe",
+	"slate-action-delete": "Wissen",
+	"slate-action-move": "Verschuuf",
+	"slate-action-protect": "Bescherm",
+	"slate-action-undelete": "Plaets truhhe",
+	"slate-action-unprotect": "Beveiligienge anpass'n",
+	"slate-view-create": "Anmaeken",
+	"slate-view-edit": "Bewerk",
+	"slate-view-history": "Geschiedenisse bekiek'n",
+	"slate-view-view": "Lezen",
+	"slate-view-viewsource": "Brontekst bekieken"
+}

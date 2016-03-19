@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Botuzhaleny-sodamo"
+		]
+	},
+	"slate-action-addsection": "Поладомс мезде кортамс",
+	"slate-action-delete": "Нардамс",
+	"slate-action-move": "Печтевтемс",
+	"slate-action-protect": "Аравтомс ванстомас",
+	"slate-action-undelete": "Вельмевтемс нардазенть",
+	"slate-action-unprotect": "Полавтомс ванстоманзо",
+	"slate-view-create": "Теемс-Шкамс",
+	"slate-view-edit": "Витнемс-петнемс",
+	"slate-view-history": "Ваномс юронзо-путовксонзо",
+	"slate-view-view": "Ловномс",
+	"slate-view-viewsource": "Ваномс косто саезь"
+}

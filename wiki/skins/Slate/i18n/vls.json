@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"DasRakel"
+		]
+	},
+	"slate-action-delete": "Wegdoen",
+	"slate-action-move": "Ernoemn",
+	"slate-view-create": "Anmoakn",
+	"slate-view-edit": "Bewerkn",
+	"slate-view-history": "Geschiedenisse bekykn",
+	"slate-view-view": "Leezn",
+	"slate-view-viewsource": "Brontekst bekykn"
+}

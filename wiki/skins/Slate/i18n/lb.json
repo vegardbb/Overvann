@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"skinname-slate": "Slate",
+	"slate-skin-desc": "Modern Versioun vu Monobook mat frëschem Look a ville Verbesserunge vun der Benotzerfrëndlechkeet",
+	"slate.css": "/* CSS deen hei steet huet Afloss op all Benotzer vum Ausgesinn Slate */",
+	"slate.js": "/* All JavaScript hei gëtt gelueden esoubal ee Benotzer d'Ausgesinn Slate benotzt */",
+	"slate-action-addsection": "Sujet derbäisetzen",
+	"slate-action-delete": "Läschen",
+	"slate-action-move": "Réckelen",
+	"slate-action-protect": "Spären",
+	"slate-action-undelete": "Restauréieren",
+	"slate-action-unprotect": "Spär änneren",
+	"slate-view-create": "Uleeën",
+	"slate-view-edit": "Änneren",
+	"slate-view-history": "Versioune weisen",
+	"slate-view-view": "Liesen",
+	"slate-view-viewsource": "Quellcode weisen",
+	"slate-more-actions": "Méi"
+}

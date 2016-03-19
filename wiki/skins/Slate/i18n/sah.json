@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"HalanTul"
+		]
+	},
+	"slate-action-addsection": "Тиэмэ эбии",
+	"slate-action-delete": "Сот",
+	"slate-action-move": "Аатын уларыт",
+	"slate-action-protect": "Уларыйбат гын",
+	"slate-action-undelete": "Төннөр",
+	"slate-action-unprotect": "Көмүскэлин уларыт",
+	"slate-view-create": "Ай",
+	"slate-view-edit": "Уларыт",
+	"slate-view-history": "Устуоруйатын көрүү",
+	"slate-view-view": "Ааҕыы",
+	"slate-view-viewsource": "Бэлиэлэрин көрүү"
+}

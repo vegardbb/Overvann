@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Diupwijk",
+			"EileenSanda"
+		]
+	},
+	"slate-action-addsection": "Nýtt evni",
+	"slate-action-delete": "Strika",
+	"slate-action-move": "Flyt",
+	"slate-action-protect": "Friða",
+	"slate-action-undelete": "Endurstovna",
+	"slate-action-unprotect": "Broyt verju",
+	"slate-view-create": "Stovna",
+	"slate-view-edit": "Rætta",
+	"slate-view-history": "Vís søgu",
+	"slate-view-view": "Les",
+	"slate-view-viewsource": "Vís keldu",
+	"slate-more-actions": "Meira"
+}

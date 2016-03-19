@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bua333",
+			"Mucalexx"
+		]
+	},
+	"slate-action-addsection": "An Obschnitt dazua doa",
+	"slate-action-delete": "Leschn",
+	"slate-action-move": "Vaschiabm",
+	"slate-action-protect": "Schitzn",
+	"slate-action-undelete": "Wiederherstön",
+	"slate-action-unprotect": "freigeem",
+	"slate-view-create": "Aufbaun",
+	"slate-view-edit": "Werkln",
+	"slate-view-history": "Gschicht oschaugn",
+	"slate-view-view": "Lesn",
+	"slate-view-viewsource": "Quejtext ozoagn"
+}

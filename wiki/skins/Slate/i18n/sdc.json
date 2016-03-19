@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Felis",
+			"Jun Misugi"
+		]
+	},
+	"slate-action-addsection": "Aggiungì oggettu",
+	"slate-action-delete": "Canzella",
+	"slate-action-move": "Ippustha",
+	"slate-action-protect": "Pruteggì",
+	"slate-view-create": "Cria",
+	"slate-view-edit": "Mudifigga",
+	"slate-view-history": "Vèdi isthòria",
+	"slate-view-view": "Leggi",
+	"slate-view-viewsource": "Vèdi fonti"
+}

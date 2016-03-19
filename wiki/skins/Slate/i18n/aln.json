@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bresta"
+		]
+	},
+	"slate.css": "/* CSSi i vednosun këtu ka me i prekë shfrytëzuesit e dukjes Slate */",
+	"slate.js": "/* Çdo JavaScript këtu ka me u ngarkue për shfrytëzuesit që përdorin dukjen Slate */",
+	"slate-action-addsection": "Shto temë",
+	"slate-action-delete": "Fshij",
+	"slate-action-move": "Zhvendos",
+	"slate-action-protect": "Mbroj",
+	"slate-action-undelete": "Kthe fshimjen mbrapsht",
+	"slate-action-unprotect": "Hiq mbrojtjen",
+	"slate-view-create": "Krijo",
+	"slate-view-edit": "Redakto",
+	"slate-view-history": "Shih historinë",
+	"slate-view-view": "Lexo",
+	"slate-view-viewsource": "Shih kodin"
+}

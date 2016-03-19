@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Paivud"
+		]
+	},
+	"slate-action-addsection": "Vassõn teema",
+	"slate-action-delete": "Pühi",
+	"slate-action-move": "Liikut",
+	"slate-action-protect": "Varjaa",
+	"slate-view-create": "Loo cülci",
+	"slate-view-edit": "Muuttaa",
+	"slate-view-history": "Istori",
+	"slate-view-view": "Lukõa",
+	"slate-view-viewsource": "Lähtekoodi"
+}

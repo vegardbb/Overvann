@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Servien"
+		]
+	},
+	"slate-action-addsection": "Niej onderwarp",
+	"slate-action-delete": "Vortdoon",
+	"slate-action-move": "Herneumen",
+	"slate-action-protect": "Beveiligen",
+	"slate-action-undelete": "Weerummeplaotsen",
+	"slate-action-unprotect": "Beveiliging wiezigen",
+	"slate-view-create": "Anmaken",
+	"slate-view-edit": "Bewarken",
+	"slate-view-history": "Geschiedenisse bekieken",
+	"slate-view-view": "Lezen",
+	"slate-view-viewsource": "Brontekste bekieken",
+	"slate-more-actions": "Meer"
+}

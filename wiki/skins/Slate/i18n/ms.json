@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Anakmalaysia",
+			"Aurora",
+			"Pizza1016"
+		]
+	},
+	"skinname-slate": "Slate",
+	"slate-skin-desc": "Versi MonoBook yang moden dengan rupa yang segar dan banyak pembaikan kepada kegunaan.",
+	"slate.css": "/* CSS yang terletak di sini akan mempengaruhi pengguna kulit Slate */",
+	"slate.js": "/ * Sebarang JavaScript di sini akan dimuatkan untuk pengguna-pengguna yang menggunakan kulit Slate * /",
+	"slate-action-addsection": "Buka topik",
+	"slate-action-delete": "Hapus",
+	"slate-action-move": "Pindah",
+	"slate-action-protect": "Lindung",
+	"slate-action-undelete": "Nyahhapus",
+	"slate-action-unprotect": "Ubah perlindungan",
+	"slate-view-create": "Cipta",
+	"slate-view-edit": "Sunting",
+	"slate-view-history": "Lihat sejarah",
+	"slate-view-view": "Baca",
+	"slate-view-viewsource": "Lihat sumber",
+	"slate-more-actions": "Lain"
+}

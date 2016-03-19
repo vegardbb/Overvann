@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Paulu"
+		]
+	},
+	"slate-action-addsection": "Aghjunghje discussione",
+	"slate-action-delete": "Supprimà",
+	"slate-action-move": "Cullucà",
+	"slate-action-protect": "Pruteghje",
+	"slate-action-unprotect": "Cambià a prutezzione",
+	"slate-view-create": "Creà",
+	"slate-view-edit": "Mudificà",
+	"slate-view-history": "Vede a cronolugia",
+	"slate-view-view": "Leghje",
+	"slate-view-viewsource": "Vede a surghjente"
+}

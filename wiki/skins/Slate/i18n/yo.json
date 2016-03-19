@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Demmy"
+		]
+	},
+	"slate-action-addsection": "Àfikún orí-ọ̀rọ̀",
+	"slate-action-delete": "Ìparẹ́",
+	"slate-action-move": "Ìyípòdà",
+	"slate-action-protect": "Àbò",
+	"slate-action-undelete": "Ìmúkúrò ìparẹ́",
+	"slate-action-unprotect": "Ìyípadà àbò",
+	"slate-view-create": "Ṣ'èdá",
+	"slate-view-edit": "Àtúnṣe",
+	"slate-view-history": "Wo ìtàn",
+	"slate-view-view": "Àwòkà",
+	"slate-view-viewsource": "Wo àmìọ̀rọ̀"
+}

@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Boulaur",
+			"Cedric31"
+		]
+	},
+	"slate.css": "/* Lo CSS plaçat aicí afectarà los utilizaires de l’abilhatge Slate */",
+	"slate.js": "/* Tot JavaScript aicí serà cargat amb las paginas accedidas pels utilizaires de l’abilhatge Slate unicament. */",
+	"slate-action-addsection": "Apondre un subjècte",
+	"slate-action-delete": "Suprimir",
+	"slate-action-move": "Tornar nomenar",
+	"slate-action-protect": "Protegir",
+	"slate-action-undelete": "Restablir",
+	"slate-action-unprotect": "Suprimir la proteccion",
+	"slate-view-create": "Crear",
+	"slate-view-edit": "Modificar",
+	"slate-view-history": "Veire l'istoric",
+	"slate-view-view": "Legir",
+	"slate-view-viewsource": "Veire la font"
+}

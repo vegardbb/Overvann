@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Don Alessandro"
+		]
+	},
+	"skinname-slate": "Sızımlı",
+	"slate-action-addsection": "Yaña tema östäw",
+	"slate-action-delete": "Beterü",
+	"slate-action-move": "Küçerü",
+	"slate-action-protect": "Yaqlaw",
+	"slate-action-undelete": "Qaytaru",
+	"slate-action-unprotect": "Yaqlawnı beterü",
+	"slate-view-create": "Tözü",
+	"slate-view-edit": "Üzgärtü",
+	"slate-view-history": "Tarixın qaraw",
+	"slate-view-view": "Uqu",
+	"slate-view-viewsource": "Çığanağın qaraw"
+}

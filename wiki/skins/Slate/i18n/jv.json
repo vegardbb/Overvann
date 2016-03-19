@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pras"
+		]
+	},
+	"slate-action-addsection": "Tambah topik",
+	"slate-action-delete": "Busak",
+	"slate-action-move": "Pindhahna",
+	"slate-action-protect": "Reksa",
+	"slate-action-undelete": "Batalna pambusakan",
+	"slate-action-unprotect": "Owahi pangreksan",
+	"slate-view-create": "Gawé",
+	"slate-view-edit": "Sunting",
+	"slate-view-history": "Sajarah kaca",
+	"slate-view-view": "Waca",
+	"slate-view-viewsource": "Pirsani sumber"
+}

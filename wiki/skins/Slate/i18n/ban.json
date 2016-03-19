@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Adi Mayndra",
+			"BASAbali"
+		]
+	},
+	"slate-action-addsection": "imbuhin indik wacana",
+	"slate-action-delete": "ngapus",
+	"slate-action-move": "kisidang",
+	"slate-action-protect": "nyaga",
+	"slate-view-create": "ngawe",
+	"slate-view-edit": "mecikang",
+	"slate-view-history": "indik sane lintang",
+	"slate-view-view": "Waca",
+	"slate-view-viewsource": "cingak witnyane"
+}

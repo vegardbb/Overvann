@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"OC Ripper"
+		]
+	},
+	"slate-action-addsection": "Dodaj temu",
+	"slate-action-delete": "Brisanje",
+	"slate-action-move": "Preusmjeri",
+	"slate-action-protect": "Zaštiti",
+	"slate-action-undelete": "Vrati obrisano",
+	"slate-action-unprotect": "Promijeni zaštitu",
+	"slate-view-create": "Napravi",
+	"slate-view-edit": "Uredi",
+	"slate-view-history": "Pregled historije",
+	"slate-view-view": "Čitaj",
+	"slate-view-viewsource": "Vidi izvor (source)"
+}

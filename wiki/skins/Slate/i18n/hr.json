@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ex13",
+			"Tivek",
+			"Bugoslav"
+		]
+	},
+	"slate-action-addsection": "Dodaj temu",
+	"slate-action-delete": "Izbriši",
+	"slate-action-move": "Premjesti",
+	"slate-action-protect": "Zaštiti",
+	"slate-action-undelete": "Vrati",
+	"slate-action-unprotect": "Promijeni zaštitu",
+	"slate-view-create": "Započni",
+	"slate-view-edit": "Uredi",
+	"slate-view-history": "Vidi stare izmjene",
+	"slate-view-view": "Čitaj",
+	"slate-view-viewsource": "Vidi izvor",
+	"slate-more-actions": "Više"
+}

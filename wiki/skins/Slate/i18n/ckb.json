@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Asoxor",
+			"Calak"
+		]
+	},
+	"skinname-slate": "ڤێکتۆر",
+	"slate-action-addsection": "بابەت دابنێ",
+	"slate-action-delete": "بیسڕەوە",
+	"slate-action-move": "بیگوازەوە",
+	"slate-action-protect": "بیپارێزە",
+	"slate-action-undelete": "سڕینەوە بگەڕێنەوە",
+	"slate-action-unprotect": "پاراستن بگۆڕە",
+	"slate-view-create": "دروستکردن",
+	"slate-view-edit": "دەستکاریی بکە",
+	"slate-view-history": "مێژووەکەی ببینە",
+	"slate-view-view": "بیخوێنەوە",
+	"slate-view-viewsource": "سەرچاوەکەی ببینە",
+	"slate-more-actions": "زیاتر"
+}

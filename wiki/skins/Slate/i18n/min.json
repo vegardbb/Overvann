@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iwan Novirion",
+			"Luthfi94",
+			"VoteITP"
+		]
+	},
+	"skinname-slate": "Vektor",
+	"slate-action-addsection": "Bagian baru",
+	"slate-action-delete": "Hapuih",
+	"slate-action-move": "Pindahkan",
+	"slate-action-protect": "Linduangkan",
+	"slate-action-undelete": "Pambatalan pangapuihan",
+	"slate-action-unprotect": "Tuka palinduangan",
+	"slate-view-create": "Buek",
+	"slate-view-edit": "Suntiang",
+	"slate-view-history": "Riwayaik",
+	"slate-view-view": "Baco",
+	"slate-view-viewsource": "Caliak sumber"
+}

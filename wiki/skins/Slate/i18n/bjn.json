@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ezagren",
+			"J Subhi"
+		]
+	},
+	"slate-action-addsection": "Tambahi tupik",
+	"slate-action-delete": "Hapus",
+	"slate-action-move": "Pindahakan",
+	"slate-action-protect": "Lindungi",
+	"slate-action-undelete": "Pawalangan pahapusan",
+	"slate-action-unprotect": "Palindungan",
+	"slate-view-create": "Ulah",
+	"slate-view-edit": "Babak",
+	"slate-view-history": "Tiringi halam",
+	"slate-view-view": "Baca",
+	"slate-view-viewsource": "Tiringi asal mula"
+}

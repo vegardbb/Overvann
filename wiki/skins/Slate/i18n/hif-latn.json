@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Girmitya",
+			"Thakurji"
+		]
+	},
+	"slate-action-addsection": "Topic jorro",
+	"slate-action-delete": "Mitao",
+	"slate-action-move": "Naam badlo",
+	"slate-action-protect": "Bachao",
+	"slate-action-undelete": "Pahile jaise karo",
+	"slate-action-unprotect": "Surakchha ke badlo",
+	"slate-view-create": "Banao",
+	"slate-view-edit": "Badlo",
+	"slate-view-history": "Itihaas dekho",
+	"slate-view-view": "Parrho",
+	"slate-view-viewsource": "Source dekho"
+}

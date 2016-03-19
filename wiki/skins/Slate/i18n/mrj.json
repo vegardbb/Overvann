@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amdf"
+		]
+	},
+	"slate-action-delete": "Карангдаш",
+	"slate-action-move": "Лӹмӹм вашталташ",
+	"slate-action-protect": "Ӹшӹклӓш",
+	"slate-view-create": "Ӹштӓш",
+	"slate-view-edit": "Тӧрлӹмӓш",
+	"slate-view-history": "Историм анжымаш",
+	"slate-view-view": "Лыдмаш",
+	"slate-view-viewsource": "Сек пӹтӓриш кодым анжалаш"
+}

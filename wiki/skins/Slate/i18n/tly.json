@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Гусейн"
+		]
+	},
+	"slate-action-addsection": "Мывзу зијод кардеј",
+	"slate-action-delete": "Рәдд кардеј",
+	"slate-action-move": "Номи дәгиш кардеј",
+	"slate-action-protect": "Мыдофијә кардеј",
+	"slate-action-undelete": "Бәрпо кардеј",
+	"slate-action-unprotect": "Мыдофијә дәгиш кардеј",
+	"slate-view-create": "Офәјеј",
+	"slate-view-edit": "Сәрост кардеј",
+	"slate-view-history": "Тарых",
+	"slate-view-view": "Һандемон",
+	"slate-view-viewsource": "Дијә кардеј"
+}

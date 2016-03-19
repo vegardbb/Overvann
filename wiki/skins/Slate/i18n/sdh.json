@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Paraw2"
+		]
+	},
+	"slate-action-addsection": "بابەت تازە بدە سەری",
+	"slate-action-delete": "بسڕەوە",
+	"slate-action-move": "جیوەجی بکە",
+	"slate-action-protect": "بپیەرێزەێ",
+	"slate-view-create": "درسکردن",
+	"slate-view-edit": "وێراشتەێ بکە",
+	"slate-view-history": "دیرۆکەگەی بۊن",
+	"slate-view-view": "بخوەنە",
+	"slate-view-viewsource": "سەرچاوەگەێ بۊن"
+}

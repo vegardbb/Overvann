@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Przemub",
+			"Schläsinger",
+			"Timpul",
+			"Äberlausitzer"
+		]
+	},
+	"slate-action-addsection": "Obschnitt hinzufiega",
+	"slate-action-delete": "Läscha",
+	"slate-action-move": "Verschieba",
+	"slate-action-protect": "Schützen",
+	"slate-action-undelete": "Wiederherstella",
+	"slate-action-unprotect": "Freigahn",
+	"slate-view-create": "Erstella",
+	"slate-view-edit": "Bearbeita",
+	"slate-view-history": "Versionsgeschichte",
+	"slate-view-view": "Lessa",
+	"slate-view-viewsource": "Quelltext siehn"
+}
