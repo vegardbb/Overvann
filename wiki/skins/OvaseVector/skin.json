@@ -7,18 +7,18 @@
 		"..."
 	],
 	"url": "https://www.mediawiki.org/wiki/Skin:Vector",
-	"descriptionmsg": "ovasevector-skin-desc",
-	"namemsg": "skinname-ovasevector",
+	"descriptionmsg": "vector-skin-desc",
+	"namemsg": "skinname-vector",
 	"license-name": "GPL-2.0+",
 	"type": "skin",
 	"ConfigRegistry": {
-		"ovasevector": "GlobalVarConfig::newInstance"
+		"vector": "GlobalVarConfig::newInstance"
 	},
 	"ValidSkinNames": {
-		"ovasevector": "OvaseVector"
+		"vector": "Vector"
 	},
 	"MessagesDirs": {
-		"OvaseVector": [
+		"Vector": [
 			"i18n"
 		]
 	},
