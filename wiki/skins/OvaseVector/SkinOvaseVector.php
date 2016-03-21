@@ -48,7 +48,7 @@ class SkinOvaseVector  extends SkinTemplate {
 
 		if ( $this->vectorConfig->get( 'VectorResponsive' ) ) {
 			$out->addMeta( 'viewport', 'width=device-width, initial-scale=1' );
-			$out->addModuleStyles( 'skins.vector.styles.responsive' );
+			$out->addModuleStyles( 'skins.ovasevector.styles.responsive' );
 		}
 
 		// Append CSS which includes IE only behavior fixes for hover support -
@@ -61,7 +61,7 @@ class SkinOvaseVector  extends SkinTemplate {
 				"/{$this->stylename}/csshover{$min}.htc\")}</style><![endif]-->"
 		);
 
-		$out->addModules( array( 'skins.vector.js' ) );
+		$out->addModules( array( 'skins.ovasevector.js' ) );
 	}
 
 	/**
@@ -71,8 +71,8 @@ class SkinOvaseVector  extends SkinTemplate {
 	function setupSkinUserCss( OutputPage $out ) {
 		parent::setupSkinUserCss( $out );
 
-		$styles = array( 'mediawiki.skinning.interface', 'skins.vector.styles' );
-		Hooks::run( 'SkinVectorStyleModules', array( $this, &$styles ) );
+		$styles = array( 'mediawiki.skinning.interface', 'skins.ovasevector.styles' );
+		Hooks::run( 'SkinOvaseVectorStyleModules', array( $this, &$styles ) );
 		$out->addModuleStyles( $styles );
 	}
 
