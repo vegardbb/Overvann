@@ -7,14 +7,24 @@
 @import "components/footer.less";
 @import "components/externalLinks.less";
 
-.mw-body-content {
-	max-width: 50em;
-	padding-right: 340px;
+#bodyContent.mw-body-content {
+	max-width: @content-text-width;
+	padding-right: @sidebar-width;
+}
+
+.ve-ce-surface.mw-body-content {
+	max-width: @content-text-width;
+	padding-right: @sidebar-width;
+}
+
+.oo-ui-widget .mw-body-content {
+	max-width: none;
+	padding-right: 1em;
 }
 
 .mw-ovase-hoyremarg {
 	float: right;
-	margin-right: -340px;
+	margin-right: @sidebar-offset;
 	padding-left: 1.6em;
 	width: auto;
 }
