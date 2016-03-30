@@ -57,5 +57,6 @@ module.exports.signUpPost = UserSystem.signUpPost;
 module.exports.signOut = UserSystem.signOut;
 module.exports.about = about;
 module.exports.person = Person.person_page;
-module.exports.company = Company.company_page
+module.exports.company = Company.company_page;
+module.exports.product = product;
 module.exports.notFound404 = notFound404;
