@@ -77,6 +77,7 @@ app.get('/signout', YpRouting.signOut);
 app.get('/om', YpRouting.about);
 app.get('/person/:who', YpRouting.person);
 app.get('/company/:who', YpRouting.company);
+app.get('/product', YpRouting.product);
 // 404 not found
 app.use(YpRouting.notFound404);
 

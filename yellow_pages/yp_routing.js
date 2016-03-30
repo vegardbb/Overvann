@@ -29,6 +29,18 @@ var about = function(req, res, next) {
     });
 };
 
+var product = function(req, res, next) {
+    var user = req.user;
+
+    if (user !== undefined) {
+        user = user.toJSON();
+    }
+    res.render('product', {
+        title: 'Ovase.no - Produkter',
+        user: user
+    });
+};
+
 var notFound404 = function(req, res, next) {
     res.status(404);
     res.render('404', {
