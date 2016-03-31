@@ -2,14 +2,15 @@
 <html lang="no">
 <%- include head.ejs %>
 <body>
-<%- include header_large.ejs %>
-<div id="container">
 <%- include header.ejs %>
-<div id="content">
-    <h2>Om produkter tilpasset overvann</h2>
-    <p>Informasjon kommer her</p>
-    <p>Kake er <%= urlparam %></p>
-</div>
+<div class="content-container">
+	<div class="inner-container">
+		<div id="content">
+		    <h2>Om produkter tilpasset overvann</h2>
+		    <p>Informasjon kommer her</p>
+		    <p>Kake er <%= urlparam %></p>
+		</div>
+	</div>
 </div>
 <%- include footer.ejs %>
 </body>
