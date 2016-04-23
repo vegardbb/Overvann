@@ -8,10 +8,12 @@ var index = function(req, res, next) {
     if (user !== undefined) {
         user = user.toJSON();
     }
-    res.render('index', {
-        title: 'Ovase.no - Framsida',
-        user: user
-    });
+    
+    var options = {
+        root: __dirname + '/static/'
+    };
+
+    res.sendFile('index.html', options);
 };
 
 var about = function(req, res, next) {
