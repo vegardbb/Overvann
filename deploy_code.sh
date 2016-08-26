@@ -7,7 +7,7 @@
 # 			./deploy_code.sh ovase wiki 	to deploy both parts
 #
 
-OVASE_DIR=~/var/www/html
+OVASE_DIR=/var/www/html
 WIKI_DIR=/var/www/html/wiki
 BACKUP_ROOT=~/deploy_backups
 BACKUP_DIR="${BACKUP_ROOT}/backup_$(date +%Y%m%d_%H%M%S)"
