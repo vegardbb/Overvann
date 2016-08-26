@@ -1,4 +1,5 @@
 
-# We really don't want to add certain usernames and passwords to Git
+# We really don't want to add certain things to git
 sql_user.txt
 sql_user.json
+mw_keys.json
