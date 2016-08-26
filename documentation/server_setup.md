@@ -7,9 +7,11 @@
 5. Install git
 6. Install Node.js (for parsoid)
 7. Install [Parsoid](https://www.mediawiki.org/wiki/Parsoid/Developer_Setup). Parsoid is used for the visual editor in mediawiki. Before installing, you might have to `sudo yum install gcc gcc-c++ make`.
-8. Change parsoid config.yaml such that `uri: 'http://localhost/wiki/api.php'`
-9. Install [forever-service](https://www.npmjs.com/package/forever-service).
-10. Install parsoid as a service: `sudo forever-service install parsoidd -s server.js`
+8. Copy config.yaml and localsettings.js from the deploy files
+9. Install [forever-service](https://www.npmjs.com/package/forever-service)
+10. Install parsoid as a service:
+    - Go to parsoid/bin folder
+    - `sudo forever-service install -s "server.js" -f " --workingDir /home/ec2-user/git/parsoid" parsoidd`
 11. Clone the Overvann repo
 12. `mkdir /var/www/html/wiki`
 13. `mkdir ~/deploy_backups`
@@ -25,3 +27,7 @@
 21. Edit `LocalSettings.php` and check that everyting is correct. For instance, you might have to change `$wgServer` and `$wgPasswordSender`
 22. Restart Apache: `sudo service httpd restart`
 23. The server should now be up and running. Goto the url of the server in your browser to check. Also check that the wiki is running. You might have to refresh it a few times for everything to work.
+
+## Currently doesn't work "out of the box" when following these steps:
+
+* VisualEditor
