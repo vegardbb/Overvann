@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Script used to deploy the wiki part or the node part of ovase.no
+#
+# Usage: 	./deploy_code.sh ovase 			to deploy the node part
+# 			./deploy_code.sh wiki 			to deploy the wiki part
+# 			./deploy_code.sh ovase wiki 	to deploy both parts
+#
+
 OVASE_DIR=~/ovase_web
 WIKI_DIR=/var/www/html/wiki
 BACKUP_ROOT=~/deploy_backups

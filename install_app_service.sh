@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Script used to install the node part of the site as a linux service
+
 INSTALL_DIR=~/ovase_web
 
 # Sets extended pattern matching options in the bash shell
