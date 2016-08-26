@@ -2,6 +2,7 @@
 // Må puttast i httpd.conf
 // Plassering: /etc/httpd/conf/httpd.conf
 
+// OBS: DON'T NEED TO USE THIS ANYMORE, AS WE ARE CURRENTLY NOT USING NODE
 
 ProxyPass /wiki !
 ProxyPass /phpmyadmin !
