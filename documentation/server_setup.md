@@ -31,3 +31,4 @@
 ## Currently doesn't work "out of the box" when following these steps:
 
 * VisualEditor
+	- Fixed by fixing the lib/ve folder. It's supposed to be a git submodule (see the official VisualEditor repo), but something has corrupted it.
