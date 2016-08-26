@@ -1,0 +1,4 @@
+
+# We really don't want to add certain usernames and passwords to Git
+sql_user.txt
+sql_user.json
