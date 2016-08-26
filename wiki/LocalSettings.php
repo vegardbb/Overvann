@@ -58,7 +58,7 @@ $wgDBtype = "mysql";
 $wgDBserver = "localhost";
 $wgDBname = "ovase";
 
-$sqlCredentials = file_get_contents("$wgResourceBasePath/sql_user.json");
+$sqlCredentials = file_get_contents("$wgResourceBasePath/sql_user.secret");
 $sqlCredentialsParsed = json_decode($sqlCredentials, true);
 $wgDBuser = $sqlCredentialsParsed['username'];
 $wgDBpassword = $sqlCredentialsParsed['password'];
@@ -99,7 +99,7 @@ $wgShellLocale = "en_US.utf8";
 $wgLanguageCode = "nb";
 
 # The secret key and upgrade key are put into a separate file
-$mwKeys = file_get_contents("$wgResourceBasePath/mw_keys.json");
+$mwKeys = file_get_contents("$wgResourceBasePath/mw_keys.secret");
 $mwKeysParsed = json_decode($mwKeys, true);
 
 $wgSecretKey = $mwKeysParsed['wgSecretKey'];

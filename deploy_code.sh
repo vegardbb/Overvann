@@ -58,7 +58,7 @@ fi
 # Copy files to ovase_web (the portion of the site which is not the wiki)
 if [ "$DEPLOY_OVASE" = true ]; then
 	echo "========== Copying ovase files =========="
-	cp -rf !(wiki|configuration|deploy_code.sh|install_app_service.sh) $OVASE_DIR
+	cp -rf !(wiki|configuration|documentation|README.md|deploy_code.sh|install_app_service.sh|delete_folders_older_than.sh) $OVASE_DIR
 fi
 
 # Copy files to /var/www/html (the wiki-portion of the site)
