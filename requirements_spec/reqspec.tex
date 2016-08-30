@@ -1,0 +1,63 @@
+\documentclass[12pt,a4paper] {report}
+
+\include{set-up} % Includes file set-up.tex
+
+\begin {document}
+
+\begin{titlepage}
+	\begin{center}
+		
+		% Upper part of the page. The '~' is needed because \\
+		% only works if a paragraph has started.1
+		\includegraphics[width=0.15\textwidth]{img/wiki.png}~\\[1cm]
+		
+		\textsc{\LARGE TDT4290 Customer Driven Project}\\
+		\textsc{\LARGE Group 1: A National Internet-based Knowledge Center for Stormwater Technology}\\[3.5cm]
+
+		{ \huge \bfseries Requirements Specification}\\[0.5cm]
+		\HRule \\[0.4cm]
+
+		{\large \textbf{Customer}}\\
+		{\large Overvannssenteret Ovase.no}\\[0.3cm]
+
+		{\large \textbf{Contacts}}\\
+		{\large Drageset, Anine}\\
+		{\large Langdal, Peder Voldnes}\\[0.3cm]
+
+		{\large \textbf{Team}}\\
+		{\large S\ae vig, Silje Nordahl}\\
+		{\large Bergerskogen, P\aa l}\\
+		{\large Bugge, Vegard Bjerkli}\\
+		{\large Chitikela, Vikas Reddy}\\
+		{\large Laskemoen, Jonas el Fezani}\\
+		{\large Lie, Ken Siva}\\
+		{\large Olsen, Thomas}\\[0.3cm]
+
+		{\large \textbf{Supervisor}}\\
+		{\large Zhang, Lemei}\\
+
+		\HRule \\[1.5cm]
+		\vfill
+		% Bottom of the page
+		{\large \today}
+		
+	\end{center}
+\end{titlepage}
+
+\pagenumbering{roman} % Sets page numbering to Roman numerals
+\tableofcontents % Inserts a ToC (requires double compilation!)
+\pagenumbering{arabic} % Sets page numbering to Arabic numerals
+
+% Create list of figures
+\listoffigures
+% Create list of tables - setup-commands for nfr and fr still needs editing - remove subsection call
+%\listoftables
+
+\include{intro}
+\include{use-case}                                        % Appends contents of file use-case.tex to this latex document
+\include{requirements}
+\include{challenges}
+\include{changes}
+\include{bibliography}
+
+\end{document}

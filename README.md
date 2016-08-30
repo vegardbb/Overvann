@@ -1,7 +1,6 @@
-# Kildekoden til nettstedet Ovase.no
+# TDT4290 Customer Driven Project Autumn 2016, Group 1
 
-## Status Ovase.no
+## On this branch
 
-* Fremsiden Ovase.no er oppe, og inneholder linker til 4 deler av siden
-* Av disse 4 delene, er det bare [ovase.no/wiki](http://ovase.no/wiki) som er operativ
-* Høsten 2016 vil en eller flere deler bygges ut
+* All LaTex-documents are put here in seperate folders
+* Do NOT merge with Master branch upstream.

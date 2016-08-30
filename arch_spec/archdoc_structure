@@ -1,0 +1,22 @@
+Architecture Document
+    Introduction; terminology used
+    Actors/User roles
+    List of Architectural Significant Requirements (ASR / architecture drivers)
+    List of stakeholders and their concerns / stakes
+    Architectural perspective - table of point of view of architecture
+        A table of references to architecture procedural viewpoint used in the document, their purpose, which interressent viewpoint is aimed at and what type of charts used in viewpoint
+        There are three views used in the table: Modular - showing how the structure of the system is; Allocation, which shows a relation between the system's software elements and its non-software items, such as developers, time and hardware; Component And-Connectors - showing how the system software elements relate to each other during system runtime
+    Architectural tactics
+        Describes tactics used to fulfill quality scenarios, expressed in full text
+    Architectural patterns and design patterns
+        A collection of patterns used to support point described in perspective section, expressed in filled text
+    Architectural views
+        Collection of diagrams / pictures / tables as promised in viewpoint section
+        Describe inconsistentencies between views
+        This amount of views will make it easier to perform tasks in parallel
+    Architectural rationale
+        Describes how the presented architecture / perspective meets the requirements
+    Challenges
+        Full text of the challenges posed by the given viewpoint - including possible tradeoffs.
+    Change Log
+        Explanatory text about what changes the document has undergone - written in the style of commit messages.

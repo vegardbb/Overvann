@@ -1,0 +1,19 @@
+Requirements Specification Document
+    Introduction; terminology used
+    Use Case - list
+        Actors/User roles
+    Requirements Section
+        List of functional requirements (FR)
+        List of non-functional requirements (NFR)
+            List of COTS components used during the development of the system
+            List of limitations / constraints on the system
+            List of quality attribute scenarios
+    Challenges
+        Full text of the challenges posed by the requirements specification - including possible tradeoffs.
+    Change Log
+        Explanatory text about what changes the document has undergone - written in the style of commit messages.
+    Bibliography
+
+
+        List of Architecturally significant requirements (ASR / architecture drivers) - referencing earlier defined requirements
+

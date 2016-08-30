@@ -1,0 +1,162 @@
+\usepackage[margin=1in]{geometry} % Sets margin of document
+\usepackage[table]{xcolor}
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage[english]{babel} % Sets language of document
+\usepackage{graphicx} % Package: graphics controls
+\usepackage{colortbl} % Package: color controls
+\usepackage{wrapfig}
+\usepackage{lscape}
+\usepackage{rotating}
+\usepackage{epstopdf}
+\usepackage{hyperref} %linking from content table
+\usepackage{xstring} %string-manipulation
+\usepackage{enumitem} %used for enumerate-manipulation
+\usepackage{float} %used to properly place float-objects (figures)
+\usepackage[T1]{fontenc}
+\usepackage{titlesec, blindtext, color}
+\usepackage[utf8]{inputenc} % Sets the Charset to UTF-8
+\usepackage{tabularx,ragged2e,booktabs,caption}
+\usepackage{ulem} %used for strikeout
+\usepackage{verbatim} %used for block-commenting
+\usepackage{mathtools} %mathematic notation. includes package amsmath
+\usepackage{longtable} %tables that stretch across multiple pages
+
+\definecolor{red}{RGB}{230, 0, 0}
+\definecolor{gray75}{gray}{0.75}
+\definecolor{gray1}{gray}{0.97}
+\definecolor{gray2}{gray}{0.90}
+\definecolor{gray3}{gray}{0.80}
+\definecolor{gray4}{gray}{0.63}
+\definecolor{white}{gray}{1.00}
+\definecolor{header-blue}{RGB}{0,0,204}
+\definecolor{row-gray}{RGB}{230 230 230}
+
+\newcommand{\hsp}{\hspace{20pt}}
+
+\newcommand{\citefigure}[1]{\ref{#1} (s.\pageref{#1})}
+
+\newcounter{sectionCount}
+\setcounter{sectionCount}{1}
+
+% Custom command for display of image. 
+% Takes 2 parameters [filename (reads from folder 'img'), Caption]
+\newcommand{\img}[2]{ %images with borders
+	\begin{figure}[H]
+	\centering
+	\fcolorbox{black}{black}{\includegraphics[width=15cm]{img/#1}}
+	\caption[#2]{#2}
+	\end{figure}
+}
+
+% Custom command for display of image; able to specify attributes for image. 
+% Takes 3 parameters [filename (reads from folder 'img'), Attributes, Caption]
+\newcommand{\imgC}[3]{ %images with borders and custom parameters
+	\begin{figure}[H]
+	\centering
+	\fcolorbox{black}{black}{\includegraphics[#2]{img/#1}}
+	\caption[#3]{#3}
+	\label{#3}
+	\end{figure}
+}
+
+\newcommand{\doubleimg}[2]{
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.45\textwidth}
+			\centering
+			#1
+		\end{minipage}\hfill
+		\begin{minipage}{0.45\textwidth}
+			\centering
+			#2
+		\end{minipage}
+	\end{figure}
+}
+
+\newcommand{\liste}[1]{\begin{enumerate}[label=\textbf{#1:\arabic*}]}
+\newcommand{\inn}{\begin{enumerate}[label*=\textbf{.\arabic*}]}
+\newcommand{\ut}{\end{enumerate}}
+
+% usecaseitem takes in an id for the use case, a description, a priority rank {Low, Medium, High, Essential} indicating how desirable it is to fulfill the requirement during the project, a complexity rank {Easy, Medium, Hard} indicating how difficult the requirment is estimated to fulfill, and finally the 5. parameter is an estimation on how much time (given in hours) that is left. Deductions on each use case / story are separatly documented. It is important to edit these estimates in separate commits to the repository.
+\newcommand{\usecaseitem}[5]{
+	{\footnotesize \texttt{#1}} &  % Use Case ID
+	{\footnotesize \texttt{#2}} &  % Description
+	{\footnotesize \texttt{#3}} &  % Priority
+	{\footnotesize \texttt{#4}} &  % Difficulty
+	{\footnotesize \texttt{#5}} &  % Sprint implemented in
+	{\footnotesize \texttt{#6}} &  % Estimated time left
+	{\footnotesize \texttt{#7}} \\ % Figure
+}
+
+% nfritem takes in an id, a reference to the functional requirement spawning it, a description, a priority rank {Low, Medium, High, Essential} indicating how desirable it is to fulfill the requirement during the project, and a complexity rank {Easy, Medium, Hard} indicating how difficult the requirment is estimated to fulfill.
+\newcommand{\nfritem}[5]{
+	{\footnotesize \texttt{#1}} & 
+	{\footnotesize \texttt{#2}} & 
+	{\footnotesize \texttt{#3}} & 
+	{\footnotesize \texttt{#4}} & 
+	{\footnotesize \texttt{#5}} \\
+}
+
+% fritem takes in an id, a reference to relevant use case, a description, a priority rank {Low, Medium, High, Essential} indicating how desirable it is to fulfill the requirement during the project, and a complexity rank {Easy, Medium, Hard} indicating how difficult the requirment is estimated to fulfill.
+\newcommand{\fritem}[5]{
+	{\footnotesize \texttt{#1}} &  % ID
+	{\footnotesize \texttt{#2}} &  % Reference to use case id
+	{\footnotesize \texttt{#3}} &  % Description
+	{\footnotesize \texttt{#4}} &  % Priority rank
+	{\footnotesize \texttt{#5}} \\ % Difficulty
+}
+
+\newcommand{\beginnfr}[1]{
+	\subsection{#1}
+	\rowcolors{2}{row-gray}{white}
+	\begin{tabular}{ | p{3cm} | p{3cm} | p{8cm} | p{3cm} | p{3cm} | } % A4?
+		\hline
+		\rowcolor{gray1}
+		\fritem{\textcolor{white}{ID}}{\textcolor{white}{FR_ID}}{\textcolor{white}{Description}}{\textcolor{white}{Priority}}{\textcolor{white}{Difficulty}}
+}
+
+% beginfr and stopfr are functions defined in setup. beginfr takes one argument, the title of the requirement listing. fritem takes in an id, a description, a priority rank {Low, Medium, High, Essential} indicating how desirable it is to fulfill the requirement during the project, and a complexity rank {Easy, Medium, Hard} indicating how difficult the requirment is estimated to fulfill. All such tables are Wrapped within a table declaration so that we can set a caption on each table, which again is used by the simple command lot.
+\newcommand{\beginfr}[1]{
+	\subsection{#1}
+	\rowcolors{2}{row-gray}{white}
+	\begin{tabular}{ | p{3cm} | p{3cm} | p{8cm} | p{3cm} | p{3cm} | } % A4?
+		\hline
+		\rowcolor{header-blue}
+		\fritem{\textcolor{white}{ID}}{\textcolor{white}{Use-Case ID}}{\textcolor{white}{Description}}{\textcolor{white}{Priority}}{\textcolor{white}{Difficulty}}
+}
+
+\newcommand{\stopreq}{
+	\hline
+	\end{tabular}
+}
+
+\parindent=3ex
+\baselineskip=0pt
+\parskip=0pt
+
+\hypersetup{ %Used to remove colours from links in 'content table'
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\newcommand{\insertqas}[6]{
+	\begin{tabular}{ | p{70pt} | p{70pt} }
+		\hline
+		{{#1} Scenario}
+		\hline
+		{Source} &  {\footnotesize \texttt{#2}} \\
+		{Stimulus} &  {\footnotesize \texttt{#3}} \\
+		{Environment} &  {\footnotesize \texttt{#4}} \\
+		{Artifacts} &  {\footnotesize \texttt{#5}} \\
+		{Response} &  {\footnotesize \texttt{#6}} \\
+		{Response Measure} &  {\footnotesize \texttt{#7}} \\
+	\stopreq
+}
+
+\titleformat{\chapter}[hang]{\LARGE\bfseries}{Post \thechapter\hsp\textcolor{gray75}{|}\hsp}{0pt}{\LARGE\bfseries}
+\titleformat{\section}[hang]{\normalfont\Large\bfseries}{\thesection}{1em}{}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}

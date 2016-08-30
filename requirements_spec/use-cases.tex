@@ -1,0 +1,40 @@
+\chapter{Use-Case}
+
+\section{Roles and actors in the system}
+
+An actor (not to be confused with the module on the system with the same name) is a person, a program or a machine that interacts with the system. Actors are widely known as the match-stick-figures performing defined tasks in use case scenarios. We have defined the following system actors. \par
+
+The Editor is the person responsible for all persisted (stored) content on the system. (S)he is able to oversee newly generated content on both modules (Anlegg and Actors), and can do changes to any content without having to modify code.\par
+The Administrator is the user who does daily maintenance on the operational server. The administrator is supposed to be able to have unrestricted access to the server's running code, its user-generated content (both editing and deleting).
+The user is a registred entity on the user who has the right to create new 
+A guest is not a registered user, but may view content published in the knowledge bases.
+% TODO: Write about the system's actors.
+
+A role in the system is a defined level of privilege which directly limit a user's access to certain parts of the system using control loops (if-then-else). This is a great functionality to have for programmers who want to directly deny any user access to key features that should be reserved for example those who operate the central server. The system will define a set of such roles as constants in the application logic to implement authorization in the system. For each speciified Use Case Actor, we will define an authorizational role in the same with the same name.
+
+\newpage
+%Legend
+\section{Terminology}
+\begin{tabular}{p{1.5cm} p{3cm} | }
+	\hline
+	\multicolumn{1}{| r}{\texttt{C:}} & Use Case\\
+	%\multicolumn{1}{| r}{\texttt{A:}} & Administrator\\
+	%\multicolumn{1}{| r}{\texttt{M:}} & Editor\\
+	%\multicolumn{1}{| r}{\texttt{E:}} & User\\
+	%\multicolumn{1}{| r}{\texttt{E:}} & Guest\\ % Abbrecations that could be used in IDs
+	\hline
+\end{tabular}
+\\[1cm]
+\newpage
+%Overview
+\section{Use-Cases}
+\rowcolors{2}{row-gray}{white}
+\begin{tabular}{| l | l | l | l | l | l | l |}
+	\hline
+	\rowcolor{header-blue}
+	\usecaseitem{\textcolor{white}{ID}}{\textcolor{white}{Description}}{\textcolor{white}{Priority}}{\textcolor{white}{Difficulty}}{\textcolor{white}{Sprint}}{\textcolor{white}{ETR}}{\textcolor{white}{Figure}}
+	\hline
+	\usecaseitem{C-01}{The Anlegg-module has an overview page.}{High}{Easy}{1}{40}{}
+	\hline
+\end{tabular}
+
