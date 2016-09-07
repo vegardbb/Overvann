@@ -1,5 +1,5 @@
 Architecture Document
-    Introduction; terminology used
+    Introduction
     Actors/User roles
     List of Architectural Significant Requirements (ASR / architecture drivers)
     List of stakeholders and their concerns / stakes
@@ -7,9 +7,9 @@ Architecture Document
         A table of references to architecture procedural viewpoint used in the document, their purpose, which interressent viewpoint is aimed at and what type of charts used in viewpoint
         There are three views used in the table: Modular - showing how the structure of the system is; Allocation, which shows a relation between the system's software elements and its non-software items, such as developers, time and hardware; Component And-Connectors - showing how the system software elements relate to each other during system runtime
     Architectural tactics
-        Describes tactics used to fulfill quality scenarios, expressed in full text
+        Describes tactics used to fulfill quality scenarios, expressed in  a tabular view, complemented by full text
     Architectural patterns and design patterns
-        A collection of patterns used to support point described in perspective section, expressed in filled text
+        A collection of patterns used to support point described in perspective section, expressed in filled text and figures/relevant models
     Architectural views
         Collection of diagrams / pictures / tables as promised in viewpoint section
         Describe inconsistentencies between views
@@ -20,3 +20,194 @@ Architecture Document
         Full text of the challenges posed by the given viewpoint - including possible tradeoffs.
     Change Log
         Explanatory text about what changes the document has undergone - written in the style of commit messages.
+
+In report QBE: Its own chapter, under Planning And Requirements section
+    Introduction _ Dependencies?
+    Architectural Drivers and Requirements
+    Stakeholders and concerns
+    Architectural Tactics
+    Architectural Views
+    Consistency Among Views
+    Architectural Rationale
+    Challenges
+    Architectural Evolution/Challenges/Change management
+
+Architecture - rO2 - THE AMOUNT OF PATTERNS CHOSEN IS TOO DAMN HIGH
+8.1 Architectural Dependencies . . . . . .
+8.1.1 Java and JavaFX . . . . . . . . . . 
+8.1.2 SCRUM . . . . . . . . . . . . .
+8.2 Architectural Drivers . . . . . . . . . .
+8.2.1 Modifiability . . . . . . . . . . .
+8.2.2 Performance . . . . . . . . . . .
+8.2.3 Usability . . . . . . . . . . . . .
+8.2.4 Testability . . . . . . . . . . . .
+8.3 Architectural Significant Requirements
+8.4 Architectural Patterns . . . . . . . . .
+8.4.1 Layered Pattern . . . . . . . . .
+8.4.2 Model-View-Controller Pattern
+8.4.3 Factory Method Pattern . . . .
+8.4.4 Abstract Factory Pattern . . . .
+8.4.5 Facade Pattern . . . . . . . . .
+8.4.6 Singleton Pattern . . . . . . . .
+8.4.7 Pipe and Filters Pattern . . . .
+8.5 Development Process . . . . . . . . . .
+8.6 Architectural Views . . . . . . . . . . .
+8.6.1 Logical Views . . . . . . . . . .
+8.6.2 Development Views . . . . . . .
+8.7 Architectural Rational . . . . . . . . .
+8.8 Changes . . . . . . . . . . . . . . . . .
+
+For a game realised with C#... R03
+Chapter 8 - Architectural description
+8.1 Choice of Architecture . . . . . . . . . . . . . . . . . . .
+8.2 Architecture Rationale . . . . . . . . . . . . . . . . . . .
+8.3 System Architecture . . . . . . . . . . . . . . . . . . . . 
+
+Architecture
+4.1 Architectural Drivers . . . . . . . . .
+4.1.1 Functional Requirements . .
+4.1.2 Non-functional Requirements
+4.1.3 Business Requirements . . . .
+4.1.4 Technical Requirements . . .
+4.2 Architectural Views . . . . . . . . .
+4.2.1 Logical View . . . . . . . . .
+4.2.2 Physical View . . . . . . . . .
+4.2.3 Development View . . . . . .
+4.2.4 Process View . . . . . . . . .
+4.3 Architectural Patterns . . . . . . . .
+4.3.1 Client-Server Architecture . .
+4.3.2 Service-Oriented Architecture
+4.3.3 Three-Tier Architecture and MVC
+Pattern . . . . . . . . . . . .
+4.4 Architectural Rationale . . . . . . .
+
+7 Architecture
+42
+7.1 Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+7.2 Explanation of AngularJS expressions . . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+7.3 Architecturally Significant Requirements . . . . . . . . . . . . . . . . . . . . . . . . . 43
+7.4 Stakeholders and concerns . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 43
+7.5 Selection of architectural views . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+7.6 Architectural tactics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+7.7 Architectural design patterns . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+7.8 Views . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 48
+7.9 Architectural rationale . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+
+8
+ARCHITECTURAL DESCRIPTION ....................................................................................................... 8—110
+8.1
+ARCHITECTURAL DRIVERS & ASRs ................................................... 8—110
+    Modularity
+    Separation of logic and presentation ....................................................................................... 8—111
+    Frameworks, platforms and languages .................................................................................... 8—111
+    Bitcoin protocol for transactions .............................................................................................. 8—111
+    Focus on testing .................................................................................................
+
+8.2
+STAKEHOLDERS AND CONCERNS ........................................................................................................... 8—112
+    The end users
+    The merchants
+    Netlight ...................................................................................................
+    Advisor and Evaluators ............................................................................................................. 8—114
+    Group Members ....................................................................................................................... 8—114
+
+8.3
+SELECTION OF ARCHITECTURAL VIEWS ................................................................................................... 8—115
+
+8.4
+THE COMBINED ARCHITECTURE ............................................................................................................. 8—117
+8.4.1 Conceptual implementation ..................................................................................................... 8—117
+8.4.2 Process viewpoint ..................................................................................................................... 8—
+8.4.3 Physical Viewpoint............................................................................................................
+
+8.5
+BACKEND ARCHITECTURE .................................................................................................................... 8—134
+8.5.1 TransactionsController ............................................................................................................. 8—134
+8.5.2 AddressesController.................................................................................................................. 8—134
+
+8.6
+ADMIN CLIENT ARCHITECTURE .............................................................................................................. 8—137
+8.7
+MOBILE CLIENT ARCHITECTURE ............................................................................................................ 8—139
+8.7.1 Logical Viewpoint ..................................................................................................................... 8—139
+8.8
+
+BITCOUPON LIBRARY ARCHITECTURE ..................................................................................................... 8—140
+8.8.1 Logical Viewpoint ..................................................................................................................... 8—141
+8.8.2 Process Viewpoint .................................................................................................................... 8—144
+8.9
+
+ARCHITECTURAL TACTICS ..................................................................................................................... 8—145
+    Modifiability .....................................................................................................
+    Usability ...............................................................................................................................
+    Testability ...........................................................................................
+    Security ..............................................................................................
+
+8.10
+ARCHITECTURAL AND DESIGN PATTERNS ................................................................................................ 8—147
+8.10.1
+Combined System Patterns .................................................................................................. 8—147
+8.10.2
+Backend / Merchant Patterns .............................................................................................. 8—147
+8.10.3
+Mobile Client Patterns.......................................................................................................... 8—148
+8.11
+ARCHITECTURAL RATIONALE ................................................................................................................ 8—149
+8.12
+ARCHITECTURAL EVOLUTION ................................................................................................................ 8—150
+
+Architecture
+6.1 Introduction . . . . . . . . . . . . . . . . . . . .
+6.2 Quality Attributes . . . . . . . . . . . . . . . . .
+6.2.1 Functionality . . . . . . . . . . . . . . . .
+6.2.2 Performance . . . . . . . . . . . . . . . .
+6.2.3 Scalability . . . . . . . . . . . . . . . . .
+6.2.4 Modifiability of Components . . . . . . .
+6.2.5 Portability of Components . . . . . . . .
+6.3 Architectural Styles . . . . . . . . . . . . . . . .
+6.3.1 Representational State Transfer (REST)
+6.4 Architectural Constraints . . . . . . . . . . . . .
+6.4.1 Client-Server . . . . . . . . . . . . . . . .
+6.4.2 Stateless . . . . . . . . . . . . . . . . . .
+6.4.3 Cacheable . . . . . . . . . . . . . . . . .
+6.4.4 Layered System . . . . . . . . . . . . . .
+6.4.5 Code on Demand . . . . . . . . . . . . .
+6.4.6 Uniform Interface . . . . . . . . . . . . .
+6.5 Architectural Tactics . . . . . . . . . . . . . . .
+6.5.1 Performance . . . . . . . . . . . . . . . .
+6.5.2 Scalability . . . . . . . . . . . . . . . . .
+6.5.3 Modifiability of Components . . . . . . .
+6.5.4 Portability of Components . . . . . . . .
+6.6 Stakeholders and Concerns . . . . . . . . . . . .
+6.7 Architectural Views . . . . . . . . . . . . . . . .
+6.7.1 Introduction . . . . . . . . . . . . . . . .
+6.7.2 Logical View . . . . . . . . . . . . . . . .
+6.7.3 Development View . . . . . . . . . . . . .
+6.7.4 Process View . . . . . . . . . . . . . . . .
+6.7.5 Physical View . . . . . . . . . . . . . . .
+6.7.6 Scenarios and Use Cases . . . . . . . . .
+6.7.7 Sprint 4 Scenarios and Use Cases . . . . .
+
+6 Architectural Description
+6.1 General . . . . . . . . . .
+6.2 Architectural Drivers . . .
+6.2.1 Motivation . . . . .
+6.2.2 Expected Life Time
+6.2.3 Experience of the Team
+6.2.4 Business Requirements .
+Architectural Patterns . . . . .
+6.3.1 Model-view-controller . .
+6.3.2 Layered Pattern . . . . .
+Architectural Views . . . . . . .
+6.4.1 4+1 View Model . . . .
+6.4.2 Process View . . . . . .
+6.4.3 Logical View . . . . . .
+6.4.4 Development View . . .
+6.4.5 Physical View . . . . . .
+Architectural Tactics . . . . . .
+6.5.1 Modifiability Tactics . .
+6.5.2 Usability Tactics . . . .
+6.5.3 Availability Tactics . . .
+Design Patterns . . . . . . . . .
+6.6.1 Factory Method Pattern
+Architectural Rationale . . . . .
