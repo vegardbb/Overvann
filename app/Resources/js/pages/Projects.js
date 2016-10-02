@@ -2,6 +2,8 @@ import React from "react";
 
 import Project from "../components/Project";
 
+import SearchInput, {createFilter} from "react-search-input";
+
 export default class Projects extends React.Component {
 	render() {
 		const { query } = this.props.location;
@@ -23,6 +25,9 @@ export default class Projects extends React.Component {
 				<div>
 					<h1>Prosjekter</h1>
 					project: {project}, date: {date}, filter: {filter}
+
+					<SearchInput class="search-input" placeholder="Søk"/>
+
 					<div class="row">{Projects}</div>
 				</div>	
 			);
@@ -35,8 +40,6 @@ export default class Projects extends React.Component {
 					<Project title={project} single={true}/>
 				</div>
 			</div>
-		);
-
-		
+		);	
 	}
 }
