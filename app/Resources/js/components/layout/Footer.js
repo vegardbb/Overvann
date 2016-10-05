@@ -1,6 +1,6 @@
 import React from "react";
 
-
+// TODO: Put footer code (footer container) from base.html.twig under footer block in return statement
 export default class Footer extends React.Component {
   render() {
 

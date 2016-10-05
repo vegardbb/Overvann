@@ -1,6 +1,5 @@
 import React from "react";
-import { Link } from "react-router";
-import { connect } from "react-redux"; 
+import { connect } from "react-redux";
 
 import { fetchUser } from "../actions/userActions";
 import { fetchTweets } from "../actions/tweetsActions";

@@ -1,7 +1,7 @@
 import React from "react";
 import SkyLight from "react-skylight";
 
-//This calss is not in use atm, maybe later
+//This class is not in use atm, maybe later
 
 export default class LogIn extends React.Component {
 	constructor(props){
