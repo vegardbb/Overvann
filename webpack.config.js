@@ -6,7 +6,7 @@ var config = {
 	entry: [
 		'webpack-dev-server/client?http://127.0.0.1:3000',
 		'webpack/hot/only-dev-server',
-		'./Resources/js/app.js',
+		'./web/js/app.js',
 	],
 	output: {
 		path: path.join(__dirname, 'web/dist'),
@@ -36,6 +36,5 @@ var config = {
 		]
 	}
 };
-
 
 module.exports = config;

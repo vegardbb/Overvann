@@ -35,5 +35,5 @@
     "redux-thunk": "^2.1.0",
     "webpack-dev-server": "^1.15.1"
   },
-  "description": "Stormwater KMS"
+  "description": "KMS built to entertain ideas, people, innovations and learning about stormwater engineering."
 }
