@@ -13,7 +13,7 @@ import LogIn from "./components/LogIn.js";
 import store from "./store";
 
 
-const app = document.getElementById('ovase');
+const app = document.getElementById('app');
 
 ReactDOM.render(
 	<Provider store={store}>
