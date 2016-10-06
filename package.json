@@ -1,12 +1,12 @@
 {
-  "name": "app",
-  "version": "1.0.0",
+  "name": "ovase",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
-    "start": "node ./Resources/js/webpack.dev-server.js",
+    "start": "node ./webpack.dev-server.js",
     "build": "webpack"
   },
-  "author": "",
+  "author": "Vegard Bugge; Paal Bergerskogen, Jonas Laskemoen; Ken Lie; Thomas Olsen, Silje Saevig",
   "license": "ISC",
   "devDependencies": {
     "webpack": "^1.13.2"
@@ -23,7 +23,7 @@
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-0": "^6.3.13",
     "history": "^4.1.0",
-    "react": "^15.3.2",
+    "react": "^15.3.1",
     "react-dom": "^15.3.1",
     "react-hot-loader": "^3.0.0-beta.3",
     "react-redux": "^4.4.5",
@@ -35,5 +35,5 @@
     "redux-thunk": "^2.1.0",
     "webpack-dev-server": "^1.15.1"
   },
-  "description": ""
+  "description": "Stormwater KMS"
 }
