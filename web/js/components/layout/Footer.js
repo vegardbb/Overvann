@@ -21,19 +21,28 @@ export default class Footer extends React.Component {
       marginTop: "15px"
     };
 
-    return (
-      <footer style={footerStyle}>
+    if(app.user){
+      return(
+        <footer style={footerStyle}>
         <p style={centerText}>Copyright &copy; Ovase.no</p>
-        <a href= {{ path('home') }} >Hjem</a> |
+        <a href= "{ path('home') }" >Hjem</a> |
         <a href="#">Om siden</a> | 
         <a href="#popup4">Foto</a> | 
         Kontakt: mail@ovase.no |
-	    {% if app.user%}
-	    	Du er {{app.user}} |
-			{#<a href="{{ path('logout') }}">Logg ut</a>#}
-    	{% else %}
-			{#<a href="{{ path('login') }}">Logg inn</a>#}
-		{% endif %}
+        Du er {app.user} |
+      <a href="{ path('logout') }">Logg ut</a>
+      </footer>
+        );
+    }
+
+    return (
+      <footer style={footerStyle}>
+        <p style={centerText}>Copyright &copy; Ovase.no</p>
+        <a href= "{ path('home') }" >Hjem</a> |
+        <a href="#">Om siden</a> | 
+        <a href="#popup4">Foto</a> | 
+        Kontakt: mail@ovase.no |
+			  <a href="{ path('login') }">Logg inn</a>
       </footer>
     );
   }

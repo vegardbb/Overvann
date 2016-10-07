@@ -21,11 +21,6 @@ var config = {
 		loaders: [
 			{
 				test: /\.jsx?$/,
-				include: path.join(__dirname, 'app/Resources/js'),
-				loader: 'react-hot!babel'
-			},
-			{
-				test: /\.js?$/,
 				exclude: /(node_modules|bower_components)/,
 				loader: 'babel-loader',
 				query: {

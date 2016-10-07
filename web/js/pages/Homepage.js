@@ -32,9 +32,9 @@ export default class Homepage extends React.Component {
 
 
 		//When a user change page in the middle of the timeout, we get a warning because this cant render anymore (fix?)
-		setTimeout(() =>{
+		/*setTimeout(() =>{
 			this.setState({randomProject: this.getRandomProject()});
-		},5000)
+		},5000)*/
 
 		return(
 			<div>
