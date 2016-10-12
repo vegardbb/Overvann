@@ -57,6 +57,10 @@ doctrine:
         naming_strategy: doctrine.orm.naming_strategy.underscore
         auto_mapping: true
 
+# CaptchaBundle config
+gregwar_captcha: ~
+# See https://github.com/Gregwar/CaptchaBundle for config options here and for forms
+
 # Swiftmailer Configuration
 swiftmailer:
     transport: "%mailer_transport%"
