@@ -61,6 +61,12 @@ doctrine:
 gregwar_captcha: ~
 # See https://github.com/Gregwar/CaptchaBundle for config options here and for forms
 
+#IvoryGoogleMapsBundle config
+ivory_google_map:
+    debug: "%kernel.debug%"
+    language: "%locale%"
+    api_key: ~
+
 # Swiftmailer Configuration
 swiftmailer:
     transport: "%mailer_transport%"
