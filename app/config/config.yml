@@ -67,9 +67,8 @@ httplug:
         client: Http\Adapter\Guzzle6\Client
         message_factory: Http\Message\MessageFactory\GuzzleMessageFactory
     clients:
-        acme:
+        app:
             factory: httplug.factory.guzzle6
-Then, configure the Google Map bundle:
 
 ivory_google_map:
     geocoder:
