@@ -61,11 +61,20 @@ doctrine:
 gregwar_captcha: ~
 # See https://github.com/Gregwar/CaptchaBundle for config options here and for forms
 
-#IvoryGoogleMapsBundle config
+# See https://github.com/egeloen/IvoryGoogleMapBundle/blob/master/Resources/doc/service/geocoder.md
+httplug:
+    classes:
+        client: Http\Adapter\Guzzle6\Client
+        message_factory: Http\Message\MessageFactory\GuzzleMessageFactory
+    clients:
+        acme:
+            factory: httplug.factory.guzzle6
+Then, configure the Google Map bundle:
+
 ivory_google_map:
-    debug: "%kernel.debug%"
-    language: "%locale%"
-    api_key: ~
+    geocoder:
+        client: httplug.client.default
+        message_factory: httplug.message_factory.default
 
 # Swiftmailer Configuration
 swiftmailer:
