@@ -61,25 +61,6 @@ doctrine:
 gregwar_captcha: ~
 # See https://github.com/Gregwar/CaptchaBundle for config options here and for forms
 
-ivory_google_map:
-    geocoder:
-        # Enable the service
-        enabled: true
-
-        # Geocoder class
-        class: "Ivory\GoogleMap\Services\Geocoding\Geocoder"
-        provider:
-
-            # Provider class
-            class: "Ivory\GoogleMap\Services\Geocoding\GeocoderProvider"
-
-            # API key used by the provider
-            # If you set an API key, this paremeter will be the second parameter provider constructor
-            # By default, there is no api key ^_^
-            api_key: "AIzaSyCRwXz00OPG1j5rOisnc0wmewBoEWHR9pY"
-        # Adapter class
-        adapter: "Geocoder\HttpAdapter\BuzzHttpAdapter"
-
 # Swiftmailer Configuration
 swiftmailer:
     transport: "%mailer_transport%"
