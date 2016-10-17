@@ -7,6 +7,8 @@ imports:
 # http://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     locale: en
+    # Google Maps Embed API key. Ought to be changeable independent of app behaviour
+    api_key: AIzaSyBDQD6CvPGK5_Bhhn3xkY710Dm-RsQGG70
 
 framework:
     #esi:             ~
