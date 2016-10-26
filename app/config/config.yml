@@ -9,6 +9,9 @@ parameters:
     locale: en
     # Google Maps Embed API key. Ought to be changeable independent of app behaviour
     api_key: AIzaSyBDQD6CvPGK5_Bhhn3xkY710Dm-RsQGG70
+    cloud_name: dcnln8hda
+    cloud_api_key: 269453474761122
+    cloud_api_secret: 6QZE93U7fcuKFspc2LAquJl3QQY
 
 framework:
     #esi:             ~
